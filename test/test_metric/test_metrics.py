@@ -6,7 +6,11 @@ from smac.utils.constants import MAXINT
 
 import autosklearn.metrics
 from autosklearn.constants import BINARY_CLASSIFICATION, REGRESSION
-from autosklearn.metrics import calculate_loss, calculate_score, compute_single_metric
+from autosklearn.metrics import (
+    calculate_losses,
+    calculate_scores,
+    compute_single_metric,
+)
 
 import pytest
 import unittest
@@ -543,7 +547,7 @@ class TestCalculateScore(unittest.TestCase):
 
         raised = False
         try:
-            calculate_score(y_true, y_pred, 6, scorer)
+            calculate_scores(y_true, y_pred, 6, scorer)
         except NotImplementedError:
             raised = True
         self.assertTrue(raised)
@@ -561,11 +565,11 @@ class TestCalculateScore(unittest.TestCase):
         y_pred = np.array(
             [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]]
         )
-        score_dict = calculate_score(
+        score_dict = calculate_scores(
             y_true,
             y_pred,
             BINARY_CLASSIFICATION,
-            autosklearn.metrics.accuracy,
+            [autosklearn.metrics.accuracy],
             scoring_functions,
         )
 
@@ -591,11 +595,11 @@ class TestCalculateScore(unittest.TestCase):
         y_true = np.array([1, 2, 3, -4])
         y_pred = y_true.copy()
 
-        score_dict = calculate_score(
+        score_dict = calculate_scores(
             y_true,
             y_pred,
             REGRESSION,
-            autosklearn.metrics.root_mean_squared_error,
+            [autosklearn.metrics.root_mean_squared_error],
             scoring_functions,
         )
 
@@ -615,7 +619,9 @@ class TestCalculateScore(unittest.TestCase):
         )
         scorer = autosklearn.metrics.accuracy
 
-        score = calculate_score(y_true, y_pred, BINARY_CLASSIFICATION, scorer)
+        score = calculate_scores(y_true, y_pred, BINARY_CLASSIFICATION, [scorer])[
+            "accuracy"
+        ]
 
         previous_score = scorer._optimum
         self.assertAlmostEqual(score, previous_score)
@@ -625,36 +631,65 @@ class TestCalculateScore(unittest.TestCase):
         y_pred = y_true.copy()
         scorer = autosklearn.metrics.root_mean_squared_error
 
-        score = calculate_score(y_true, y_pred, REGRESSION, scorer)
+        score = calculate_scores(y_true, y_pred, REGRESSION, [scorer])[
+            "root_mean_squared_error"
+        ]
         previous_score = scorer._optimum
         self.assertAlmostEqual(score, previous_score)
 
 
-def test_calculate_loss():
+def test_calculate_losses():
     # In a 0-1 ranged scorer, make sure that the loss
     # has an expected positive value
     y_pred = np.array([0, 1, 0, 1, 1, 1, 0, 0, 0, 0])
     y_true = np.array([0, 1, 0, 1, 1, 0, 0, 0, 0, 0])
     score = sklearn.metrics.accuracy_score(y_true, y_pred)
-    assert pytest.approx(score) == calculate_score(
+    assert {"accuracy": pytest.approx(score)} == calculate_scores(
         solution=y_true,
         prediction=y_pred,
         task_type=BINARY_CLASSIFICATION,
-        metric=autosklearn.metrics.accuracy,
+        metrics=[autosklearn.metrics.accuracy],
     )
-    assert pytest.approx(1.0 - score) == calculate_loss(
+    assert {"accuracy": pytest.approx(1.0 - score)} == calculate_losses(
         solution=y_true,
         prediction=y_pred,
         task_type=BINARY_CLASSIFICATION,
-        metric=autosklearn.metrics.accuracy,
+        metrics=[autosklearn.metrics.accuracy],
     )
 
-    # Test the dictionary case
-    score_dict = calculate_score(
+    # Test two metrics
+    score_dict = calculate_scores(
         solution=y_true,
         prediction=y_pred,
         task_type=BINARY_CLASSIFICATION,
-        metric=autosklearn.metrics.accuracy,
+        metrics=[
+            autosklearn.metrics.accuracy,
+            autosklearn.metrics.balanced_accuracy,
+        ],
+    )
+    expected_score_dict = {
+        "accuracy": 0.9,
+        "balanced_accuracy": 0.9285714285714286,
+    }
+    loss_dict = calculate_losses(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metrics=[
+            autosklearn.metrics.accuracy,
+            autosklearn.metrics.balanced_accuracy,
+        ],
+    )
+    for expected_metric, expected_score in expected_score_dict.items():
+        assert pytest.approx(expected_score) == score_dict[expected_metric]
+        assert pytest.approx(1 - expected_score) == loss_dict[expected_metric]
+
+    # Test additional scoring functions
+    score_dict = calculate_scores(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metrics=[autosklearn.metrics.accuracy],
         scoring_functions=[
             autosklearn.metrics.accuracy,
             autosklearn.metrics.balanced_accuracy,
@@ -664,11 +699,11 @@ def test_calculate_loss():
         "accuracy": 0.9,
         "balanced_accuracy": 0.9285714285714286,
     }
-    loss_dict = calculate_loss(
+    loss_dict = calculate_losses(
         solution=y_true,
         prediction=y_pred,
         task_type=BINARY_CLASSIFICATION,
-        metric=autosklearn.metrics.accuracy,
+        metrics=[autosklearn.metrics.accuracy],
         scoring_functions=[
             autosklearn.metrics.accuracy,
             autosklearn.metrics.balanced_accuracy,
@@ -683,17 +718,17 @@ def test_calculate_loss():
     y_true = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     y_pred = np.array([0.11, 0.22, 0.33, 0.44, 0.55, 0.66])
     score = sklearn.metrics.mean_squared_error(y_true, y_pred)
-    assert pytest.approx(0 - score) == calculate_score(
+    assert {"mean_squared_error": pytest.approx(0 - score)} == calculate_scores(
         solution=y_true,
         prediction=y_pred,
         task_type=REGRESSION,
-        metric=autosklearn.metrics.mean_squared_error,
+        metrics=[autosklearn.metrics.mean_squared_error],
     )
-    assert pytest.approx(score) == calculate_loss(
+    assert {"mean_squared_error": pytest.approx(score)} == calculate_losses(
         solution=y_true,
         prediction=y_pred,
         task_type=REGRESSION,
-        metric=autosklearn.metrics.mean_squared_error,
+        metrics=[autosklearn.metrics.mean_squared_error],
     )
 
 

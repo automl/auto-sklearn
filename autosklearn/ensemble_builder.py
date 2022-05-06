@@ -30,7 +30,7 @@ from autosklearn.automl_common.common.ensemble_building.abstract_ensemble import
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.metrics import Scorer, calculate_loss, calculate_score
+from autosklearn.metrics import Scorer, calculate_losses, calculate_scores
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 
@@ -999,7 +999,7 @@ class EnsembleBuilder(object):
             # actually read the predictions and compute their respective loss
             try:
                 y_ensemble = self._read_np_fn(y_ens_fn)
-                loss = calculate_loss(
+                loss = calculate_losses(
                     solution=self.y_true_ensemble,
                     prediction=y_ensemble,
                     task_type=self.task_type,
@@ -1511,7 +1511,7 @@ class EnsembleBuilder(object):
 
         performance_stamp = {
             "Timestamp": pd.Timestamp.now(),
-            "ensemble_optimization_score": calculate_score(
+            "ensemble_optimization_score": calculate_scores(
                 solution=self.y_true_ensemble,
                 prediction=train_pred,
                 task_type=self.task_type,
@@ -1522,7 +1522,7 @@ class EnsembleBuilder(object):
         if valid_pred is not None:
             # TODO: valid_pred are a legacy from competition manager
             # and this if never happens. Re-evaluate Y_valid support
-            performance_stamp["ensemble_val_score"] = calculate_score(
+            performance_stamp["ensemble_val_score"] = calculate_scores(
                 solution=self.y_valid,
                 prediction=valid_pred,
                 task_type=self.task_type,
@@ -1532,7 +1532,7 @@ class EnsembleBuilder(object):
 
         # In case test_pred was provided
         if test_pred is not None:
-            performance_stamp["ensemble_test_score"] = calculate_score(
+            performance_stamp["ensemble_test_score"] = calculate_scores(
                 solution=self.y_test,
                 prediction=test_pred,
                 task_type=self.task_type,

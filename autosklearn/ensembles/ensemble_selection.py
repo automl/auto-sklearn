@@ -8,7 +8,7 @@ from sklearn.utils import check_random_state
 
 from autosklearn.constants import TASK_TYPES
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.metrics import Scorer, calculate_loss
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.base import BasePipeline
 
 
@@ -164,7 +164,7 @@ class EnsembleSelection(AbstractEnsemble):
                     out=fant_ensemble_prediction,
                 )
 
-                losses[j] = calculate_loss(
+                losses[j] = calculate_losses(
                     solution=labels,
                     prediction=fant_ensemble_prediction,
                     task_type=self.task_type,
@@ -210,7 +210,7 @@ class EnsembleSelection(AbstractEnsemble):
                 # when scoring_functions=None, we know it will be a float
                 losses[j] = cast(
                     float,
-                    calculate_loss(
+                    calculate_losses(
                         solution=labels,
                         prediction=ensemble_prediction,
                         task_type=self.task_type,

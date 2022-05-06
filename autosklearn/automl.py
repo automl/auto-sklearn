@@ -1504,7 +1504,7 @@ class AutoML(BaseEstimator):
             backend=copy.deepcopy(self._backend),
             dataset_name=dataset_name if dataset_name else self._dataset_name,
             task=task if task else self._task,
-            metric=self._metric[0],
+            metric=self._metrics[0],
             ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
             ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
             max_models_on_disc=self._max_models_on_disc,
@@ -1804,7 +1804,7 @@ class AutoML(BaseEstimator):
             param_dict = config.get_dictionary()
             params.append(param_dict)
             mean_test_score.append(
-                self._metric._optimum - (self._metric._sign * run_value.cost)
+                self._metrics[0]._optimum - (self._metrics[0]._sign * run_value.cost)
             )
             mean_fit_time.append(run_value.time)
             budgets.append(run_key.budget)
@@ -1838,7 +1838,7 @@ class AutoML(BaseEstimator):
 
         results["mean_fit_time"] = np.array(mean_fit_time)
         results["params"] = params
-        rank_order = -1 * self._metric._sign * results["mean_test_score"]
+        rank_order = -1 * self._metrics[0]._sign * results["mean_test_score"]
         results["rank_test_scores"] = scipy.stats.rankdata(rank_order, method="min")
         results["status"] = status
         results["budgets"] = budgets
@@ -1857,7 +1857,10 @@ class AutoML(BaseEstimator):
         sio = io.StringIO()
         sio.write("auto-sklearn results:\n")
         sio.write("  Dataset name: %s\n" % self._dataset_name)
-        sio.write("  Metric: %s\n" % self._metric)
+        if len(self._metrics) == 1:
+            sio.write("  Metric: %s\n" % self._metrics[0])
+        else:
+            sio.write("  Metrics: %s\n" % self._metrics)
         idx_success = np.where(
             np.array(
                 [
@@ -1868,7 +1871,7 @@ class AutoML(BaseEstimator):
             )
         )[0]
         if len(idx_success) > 0:
-            if not self._metric._optimum:
+            if not self._metrics[0]._optimum:
                 idx_best_run = np.argmin(cv_results["mean_test_score"][idx_success])
             else:
                 idx_best_run = np.argmax(cv_results["mean_test_score"][idx_success])

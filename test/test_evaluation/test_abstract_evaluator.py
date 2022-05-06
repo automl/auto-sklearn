@@ -65,7 +65,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             port=self.port,
             output_y_hat_optimization=False,
             queue=queue_mock,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         ae.Y_optimization = rs.rand(33, 3)
@@ -143,7 +143,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             backend=self.backend_mock,
             queue=queue_mock,
             disable_file_output=True,
-            metric=accuracy,
+            metrics=[accuracy],
             port=self.port,
             additional_components=dict(),
         )
@@ -169,7 +169,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                 output_y_hat_optimization=False,
                 queue=queue_mock,
                 disable_file_output=[disable],
-                metric=accuracy,
+                metrics=[accuracy],
                 port=self.port,
                 additional_components=dict(),
             )
@@ -226,7 +226,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             backend=self.backend_mock,
             output_y_hat_optimization=False,
             queue=queue_mock,
-            metric=accuracy,
+            metrics=[accuracy],
             disable_file_output=["y_optimization"],
             port=self.port,
             additional_components=dict(),
@@ -286,7 +286,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                 backend=backend,
                 output_y_hat_optimization=False,
                 queue=queue_mock,
-                metric=accuracy,
+                metrics=[accuracy],
                 port=self.port,
                 additional_components=dict(),
             )
@@ -357,7 +357,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                         backend=backend,
                         output_y_hat_optimization=False,
                         queue=queue_mock,
-                        metric=accuracy,
+                        metrics=[accuracy],
                         port=self.port,
                         additional_components=additional_components,
                     )

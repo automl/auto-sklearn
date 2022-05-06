@@ -384,7 +384,7 @@ for (base_name, sklearn_metric), average in product(
     CLASSIFICATION_METRICS[name] = scorer
 
 
-def calculate_score(
+def calculate_scores(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
@@ -392,9 +392,9 @@ def calculate_score(
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
-    Returns a score (a magnitude that allows casting the
+    Returns the scores (a magnitude that allows casting the
     optimization problem as a maximization one) for the
-    given Auto-Sklearn Scorer object
+    given Auto-Sklearn Scorer objects.
 
     Parameters
     ----------
@@ -469,7 +469,7 @@ def calculate_score(
     return score_dict
 
 
-def calculate_loss(
+def calculate_losses(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
@@ -477,9 +477,9 @@ def calculate_loss(
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
-    Returns a loss (a magnitude that allows casting the
+    Returns the losses (a magnitude that allows casting the
     optimization problem as a minimization one) for the
-    given Auto-Sklearn Scorer object
+    given Auto-Sklearn Scorer objects.
 
     Parameters
     ----------
@@ -490,7 +490,7 @@ def calculate_loss(
     task_type: int
         To understand if the problem task is classification
         or regression
-    metric: Sequence[Scorer]
+    metrics: Sequence[Scorer]
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
     scoring_functions: List[Scorer]
@@ -501,7 +501,7 @@ def calculate_loss(
     Dict[str, float]
         A loss function for each of the provided scorer objects
     """
-    score = calculate_score(
+    score = calculate_scores(
         solution=solution,
         prediction=prediction,
         task_type=task_type,

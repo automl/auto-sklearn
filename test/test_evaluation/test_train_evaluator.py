@@ -139,7 +139,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy_args={"train_size": 0.66},
             scoring_functions=None,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             port=self.port,
             additional_components=dict(),
         )
@@ -229,7 +229,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy="holdout",
             scoring_functions=None,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=0.0,
             additional_components=dict(),
         )
@@ -239,42 +239,45 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         class LossSideEffect(object):
             def __init__(self):
                 self.losses = [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.9,
-                    0.9,
-                    0.9,
-                    0.9,
-                    0.8,
-                    0.8,
-                    0.8,
-                    0.8,
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.4,
-                    0.4,
-                    0.4,
-                    0.4,
-                    0.3,
-                    0.3,
-                    0.3,
-                    0.3,
-                    0.2,
-                    0.2,
-                    0.2,
-                    0.2,
+                    {"accuracy": value}
+                    for value in [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.9,
+                        0.9,
+                        0.9,
+                        0.9,
+                        0.8,
+                        0.8,
+                        0.8,
+                        0.8,
+                        0.7,
+                        0.7,
+                        0.7,
+                        0.7,
+                        0.6,
+                        0.6,
+                        0.6,
+                        0.6,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.4,
+                        0.4,
+                        0.4,
+                        0.4,
+                        0.3,
+                        0.3,
+                        0.3,
+                        0.3,
+                        0.2,
+                        0.2,
+                        0.2,
+                        0.2,
+                    ]
                 ]
                 self.iteration = 0
 
@@ -381,7 +384,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy="holdout-iterative-fit",
             scoring_functions=None,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=0.0,
             additional_components=dict(),
         )
@@ -391,26 +394,29 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         class LossSideEffect(object):
             def __init__(self):
                 self.losses = [
-                    0.8,
-                    0.8,
-                    0.8,
-                    0.8,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.4,
-                    0.4,
-                    0.4,
-                    0.4,
-                    0.2,
-                    0.2,
-                    0.2,
-                    0.2,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
+                    {"accuracy": value}
+                    for value in [
+                        0.8,
+                        0.8,
+                        0.8,
+                        0.8,
+                        0.6,
+                        0.6,
+                        0.6,
+                        0.6,
+                        0.4,
+                        0.4,
+                        0.4,
+                        0.4,
+                        0.2,
+                        0.2,
+                        0.2,
+                        0.2,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                    ]
                 ]
                 self.iteration = 0
 
@@ -482,7 +488,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy="holdout-iterative-fit",
             scoring_functions=None,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -538,7 +544,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy_args={"folds": 5},
             scoring_functions=None,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -606,7 +612,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy_args={"folds": 5},
             scoring_functions=None,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
 
@@ -688,7 +694,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy_args={"folds": 5},
             scoring_functions=None,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=0.0,
             additional_components=dict(),
         )
@@ -698,42 +704,45 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         class LossSideEffect(object):
             def __init__(self):
                 self.losses = [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.9,
-                    0.9,
-                    0.9,
-                    0.9,
-                    0.8,
-                    0.8,
-                    0.8,
-                    0.8,
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.4,
-                    0.4,
-                    0.4,
-                    0.4,
-                    0.3,
-                    0.3,
-                    0.3,
-                    0.3,
-                    0.2,
-                    0.2,
-                    0.2,
-                    0.2,
+                    {"accuracy": value}
+                    for value in [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.9,
+                        0.9,
+                        0.9,
+                        0.9,
+                        0.8,
+                        0.8,
+                        0.8,
+                        0.8,
+                        0.7,
+                        0.7,
+                        0.7,
+                        0.7,
+                        0.6,
+                        0.6,
+                        0.6,
+                        0.6,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.5,
+                        0.4,
+                        0.4,
+                        0.4,
+                        0.4,
+                        0.3,
+                        0.3,
+                        0.3,
+                        0.3,
+                        0.2,
+                        0.2,
+                        0.2,
+                        0.2,
+                    ]
                 ]
                 self.iteration = 0
 
@@ -791,7 +800,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy_args={"folds": 5},
             scoring_functions=SCORER_LIST,
             output_y_hat_optimization=True,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
 
@@ -903,7 +912,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             configuration=configuration,
             resampling_strategy="cv",
             resampling_strategy_args={"folds": 10},
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         train_indices = np.arange(69, dtype=int)
@@ -974,7 +983,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             configuration=configuration,
             resampling_strategy="cv",
             resampling_strategy_args={"folds": 10},
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         train_indices = np.arange(69, dtype=int)
@@ -1043,7 +1052,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy="cv",
             resampling_strategy_args={"folds": 10},
             output_y_hat_optimization=False,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
 
@@ -1091,7 +1100,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             configuration=configuration,
             resampling_strategy="holdout",
             output_y_hat_optimization=False,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -1139,7 +1148,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy="cv",
             resampling_strategy_args={"folds": 2},
             output_y_hat_optimization=False,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -1182,7 +1191,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         mock.get_current_iter.side_effect = Counter()
         mock.get_max_iter.return_value = 1
         mock.get_additional_run_info.return_value = 14678
-        loss_mock.return_value = 0.5
+        loss_mock.return_value = {"accuracy": 0.5}
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
@@ -1199,7 +1208,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             configuration=configuration,
             resampling_strategy="holdout",
             output_y_hat_optimization=False,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=0.0,
             additional_components=dict(),
         )
@@ -1228,7 +1237,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         mock.estimator_supports_iterative_fit.return_value = False
         mock.fit_transformer.return_value = ("Xt", {})
         mock.get_additional_run_info.return_value = 14678
-        loss_mock.return_value = 0.5
+        loss_mock.return_value = {"accuracy": 0.5}
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
@@ -1245,7 +1254,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             configuration=configuration,
             resampling_strategy="holdout",
             output_y_hat_optimization=False,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
@@ -1285,7 +1294,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         mock.fit_transformer.return_value = ("Xt", {})
         mock.get_additional_run_info.return_value = {"val": 14678}
         mock.get_max_iter.return_value = 512
-        loss_mock.return_value = 0.5
+        loss_mock.return_value = {"accuracy": 0.5}
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
@@ -1302,7 +1311,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             configuration=configuration,
             resampling_strategy="holdout",
             output_y_hat_optimization=False,
-            metric=accuracy,
+            metrics=[accuracy],
             budget_type="iterations",
             budget=50,
             additional_components=dict(),
@@ -1335,7 +1344,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         mock.estimator_supports_iterative_fit.return_value = False
         mock.fit_transformer.return_value = ("Xt", {})
         mock.get_additional_run_info.return_value = {"val": 14678}
-        loss_mock.return_value = 0.5
+        loss_mock.return_value = {"accuracy": 0.5}
 
         D = get_binary_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
@@ -1352,7 +1361,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             configuration=configuration,
             resampling_strategy="holdout",
             output_y_hat_optimization=False,
-            metric=accuracy,
+            metrics=[accuracy],
             budget_type="subsample",
             budget=50,
             additional_components=dict(),
@@ -1406,7 +1415,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                     resampling_strategy="cv",
                     resampling_strategy_args={"folds": 2},
                     output_y_hat_optimization=False,
-                    metric=metric_lookup[D.info["task"]],
+                    metrics=[metric_lookup[D.info["task"]]],
                     additional_components=dict(),
                 )
 
@@ -2984,7 +2993,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         info = read_queue(self.queue)
@@ -3009,7 +3018,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         rval = read_queue(self.queue)
@@ -3063,7 +3072,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         rval = read_queue(self.queue)
@@ -3088,7 +3097,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=1,
             budget_type="iterations",
             additional_components=dict(),
@@ -3119,7 +3128,7 @@ class FunctionsTest(unittest.TestCase):
             exclude={"classifier": ["random_forest", "liblinear_svc"]},
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=80,
             budget_type="iterations",
             additional_components=dict(),
@@ -3146,7 +3155,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=30,
             budget_type="subsample",
             additional_components=dict(),
@@ -3174,7 +3183,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=1,
             budget_type="mixed",
             additional_components=dict(),
@@ -3204,7 +3213,7 @@ class FunctionsTest(unittest.TestCase):
             exclude={"classifier": ["random_forest"]},
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             budget=40,
             budget_type="mixed",
             additional_components=dict(),
@@ -3231,7 +3240,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         rval = read_queue(self.queue)
@@ -3256,7 +3265,7 @@ class FunctionsTest(unittest.TestCase):
             exclude=None,
             disable_file_output=False,
             instance=self.dataset_name,
-            metric=accuracy,
+            metrics=[accuracy],
             additional_components=dict(),
         )
         rval = read_queue(self.queue)
@@ -3330,7 +3339,7 @@ class FunctionsTest(unittest.TestCase):
                 include=None,
                 exclude=None,
                 disable_file_output=False,
-                metric=accuracy,
+                metrics=[accuracy],
                 additional_components=dict(),
             )
             rval = read_queue(self.queue)

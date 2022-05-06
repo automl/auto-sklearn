@@ -25,7 +25,7 @@ from autosklearn.constants import (
     MULTIOUTPUT_REGRESSION,
     REGRESSION_TASKS,
 )
-from autosklearn.metrics import Scorer, calculate_loss
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents, _addons
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel,
@@ -349,7 +349,7 @@ class AbstractEvaluator(object):
             return rval
 
         else:
-            return calculate_loss(
+            return calculate_losses(
                 y_true,
                 y_hat,
                 self.task_type,
@@ -402,14 +402,11 @@ class AbstractEvaluator(object):
         if file_out_loss is not None:
             return self.duration, file_out_loss, self.seed, additional_run_info_
 
-        if isinstance(loss, dict):
-            loss_ = loss
-            if len(self.metrics) == 1:
-                loss = loss_[self.metrics[0].name]
-            else:
-                loss = {metric: loss_[metric] for metric in loss_}
+        loss_ = loss
+        if len(self.metrics) == 1:
+            loss = loss_[self.metrics[0].name]
         else:
-            loss_ = {}
+            loss = {metric: loss_[metric] for metric in loss_}
 
         additional_run_info = {} if additional_run_info is None else additional_run_info
         for metric_name, value in loss_.items():

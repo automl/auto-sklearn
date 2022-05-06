@@ -12,7 +12,7 @@ from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
-from autosklearn.metrics import Scorer, calculate_loss
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents
 
 __all__ = ["eval_t", "TestEvaluator"]
@@ -83,22 +83,22 @@ class TestEvaluator(AbstractEvaluator):
             Y_pred = self.predict_function(
                 self.X_train, self.model, self.task_type, self.Y_train
             )
-            err = calculate_loss(
+            err = calculate_losses(
                 solution=self.Y_train,
                 prediction=Y_pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=self.metrics,
                 scoring_functions=self.scoring_functions,
             )
         else:
             Y_pred = self.predict_function(
                 self.X_test, self.model, self.task_type, self.Y_train
             )
-            err = calculate_loss(
+            err = calculate_losses(
                 solution=self.Y_test,
                 prediction=Y_pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=self.metrics,
                 scoring_functions=self.scoring_functions,
             )
 
@@ -129,7 +129,7 @@ def eval_t(
     evaluator = TestEvaluator(
         configuration=config,
         backend=backend,
-        metric=metrics,
+        metrics=metrics,
         seed=seed,
         port=port,
         queue=queue,

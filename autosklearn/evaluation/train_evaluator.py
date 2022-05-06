@@ -448,23 +448,15 @@ class TrainEvaluator(AbstractEvaluator):
                         for metric in self.metrics
                     ]
                     if len(self.metrics) == 1:
-                        train_loss = train_loss[self.metrics[0].name]
+                        train_loss = train_loss[0]
 
                     # if all_scoring_function is true, return a dict of opt_loss.
                     # Otherwise, return a scalar.
-                    if self.scoring_functions:
-                        opt_loss = {}
-                        for metric in opt_losses[0].keys():
-                            opt_loss[metric] = np.average(
-                                [
-                                    opt_losses[i][metric]
-                                    for i in range(self.num_cv_folds)
-                                ],
-                                weights=opt_fold_weights_percentage,
-                            )
-                    else:
-                        opt_loss = np.average(
-                            opt_losses, weights=opt_fold_weights_percentage
+                    opt_loss = {}
+                    for metric in opt_losses[0].keys():
+                        opt_loss[metric] = np.average(
+                            [opt_losses[i][metric] for i in range(self.num_cv_folds)],
+                            weights=opt_fold_weights_percentage,
                         )
 
                     Y_targets = self.Y_targets
@@ -647,7 +639,7 @@ class TrainEvaluator(AbstractEvaluator):
                 for metric in self.metrics
             ]
             if len(self.metrics) == 1:
-                train_loss = train_loss[self.metrics[0].name]
+                train_loss = train_loss[0]
 
             # if all_scoring_function is true, return a dict of opt_loss. Otherwise,
             # return a scalar.
@@ -659,8 +651,6 @@ class TrainEvaluator(AbstractEvaluator):
                     [opt_losses[i][metric_name] for i in range(self.num_cv_folds)],
                     weights=opt_fold_weights,
                 )
-            if len(self.metrics) == 1:
-                opt_loss = opt_loss[self.metrics[0].name]
 
             Y_targets = self.Y_targets
             Y_train_targets = self.Y_train_targets
@@ -798,6 +788,8 @@ class TrainEvaluator(AbstractEvaluator):
                 add_model_to_self=True,
             )
             train_loss = self._loss(self.Y_actual_train, train_pred)
+            if len(self.metrics) == 1:
+                train_loss = train_loss[self.metrics[0].name]
             loss = self._loss(self.Y_targets[fold], opt_pred)
 
             if self.model.estimator_supports_iterative_fit():
@@ -898,6 +890,8 @@ class TrainEvaluator(AbstractEvaluator):
                     else self.Y_train[train_indices],
                     Y_train_pred,
                 )
+                if len(self.metrics) == 1:
+                    train_loss = train_loss[self.metrics[0].name]
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
                 additional_run_info = model.get_additional_run_info()
 
@@ -943,6 +937,8 @@ class TrainEvaluator(AbstractEvaluator):
                 else self.Y_train[train_indices],
                 Y_train_pred,
             )
+            if len(self.metrics) == 1:
+                train_loss = train_loss[self.metrics[0].name]
             loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
             if self.model.estimator_supports_iterative_fit():
                 model_max_iter = self.model.get_max_iter()

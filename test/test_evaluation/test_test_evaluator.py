@@ -72,7 +72,7 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 evaluator = TestEvaluator(
                     backend_mock,
                     queue_,
-                    metric=metric_lookup[D.info["task"]],
+                    metrics=[metric_lookup[D.info["task"]]],
                     port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
                     additional_components=dict(),
                 )
@@ -110,7 +110,7 @@ class FunctionsTest(unittest.TestCase):
             queue=self.queue,
             backend=self.backend,
             config=self.configuration,
-            metric=accuracy,
+            metrics=[accuracy],
             seed=1,
             num_run=1,
             scoring_functions=None,
@@ -133,7 +133,7 @@ class FunctionsTest(unittest.TestCase):
             queue=self.queue,
             backend=self.backend,
             config=self.configuration,
-            metric=accuracy,
+            metrics=[accuracy],
             seed=1,
             num_run=1,
             scoring_functions=SCORER_LIST,
