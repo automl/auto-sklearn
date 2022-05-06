@@ -1803,8 +1803,11 @@ class AutoML(BaseEstimator):
 
             param_dict = config.get_dictionary()
             params.append(param_dict)
+            cost = run_value.cost
+            if len(self._metrics) > 1:
+                cost = cost[0]
             mean_test_score.append(
-                self._metrics[0]._optimum - (self._metrics[0]._sign * run_value.cost)
+                self._metrics[0]._optimum - (self._metrics[0]._sign * cost)
             )
             mean_fit_time.append(run_value.time)
             budgets.append(run_key.budget)
