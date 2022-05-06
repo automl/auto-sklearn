@@ -107,20 +107,25 @@ def test_caching(make_run: Callable[..., Run]) -> None:
     -------
     * Attempting to load the same predictions again will cause the result to be cached
     * Unloading the cache will cause it to reload and reread the predictions
+
+    Note
+    ----
+    The `time.sleep` here is to give some time between accesses. Using a value of
+    `0.01` seemed to be too low for the github action runners
     """
     run = make_run()
 
     path = run.pred_path()
     before_access = path.stat().st_atime_ns
 
-    time.sleep(0.01)
+    time.sleep(1)
     _ = run.predictions()  # Should cache result
     load_access = path.stat().st_atime_ns
 
     # We test that it was not loaded from disk by checking when it was last accessed
     assert before_access != load_access
 
-    time.sleep(0.01)
+    time.sleep(1)
     _ = run.predictions()  # Should use cache result
     cache_access = path.stat().st_atime_ns
 
@@ -128,7 +133,7 @@ def test_caching(make_run: Callable[..., Run]) -> None:
 
     run.unload_cache()
 
-    time.sleep(0.01)
+    time.sleep(1)
     _ = run.predictions()  # Should have reloaded it
     reloaded_access = path.stat().st_atime_ns
 
