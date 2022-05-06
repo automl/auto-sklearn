@@ -140,12 +140,15 @@ class Run:
         self._cache[key] = predictions
         return predictions
 
-    def unload_cache(self) -> None:
-        """Removes the cache from this object
+    def __getstate__(self) -> dict:
+        """Remove the cache when pickling."""
+        state = self.__dict__.copy()
+        del state["_cache"]
+        return state
 
-        We could also enforce that nothing gets pickled to disk with __getstate__
-        but this is simpler and shows expliciyt behaviour in caller code.
-        """
+    def __setstate__(self, state: dict) -> None:
+        """Reset state and instansiate blank cache."""
+        self.__dict__.update(state)
         self._cache = {}
 
     @property

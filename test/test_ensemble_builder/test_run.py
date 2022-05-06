@@ -131,10 +131,11 @@ def test_caching(make_run: Callable[..., Run]) -> None:
 
     assert cache_access == load_access
 
-    run.unload_cache()
+    pickled_run = pickle.dumps(run)
+    unpickled_run = pickle.loads(pickled_run)
 
     time.sleep(1)
-    _ = run.predictions()  # Should have reloaded it
+    _ = unpickled_run.predictions()  # Should have reloaded it
     reloaded_access = path.stat().st_atime_ns
 
     assert reloaded_access != cache_access

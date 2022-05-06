@@ -499,11 +499,6 @@ class EnsembleBuilder:
             candidates = sorted(candidates_set, key=lambda r: r.id)
             test_models = []
 
-        # To save on pickle and to allow for fresh predictions, unload the cache
-        # before pickling
-        for run in candidates:
-            run.unload_cache()
-
         # Save the candidates for the next round
         with self.previous_candidates_path.open("wb") as f:
             pickle.dump({run.id: run for run in candidates}, f)
