@@ -360,7 +360,7 @@ class AbstractEvaluator(object):
     def finish_up(
         self,
         loss: Union[Dict[str, float], float],
-        train_loss: Optional[Union[float, Dict[str, float]]],
+        train_loss: Optional[Dict[str, float]],
         opt_pred: np.ndarray,
         valid_pred: np.ndarray,
         test_pred: np.ndarray,
@@ -414,7 +414,12 @@ class AbstractEvaluator(object):
         additional_run_info["duration"] = self.duration
         additional_run_info["num_run"] = self.num_run
         if train_loss is not None:
-            additional_run_info["train_loss"] = train_loss
+            if len(self.metrics) == 1:
+                additional_run_info["train_loss"] = train_loss[self.metrics[0].name]
+            else:
+                additional_run_info["train_loss"] = [
+                    train_loss[metric.name] for metric in self.metrics
+                ]
         if validation_loss is not None:
             additional_run_info["validation_loss"] = validation_loss
         if test_loss is not None:
