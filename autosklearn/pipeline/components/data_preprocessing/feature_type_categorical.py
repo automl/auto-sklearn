@@ -128,15 +128,25 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         if dataset_properties is not None and isinstance(dataset_properties, dict):
             default_dataset_properties.update(dataset_properties)
 
-        steps.extend(
-            [
-                ("imputation", CategoricalImputation()),
-                ("encoding", OrdinalEncoding()),
-                ("category_shift", CategoryShift()),
-                ("category_coalescence", CoalescenseChoice(default_dataset_properties)),
-                ("categorical_encoding", OHEChoice(default_dataset_properties)),
-            ]
-        )
+        steps = [
+            ("imputation", CategoricalImputation(random_state=self.random_state)),
+            ("encoding", OrdinalEncoding(random_state=self.random_state)),
+            ("category_shift", CategoryShift(random_state=self.random_state)),
+            (
+                "category_coalescence",
+                CoalescenseChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state,
+                ),
+            ),
+            (
+                "categorical_encoding",
+                OHEChoice(
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state,
+                ),
+            ),
+        ]
 
         return steps
 
