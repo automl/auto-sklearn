@@ -36,7 +36,7 @@ X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
 
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=30,
-    tmp_folder="/tmp/autosklearn_classification_example_tmp",
+    tmp_folder="/tmp/autosklearn_multi_objective_example_tmp",
     metric=[autosklearn.metrics.precision, autosklearn.metrics.recall],
 )
 automl.fit(X_train, y_train, dataset_name="breast_cancer")

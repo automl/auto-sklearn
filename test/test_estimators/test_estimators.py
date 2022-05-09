@@ -388,7 +388,7 @@ def test_leaderboard(
     # Comprehensive test tasks a substantial amount of time, manually set if
     # required.
     MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 3  # [0, len(valid_columns) + 1]
-    column_types = AutoSklearnEstimator._leaderboard_columns()
+    column_types = AutoSklearnEstimator._leaderboard_columns(num_metrics=1)
 
     # Create a dict of all possible param values for each param
     # with some invalid one's of the incorrect type
