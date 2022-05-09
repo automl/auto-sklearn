@@ -101,11 +101,6 @@ def _calculate_metafeatures(
         # == Calculate metafeatures
         with stopwatch.time("Calculate meta-features") as task_timer:
 
-            categorical = {
-                col: True if feat_type.lower() in {"categorical", "string"} else False
-                for col, feat_type in data_feat_type.items()
-            }
-
             EXCLUDE_META_FEATURES = (
                 EXCLUDE_META_FEATURES_CLASSIFICATION
                 if data_info_task in CLASSIFICATION_TASKS
@@ -123,7 +118,7 @@ def _calculate_metafeatures(
                 result = calculate_all_metafeatures_with_labels(
                     x_train,
                     y_train,
-                    categorical=categorical,
+                    feat_type=data_feat_type,
                     dataset_name=basename,
                     dont_calculate=EXCLUDE_META_FEATURES,
                     logger=logger_,
@@ -159,15 +154,11 @@ def _calculate_metafeatures_encoded(
         )
 
         with stopwatch.time("Calculate meta-features encoded") as task_timer:
-            categorical = {
-                col: True if feat_type.lower() in {"categorical", "string"} else False
-                for col, feat_type in data_feat_type.items()
-            }
 
             result = calculate_all_metafeatures_encoded_labels(
                 x_train,
                 y_train,
-                categorical=categorical,
+                feat_type=data_feat_type,
                 dataset_name=basename,
                 dont_calculate=EXCLUDE_META_FEATURES,
                 logger=logger_,
