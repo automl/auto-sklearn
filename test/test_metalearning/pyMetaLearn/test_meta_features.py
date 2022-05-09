@@ -125,18 +125,7 @@ def meta_train_data_transformed(request):
 
     DPP = FeatTypeSplit(feat_type=feat_type)
     X_transformed = DPP.fit_transform(X)
-
-    categorical = {
-        key: True if value.lower() == "categorical" else False
-        for key, value in feat_type.items()
-    }
-    number_not_categorical = np.sum(~np.array(list(categorical.values())))
-    feat_type_transformed = {
-        i: "categorical"
-        if i < (X_transformed.shape[1] - number_not_categorical)
-        else "numerical"
-        for i in range(X_transformed.shape[1])
-    }
+    feat_type_transformed = {i: "numerical" for i in range(X_transformed.shape[1])}
 
     # pre-compute values for transformed inputs
     meta_features.helper_functions.set_value(
@@ -553,7 +542,7 @@ def test_kurtosisses(meta_train_data_transformed):
     mf = meta_features.helper_functions["Kurtosisses"](
         X_transformed, y, logging.getLogger("Meta"), feat_type_transformed
     )
-    assert 6 == len(mf.value)
+    assert 81 == len(mf.value)
 
 
 def test_kurtosis_min(meta_train_data_transformed):
@@ -593,7 +582,7 @@ def test_skewnesses(meta_train_data_transformed):
     mf = meta_features.helper_functions["Skewnesses"](
         X_transformed, y, logging.getLogger("Meta"), feat_type_transformed
     )
-    assert 6 == len(mf.value)
+    assert 81 == len(mf.value)
 
 
 def test_skewness_min(meta_train_data_transformed):
