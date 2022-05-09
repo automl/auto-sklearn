@@ -108,21 +108,8 @@ def sparse_data_transformed():
     standard_scaler = StandardScaler(with_mean=False)
     X_transformed = standard_scaler.fit_transform(X_transformed)
 
-    # Transform the array which indicates the categorical metafeatures
-    number_not_categorical = np.sum(
-        np.array(
-            [
-                False if value.lower() == "categorical" else True
-                for value in feat_type.values()
-            ]
-        )
-    )
-    feat_type_transformed = {
-        i: "categorical"
-        if i < (X_transformed.shape[1] - number_not_categorical)
-        else "numerical"
-        for i in range(X_transformed.shape[1])
-    }
+    # Transform the array which indicates the numerical metafeatures
+    feat_type_transformed = {i: "numerical" for i in range(X_transformed.shape[1])}
 
     X = X_sparse
     X_transformed = X_transformed

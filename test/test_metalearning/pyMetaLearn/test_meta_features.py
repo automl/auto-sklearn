@@ -159,7 +159,18 @@ def meta_train_data_transformed(request):
     if request.param == "numpy":
         return X_transformed, y, feat_type_transformed
     elif request.param == "pandas":
-        return pd.DataFrame(X_transformed), y, feat_type_transformed
+        dtypes = {}
+        for key, value in feat_type.items():
+            if value == "categorical":
+                dtypes[key] = "category"
+            elif value == "numerical":
+                dtypes[key] = "float64"
+            elif value == "string":
+                dtypes[key] = "string"
+            else:
+                raise KeyError
+        X_transformed = pd.DataFrame(X_transformed).astype(dtypes)
+        return X_transformed, y, feat_type_transformed
     else:
         raise ValueError(request.param)
 
@@ -930,9 +941,9 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
 
     # Then do numpy!
     X, y = fetch_openml(data_id=2, return_X_y=True, as_frame=False)
-    feat_type_head = {i: value for i, value in enumerate(feat_type.values())}
+    feat_type = {i: value for i, value in enumerate(feat_type.values())}
     mf = meta_features.calculate_all_metafeatures(
-        X, y, feat_type_head, "2", logger=logging.getLogger("Meta")
+        X, y, feat_type, "2", logger=logging.getLogger("Meta")
     )
     assert {k: mf[k].value for k in expected.keys()} == pytest.approx(expected)
 
