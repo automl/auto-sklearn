@@ -1299,9 +1299,11 @@ class AutoML(BaseEstimator):
         if "resampling_strategy" not in kwargs:
             kwargs["resampling_strategy"] = self._resampling_strategy
         if "metrics" not in kwargs:
-            kwargs["metric"] = self._metrics
-        kwargs["metrics"] = kwargs["metric"]
-        del kwargs["metric"]
+            if "metric" in kwargs:
+                kwargs["metrics"] = kwargs["metric"]
+                del kwargs["metric"]
+            else:
+                kwargs["metrics"] = self._metrics
         if "disable_file_output" not in kwargs:
             kwargs["disable_file_output"] = self._disable_evaluator_output
         if "pynisher_context" not in kwargs:

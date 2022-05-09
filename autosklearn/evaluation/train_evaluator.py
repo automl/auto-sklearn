@@ -395,8 +395,6 @@ class TrainEvaluator(AbstractEvaluator):
                         Y_test_pred[i] = test_pred
                         train_splits[i] = train_indices
 
-                        # Compute train loss of this fold and store it. train_loss could
-                        # either be a scalar or a dict of scalars with metrics as keys.
                         train_loss = self._loss(
                             self.Y_train.iloc[train_indices]
                             if hasattr(self.Y_train, "iloc")
@@ -601,8 +599,6 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred[i] = test_pred
                 train_splits[i] = train_split
 
-                # Compute train loss of this fold and store it. train_loss could
-                # either be a scalar or a dict of scalars with metrics as keys.
                 train_loss = self._loss(
                     self.Y_train_targets[train_split],
                     train_pred,
