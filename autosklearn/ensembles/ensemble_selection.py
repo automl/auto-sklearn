@@ -214,7 +214,7 @@ class EnsembleSelection(AbstractEnsemble):
                         solution=labels,
                         prediction=ensemble_prediction,
                         task_type=self.task_type,
-                        metric=self.metric,
+                        metrics=[self.metric],
                         scoring_functions=None,
                     ),
                 )

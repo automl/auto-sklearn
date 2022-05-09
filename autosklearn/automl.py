@@ -691,8 +691,6 @@ class AutoML(BaseEstimator):
         # The metric must exist as of this point
         # It can be provided in the constructor, or automatically
         # defined in the estimator fit call
-        if self._metrics is None:
-            raise ValueError("No metrics given.")
         if isinstance(self._metrics, Sequence):
             for entry in self._metrics:
                 if not isinstance(entry, Scorer):
