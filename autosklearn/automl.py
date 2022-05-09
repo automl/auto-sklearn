@@ -4,6 +4,7 @@ from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Tuple
 
 import copy
 import io
+import itertools
 import json
 import logging.handlers
 import multiprocessing
@@ -1767,14 +1768,11 @@ class AutoML(BaseEstimator):
 
         metric_mask = dict()
         metric_dict = dict()
-        metric_name = []
 
-        for metric in self._scoring_functions:
-            metric_name.append(metric.name)
+        for metric in itertools.chain(self._metrics, self._scoring_functions):
             metric_dict[metric.name] = []
             metric_mask[metric.name] = []
 
-        mean_test_score = []
         mean_fit_time = []
         params = []
         status = []
@@ -1807,12 +1805,7 @@ class AutoML(BaseEstimator):
 
             param_dict = config.get_dictionary()
             params.append(param_dict)
-            cost = run_value.cost
-            if len(self._metrics) > 1:
-                cost = cost[0]
-            mean_test_score.append(
-                self._metrics[0]._optimum - (self._metrics[0]._sign * cost)
-            )
+
             mean_fit_time.append(run_value.time)
             budgets.append(run_key.budget)
 
@@ -1827,6 +1820,14 @@ class AutoML(BaseEstimator):
                 parameter_dictionaries[hp_name].append(hp_value)
                 masks[hp_name].append(mask_value)
 
+            cost = [run_value.cost] if len(self._metrics) == 1 else run_value.cost
+            for metric_idx, metric in enumerate(self._metrics):
+                metric_cost = cost[metric_idx]
+                metric_value = metric._optimum - (metric._sign * metric_cost)
+                mask_value = False
+                metric_dict[metric.name].append(metric_value)
+                metric_mask[metric.name].append(mask_value)
+
             for metric in self._scoring_functions:
                 if metric.name in run_value.additional_info.keys():
                     metric_cost = run_value.additional_info[metric.name]
@@ -1838,15 +1839,26 @@ class AutoML(BaseEstimator):
                 metric_dict[metric.name].append(metric_value)
                 metric_mask[metric.name].append(mask_value)
 
-        results["mean_test_score"] = np.array(mean_test_score)
-        for name in metric_name:
-            masked_array = ma.MaskedArray(metric_dict[name], metric_mask[name])
-            results["metric_%s" % name] = masked_array
+        if len(self._metrics) == 1:
+            results["mean_test_score"] = np.array(metric_dict[self._metrics[0].name])
+            rank_order = -1 * self._metrics[0]._sign * results["mean_test_score"]
+            results["rank_test_scores"] = scipy.stats.rankdata(rank_order, method="min")
+        else:
+            for metric in self._metrics:
+                key = f"mean_test_{metric.name}"
+                results[key] = np.array(metric_dict[metric.name])
+                rank_order = -1 * metric._sign * results[key]
+                results[f"rank_test_{metric.name}"] = scipy.stats.rankdata(
+                    rank_order, method="min"
+                )
+        for metric in self._scoring_functions:
+            masked_array = ma.MaskedArray(
+                metric_dict[metric.name], metric_mask[metric.name]
+            )
+            results[f"metric_{metric.name}"] = masked_array
 
         results["mean_fit_time"] = np.array(mean_fit_time)
         results["params"] = params
-        rank_order = -1 * self._metrics[0]._sign * results["mean_test_score"]
-        results["rank_test_scores"] = scipy.stats.rankdata(rank_order, method="min")
         results["status"] = status
         results["budgets"] = budgets
 
