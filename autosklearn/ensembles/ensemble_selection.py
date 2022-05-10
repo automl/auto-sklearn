@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import random
 from collections import Counter
@@ -208,16 +208,13 @@ class EnsembleSelection(AbstractEnsemble):
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
                 # calculate_loss is versatile and can return a dict of losses
                 # when scoring_functions=None, we know it will be a float
-                losses[j] = cast(
-                    float,
-                    calculate_losses(
-                        solution=labels,
-                        prediction=ensemble_prediction,
-                        task_type=self.task_type,
-                        metrics=[self.metric],
-                        scoring_functions=None,
-                    ),
-                )
+                losses[j] = calculate_losses(
+                    solution=labels,
+                    prediction=ensemble_prediction,
+                    task_type=self.task_type,
+                    metrics=[self.metric],
+                    scoring_functions=None,
+                )[self.metric.name]
                 ensemble.pop()
             best = np.nanargmin(losses)
             ensemble.append(predictions[best])
