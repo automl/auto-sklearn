@@ -202,7 +202,6 @@ def pytest_collection_modifyitems(
 def pytest_configure(config: Config) -> None:
     """Used to register marks"""
     config.addinivalue_line("markers", "todo: Mark test as todo")
-    config.addinivalue_line("markers", "slow: Mark test as slow")
 
 
 pytest_plugins = fixture_modules()
@@ -230,10 +229,4 @@ def pytest_addoption(parser: Parser) -> None:
         action="store_true",
         default=False,
         help="Cache everything between invocations of pytest",
-    )
-    parser.addoption(
-        "--cached-automl",
-        action="store_true",
-        default=False,
-        help="Cache AutoML training runs between invocations of pytest.",
     )
