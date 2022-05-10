@@ -206,8 +206,6 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                # calculate_loss is versatile and can return a dict of losses
-                # when scoring_functions=None, we know it will be a float
                 losses[j] = calculate_losses(
                     solution=labels,
                     prediction=ensemble_prediction,
