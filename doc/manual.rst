@@ -19,6 +19,25 @@ give short explanations (click the title to expand text), e.g.
 
     We provide resources for talks, tutorials and presentations on *auto-sklearn* under `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
 
+.. _askl2:
+
+Auto-sklearn 2.0
+================
+
+Auto-sklearn 2.0 includes latest research on automatically configuring the AutoML system itself
+and contains a multitude of improvements which speed up the fitting the AutoML system.
+Concretely, Auto-sklearn 2.0 automatically sets the :ref:`bestmodel`, decides whether it can use
+the efficient bandit strategy *Successive Halving* and uses meta-feature free *Portfolios* for
+efficient meta-learning.
+
+*auto-sklearn 2.0* has the same interface as regular *auto-sklearn* and you can use it via
+
+.. code:: python
+
+    from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+
+A paper describing our advances is available on `arXiv <https://arxiv.org/abs/2007.04074>`_.
+
 .. _limits:
 
 Resource limits
