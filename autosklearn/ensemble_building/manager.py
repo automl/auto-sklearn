@@ -29,8 +29,8 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         time_left_for_ensembles: float = 10,
         max_iterations: int | None = None,
         pynisher_context: str = "fork",
-        ensemble_size: int = 10,
-        ensemble_nbest: int | float = 100,
+        ensemble_size: int = 50,
+        ensemble_nbest: int | float = 50,
         max_models_on_disc: int | float | None = None,
         seed: int = 1,
         precision: int = 32,
@@ -67,13 +67,12 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         pynisher_context: "spawn" | "fork" | "forkserver" = "fork"
             The multiprocessing context for pynisher.
 
-        ensemble_size: int = 10
+        ensemble_size: int = 50
             maximal size of ensemble
 
-        ensemble_nbest: int | float = 100
+        ensemble_nbest: int | float = 50
             If int: consider only the n best prediction
             If float: consider only this fraction of the best models
-            If performance_range_threshold > 0, might return less models
 
         max_models_on_disc: int | float | None = None
            Defines the maximum number of models that are kept in the disc.
@@ -99,8 +98,9 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         memory_limit: int | None = None
             Memory limit in mb. If ``None``, no memory limit is enforced.
 
-        read_at_most: int | None = 5
-            Read at most n new prediction files in each iteration
+        read_at_most: int | None = None
+            read at most n new prediction files in each iteration. If `None`, will read
+            the predictions and calculate losses for all runs that require it.
 
         logger_port: int = DEFAULT_TCP_LOGGING_PORT
             Port that receives logging records
@@ -265,13 +265,13 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         task_type: int,
         metric: Scorer,
         pynisher_context: str,
-        ensemble_size: int = 10,
-        ensemble_nbest: int | float = 100,
+        ensemble_size: int = 50,
+        ensemble_nbest: int | float = 50,
         max_models_on_disc: int | float | None = None,
         seed: int = 1,
         precision: int = 32,
         memory_limit: int | None = None,
-        read_at_most: int | None = 5,
+        read_at_most: int | None = None,
         logger_port: int = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
         random_state: int | np.random.RandomState | None = None,
     ) -> tuple[list[dict[str, Any]], int | float]:
@@ -303,13 +303,12 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         pynisher_context: "fork" | "spawn" | "forkserver" = "fork"
             Context to use for multiprocessing, can be either fork, spawn or forkserver.
 
-        ensemble_size: int = 10
+        ensemble_size: int = 50
             Maximal size of ensemble
 
-        ensemble_nbest: int | float = 1000
+        ensemble_nbest: int | float = 50
             If int: consider only the n best prediction
             If float: consider only this fraction of the best models
-            If performance_range_threshold > 0, might return less models
 
         max_models_on_disc: int | float | None = 100
            Defines the maximum number of models that are kept in the disc.
@@ -334,8 +333,9 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         memory_limit: int | None = None
             Memory limit in mb. If ``None``, no memory limit is enforced.
 
-        read_at_most: int | None = 5
-            Read at most n new prediction files in each iteration
+        read_at_most: int | None = None
+            read at most n new prediction files in each iteration. If `None`, will read
+            the predictions and calculate losses for all runs that require it.
 
         logger_port: int = DEFAULT_TCP_LOGGING_PORT
             The port where the logging server is listening to.

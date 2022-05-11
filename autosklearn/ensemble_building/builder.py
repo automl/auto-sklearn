@@ -43,8 +43,8 @@ class EnsembleBuilder:
         dataset_name: str,
         task_type: int,
         metric: Scorer,
-        ensemble_size: int = 10,
-        ensemble_nbest: int | float = 100,
+        ensemble_size: int = 50,
+        ensemble_nbest: int | float = 50,
         max_models_on_disc: int | float | None = 100,
         performance_range_threshold: float = 0,
         seed: int = 1,
@@ -69,10 +69,10 @@ class EnsembleBuilder:
         metric: str
             name of metric to compute the loss of the given predictions
 
-        ensemble_size: int = 10
+        ensemble_size: int = 50
             maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
 
-        ensemble_nbest: int | float = 100
+        ensemble_nbest: int | float = 50
 
             * int: consider only the n best prediction (> 0)
 
@@ -114,8 +114,10 @@ class EnsembleBuilder:
         memory_limit: int | None = 1024
             memory limit in mb. If ``None``, no memory limit is enforced.
 
-        read_at_most: int | None = 5
-            read at most n new prediction files in each iteration
+        read_at_most: int | None = None
+            read at most n new prediction files in each iteration. If `None`, will read
+            the predictions and calculate losses for all runs that require it.
+
 
         logger_port: int = DEFAULT_TCP_LOGGING_PORT
             port that receives logging records
@@ -477,10 +479,11 @@ class EnsembleBuilder:
                 deletable_runs.update(to_delete)
         else:
             candidates = dummies
-            self.logger.warning("No real runs to build ensemble from")
+            self.logger.warning("No runs were available to build an ensemble from")
 
-        # If there's an intersect with models that have some predictions on the
-        # test subset, use that subset, otherwise use all of the candidates
+        # In case we record test predictions and not every model has test predictions,
+        # only use the subset of models that has predictions for both the test set and
+        # the ensemble optimization set.
         candidates_set = set(candidates)
         test_subset = {r for r in candidates if r.pred_path("test").exists()}
 
