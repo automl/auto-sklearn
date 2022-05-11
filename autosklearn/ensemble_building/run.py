@@ -13,7 +13,12 @@ RunID = Tuple[int, int, float]
 
 
 class Run:
-    """Class for storing information about a run used during ensemble building"""
+    """Class for storing information about a run used during ensemble building.
+
+    Note
+    ----
+    This is for internal use by the EnsembleBuilder and not for general usage.
+    """
 
     # For matching prediction files
     RE_MODEL_PREDICTION_FILE = (
