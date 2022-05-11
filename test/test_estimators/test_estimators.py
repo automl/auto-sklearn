@@ -109,7 +109,6 @@ def test_fit_n_jobs(tmp_dir):
         )
     )
     seeds = set()
-    print("predictions", predictions)
     for prediction in predictions:
         prediction = os.path.split(prediction)[1]
         match = re.match(Run.RE_MODEL_PREDICTION_FILE, prediction)
