@@ -17,7 +17,6 @@ from autosklearn.constants import (
 from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.pipeline.util import get_dataset
-from autosklearn.util.functional import normalize
 
 from pytest import fixture
 
@@ -134,7 +133,7 @@ def _make_binary_data(
         weights = np.ones_like(classes) / len(classes)
 
     assert len(weights) == len(classes)
-    weights = normalize(np.asarray(weights))
+    weights = weights / np.sum(weights, keepdims=True)
 
     X = rs.rand(*dims)
     y = rs.choice([0, 1], dims[0], p=weights)
@@ -163,7 +162,7 @@ def _make_multiclass_data(
         weights = np.ones_like(classes) / len(classes)
 
     assert len(weights) == len(classes)
-    weights = normalize(np.asarray(weights))
+    weights = weights / np.sum(weights, keepdims=True)
 
     X = rs.rand(*dims)
     y = rs.choice(classes, dims[0], p=weights)
@@ -194,7 +193,7 @@ def _make_multilabel_data(
         weights = np.ones(classes.shape[0]) / len(classes)
 
     assert len(weights) == len(classes)
-    weights = normalize(np.asarray(weights))
+    weights = weights / np.sum(weights, keepdims=True)
 
     X = rs.rand(*dims)
 
