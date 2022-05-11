@@ -155,8 +155,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         """
         if result.status in (StatusType.STOP, StatusType.ABORT) or smbo._stop:
             return
-        client = getattr(smbo.tae_runner, "client")
-        self.build_ensemble(client)
+        self.build_ensemble(smbo.tae_runner.client)
 
     def build_ensemble(
         self,
