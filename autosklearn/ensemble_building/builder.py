@@ -407,6 +407,9 @@ class EnsembleBuilder:
             self.logger.debug(f"No targets for ensemble: {traceback.format_exc()}")
             raise RuntimeError("No targets for ensemble")
 
+        # We will delete runs once we are complete
+        deletable_runs: set[Run] = set()
+
         # Load in information from previous candidates and also runs
         available_runs = self.available_runs()
 
@@ -454,7 +457,7 @@ class EnsembleBuilder:
                     f" max_models={self.max_models_on_disc} and/or"
                     f" memory_limit={self.model_memory_limit}"
                 )
-                self.delete_runs(to_delete)
+                deletable_runs.update(to_delete)
 
         # If there are any candidates, perform candidates selection
         if any(candidates):
@@ -471,7 +474,7 @@ class EnsembleBuilder:
                     f" nbest={self.ensemble_nbest} and/or"
                     f" performance_range_threshold={self.performance_range_threshold}"
                 )
-                self.delete_runs(to_delete)
+                deletable_runs.update(to_delete)
         else:
             candidates = dummies
             self.logger.warning("No real runs to build ensemble from")
@@ -493,7 +496,7 @@ class EnsembleBuilder:
                     f"\nHave test_predictions = {test_subset}"
                     f"\nNo test_predictions = {to_delete}"
                 )
-                self.delete_runs(candidates_set - test_subset)
+                deletable_runs.update(to_delete)
 
         else:
             candidates = sorted(candidates_set, key=lambda r: r.id)
@@ -572,6 +575,13 @@ class EnsembleBuilder:
             )
             performance_stamp[f"ensemble_{score_name}_score"] = score
             self.ensemble_history.append(performance_stamp)
+
+        # Lastly, delete any runs that need to be deleted. We save this as the last step
+        # so that we have an ensemble saved that is up to date. If we do not do so,
+        # there could be runs deleted that are in th previous ensemble and we do not
+        # manage to update the ensemble due to a crash or the process being killed
+        # before it could be updated
+        self.delete_runs(deletable_runs)
 
         return self.ensemble_history, self.ensemble_nbest
 
