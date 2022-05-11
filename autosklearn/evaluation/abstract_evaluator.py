@@ -410,7 +410,8 @@ class AbstractEvaluator(object):
 
         additional_run_info = {} if additional_run_info is None else additional_run_info
         for metric in self.scoring_functions:
-            additional_run_info[metric.name] = loss_[metric.name]
+            if metric.name in loss_:
+                additional_run_info[metric.name] = loss_[metric.name]
         additional_run_info["duration"] = self.duration
         additional_run_info["num_run"] = self.num_run
         if train_loss is not None:
