@@ -226,7 +226,7 @@ class AbstractEvaluator(object):
         self.seed = seed
 
         self.output_y_hat_optimization = output_y_hat_optimization
-        self.scoring_functions = scoring_functions
+        self.scoring_functions = scoring_functions if scoring_functions else []
 
         if isinstance(disable_file_output, (bool, list)):
             self.disable_file_output: Union[bool, List[str]] = disable_file_output
@@ -406,11 +406,11 @@ class AbstractEvaluator(object):
         if len(self.metrics) == 1:
             loss = loss_[self.metrics[0].name]
         else:
-            loss = {metric: loss_[metric] for metric in loss_}
+            loss = {metric.name: loss_[metric.name] for metric in self.metrics}
 
         additional_run_info = {} if additional_run_info is None else additional_run_info
-        for metric_name, value in loss_.items():
-            additional_run_info[metric_name] = value
+        for metric in self.scoring_functions:
+            additional_run_info[metric.name] = loss_[metric.name]
         additional_run_info["duration"] = self.duration
         additional_run_info["num_run"] = self.num_run
         if train_loss is not None:

@@ -586,7 +586,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 for name in self.multi_objectives:
                     if name not in cost:
                         raise RuntimeError(
-                            f"Objective {name} was not found in the returned costs."
+                            f"Objective {name} was not found "
+                            f"in the returned costs ({cost})"
                         )
 
                     ordered_cost.append(cost[name])

@@ -513,13 +513,11 @@ def calculate_losses(
     # we expect a dict() object for which we should calculate the loss
     loss_dict = dict()
     for metric_ in scoring_functions + list(metrics):
+        # maybe metric argument is not in scoring_functions
         # TODO: When metrics are annotated with type_of_target support
         # we can remove this check
         if metric_.name not in score:
             continue
-        # maybe metric argument is not in scoring_functions
-        # so append it to the list. Rather than check if such
-        # is the case, redefining loss_dict[metric] is less expensive
         loss_dict[metric_.name] = metric_._optimum - score[metric_.name]
     return loss_dict
 

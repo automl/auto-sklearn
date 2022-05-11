@@ -827,6 +827,10 @@ class AutoSklearnEstimator(BaseEstimator):
             else len(self.metric)
         )
         column_types = AutoSklearnEstimator._leaderboard_columns(num_metrics)
+        if num_metrics == 1:
+            multi_objective_cost_names = []
+        else:
+            multi_objective_cost_names = [f"cost_{i}" for i in range(num_metrics)]
 
         # Validation of top_k
         if (
@@ -872,7 +876,7 @@ class AutoSklearnEstimator(BaseEstimator):
             if num_metrics == 1:
                 sort_by = ["cost", "model_id"]
             else:
-                sort_by = [f"cost_{i}" for i in range(num_metrics)] + ["model_id"]
+                sort_by = list(multi_objective_cost_names) + ["model_id"]
         else:
             sort_by_cost = False
             if isinstance(sort_by, str):
@@ -985,12 +989,13 @@ class AutoSklearnEstimator(BaseEstimator):
                     "status": pd.NA,
                     "train_loss": pd.NA,
                     "config_origin": pd.NA,
+                    "type": pd.NA,
                 }
                 if num_metrics == 1:
-                    model_run[model_id]["cost"] = pd.NA
+                    model_run["cost"] = pd.NA
                 else:
                     for cost_idx in range(num_metrics):
-                        model_run[model_id][f"cost_{cost_idx}"] = pd.NA
+                        model_run[f"cost_{cost_idx}"] = pd.NA
                 model_runs[model_id] = model_run
 
             model_runs[model_id]["ensemble_weight"] = weight
@@ -1014,9 +1019,9 @@ class AutoSklearnEstimator(BaseEstimator):
             if num_metrics == 1 and "cost" not in columns:
                 columns = [*columns, "cost"]
             elif num_metrics > 1 and any(
-                f"cost_{i}" not in columns for i in range(num_metrics)
+                cost_name not in columns for cost_name in multi_objective_cost_names
             ):
-                columns = columns + [f"cost_{i}" for i in range(num_metrics)]
+                columns = columns + list(multi_objective_cost_names)
 
         # Finally, convert into a tabular format by converting the dict into
         # column wise orientation.
@@ -1062,7 +1067,8 @@ class AutoSklearnEstimator(BaseEstimator):
             or (
                 sort_by_cost
                 and any(
-                    f"cost_{i}" not in dataframe.columns for i in range(num_metrics)
+                    cost_name not in dataframe.columns
+                    for cost_name in multi_objective_cost_names
                 )
             )
         ):
@@ -1083,13 +1089,13 @@ class AutoSklearnEstimator(BaseEstimator):
         else:
             dataframe.sort_values(by=sort_by, ascending=ascending_param, inplace=True)
 
-        if num_metrics:
+        if num_metrics == 1:
             if "cost" not in columns and "cost" in dataframe.columns:
                 dataframe.drop("cost", inplace=True)
         else:
-            for i in range(num_metrics):
-                if f"cost_{i}" not in columns and f"cost_{i}" in dataframe.columns:
-                    dataframe.drop(f"cost_{i}", inplace=True)
+            for cost_name in multi_objective_cost_names:
+                if cost_name not in columns and cost_name in dataframe.columns:
+                    dataframe.drop(cost_name, inplace=True)
 
         # Lastly, just grab the top_k
         if top_k == "all" or top_k >= len(dataframe):
