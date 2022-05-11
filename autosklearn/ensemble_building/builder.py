@@ -877,7 +877,7 @@ class EnsembleBuilder:
         return keep, delete
 
     def loss(self, run: Run, kind: str = "ensemble") -> float:
-        """Calculate the loss for a list of runs
+        """Calculate the loss for a run
 
         Parameters
         ----------
