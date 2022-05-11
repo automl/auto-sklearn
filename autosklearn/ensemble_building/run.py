@@ -29,17 +29,12 @@ class Run:
     RE_MODEL_DIR = r"^([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)$"
 
     def __init__(self, path: Path) -> None:
-        """Creates a Run from a path point to the directory of a run
+        """Creates a Run from a path pointing to the directory of a run
 
         Parameters
         ----------
         path: Path
             Expects something like /path/to/{seed}_{numrun}_{budget}
-
-        Returns
-        -------
-        Run
-            The run object generated from the directory
         """
         name = path.name
         seed, num_run, budget = name.split("_")
