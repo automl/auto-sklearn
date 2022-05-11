@@ -26,7 +26,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         dataset_name: str,
         task: int,
         metric: Scorer,
-        time_left_for_ensembles: float = 10,
+        time_left_for_ensembles: float = np.inf,
         max_iterations: int | None = None,
         pynisher_context: str = "fork",
         ensemble_size: int = 50,
@@ -56,7 +56,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         metric: Scorer
             Metric to compute the loss of the given predictions
 
-        time_left_for_ensemble: float = 10
+        time_left_for_ensemble: float = np.inf
             How much time is left for the task in seconds.
             Job should finish within this allocated time
 
