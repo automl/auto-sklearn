@@ -449,7 +449,7 @@ class EnsembleBuilder:
 
             # If there are no candidates left, we just keep the best one
             if not any(candidates):
-                best = sorted(to_delete, key=lambda r: (r.loss, r.num_run))[0]
+                best = min(to_delete, key=lambda r: (r.loss, r.num_run))
                 candidates = [best]
                 to_delete.remove(best)
 
