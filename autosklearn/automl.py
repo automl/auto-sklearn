@@ -1312,7 +1312,7 @@ class AutoML(BaseEstimator):
         if not isinstance(kwargs["metrics"], Sequence):
             kwargs["metrics"] = [kwargs["metrics"]]
         if "scoring_functions" not in kwargs:
-            kwargs["scoring_function"] = self._scoring_functions
+            kwargs["scoring_functions"] = self._scoring_functions
         if "disable_file_output" not in kwargs:
             kwargs["disable_file_output"] = self._disable_evaluator_output
         if "pynisher_context" not in kwargs:
