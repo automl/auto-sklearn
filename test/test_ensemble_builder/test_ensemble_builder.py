@@ -8,12 +8,15 @@ from pathlib import Path
 
 import numpy as np
 
+from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.ensemble_building import EnsembleBuilder, Run
 from autosklearn.util.functional import bound, pairs
 
 import pytest
 from pytest_cases import fixture, parametrize
 from unittest.mock import patch
+
+from test.conftest import DEFAULT_SEED
 
 
 @fixture
@@ -552,3 +555,82 @@ def test_run_end_at(builder: EnsembleBuilder, time_buffer: int, duration: int) -
         # The 1 comes from the small overhead in conjuction with rounding down
         expected = duration - time_buffer - 1
         assert pynisher_mock.call_args_list[0][1]["wall_time_in_s"] == expected
+
+
+def test_deletion_will_not_break_current_ensemble(
+    make_backend: Callable[..., Backend],
+    make_ensemble_builder: Callable[..., EnsembleBuilder],
+    make_run: Callable[..., Run],
+) -> None:
+    """
+    Expects
+    -------
+    * When running the builder, it's previous ensemble should not have it's runs deleted
+      until a new ensemble is built.
+    """
+    # Make a builder with this backend and limit it to only allow 10 models on disc
+    builder = make_ensemble_builder(
+        max_models_on_disc=10,
+        seed=DEFAULT_SEED,
+    )
+
+    # Stick a dummy run and 10 bad runs into the backend
+    datamanager = builder.backend.load_datamanager()
+    targets = datamanager.data["Y_train"]
+
+    bad_predictions = {"ensemble": np.zeros_like(targets)}
+    good_predictions = {"ensemble": targets}
+
+    make_run(dummy=True, loss=10000, backend=builder.backend)
+    bad_runs = [
+        make_run(backend=builder.backend, predictions=bad_predictions)
+        for _ in range(10)
+    ]
+
+    ens_dir = Path(builder.backend.get_ensemble_dir())
+
+    # Make sure there's no ensemble and run with the candidates available
+    assert not ens_dir.exists()
+    builder.main(time_left=100)
+
+    # Make sure an ensemble was built
+    assert ens_dir.exists()
+    first_builder_contents = set(ens_dir.iterdir())
+
+    # Create 10 new and better runs and put them in the backend
+    new_runs = [
+        make_run(backend=builder.backend, predictions=good_predictions)
+        for _ in range(10)
+    ]
+
+    # Now we make `save_ensemble` crash so that even though we run the builder, it does
+    # not manage to save the new ensemble
+    with patch.object(builder.backend, "save_ensemble", side_effect=ValueError):
+        try:
+            builder.main(time_left=100)
+        except Exception:
+            pass
+
+    # Ensure that no new ensemble was created
+    second_builder_contents = set(ens_dir.iterdir())
+    assert first_builder_contents == second_builder_contents
+
+    # Now we make sure that the ensemble there still has access to all the bad models
+    # that it contained from the first run, even though the second crashed.
+    available_runs = builder.available_runs().values()
+    for run in bad_runs + new_runs:
+        assert run in available_runs
+
+    # As a sanity check, run the builder one more time without crashing and make
+    # sure the bad runs are removed with the good ones kept.
+    # We remove its previous candidates so that it won't remember previous candidates
+    # and will fit a new ensemble
+    builder.previous_candidates_path.unlink()
+    builder.main(time_left=100)
+    available_runs = builder.available_runs().values()
+
+    for run in bad_runs:
+        assert run not in available_runs
+
+    for run in new_runs:
+        assert run in available_runs

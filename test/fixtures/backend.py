@@ -7,6 +7,7 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 
 from autosklearn.automl_common.common.utils.backend import Backend, create
+from autosklearn.data.xy_data_manager import XYDataManager
 
 from pytest import fixture
 
@@ -97,7 +98,11 @@ def make_backend(tmp_path: Path) -> Callable[..., Backend]:
     def _make(
         path: str | Path | None = None,
         template: Path | Backend | None = None,
+        datamanager: XYDataManager | None = None,
     ) -> Backend:
+        if template is not None and datamanager is not None:
+            raise ValueError("Does not support template and datamanager")
+
         if path is None:
             _path = Path(tmp_path) / "backend"
         elif isinstance(path, str):
@@ -115,6 +120,9 @@ def make_backend(tmp_path: Path) -> Callable[..., Backend]:
                 output_directory=None,
                 prefix="auto-sklearn",
             )
+
+            if datamanager is not None:
+                backend.save_datamanager(datamanager)
 
         return backend
 

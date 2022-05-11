@@ -17,7 +17,6 @@ import pandas as pd
 import pynisher
 
 from autosklearn.automl_common.common.utils.backend import Backend
-from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -164,9 +163,9 @@ class EnsembleBuilder:
         self.model_memory_limit: float | None = None
 
         if isinstance(max_models_on_disc, int):
-            self.max_models_on_disc = self.max_models_on_disc
-        elif isinstance(self.max_models_on_disc, float):
-            self.model_memory_limit = self.max_models_on_disc
+            self.max_models_on_disc = max_models_on_disc
+        elif isinstance(max_models_on_disc, float):
+            self.model_memory_limit = max_models_on_disc
 
         # The starting time of the procedure
         self.start_time: float = 0.0
@@ -259,7 +258,7 @@ class EnsembleBuilder:
             How much time should be left for this run. Either this or `end_at` must
             be provided.
 
-        end_at : float | None = Non
+        end_at : float | None = None
             When this run should end. Either this or `time_left` must be provided.
 
         time_buffer : int = 5
@@ -558,16 +557,6 @@ class EnsembleBuilder:
 
             run_preds = [r.predictions(kind, precision=self.precision) for r in models]
             pred = ensemble.predict(run_preds)
-
-            # Pretty sure this whole step is uneeded but left over and afraid
-            # to touch
-            if self.task_type == BINARY_CLASSIFICATION:
-                pred = pred[:, 1]
-
-                if pred.ndim == 1 or pred.shape[1] == 1:
-                    pred = np.vstack(
-                        ((1 - pred).reshape((1, -1)), pred.reshape((1, -1)))
-                    ).transpose()
 
             score = calculate_score(
                 solution=pred_targets,
