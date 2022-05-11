@@ -321,6 +321,8 @@ def test_candidates_performance_range_threshold(
         performance_range_threshold=threshold,
     )
 
+    assert len(candidates) > 0
+
     # When no run is better than threshold, we just get 1 candidate,
     # Make sure it's the best
     if len(candidates) == 1:

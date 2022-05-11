@@ -540,7 +540,6 @@ class EnsembleBuilder:
             ensemble=ensemble, idx=iteration, seed=self.seed  # type: ignore
         )
 
-        # Continue with evaluating the ensemble after making some space
         performance_stamp = {"Timestamp": pd.Timestamp.now()}
 
         for kind, score_name, models in [
@@ -717,7 +716,7 @@ class EnsembleBuilder:
             # Always preserve at least one, the best
             if len(candidates) == 0:
                 candidates, discared = cut(discarded, 1)
-                self.logger.warning("nbest too aggresive, using best")
+                self.logger.warning("nbest too aggresive, using single best")
 
             all_discarded.update(discarded)
 
@@ -733,7 +732,7 @@ class EnsembleBuilder:
             # Always preserve at least one, the best
             if len(candidates) == 0:
                 candidates, discared = cut(discarded, 1)
-                self.logger.warning("No models in performance range, using best")
+                self.logger.warning("No models in performance range, using single best")
 
             all_discarded.update(discarded)
 
