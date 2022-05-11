@@ -67,7 +67,12 @@ from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
-from autosklearn.metrics import Scorer, compute_single_metric, default_metric_for_task
+from autosklearn.metrics import (
+    Scorer,
+    _validate_metrics,
+    compute_single_metric,
+    default_metric_for_task,
+)
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (
@@ -614,6 +619,7 @@ class AutoML(BaseEstimator):
         # Assign a metric if it doesnt exist
         if self._metrics is None:
             self._metrics = [default_metric_for_task[self._task]]
+        _validate_metrics(self._metrics, self._scoring_functions)
 
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
@@ -1305,6 +1311,8 @@ class AutoML(BaseEstimator):
                 kwargs["metrics"] = self._metrics
         if not isinstance(kwargs["metrics"], Sequence):
             kwargs["metrics"] = [kwargs["metrics"]]
+        if "scoring_functions" not in kwargs:
+            kwargs["scoring_function"] = self._scoring_functions
         if "disable_file_output" not in kwargs:
             kwargs["disable_file_output"] = self._disable_evaluator_output
         if "pynisher_context" not in kwargs:
@@ -1314,6 +1322,8 @@ class AutoML(BaseEstimator):
             scenario_mock.wallclock_limit = self._time_for_task
             kwargs["stats"] = Stats(scenario_mock)
         kwargs["stats"].start_timing()
+
+        _validate_metrics(kwargs["metrics"], kwargs["scoring_functions"])
 
         # Fit a pipeline, which will be stored on disk
         # which we can later load via the backend
@@ -1826,7 +1836,10 @@ class AutoML(BaseEstimator):
                 metric_dict[metric.name].append(metric_value)
                 metric_mask[metric.name].append(mask_value)
 
+            optimization_metric_names = set(m.name for m in self._metrics)
             for metric in self._scoring_functions:
+                if metric.name in optimization_metric_names:
+                    continue
                 if metric.name in run_value.additional_info.keys():
                     metric_cost = run_value.additional_info[metric.name]
                     metric_value = metric._optimum - (metric._sign * metric_cost)

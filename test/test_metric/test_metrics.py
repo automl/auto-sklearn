@@ -684,6 +684,56 @@ def test_calculate_losses():
         assert pytest.approx(expected_score) == score_dict[expected_metric]
         assert pytest.approx(1 - expected_score) == loss_dict[expected_metric]
 
+    # Test no metric
+    with pytest.raises(
+        ValueError, match="Number of metrics to compute must be greater than zero."
+    ):
+        calculate_scores(
+            solution=y_true,
+            prediction=y_pred,
+            task_type=BINARY_CLASSIFICATION,
+            metrics=[],
+        )
+
+    with pytest.raises(
+        ValueError, match="Number of metrics to compute must be greater than zero."
+    ):
+        calculate_scores(
+            solution=y_true,
+            prediction=y_pred,
+            task_type=BINARY_CLASSIFICATION,
+            metrics=[],
+            scoring_functions=[
+                autosklearn.metrics.accuracy,
+                autosklearn.metrics.balanced_accuracy,
+            ],
+        )
+
+    # Test the same metric twice
+    accuracy_fixture = {"accuracy": pytest.approx(0.9)}
+    assert accuracy_fixture == calculate_scores(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metrics=[autosklearn.metrics.accuracy, autosklearn.metrics.accuracy],
+    )
+    assert accuracy_fixture == calculate_scores(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metrics=[autosklearn.metrics.accuracy],
+        scoring_functions=[autosklearn.metrics.accuracy],
+    )
+    assert accuracy_fixture == calculate_scores(
+        solution=y_true,
+        prediction=y_pred,
+        task_type=BINARY_CLASSIFICATION,
+        metrics=[autosklearn.metrics.accuracy],
+        scoring_functions=[autosklearn.metrics.accuracy, autosklearn.metrics.accuracy],
+    )
+
+    # Test the same name for multiple metrics!
+
     # Test additional scoring functions
     score_dict = calculate_scores(
         solution=y_true,

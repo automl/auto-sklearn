@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
+import collections
 from functools import partial
 from itertools import product
 
@@ -384,6 +385,36 @@ for (base_name, sklearn_metric), average in product(
     CLASSIFICATION_METRICS[name] = scorer
 
 
+def _validate_metrics(
+    metrics: Sequence[Scorer],
+    scoring_functions: Optional[List[Scorer]] = None,
+) -> None:
+    """
+    Validate metrics given to Auto-sklearn. Raises an Exception in case of a problem.
+
+    metrics: Sequence[Scorer]
+        A list of objects that hosts a function to calculate how good the
+        prediction is according to the solution.
+    scoring_functions: List[Scorer]
+        A list of metrics to calculate multiple losses
+    """
+
+    to_score = list(metrics)
+    if scoring_functions:
+        to_score.extend(scoring_functions)
+
+    if len(metrics) == 0:
+        raise ValueError("Number of metrics to compute must be greater than zero.")
+
+    metric_counter = collections.Counter(to_score)
+    metric_names_counter = collections.Counter(metric.name for metric in to_score)
+    if len(metric_counter) != len(metric_names_counter):
+        raise ValueError(
+            "Error in metrics passed to Auto-sklearn. A metric name was used "
+            "multiple times for different metrics!"
+        )
+
+
 def calculate_scores(
     solution: np.ndarray,
     prediction: np.ndarray,
@@ -416,6 +447,8 @@ def calculate_scores(
     """
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
+
+    _validate_metrics(metrics, scoring_functions)
 
     to_score = list(metrics)
     if scoring_functions:
