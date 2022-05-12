@@ -114,7 +114,7 @@ To use ``n_jobs_`` we must guard the code
       self.metafeatures = self.metafeatures.append(metafeatures)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
-    [ERROR] [2022-05-09 11:19:41,074:asyncio.events] 
+    [ERROR] [2022-05-12 20:23:07,449:asyncio.events] 
     Traceback (most recent call last):
       File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py", line 759, in wrapper
         return await func(*args, **kwargs)
@@ -127,7 +127,7 @@ To use ``n_jobs_`` we must guard the code
       File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
         return await future
     asyncio.exceptions.CancelledError
-    [ERROR] [2022-05-09 11:19:41,108:asyncio.events] 
+    [ERROR] [2022-05-12 20:23:07,465:asyncio.events] 
     Traceback (most recent call last):
       File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py", line 759, in wrapper
         return await func(*args, **kwargs)
@@ -148,8 +148,8 @@ To use ``n_jobs_`` we must guard the code
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 45
-      Number of successful target algorithm runs: 45
+      Number of target algorithm runs: 46
+      Number of successful target algorithm runs: 46
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
@@ -161,7 +161,7 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  4.780 seconds)
+   **Total running time of the script:** ( 2 minutes  6.562 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:

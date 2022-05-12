@@ -175,13 +175,13 @@ Build and fit a classifier
 
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
-    2022-05-09 11:05:43,038 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-09 11:05:43.024274'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.05.09-11.05.43 for iteration 0.
-    2022-05-09 11:05:46,904 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-09 11:05:46.885518'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.05.09-11.05.46 for iteration 1.
-    tmp_folder/space.json
+    2022-05-12 20:08:46,639 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-12 20:08:46.620075'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.05.12-20.08.46 for iteration 0.
+    2022-05-12 20:08:51,274 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-12 20:08:51.255985'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.05.12-20.08.51 for iteration 1.
     tmp_folder/distributed.log
-    tmp_folder/smac3-output
+    tmp_folder/AutoML(1):50fb2919-d22f-11ec-87fb-6f4cb686b05f.log
     tmp_folder/.auto-sklearn
-    tmp_folder/AutoML(1):f46b96e5-cf87-11ec-87f9-cb6a1f63d5de.log
+    tmp_folder/space.json
+    tmp_folder/smac3-output
 
 
 
@@ -189,7 +189,7 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.294 seconds)
+   **Total running time of the script:** ( 0 minutes  16.167 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_debug_logging.py:

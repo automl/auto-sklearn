@@ -177,18 +177,18 @@ First example: Use predefined accuracy metric
 
     print("#" * 80)
     print("Use predefined accuracy metric")
+    scorer = autosklearn.metrics.accuracy
     cls = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=60,
         per_run_time_limit=30,
         seed=1,
-        metric=autosklearn.metrics.accuracy,
+        metric=scorer,
     )
     cls.fit(X_train, y_train)
 
     predictions = cls.predict(X_test)
-    score = sklearn.metrics.accuracy_score(y_test, predictions)
-    metric_name = cls.automl_._metric.name
-    print(f"Accuracy score {score:.3f} using {metric_name}")
+    score = scorer(y_test, predictions)
+    print(f"Accuracy score {score:.3f} using {scorer.name}")
 
 
 
@@ -206,7 +206,7 @@ First example: Use predefined accuracy metric
       self.metafeatures = self.metafeatures.append(metafeatures)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
-    Accuracy score 0.958 using accuracy
+    Accuracy score 0.951 using accuracy
 
 
 
@@ -216,7 +216,7 @@ First example: Use predefined accuracy metric
 Second example: Use own accuracy metric
 =======================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-114
+.. GENERATED FROM PYTHON SOURCE LINES 90-113
 
 .. code-block:: default
 
@@ -241,8 +241,7 @@ Second example: Use own accuracy metric
 
     predictions = cls.predict(X_test)
     score = accuracy_scorer(y_test, predictions)
-    metric_name = cls.automl_._metric.name
-    print(f"Accuracy score {score:.3f} using {metric_name:s}")
+    print(f"Accuracy score {score:.3f} using {accuracy_scorer.name:s}")
 
 
 
@@ -256,17 +255,17 @@ Second example: Use own accuracy metric
 
     ################################################################################
     Use self defined accuracy metric
-    Accuracy score 0.944 using accu
+    Accuracy score 0.937 using accu
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-117
+.. GENERATED FROM PYTHON SOURCE LINES 114-116
 
 Third example: Use own error metric
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-141
+.. GENERATED FROM PYTHON SOURCE LINES 116-139
 
 .. code-block:: default
 
@@ -291,8 +290,7 @@ Third example: Use own error metric
 
     cls.predictions = cls.predict(X_test)
     score = error_rate(y_test, predictions)
-    metric_name = cls.automl_._metric.name
-    print(f"Error score {score:.3f} using {metric_name:s}")
+    print(f"Error score {score:.3f} using {error_rate.name:s}")
 
 
 
@@ -306,17 +304,17 @@ Third example: Use own error metric
 
     ################################################################################
     Use self defined error metric
-    Error score -0.056 using error
+    Error score -0.063 using error
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-144
+.. GENERATED FROM PYTHON SOURCE LINES 140-142
 
 Fourth example: Use own accuracy metric with additional argument
 ================================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 144-166
+.. GENERATED FROM PYTHON SOURCE LINES 142-163
 
 .. code-block:: default
 
@@ -339,8 +337,7 @@ Fourth example: Use own accuracy metric with additional argument
 
     predictions = cls.predict(X_test)
     score = accuracy_scorer(y_test, predictions)
-    metric_name = cls.automl_._metric.name
-    print(f"Accuracy score {score:.3f} using {metric_name:s}")
+    print(f"Accuracy score {score:.3f} using {accuracy_scorer.name:s}")
 
 
 
@@ -354,17 +351,17 @@ Fourth example: Use own accuracy metric with additional argument
 
     ################################################################################
     Use self defined accuracy with additional argument
-    Accuracy score 0.944 using accu_add
+    Accuracy score 0.937 using accu_add
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 167-169
+.. GENERATED FROM PYTHON SOURCE LINES 164-166
 
 Fifth example: Use own accuracy metric with additional argument
 ===============================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 169-193
+.. GENERATED FROM PYTHON SOURCE LINES 166-189
 
 .. code-block:: default
 
@@ -390,8 +387,7 @@ Fifth example: Use own accuracy metric with additional argument
 
     predictions = cls.predict(X_test)
     score = error_rate(y_test, predictions)
-    metric_name = cls.automl_._metric.name
-    print(f"Error score {score:.3f} using {metric_name:s}")
+    print(f"Error score {score:.3f} using {error_rate.name:s}")
 
 
 
@@ -404,20 +400,17 @@ Fifth example: Use own accuracy metric with additional argument
 
     ################################################################################
     Use self defined error with additional argument
-    [WARNING] [2022-05-09 11:16:46,931:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:16:50,305:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:16:53,604:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:16:54,742:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:02,060:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:03,777:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:04,612:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:09,260:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:14,347:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:19,258:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:20,246:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:25,878:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:31,133:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-09 11:17:32,201:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:14,644:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:19,228:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:23,326:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:24,397:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:32,999:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:35,181:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:36,246:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:41,832:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:48,048:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:54,443:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-12 20:20:55,732:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
     Error score 0.615 using error_add
 
 
@@ -426,7 +419,7 @@ Fifth example: Use own accuracy metric with additional argument
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 5 minutes  2.786 seconds)
+   **Total running time of the script:** ( 4 minutes  54.092 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_metrics.py:

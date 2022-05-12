@@ -112,7 +112,9 @@
       
   <h1>Source code for autosklearn.estimators</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
 <span class="kn">import</span> <span class="nn">joblib</span>
@@ -159,7 +161,7 @@
         <span class="n">smac_scenario_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">logging_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">metadata_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">get_trials_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -530,7 +532,7 @@
             <span class="n">smac_scenario_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smac_scenario_args</span><span class="p">,</span>
             <span class="n">logging_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logging_config</span><span class="p">,</span>
             <span class="n">metadata_directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_directory</span><span class="p">,</span>
-            <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">Scorer</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
             <span class="n">scoring_functions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_functions</span><span class="p">,</span>
             <span class="n">get_trials_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span><span class="p">,</span>
             <span class="n">dataset_compression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_compression</span><span class="p">,</span>
@@ -905,6 +907,9 @@
 <span class="sd">            What column to sort by. If that column is not present, the</span>
 <span class="sd">            sorting defaults to the ``&quot;model_id&quot;`` index column.</span>
 
+<span class="sd">            Defaults to the metric optimized. Sort by the first objective</span>
+<span class="sd">            in case of a multi-objective optimization problem</span>
+
 <span class="sd">        sort_order: &quot;auto&quot; or &quot;ascending&quot; or &quot;descending&quot; = &quot;auto&quot;</span>
 <span class="sd">            Which sort order to apply to the ``sort_by`` column. If left</span>
 <span class="sd">            as ``&quot;auto&quot;``, it will sort by a sensible default where &quot;better&quot; is</span>
@@ -929,7 +934,16 @@
         <span class="c1"># TODO validate that `self` is fitted. This is required for</span>
         <span class="c1">#      self.ensemble_ to get the identifiers of models it will generate</span>
         <span class="c1">#      weights for.</span>
-        <span class="n">column_types</span> <span class="o">=</span> <span class="n">AutoSklearnEstimator</span><span class="o">.</span><span class="n">_leaderboard_columns</span><span class="p">()</span>
+        <span class="n">num_metrics</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">Scorer</span><span class="p">)</span>
+            <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">column_types</span> <span class="o">=</span> <span class="n">AutoSklearnEstimator</span><span class="o">.</span><span class="n">_leaderboard_columns</span><span class="p">(</span><span class="n">num_metrics</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">multi_objective_cost_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">multi_objective_cost_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cost_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_metrics</span><span class="p">)]</span>
 
         <span class="c1"># Validation of top_k</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -970,11 +984,26 @@
             <span class="n">columns</span> <span class="o">=</span> <span class="n">column_types</span><span class="p">[</span><span class="s2">&quot;simple&quot;</span><span class="p">]</span>
 
         <span class="c1"># Validation of sorting</span>
-        <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">column_types</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;sort_by=&#39;</span><span class="si">{</span><span class="n">sort_by</span><span class="si">}</span><span class="s2">&#39; must be one of included &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;columns </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">sort_by</span> <span class="o">==</span> <span class="s2">&quot;cost&quot;</span><span class="p">:</span>
+            <span class="n">sort_by_cost</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">sort_by</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="s2">&quot;model_id&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sort_by</span> <span class="o">=</span> <span class="n">multi_objective_cost_names</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;model_id&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sort_by_cost</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sort_by</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">column_types</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;sort_by=&#39;</span><span class="si">{</span><span class="n">sort_by</span><span class="si">}</span><span class="s2">&#39; must be one of included &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;columns </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">sort_by</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">column_types</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">too_much</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">sort_by</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">column_types</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">])</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;sort_by=&#39;</span><span class="si">{</span><span class="n">too_much</span><span class="si">}</span><span class="s2">&#39; must be in the included columns &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">column_types</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
 
         <span class="n">valid_sort_orders</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;ascending&quot;</span><span class="p">,</span> <span class="s2">&quot;descending&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">sort_order</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sort_order</span> <span class="ow">in</span> <span class="n">valid_sort_orders</span><span class="p">):</span>
@@ -984,30 +1013,37 @@
 
         <span class="c1"># To get all the models that were optmized, we collect what we can from</span>
         <span class="c1"># runhistory first.</span>
-        <span class="k">def</span> <span class="nf">has_key</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">additional_info_has_key</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">rv</span><span class="o">.</span><span class="n">additional_info</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">additional_info</span>
 
-        <span class="n">model_runs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;num_run&quot;</span><span class="p">]:</span> <span class="p">{</span>
-                <span class="s2">&quot;model_id&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;num_run&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                <span class="s2">&quot;budget&quot;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">budget</span><span class="p">,</span>
-                <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
-                <span class="s2">&quot;config_id&quot;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">config_id</span><span class="p">,</span>
-                <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span>
-                <span class="s2">&quot;end_time&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">endtime</span><span class="p">,</span>
-                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">rval</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
-                <span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">cost</span><span class="p">,</span>
-                <span class="s2">&quot;train_loss&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;train_loss&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s2">&quot;train_loss&quot;</span><span class="p">)</span>
-                <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;config_origin&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;configuration_origin&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s2">&quot;configuration_origin&quot;</span><span class="p">)</span>
-                <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="p">}</span>
-            <span class="k">for</span> <span class="n">rkey</span><span class="p">,</span> <span class="n">rval</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">runhistory_</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s2">&quot;num_run&quot;</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">model_runs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">rkey</span><span class="p">,</span> <span class="n">rval</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">runhistory_</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">additional_info_has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s2">&quot;num_run&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">model_key</span> <span class="o">=</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;num_run&quot;</span><span class="p">]</span>
+                <span class="n">model_run</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;model_id&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;num_run&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
+                    <span class="s2">&quot;budget&quot;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">budget</span><span class="p">,</span>
+                    <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                    <span class="s2">&quot;config_id&quot;</span><span class="p">:</span> <span class="n">rkey</span><span class="o">.</span><span class="n">config_id</span><span class="p">,</span>
+                    <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">starttime</span><span class="p">,</span>
+                    <span class="s2">&quot;end_time&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">endtime</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">rval</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
+                    <span class="s2">&quot;train_loss&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;train_loss&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">additional_info_has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s2">&quot;train_loss&quot;</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;config_origin&quot;</span><span class="p">:</span> <span class="n">rval</span><span class="o">.</span><span class="n">additional_info</span><span class="p">[</span><span class="s2">&quot;configuration_origin&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">additional_info_has_key</span><span class="p">(</span><span class="n">rval</span><span class="p">,</span> <span class="s2">&quot;configuration_origin&quot;</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">model_run</span><span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rval</span><span class="o">.</span><span class="n">cost</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">cost_idx</span><span class="p">,</span> <span class="n">cost</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rval</span><span class="o">.</span><span class="n">cost</span><span class="p">):</span>
+                        <span class="n">model_run</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cost_</span><span class="si">{</span><span class="n">cost_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cost</span>
+                <span class="n">model_runs</span><span class="p">[</span><span class="n">model_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_run</span>
 
         <span class="c1"># Next we get some info about the model itself</span>
         <span class="n">model_class_strings</span> <span class="o">=</span> <span class="p">{</span>
@@ -1055,7 +1091,7 @@
             <span class="c1"># collected. I have no clue why this is but to prevent failures, we fill</span>
             <span class="c1"># the values with NaN</span>
             <span class="k">if</span> <span class="n">model_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model_runs</span><span class="p">:</span>
-                <span class="n">model_runs</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">model_run</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;model_id&quot;</span><span class="p">:</span> <span class="n">model_id</span><span class="p">,</span>
                     <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
                     <span class="s2">&quot;budget&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
@@ -1064,10 +1100,16 @@
                     <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
                     <span class="s2">&quot;end_time&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
                     <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
-                    <span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
                     <span class="s2">&quot;train_loss&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
                     <span class="s2">&quot;config_origin&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span>
                 <span class="p">}</span>
+                <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">model_run</span><span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">cost_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_metrics</span><span class="p">):</span>
+                        <span class="n">model_run</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cost_</span><span class="si">{</span><span class="n">cost_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span>
+                <span class="n">model_runs</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_run</span>
 
             <span class="n">model_runs</span><span class="p">[</span><span class="n">model_id</span><span class="p">][</span><span class="s2">&quot;ensemble_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight</span>
 
@@ -1086,8 +1128,13 @@
 
         <span class="c1"># `rank` relies on `cost` so we include `cost`</span>
         <span class="c1"># We drop it later if it&#39;s not requested</span>
-        <span class="k">if</span> <span class="s2">&quot;rank&quot;</span> <span class="ow">in</span> <span class="n">columns</span> <span class="ow">and</span> <span class="s2">&quot;cost&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;rank&quot;</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s2">&quot;cost&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+                <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">num_metrics</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">cost_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">for</span> <span class="n">cost_name</span> <span class="ow">in</span> <span class="n">multi_objective_cost_names</span>
+            <span class="p">):</span>
+                <span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">multi_objective_cost_names</span><span class="p">)</span>
 
         <span class="c1"># Finally, convert into a tabular format by converting the dict into</span>
         <span class="c1"># column wise orientation.</span>
@@ -1102,42 +1149,64 @@
         <span class="c1"># Give it an index, even if not in the `include`</span>
         <span class="n">dataframe</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;model_id&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="c1"># Add the `rank` column if needed, dropping `cost` if it&#39;s not</span>
+        <span class="c1"># Add the `rank` column if needed</span>
         <span class="c1"># requested by the user</span>
         <span class="k">if</span> <span class="s2">&quot;rank&quot;</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
-            <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;cost_0&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">dataframe</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
                 <span class="n">column</span><span class="o">=</span><span class="s2">&quot;rank&quot;</span><span class="p">,</span>
                 <span class="n">value</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
                 <span class="n">loc</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;rank&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="p">)</span>  <span class="c1"># account for `model_id`</span>
 
-            <span class="k">if</span> <span class="s2">&quot;cost&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
-                <span class="n">dataframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
         <span class="c1"># Decide on the sort order depending on what it gets sorted by</span>
         <span class="n">descending_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ensemble_weight&quot;</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">ascending_param</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">in</span> <span class="n">descending_columns</span> <span class="k">else</span> <span class="kc">True</span>
+            <span class="n">ascending_param</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="kc">False</span> <span class="k">if</span> <span class="n">sby</span> <span class="ow">in</span> <span class="n">descending_columns</span> <span class="k">else</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">sby</span> <span class="ow">in</span> <span class="n">sort_by</span>
+            <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ascending_param</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">sort_order</span> <span class="o">==</span> <span class="s2">&quot;descending&quot;</span> <span class="k">else</span> <span class="kc">True</span>
 
         <span class="c1"># Sort by the given column name, defaulting to &#39;model_id&#39; if not present</span>
-        <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="p">(</span><span class="ow">not</span> <span class="n">sort_by_cost</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">sort_by</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">sort_by_cost</span> <span class="ow">and</span> <span class="s2">&quot;cost&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">sort_by_cost</span>
+                <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+                    <span class="n">cost_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span>
+                    <span class="k">for</span> <span class="n">cost_name</span> <span class="ow">in</span> <span class="n">multi_objective_cost_names</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;sort_by = &#39;</span><span class="si">{</span><span class="n">sort_by</span><span class="si">}</span><span class="s2">&#39; was not present&quot;</span>
                 <span class="s2">&quot;, defaulting to sort on the index &quot;</span>
                 <span class="s2">&quot;&#39;model_id&#39;&quot;</span>
             <span class="p">)</span>
             <span class="n">sort_by</span> <span class="o">=</span> <span class="s2">&quot;model_id&quot;</span>
+            <span class="n">sort_by_cost</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">ascending_param</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1"># Cost can be the same but leave rank all over the place</span>
-        <span class="k">if</span> <span class="s2">&quot;rank&quot;</span> <span class="ow">in</span> <span class="n">columns</span> <span class="ow">and</span> <span class="n">sort_by</span> <span class="o">==</span> <span class="s2">&quot;cost&quot;</span><span class="p">:</span>
+        <span class="c1"># Single objective</span>
+        <span class="k">if</span> <span class="n">sort_by_cost</span><span class="p">:</span>
             <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
-                <span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="n">sort_by</span><span class="p">,</span> <span class="s2">&quot;rank&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="n">ascending_param</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sort_by</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">sort_by</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="n">ascending_param</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;cost&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span> <span class="ow">and</span> <span class="s2">&quot;cost&quot;</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">dataframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">cost_name</span> <span class="ow">in</span> <span class="n">multi_objective_cost_names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cost_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span> <span class="ow">and</span> <span class="n">cost_name</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">dataframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">cost_name</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># Lastly, just grab the top_k</span>
         <span class="k">if</span> <span class="n">top_k</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="n">top_k</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframe</span><span class="p">):</span>
@@ -1148,27 +1217,39 @@
         <span class="k">return</span> <span class="n">dataframe</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_leaderboard_columns</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="s2">&quot;detailed&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-        <span class="nb">all</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;model_id&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;rank&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;ensemble_weight&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;cost&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;duration&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;config_id&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;seed&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;start_time&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;end_time&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;budget&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;status&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;data_preprocessors&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;feature_preprocessors&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;balancing_strategy&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;config_origin&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="n">simple</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;model_id&quot;</span><span class="p">,</span> <span class="s2">&quot;rank&quot;</span><span class="p">,</span> <span class="s2">&quot;ensemble_weight&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">_leaderboard_columns</span><span class="p">(</span>
+        <span class="n">num_metrics</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="s2">&quot;detailed&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">if</span> <span class="n">num_metrics</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cost_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_metrics</span><span class="p">)]</span>
+        <span class="nb">all</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;model_id&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;rank&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ensemble_weight&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="o">+</span> <span class="n">cost_list</span>
+            <span class="o">+</span> <span class="p">[</span>
+                <span class="s2">&quot;duration&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;config_id&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;seed&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;start_time&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;end_time&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;budget&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;status&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data_preprocessors&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;feature_preprocessors&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;balancing_strategy&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;config_origin&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">simple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;model_id&quot;</span><span class="p">,</span> <span class="s2">&quot;rank&quot;</span><span class="p">,</span> <span class="s2">&quot;ensemble_weight&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">cost_list</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="n">detailed</span> <span class="o">=</span> <span class="nb">all</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;all&quot;</span><span class="p">:</span> <span class="nb">all</span><span class="p">,</span> <span class="s2">&quot;detailed&quot;</span><span class="p">:</span> <span class="n">detailed</span><span class="p">,</span> <span class="s2">&quot;simple&quot;</span><span class="p">:</span> <span class="n">simple</span><span class="p">}</span>
 

@@ -112,8 +112,9 @@
       
   <h1>Source code for autosklearn.metrics</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
 
+<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 
@@ -497,17 +498,47 @@
     <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scorer</span>
 
 
-<span class="k">def</span> <span class="nf">calculate_score</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_validate_metrics</span><span class="p">(</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">],</span>
+    <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate metrics given to Auto-sklearn. Raises an Exception in case of a problem.</span>
+
+<span class="sd">    metrics: Sequence[Scorer]</span>
+<span class="sd">        A list of objects that hosts a function to calculate how good the</span>
+<span class="sd">        prediction is according to the solution.</span>
+<span class="sd">    scoring_functions: Optional[List[Scorer]]</span>
+<span class="sd">        A list of metrics to calculate multiple losses</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">to_score</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scoring_functions</span><span class="p">:</span>
+        <span class="n">to_score</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">scoring_functions</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of metrics to compute must be greater than zero.&quot;</span><span class="p">)</span>
+
+    <span class="n">metric_counter</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">to_score</span><span class="p">)</span>
+    <span class="n">metric_names_counter</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">to_score</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_counter</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_names_counter</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Error in metrics passed to Auto-sklearn. A metric name was used &quot;</span>
+            <span class="s2">&quot;multiple times for different metrics!&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">calculate_scores</span><span class="p">(</span>
     <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">],</span>
     <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a score (a magnitude that allows casting the</span>
+<span class="sd">    Returns the scores (a magnitude that allows casting the</span>
 <span class="sd">    optimization problem as a maximization one) for the</span>
-<span class="sd">    given Auto-Sklearn Scorer object</span>
+<span class="sd">    given Auto-Sklearn Scorer objects.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -518,82 +549,83 @@
 <span class="sd">    task_type: int</span>
 <span class="sd">        To understand if the problem task is classification</span>
 <span class="sd">        or regression</span>
-<span class="sd">    metric: Scorer</span>
-<span class="sd">        Object that host a function to calculate how good the</span>
+<span class="sd">    metrics: Sequence[Scorer]</span>
+<span class="sd">        A list of objects that hosts a function to calculate how good the</span>
 <span class="sd">        prediction is according to the solution.</span>
 <span class="sd">    scoring_functions: List[Scorer]</span>
 <span class="sd">        A list of metrics to calculate multiple losses</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    float or Dict[str, float]</span>
+<span class="sd">    Dict[str, float]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">task_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TASK_TYPES</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">task_type</span><span class="p">)</span>
 
+    <span class="n">_validate_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span> <span class="n">scoring_functions</span><span class="o">=</span><span class="n">scoring_functions</span><span class="p">)</span>
+
+    <span class="n">to_score</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">scoring_functions</span><span class="p">:</span>
-        <span class="n">score_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">REGRESSION_TASKS</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">scoring_functions</span> <span class="o">+</span> <span class="p">[</span><span class="n">metric</span><span class="p">]:</span>
+        <span class="n">to_score</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">scoring_functions</span><span class="p">)</span>
 
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_scorer</span><span class="p">(</span>
-                        <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span>
-                    <span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="o">==</span> <span class="s2">&quot;Mean Squared Logarithmic Error cannot be used when &quot;</span>
-                        <span class="s2">&quot;targets contain negative values.&quot;</span>
-                    <span class="p">):</span>
-                        <span class="k">continue</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">e</span>
+    <span class="n">score_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">REGRESSION_TASKS</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">to_score</span><span class="p">:</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">scoring_functions</span> <span class="o">+</span> <span class="p">[</span><span class="n">metric</span><span class="p">]:</span>
-
-                <span class="c1"># TODO maybe annotate metrics to define which cases they can</span>
-                <span class="c1"># handle?</span>
-
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_scorer</span><span class="p">(</span>
-                        <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span>
-                    <span class="p">)</span>
-                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;multiclass format is not supported&quot;</span><span class="p">:</span>
-                        <span class="k">continue</span>
-                    <span class="k">elif</span> <span class="p">(</span>
-                        <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Samplewise metrics are not available &quot;</span>
-                        <span class="s2">&quot;outside of multilabel classification.&quot;</span>
-                    <span class="p">):</span>
-                        <span class="k">continue</span>
-                    <span class="k">elif</span> <span class="p">(</span>
-                        <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Target is multiclass but &quot;</span>
-                        <span class="s2">&quot;average=&#39;binary&#39;. Please choose another average &quot;</span>
-                        <span class="s2">&quot;setting, one of [None, &#39;micro&#39;, &#39;macro&#39;, &#39;weighted&#39;].&quot;</span>
-                    <span class="p">):</span>
-                        <span class="k">continue</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">e</span>
-
-        <span class="k">return</span> <span class="n">score_dict</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_single_scorer</span><span class="p">(</span>
+                    <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Mean Squared Logarithmic Error cannot be used when &quot;</span>
+                    <span class="s2">&quot;targets contain negative values.&quot;</span>
+                <span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">e</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_compute_scorer</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">to_score</span><span class="p">:</span>
+
+            <span class="c1"># TODO maybe annotate metrics to define which cases they can</span>
+            <span class="c1"># handle?</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_single_scorer</span><span class="p">(</span>
+                    <span class="n">metric_</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">task_type</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;multiclass format is not supported&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="p">(</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Samplewise metrics are not available &quot;</span>
+                    <span class="s2">&quot;outside of multilabel classification.&quot;</span>
+                <span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="p">(</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Target is multiclass but &quot;</span>
+                    <span class="s2">&quot;average=&#39;binary&#39;. Please choose another average &quot;</span>
+                    <span class="s2">&quot;setting, one of [None, &#39;micro&#39;, &#39;macro&#39;, &#39;weighted&#39;].&quot;</span>
+                <span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">e</span>
+
+    <span class="k">return</span> <span class="n">score_dict</span>
 
 
-<span class="k">def</span> <span class="nf">calculate_loss</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">calculate_losses</span><span class="p">(</span>
     <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">],</span>
     <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a loss (a magnitude that allows casting the</span>
+<span class="sd">    Returns the losses (a magnitude that allows casting the</span>
 <span class="sd">    optimization problem as a minimization one) for the</span>
-<span class="sd">    given Auto-Sklearn Scorer object</span>
+<span class="sd">    given Auto-Sklearn Scorer objects.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -604,45 +636,39 @@
 <span class="sd">    task_type: int</span>
 <span class="sd">        To understand if the problem task is classification</span>
 <span class="sd">        or regression</span>
-<span class="sd">    metric: Scorer</span>
-<span class="sd">        Object that host a function to calculate how good the</span>
+<span class="sd">    metrics: Sequence[Scorer]</span>
+<span class="sd">        A list of objects that hosts a function to calculate how good the</span>
 <span class="sd">        prediction is according to the solution.</span>
 <span class="sd">    scoring_functions: List[Scorer]</span>
 <span class="sd">        A list of metrics to calculate multiple losses</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    float or Dict[str, float]</span>
+<span class="sd">    Dict[str, float]</span>
 <span class="sd">        A loss function for each of the provided scorer objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">score</span> <span class="o">=</span> <span class="n">calculate_score</span><span class="p">(</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">calculate_scores</span><span class="p">(</span>
         <span class="n">solution</span><span class="o">=</span><span class="n">solution</span><span class="p">,</span>
         <span class="n">prediction</span><span class="o">=</span><span class="n">prediction</span><span class="p">,</span>
         <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
         <span class="n">scoring_functions</span><span class="o">=</span><span class="n">scoring_functions</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">scoring_functions</span> <span class="o">=</span> <span class="n">scoring_functions</span> <span class="k">if</span> <span class="n">scoring_functions</span> <span class="k">else</span> <span class="p">[]</span>
 
-    <span class="k">if</span> <span class="n">scoring_functions</span><span class="p">:</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
-        <span class="c1"># we expect a dict() object for which we should calculate the loss</span>
-        <span class="n">loss_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">scoring_functions</span> <span class="o">+</span> <span class="p">[</span><span class="n">metric</span><span class="p">]:</span>
-            <span class="c1"># TODO: When metrics are annotated with type_of_target support</span>
-            <span class="c1"># we can remove this check</span>
-            <span class="k">if</span> <span class="n">metric_</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">score</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="c1"># maybe metric argument is not in scoring_functions</span>
-            <span class="c1"># so append it to the list. Rather than check if such</span>
-            <span class="c1"># is the case, redefining loss_dict[metric] is less expensive</span>
-            <span class="n">loss_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="n">score</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">loss_dict</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">rval</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="n">cast</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">rval</span>
+    <span class="c1"># we expect a dict() object for which we should calculate the loss</span>
+    <span class="n">loss_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">scoring_functions</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics</span><span class="p">):</span>
+        <span class="c1"># maybe metric argument is not in scoring_functions</span>
+        <span class="c1"># TODO: When metrics are annotated with type_of_target support</span>
+        <span class="c1"># we can remove this check</span>
+        <span class="k">if</span> <span class="n">metric_</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">score</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">loss_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">-</span> <span class="n">score</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">loss_dict</span>
 
 
-<span class="k">def</span> <span class="nf">calculate_metric</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">compute_single_metric</span><span class="p">(</span>
     <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -666,7 +692,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">score</span> <span class="o">=</span> <span class="n">_compute_scorer</span><span class="p">(</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">_compute_single_scorer</span><span class="p">(</span>
         <span class="n">solution</span><span class="o">=</span><span class="n">solution</span><span class="p">,</span>
         <span class="n">prediction</span><span class="o">=</span><span class="n">prediction</span><span class="p">,</span>
         <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
@@ -675,7 +701,7 @@
     <span class="k">return</span> <span class="n">metric</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="n">score</span>
 
 
-<span class="k">def</span> <span class="nf">_compute_scorer</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_compute_single_scorer</span><span class="p">(</span>
     <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">solution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>

@@ -169,19 +169,16 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight                 type      cost  duration
     model_id                                                                
-    9            1             0.06                  mlp  0.051020  2.724765
-    5            2             0.12                  mlp  0.053571  2.141590
-    14           3             0.06                  mlp  0.058673  3.369074
-    15           4             0.04    gradient_boosting  0.073980  4.419546
-    10           5             0.14   passive_aggressive  0.084184  2.133791
-    12           6             0.12                  lda  0.086735  2.143660
-    4            7             0.06          extra_trees  0.091837  3.439125
-    2            8             0.02        random_forest  0.102041  4.577214
-    7            9             0.08        random_forest  0.130102  3.076859
-    3           10             0.04                  mlp  0.137755  3.153780
-    6           11             0.10                  qda  0.150510  2.008097
-    11          12             0.08  k_nearest_neighbors  0.155612  2.468227
-    8           13             0.08           libsvm_svc  0.367347  2.177768
+    9            1             0.14                  mlp  0.053571  4.069043
+    10           2             0.22   passive_aggressive  0.068878  2.585713
+    4            3             0.10          extra_trees  0.091837  4.213710
+    12           4             0.08                  lda  0.091837  2.593031
+    2            5             0.02        random_forest  0.102041  5.203154
+    7            6             0.08        random_forest  0.130102  3.922801
+    3            7             0.02                  mlp  0.137755  4.690810
+    6            8             0.10                  qda  0.153061  2.806001
+    11           9             0.02  k_nearest_neighbors  0.158163  2.665283
+    8           10             0.22           libsvm_svc  0.311224  2.754868
 
 
 
@@ -209,87 +206,75 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2911a9d400>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f908109eeb0>,
                'cost': 0.10204081632653061,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2911eb0a30>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f907c419fd0>,
                'ensemble_weight': 0.02,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2911a9d040>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f908109e310>,
                'model_id': 2,
-               'rank': 8,
+               'rank': 5,
                'sklearn_classifier': RandomForestClassifier(max_features=10, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         3: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2912c03a90>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907d3cf910>,
                'cost': 0.1377551020408163,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2914a38070>,
-               'ensemble_weight': 0.04,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2912c035e0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f907d9625e0>,
+               'ensemble_weight': 0.02,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907c08b2e0>,
                'model_id': 3,
-               'rank': 10,
+               'rank': 7,
                'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.103855734598575e-05, beta_1=0.999,
                   beta_2=0.9, early_stopping=True,
                   hidden_layer_sizes=(229, 229, 229),
                   learning_rate_init=0.00014375616988222174, max_iter=32,
                   n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
         4: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2912e784f0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907c48eaf0>,
                'cost': 0.09183673469387754,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2911315250>,
-               'ensemble_weight': 0.06,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2912e78340>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9081353130>,
+               'ensemble_weight': 0.1,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907c48e6d0>,
                'model_id': 4,
-               'rank': 7,
+               'rank': 3,
                'sklearn_classifier': ExtraTreesClassifier(max_features=9, min_samples_split=4, n_estimators=512,
                          n_jobs=1, random_state=1, warm_start=True)},
-        5: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2914990520>,
-               'cost': 0.0535714285714286,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f29160fb820>,
-               'ensemble_weight': 0.12,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f29149904f0>,
-               'model_id': 5,
-               'rank': 2,
-               'sklearn_classifier': MLPClassifier(activation='tanh', alpha=0.05476322473700896, beta_1=0.999,
-                  beta_2=0.9, early_stopping=True, hidden_layer_sizes=(136,),
-                  learning_rate_init=0.012698439797907473, max_iter=32,
-                  n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
         6: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f29121fc1c0>,
-               'cost': 0.15051020408163263,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f291114c280>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907ceee070>,
+               'cost': 0.15306122448979587,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f907c660910>,
                'ensemble_weight': 0.1,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f29121fc0d0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907d37ff40>,
                'model_id': 6,
-               'rank': 11,
+               'rank': 8,
                'sklearn_classifier': QuadraticDiscriminantAnalysis(reg_param=0.585497512341966)},
         7: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2912032340>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907db4ea60>,
                'cost': 0.13010204081632648,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f29167cea00>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f907d2a4100>,
                'ensemble_weight': 0.08,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f291201efd0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907db4edc0>,
                'model_id': 7,
-               'rank': 9,
+               'rank': 6,
                'sklearn_classifier': RandomForestClassifier(criterion='entropy', max_features=1, min_samples_leaf=5,
                            min_samples_split=11, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         8: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2911b9f2e0>,
-               'cost': 0.36734693877551017,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f29129112e0>,
-               'ensemble_weight': 0.08,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2911b9f190>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907ce42190>,
+               'cost': 0.3112244897959183,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f907f7ba430>,
+               'ensemble_weight': 0.22,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907ce42040>,
                'model_id': 8,
-               'rank': 13,
-               'sklearn_classifier': SVC(C=0.20435138760822585, cache_size=1836.2734375, class_weight='balanced',
-        gamma=7.373654384480026e-05, max_iter=-1.0, random_state=1,
-        tol=4.6066870756479984e-05)},
+               'rank': 10,
+               'sklearn_classifier': SVC(C=0.20435138760822585, cache_size=1845.5963541666667,
+        class_weight='balanced', gamma=7.373654384480026e-05, max_iter=-1.0,
+        random_state=1, tol=4.6066870756479984e-05)},
         9: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f291484a0a0>,
-               'cost': 0.05102040816326525,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2912610fa0>,
-               'ensemble_weight': 0.06,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f291484a700>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907c789940>,
+               'cost': 0.0535714285714286,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9079b72850>,
+               'ensemble_weight': 0.14,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907f919cd0>,
                'model_id': 9,
                'rank': 1,
                'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.0207902638359607e-07, beta_1=0.999,
@@ -298,61 +283,35 @@ Print the final ensemble constructed by auto-sklearn
                   n_iter_no_change=32, random_state=1, validation_fraction=0.0,
                   verbose=0, warm_start=True)},
         10: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2914a81d90>,
-                'cost': 0.08418367346938771,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f29129fda00>,
-                'ensemble_weight': 0.14,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2914a81730>,
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907c0ce2e0>,
+                'cost': 0.06887755102040816,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f90793e0c70>,
+                'ensemble_weight': 0.22,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907c0ce8e0>,
                 'model_id': 10,
-                'rank': 5,
+                'rank': 2,
                 'sklearn_classifier': PassiveAggressiveClassifier(C=0.14833233294431605, average=True,
                                 loss='squared_hinge', max_iter=128, random_state=1,
                                 tol=0.00016482166646253793, warm_start=True)},
         11: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2912d14100>,
-                'cost': 0.15561224489795922,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2911a8ef70>,
-                'ensemble_weight': 0.08,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2912359e80>,
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907c608f70>,
+                'cost': 0.15816326530612246,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f908109e730>,
+                'ensemble_weight': 0.02,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f907c608d30>,
                 'model_id': 11,
-                'rank': 12,
+                'rank': 9,
                 'sklearn_classifier': KNeighborsClassifier(n_neighbors=3, p=1, weights='distance')},
         12: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f291181a190>,
-                'cost': 0.08673469387755106,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f29160ff1c0>,
-                'ensemble_weight': 0.12,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f291181ac70>,
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f907c8480a0>,
+                'cost': 0.09183673469387754,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9079b644f0>,
+                'ensemble_weight': 0.08,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9081328ee0>,
                 'model_id': 12,
-                'rank': 6,
-                'sklearn_classifier': LinearDiscriminantAnalysis(shrinkage=0.3306135150299744, solver='lsqr',
-                               tol=0.0007215763283486354)},
-        14: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2912f4e7c0>,
-                'cost': 0.058673469387755084,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f29160e1880>,
-                'ensemble_weight': 0.06,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2912f4ed60>,
-                'model_id': 14,
-                'rank': 3,
-                'sklearn_classifier': MLPClassifier(alpha=0.0005005168300134541, beta_1=0.999, beta_2=0.9,
-                  hidden_layer_sizes=(262, 262),
-                  learning_rate_init=0.0012631168744483667, max_iter=32,
-                  n_iter_no_change=32, random_state=1, validation_fraction=0.0,
-                  verbose=0, warm_start=True)},
-        15: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2911e0b580>,
-                'cost': 0.07397959183673475,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2912f2bf10>,
-                'ensemble_weight': 0.04,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2911e0b220>,
-                'model_id': 15,
                 'rank': 4,
-                'sklearn_classifier': HistGradientBoostingClassifier(early_stopping=False, l2_regularization=1e-10,
-                                   learning_rate=0.16262682406125173, max_iter=512,
-                                   max_leaf_nodes=66, n_iter_no_change=0,
-                                   random_state=1, validation_fraction=None,
-                                   warm_start=True)}}
+                'sklearn_classifier': LinearDiscriminantAnalysis(shrinkage=0.3306135150299744, solver='lsqr',
+                               tol=0.0007215763283486354)}}
 
 
 
@@ -379,7 +338,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.9556400506970849
+    Accuracy score: 0.9632446134347274
 
 
 
@@ -387,7 +346,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  8.422 seconds)
+   **Total running time of the script:** ( 1 minutes  18.204 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:

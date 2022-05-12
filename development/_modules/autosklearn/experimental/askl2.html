@@ -206,6 +206,8 @@
         <span class="n">metalearning_configurations</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">,</span>
         <span class="n">dask_client</span><span class="p">,</span>
+        <span class="n">multi_objective_algorithm</span><span class="p">,</span>
+        <span class="n">multi_objective_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
         <span class="kn">from</span> <span class="nn">smac.intensification.simple_intensifier</span> <span class="kn">import</span> <span class="n">SimpleIntensifier</span>
@@ -235,6 +237,8 @@
             <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
             <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span>
+            <span class="n">multi_objective_algorithm</span><span class="o">=</span><span class="n">multi_objective_algorithm</span><span class="p">,</span>
+            <span class="n">multi_objective_kwargs</span><span class="o">=</span><span class="n">multi_objective_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
 
@@ -254,6 +258,8 @@
         <span class="n">metalearning_configurations</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">,</span>
         <span class="n">dask_client</span><span class="p">,</span>
+        <span class="n">multi_objective_algorithm</span><span class="p">,</span>
+        <span class="n">multi_objective_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
         <span class="kn">from</span> <span class="nn">smac.intensification.successive_halving</span> <span class="kn">import</span> <span class="n">SuccessiveHalving</span>
@@ -291,6 +297,8 @@
             <span class="p">},</span>
             <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">multi_objective_algorithm</span><span class="o">=</span><span class="n">multi_objective_algorithm</span><span class="p">,</span>
+            <span class="n">multi_objective_kwargs</span><span class="o">=</span><span class="n">multi_objective_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">smac4ac</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">epm_chooser</span><span class="o">.</span><span class="n">min_samples_model</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameters</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span>

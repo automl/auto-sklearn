@@ -137,6 +137,27 @@ procedure.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit *auto-sklearn* to optimize for two competing metrics: pr...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_multi_objective_thumb.png
+     :alt: Classification
+
+     :ref:`sphx_glr_examples_40_advanced_example_multi_objective.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_multi_objective
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to inspect the models which *auto-sklearn* optimizes over and h...">
 
 .. only:: html
