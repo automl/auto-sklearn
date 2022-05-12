@@ -54,6 +54,8 @@ from autosklearn.util.pipeline import get_configuration_space
 import unittest
 import unittest.mock
 
+import test.conftest
+
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import (  # noqa (E402: module level import not at top of file)
@@ -3014,7 +3016,7 @@ class FunctionsTest(unittest.TestCase):
             backend=self.backend,
             resampling_strategy="holdout",
             resampling_strategy_args=None,
-            seed=1,
+            seed=test.conftest.DEFAULT_SEED,
             num_run=1,
             scoring_functions=None,
             output_y_hat_optimization=True,
@@ -3297,7 +3299,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_budget_subsample_multi_objective(self):
         metrics = {
             accuracy: 0.0,
-            balanced_accuracy: 0.0,
+            f1_macro: 0.0,
         }
         eval_holdout(
             queue=self.queue,

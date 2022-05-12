@@ -395,7 +395,7 @@ def _validate_metrics(
     metrics: Sequence[Scorer]
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
-    scoring_functions: List[Scorer]
+    scoring_functions: Optional[List[Scorer]]
         A list of metrics to calculate multiple losses
     """
 
@@ -448,7 +448,7 @@ def calculate_scores(
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
-    _validate_metrics(metrics, scoring_functions)
+    _validate_metrics(metrics=metrics, scoring_functions=scoring_functions)
 
     to_score = list(metrics)
     if scoring_functions:

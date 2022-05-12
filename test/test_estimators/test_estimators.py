@@ -42,6 +42,7 @@ import pytest
 import unittest
 import unittest.mock
 
+import test.conftest
 from test.test_automl.automl_utils import (
     count_succeses,
     include_single_scores,
@@ -623,7 +624,7 @@ def test_leaderboard_multi_objective(
         time_left_for_this_task=30,
         per_run_time_limit=5,
         tmp_folder=os.path.join(tmp_dir, "backend"),
-        seed=1,
+        seed=test.conftest.DEFAULT_SEED,
         metric=metrics,
     )
 
@@ -644,6 +645,7 @@ def test_leaderboard_multi_objective(
             params["sort_by"] not in column_types["all"]
             and params["sort_by"] != "cost"
             and params["sort_by"] != ["cost_1", "cost_0"]
+            and params["sort_by"] not in ["cost_0", "cost_1"]
         ):
             with pytest.raises(ValueError):
                 model.leaderboard(**params)
@@ -678,6 +680,14 @@ def test_leaderboard_multi_objective(
         else:
             leaderboard = model.leaderboard(**params)
             assert "cost" not in leaderboard.columns
+
+            if params["include"] is None:
+                assert "cost_0" in leaderboard.columns
+                assert "cost_1" in leaderboard.columns
+            else:
+                for cost_name in ["cost_0", "cost_1"]:
+                    if cost_name in params["include"]:
+                        assert cost_name in leaderboard.columns
 
             # top_k should never be less than the rows given back
             # It can however be larger

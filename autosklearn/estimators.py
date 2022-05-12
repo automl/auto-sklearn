@@ -876,7 +876,7 @@ class AutoSklearnEstimator(BaseEstimator):
             if num_metrics == 1:
                 sort_by = ["cost", "model_id"]
             else:
-                sort_by = list(multi_objective_cost_names) + ["model_id"]
+                sort_by = multi_objective_cost_names + ["model_id"]
         else:
             sort_by_cost = False
             if isinstance(sort_by, str):
@@ -1041,15 +1041,13 @@ class AutoSklearnEstimator(BaseEstimator):
         if "rank" in columns:
             if num_metrics == 1:
                 dataframe.sort_values(by="cost", ascending=True, inplace=True)
-                dataframe.insert(
-                    column="rank",
-                    value=range(1, len(dataframe) + 1),
-                    loc=list(columns).index("rank") - 1,
-                )  # account for `model_id`
             else:
-                self.automl_._logger.warning(
-                    "Cannot compute rank for multi-objective optimization problems."
-                )
+                dataframe.sort_values(by="cost_0", ascending=True, inplace=True)
+            dataframe.insert(
+                column="rank",
+                value=range(1, len(dataframe) + 1),
+                loc=list(columns).index("rank") - 1,
+            )  # account for `model_id`
 
         # Decide on the sort order depending on what it gets sorted by
         descending_columns = ["ensemble_weight", "duration"]
@@ -1139,9 +1137,6 @@ class AutoSklearnEstimator(BaseEstimator):
         simple = (
             ["model_id", "rank", "ensemble_weight", "type"] + cost_list + ["duration"]
         )
-        if num_metrics > 1:
-            simple.remove("rank")
-            all.remove("rank")
         detailed = all
         return {"all": all, "detailed": detailed, "simple": simple}
 

@@ -733,6 +733,17 @@ def test_calculate_losses():
     )
 
     # Test the same name for multiple metrics!
+    bogus_accuracy = autosklearn.metrics.make_scorer(
+        "accuracy",
+        score_func=sklearn.metrics.roc_auc_score,
+    )
+    with pytest.raises(ValueError, match="used multiple times"):
+        calculate_scores(
+            solution=y_true,
+            prediction=y_pred,
+            task_type=BINARY_CLASSIFICATION,
+            metrics=[autosklearn.metrics.accuracy, bogus_accuracy],
+        )
 
     # Test additional scoring functions
     score_dict = calculate_scores(

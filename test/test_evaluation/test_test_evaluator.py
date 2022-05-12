@@ -26,6 +26,8 @@ from autosklearn.util.pipeline import get_configuration_space
 import unittest
 import unittest.mock
 
+import test.conftest
+
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import (  # noqa (E402: module level import not at top of file)
@@ -111,7 +113,7 @@ class FunctionsTest(unittest.TestCase):
             backend=self.backend,
             config=self.configuration,
             metrics=[accuracy],
-            seed=1,
+            seed=test.conftest.DEFAULT_SEED,
             num_run=1,
             scoring_functions=None,
             output_y_hat_optimization=False,
@@ -124,21 +126,21 @@ class FunctionsTest(unittest.TestCase):
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]["loss"], 0.040000000000000036)
+        self.assertAlmostEqual(rval[0]["loss"], 0.07999999999999996)
         self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
         self.assertNotIn("bac_metric", rval[0]["additional_run_info"])
 
     def test_eval_test_multi_objective(self):
         metrics = {
-            accuracy: 0.040000000000000036,
-            balanced_accuracy: 0.02777777777777779,
+            accuracy: 0.07999999999999996,
+            balanced_accuracy: 0.05555555555555547,
         }
         eval_t(
             queue=self.queue,
             backend=self.backend,
             config=self.configuration,
             metrics=list(metrics.keys()),
-            seed=1,
+            seed=test.conftest.DEFAULT_SEED,
             num_run=1,
             scoring_functions=None,
             output_y_hat_optimization=False,
