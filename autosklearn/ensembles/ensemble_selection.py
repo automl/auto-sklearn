@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import random
 from collections import Counter
@@ -8,7 +8,7 @@ from sklearn.utils import check_random_state
 
 from autosklearn.constants import TASK_TYPES
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.metrics import Scorer, calculate_loss
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.base import BasePipeline
 
 
@@ -164,18 +164,13 @@ class EnsembleSelection(AbstractEnsemble):
                     out=fant_ensemble_prediction,
                 )
 
-                # calculate_loss is versatile and can return a dict of losses
-                # when scoring_functions=None, we know it will be a float
-                losses[j] = cast(
-                    float,
-                    calculate_loss(
-                        solution=labels,
-                        prediction=fant_ensemble_prediction,
-                        task_type=self.task_type,
-                        metric=self.metric,
-                        scoring_functions=None,
-                    ),
-                )
+                losses[j] = calculate_losses(
+                    solution=labels,
+                    prediction=fant_ensemble_prediction,
+                    task_type=self.task_type,
+                    metrics=[self.metric],
+                    scoring_functions=None,
+                )[self.metric.name]
 
             all_best = np.argwhere(losses == np.nanmin(losses)).flatten()
 
@@ -211,18 +206,13 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                # calculate_loss is versatile and can return a dict of losses
-                # when scoring_functions=None, we know it will be a float
-                losses[j] = cast(
-                    float,
-                    calculate_loss(
-                        solution=labels,
-                        prediction=ensemble_prediction,
-                        task_type=self.task_type,
-                        metric=self.metric,
-                        scoring_functions=None,
-                    ),
-                )
+                losses[j] = calculate_losses(
+                    solution=labels,
+                    prediction=ensemble_prediction,
+                    task_type=self.task_type,
+                    metrics=[self.metric],
+                    scoring_functions=None,
+                )[self.metric.name]
                 ensemble.pop()
             best = np.nanargmin(losses)
             ensemble.append(predictions[best])

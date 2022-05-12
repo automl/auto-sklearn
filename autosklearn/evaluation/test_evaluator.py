@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import multiprocessing
 
@@ -12,7 +12,7 @@ from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
-from autosklearn.metrics import Scorer, calculate_loss
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents
 
 __all__ = ["eval_t", "TestEvaluator"]
@@ -23,7 +23,7 @@ class TestEvaluator(AbstractEvaluator):
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Scorer,
+        metrics: Sequence[Scorer],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -39,7 +39,7 @@ class TestEvaluator(AbstractEvaluator):
             queue=queue,
             port=port,
             configuration=configuration,
-            metric=metric,
+            metrics=metrics,
             additional_components=additional_components,
             scoring_functions=scoring_functions,
             seed=seed,
@@ -83,22 +83,22 @@ class TestEvaluator(AbstractEvaluator):
             Y_pred = self.predict_function(
                 self.X_train, self.model, self.task_type, self.Y_train
             )
-            err = calculate_loss(
+            err = calculate_losses(
                 solution=self.Y_train,
                 prediction=Y_pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=self.metrics,
                 scoring_functions=self.scoring_functions,
             )
         else:
             Y_pred = self.predict_function(
                 self.X_test, self.model, self.task_type, self.Y_train
             )
-            err = calculate_loss(
+            err = calculate_losses(
                 solution=self.Y_test,
                 prediction=Y_pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=self.metrics,
                 scoring_functions=self.scoring_functions,
             )
 
@@ -111,7 +111,7 @@ def eval_t(
     queue: multiprocessing.Queue,
     config: Union[int, Configuration],
     backend: Backend,
-    metric: Scorer,
+    metrics: Sequence[Scorer],
     seed: int,
     num_run: int,
     instance: Dict[str, Any],
@@ -129,7 +129,7 @@ def eval_t(
     evaluator = TestEvaluator(
         configuration=config,
         backend=backend,
-        metric=metric,
+        metrics=metrics,
         seed=seed,
         port=port,
         queue=queue,

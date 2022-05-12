@@ -1,5 +1,5 @@
 import typing
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence
 
 import copy
 import json
@@ -16,6 +16,7 @@ from smac.callbacks import IncorporateRunResultCallback
 from smac.facade.smac_ac_facade import SMAC4AC
 from smac.intensification.intensification import Intensifier
 from smac.intensification.simple_intensifier import SimpleIntensifier
+from smac.optimizer.multi_objective.parego import ParEGO
 from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.tae.dask_runner import DaskParallelRunner
@@ -40,6 +41,7 @@ from autosklearn.metalearning.metafeatures.metafeatures import (
 )
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
+from autosklearn.metrics import Scorer
 from autosklearn.util.logging_ import get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 from autosklearn.util.stopwatch import StopWatch
@@ -209,6 +211,8 @@ def get_smac_object(
     metalearning_configurations,
     n_jobs,
     dask_client,
+    multi_objective_algorithm,
+    multi_objective_kwargs,
 ):
     if len(scenario_dict["instances"]) > 1:
         intensifier = Intensifier
@@ -233,6 +237,8 @@ def get_smac_object(
         intensifier=intensifier,
         dask_client=dask_client,
         n_jobs=n_jobs,
+        multi_objective_algorithm=multi_objective_algorithm,
+        multi_objective_kwargs=multi_objective_kwargs,
     )
 
 
@@ -245,7 +251,7 @@ class AutoMLSMBO:
         total_walltime_limit,
         func_eval_time_limit,
         memory_limit,
-        metric,
+        metrics: Sequence[Scorer],
         stopwatch: StopWatch,
         n_jobs,
         dask_client: dask.distributed.Client,
@@ -272,7 +278,7 @@ class AutoMLSMBO:
         # data related
         self.dataset_name = dataset_name
         self.datamanager = None
-        self.metric = metric
+        self.metrics = metrics
         self.task = None
         self.backend = backend
         self.port = port
@@ -291,7 +297,7 @@ class AutoMLSMBO:
         self.resampling_strategy_args = resampling_strategy_args
 
         # and a bunch of useful limits
-        self.worst_possible_result = get_cost_of_crash(self.metric)
+        self.worst_possible_result = get_cost_of_crash(self.metrics)
         self.total_walltime_limit = int(total_walltime_limit)
         self.func_eval_time_limit = int(func_eval_time_limit)
         self.memory_limit = memory_limit
@@ -346,7 +352,7 @@ class AutoMLSMBO:
             metalearning_configurations = _get_metalearning_configurations(
                 meta_base=meta_base,
                 basename=self.dataset_name,
-                metric=self.metric,
+                metric=self.metrics[0],
                 configuration_space=self.config_space,
                 task=self.task,
                 is_sparse=self.datamanager.info["is_sparse"],
@@ -460,7 +466,7 @@ class AutoMLSMBO:
             initial_num_run=num_run,
             include=self.include,
             exclude=self.exclude,
-            metric=self.metric,
+            metrics=self.metrics,
             memory_limit=self.memory_limit,
             disable_file_output=self.disable_file_output,
             scoring_functions=self.scoring_functions,
@@ -526,6 +532,13 @@ class AutoMLSMBO:
             "n_jobs": self.n_jobs,
             "dask_client": self.dask_client,
         }
+        if len(self.metrics) > 1:
+            smac_args["multi_objective_algorithm"] = ParEGO
+            smac_args["multi_objective_kwargs"] = {"rho": 0.05}
+            scenario_dict["multi_objectives"] = [metric.name for metric in self.metrics]
+        else:
+            smac_args["multi_objective_algorithm"] = None
+            smac_args["multi_objective_kwargs"] = {}
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
         else:
@@ -571,7 +584,7 @@ class AutoMLSMBO:
                     "files",
                     "%s_%s_%s"
                     % (
-                        self.metric,
+                        self.metrics[0],
                         TASK_TYPES_TO_STRING[meta_task],
                         "sparse" if self.datamanager.info["is_sparse"] else "dense",
                     ),
@@ -598,7 +611,7 @@ class AutoMLSMBO:
                         self.metadata_directory,
                         "%s_%s_%s"
                         % (
-                            self.metric,
+                            self.metrics[0],
                             TASK_TYPES_TO_STRING[meta_task],
                             "sparse" if self.datamanager.info["is_sparse"] else "dense",
                         ),

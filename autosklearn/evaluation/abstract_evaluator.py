@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, TextIO, Tuple, Type, Union, cast
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Sequence, TextIO, Tuple, Type, Union, cast
 
 import logging
 import multiprocessing
@@ -23,7 +25,7 @@ from autosklearn.constants import (
     MULTIOUTPUT_REGRESSION,
     REGRESSION_TASKS,
 )
-from autosklearn.metrics import Scorer, calculate_loss
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents, _addons
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel,
@@ -184,7 +186,7 @@ class AbstractEvaluator(object):
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Scorer,
+        metrics: Sequence[Scorer],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -219,12 +221,12 @@ class AbstractEvaluator(object):
         self.X_test = self.datamanager.data.get("X_test")
         self.y_test = self.datamanager.data.get("Y_test")
 
-        self.metric = metric
+        self.metrics = metrics
         self.task_type = self.datamanager.info["task"]
         self.seed = seed
 
         self.output_y_hat_optimization = output_y_hat_optimization
-        self.scoring_functions = scoring_functions
+        self.scoring_functions = scoring_functions if scoring_functions else []
 
         if isinstance(disable_file_output, (bool, list)):
             self.disable_file_output: Union[bool, List[str]] = disable_file_output
@@ -326,8 +328,7 @@ class AbstractEvaluator(object):
         self,
         y_true: np.ndarray,
         y_hat: np.ndarray,
-        scoring_functions: Optional[List[Scorer]] = None,
-    ) -> Union[float, Dict[str, float]]:
+    ) -> Dict[str, float]:
         """Auto-sklearn follows a minimization goal.
         The calculate_loss internally translate a score function to
         a minimization problem.
@@ -338,27 +339,28 @@ class AbstractEvaluator(object):
         ----------
             y_true
         """
-        scoring_functions = (
-            self.scoring_functions if scoring_functions is None else scoring_functions
-        )
         if not isinstance(self.configuration, Configuration):
-            if scoring_functions:
-                return {self.metric.name: self.metric._worst_possible_result}
-            else:
-                return self.metric._worst_possible_result
+            # Dummy prediction
+            rval = {}
+            for metric in self.scoring_functions if self.scoring_functions else []:
+                rval[metric.name] = metric._worst_possible_result
+            for metric in self.metrics:
+                rval[metric.name] = metric._worst_possible_result
+            return rval
 
-        return calculate_loss(
-            y_true,
-            y_hat,
-            self.task_type,
-            self.metric,
-            scoring_functions=scoring_functions,
-        )
+        else:
+            return calculate_losses(
+                y_true,
+                y_hat,
+                self.task_type,
+                self.metrics,
+                scoring_functions=self.scoring_functions,
+            )
 
     def finish_up(
         self,
         loss: Union[Dict[str, float], float],
-        train_loss: Optional[Union[float, Dict[str, float]]],
+        train_loss: Optional[Dict[str, float]],
         opt_pred: np.ndarray,
         valid_pred: np.ndarray,
         test_pred: np.ndarray,
@@ -400,19 +402,25 @@ class AbstractEvaluator(object):
         if file_out_loss is not None:
             return self.duration, file_out_loss, self.seed, additional_run_info_
 
-        if isinstance(loss, dict):
-            loss_ = loss
-            loss = loss_[self.metric.name]
+        loss_ = loss
+        if len(self.metrics) == 1:
+            loss = loss_[self.metrics[0].name]
         else:
-            loss_ = {}
+            loss = {metric.name: loss_[metric.name] for metric in self.metrics}
 
         additional_run_info = {} if additional_run_info is None else additional_run_info
-        for metric_name, value in loss_.items():
-            additional_run_info[metric_name] = value
+        for metric in self.scoring_functions:
+            if metric.name in loss_:
+                additional_run_info[metric.name] = loss_[metric.name]
         additional_run_info["duration"] = self.duration
         additional_run_info["num_run"] = self.num_run
         if train_loss is not None:
-            additional_run_info["train_loss"] = train_loss
+            if len(self.metrics) == 1:
+                additional_run_info["train_loss"] = train_loss[self.metrics[0].name]
+            else:
+                additional_run_info["train_loss"] = [
+                    train_loss[metric.name] for metric in self.metrics
+                ]
         if validation_loss is not None:
             additional_run_info["validation_loss"] = validation_loss
         if test_loss is not None:
@@ -433,14 +441,14 @@ class AbstractEvaluator(object):
         self,
         Y_valid_pred: np.ndarray,
         Y_test_pred: np.ndarray,
-    ) -> Tuple[Optional[float], Optional[float]]:
+    ) -> Tuple[Optional[float | Sequence[float]], Optional[float | Sequence[float]]]:
         if Y_valid_pred is not None:
             if self.y_valid is not None:
                 validation_loss: Optional[Union[float, Dict[str, float]]] = self._loss(
                     self.y_valid, Y_valid_pred
                 )
-                if isinstance(validation_loss, dict):
-                    validation_loss = validation_loss[self.metric.name]
+                if len(self.metrics) == 1:
+                    validation_loss = validation_loss[self.metrics[0].name]
             else:
                 validation_loss = None
         else:
@@ -451,8 +459,8 @@ class AbstractEvaluator(object):
                 test_loss: Optional[Union[float, Dict[str, float]]] = self._loss(
                     self.y_test, Y_test_pred
                 )
-                if isinstance(test_loss, dict):
-                    test_loss = test_loss[self.metric.name]
+                if len(self.metrics) == 1:
+                    test_loss = test_loss[self.metrics[0].name]
             else:
                 test_loss = None
         else:
