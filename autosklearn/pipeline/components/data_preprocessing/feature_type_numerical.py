@@ -126,11 +126,17 @@ class NumericalPreprocessingPipeline(BasePipeline):
 
         steps.extend(
             [
-                ("imputation", NumericalImputation()),
-                ("variance_threshold", VarianceThreshold()),
+                ("imputation", NumericalImputation(random_state=self.random_state)),
+                (
+                    "variance_threshold",
+                    VarianceThreshold(random_state=self.random_state),
+                ),
                 (
                     "rescaling",
-                    rescaling_components.RescalingChoice(default_dataset_properties),
+                    rescaling_components.RescalingChoice(
+                        dataset_properties=default_dataset_properties,
+                        random_state=self.random_state,
+                    ),
                 ),
             ]
         )
