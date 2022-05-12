@@ -13,6 +13,8 @@ from autosklearn.automl import AutoML
 from pytest import FixtureRequest
 from pytest_cases import fixture
 
+from test.conftest import AUTOSKLEARN_CACHE_NAME
+
 
 class Cache:
     """Used for the below fixtures.
@@ -143,7 +145,7 @@ def cache(request: FixtureRequest) -> Callable[[str], Cache]:
     pytest_cache = request.config.cache
     assert pytest_cache is not None
 
-    cache_dir = pytest_cache.mkdir("autosklearn-cache")
+    cache_dir = pytest_cache.mkdir(AUTOSKLEARN_CACHE_NAME)
     return partial(Cache, cache_dir=cache_dir)
 
 
@@ -153,6 +155,6 @@ def automl_cache(request: FixtureRequest) -> Callable[[str], AutoMLCache]:
     pytest_cache = request.config.cache
     assert pytest_cache is not None
 
-    cache_dir = pytest_cache.mkdir("autosklearn-cache")
+    cache_dir = pytest_cache.mkdir(AUTOSKLEARN_CACHE_NAME)
     verbosity = request.config.getoption("verbose")
     return partial(AutoMLCache, cache_dir=cache_dir, verbose=verbosity)
