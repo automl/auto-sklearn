@@ -1036,7 +1036,7 @@ class AutoSklearnEstimator(BaseEstimator):
         # Give it an index, even if not in the `include`
         dataframe.set_index("model_id", inplace=True)
 
-        # Add the `rank` column if needed, dropping `cost` if it's not
+        # Add the `rank` column if needed
         # requested by the user
         if "rank" in columns:
             if num_metrics == 1:
@@ -1048,7 +1048,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 )  # account for `model_id`
             else:
                 self.automl_._logger.warning(
-                    "Cannot compute rank for multi-objective optimization porblems."
+                    "Cannot compute rank for multi-objective optimization problems."
                 )
 
         # Decide on the sort order depending on what it gets sorted by

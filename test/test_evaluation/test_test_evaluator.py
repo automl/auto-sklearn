@@ -20,7 +20,7 @@ from autosklearn.constants import (
 )
 from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
 from autosklearn.evaluation.util import read_queue
-from autosklearn.metrics import accuracy, f1_macro, r2
+from autosklearn.metrics import accuracy, balanced_accuracy, f1_macro, r2
 from autosklearn.util.pipeline import get_configuration_space
 
 import unittest
@@ -125,6 +125,34 @@ class FunctionsTest(unittest.TestCase):
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
         self.assertAlmostEqual(rval[0]["loss"], 0.040000000000000036)
+        self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
+        self.assertNotIn("bac_metric", rval[0]["additional_run_info"])
+
+    def test_eval_test_multi_objective(self):
+        metrics = {
+            accuracy: 0.040000000000000036,
+            balanced_accuracy: 0.02777777777777779,
+        }
+        eval_t(
+            queue=self.queue,
+            backend=self.backend,
+            config=self.configuration,
+            metrics=list(metrics.keys()),
+            seed=1,
+            num_run=1,
+            scoring_functions=None,
+            output_y_hat_optimization=False,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            port=self.port,
+            additional_components=dict(),
+        )
+        rval = read_queue(self.queue)
+        self.assertEqual(len(rval), 1)
+        for metric, loss in metrics.items():
+            self.assertAlmostEqual(rval[0]["loss"][metric.name], loss)
         self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
         self.assertNotIn("bac_metric", rval[0]["additional_run_info"])
 
