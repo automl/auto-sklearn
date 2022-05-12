@@ -1139,6 +1139,9 @@ class AutoSklearnEstimator(BaseEstimator):
         simple = (
             ["model_id", "rank", "ensemble_weight", "type"] + cost_list + ["duration"]
         )
+        if num_metrics > 1:
+            simple.remove("rank")
+            all.remove("rank")
         detailed = all
         return {"all": all, "detailed": detailed, "simple": simple}
 
