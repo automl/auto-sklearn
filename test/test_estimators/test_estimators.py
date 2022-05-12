@@ -378,6 +378,74 @@ def test_cv_results(tmp_dir):
     assert hasattr(cls, "classes_")
 
 
+def test_cv_results_multi_objective(tmp_dir):
+    # TODO restructure and actually use real SMAC output from a long run
+    # to do this unittest!
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+
+    cls = AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
+        seed=1,
+        initial_configurations_via_metalearning=0,
+        metric=[autosklearn.metrics.precision_macro, autosklearn.metrics.roc_auc],
+        scoring_functions=[autosklearn.metrics.accuracy, autosklearn.metrics.roc_auc],
+    )
+
+    params = cls.get_params()
+    original_params = copy.deepcopy(params)
+
+    cls.fit(X_train, Y_train)
+
+    cv_results = cls.cv_results_
+    assert isinstance(cv_results, dict), type(cv_results)
+    assert "mean_test_score" not in cv_results
+    assert "rank_test_scores" not in cv_results
+    for expected_column in (
+        "mean_test_precision_macro",
+        "mean_test_roc_auc",
+        "mean_fit_time",
+        "rank_test_precision_macro",
+        "rank_test_roc_auc",
+        "metric_roc_auc",
+        "metric_accuracy",
+    ):
+        assert isinstance(cv_results[expected_column], np.ndarray), type(
+            cv_results[expected_column]
+        )
+
+    assert isinstance(cv_results["params"], list), type(cv_results["params"])
+    cv_result_items = [
+        isinstance(val, npma.MaskedArray)
+        for key, val in cv_results.items()
+        if key.startswith("param_")
+    ]
+    assert all(cv_result_items), cv_results.items()
+
+    # Compare the state of the model parameters with the original parameters
+    new_params = clone(cls).get_params()
+    for param_name, original_value in original_params.items():
+        new_value = new_params[param_name]
+
+        # Taken from Sklearn code:
+        # We should never change or mutate the internal state of input
+        # parameters by default. To check this we use the joblib.hash function
+        # that introspects recursively any subobjects to compute a checksum.
+        # The only exception to this rule of immutable constructor parameters
+        # is possible RandomState instance but in this check we explicitly
+        # fixed the random_state params recursively to be integer seeds.
+        assert joblib.hash(new_value) == joblib.hash(original_value), (
+            "Estimator %s should not change or mutate "
+            " the parameter %s from %s to %s during fit."
+            % (cls, param_name, original_value, new_value)
+        )
+
+    # Comply with https://scikit-learn.org/dev/glossary.html#term-classes
+    is_classifier(cls)
+    assert hasattr(cls, "classes_")
+
+
 @pytest.mark.parametrize(
     "estimator_type,dataset_name",
     [(AutoSklearnClassifier, "iris"), (AutoSklearnRegressor, "boston")],
