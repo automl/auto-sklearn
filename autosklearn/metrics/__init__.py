@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
+import collections
 from functools import partial
 from itertools import product
 
@@ -384,17 +385,47 @@ for (base_name, sklearn_metric), average in product(
     CLASSIFICATION_METRICS[name] = scorer
 
 
-def calculate_score(
+def _validate_metrics(
+    metrics: Sequence[Scorer],
+    scoring_functions: Optional[List[Scorer]] = None,
+) -> None:
+    """
+    Validate metrics given to Auto-sklearn. Raises an Exception in case of a problem.
+
+    metrics: Sequence[Scorer]
+        A list of objects that hosts a function to calculate how good the
+        prediction is according to the solution.
+    scoring_functions: Optional[List[Scorer]]
+        A list of metrics to calculate multiple losses
+    """
+
+    to_score = list(metrics)
+    if scoring_functions:
+        to_score.extend(scoring_functions)
+
+    if len(metrics) == 0:
+        raise ValueError("Number of metrics to compute must be greater than zero.")
+
+    metric_counter = collections.Counter(to_score)
+    metric_names_counter = collections.Counter(metric.name for metric in to_score)
+    if len(metric_counter) != len(metric_names_counter):
+        raise ValueError(
+            "Error in metrics passed to Auto-sklearn. A metric name was used "
+            "multiple times for different metrics!"
+        )
+
+
+def calculate_scores(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Scorer,
+    metrics: Sequence[Scorer],
     scoring_functions: Optional[List[Scorer]] = None,
-) -> Union[float, Dict[str, float]]:
+) -> Dict[str, float]:
     """
-    Returns a score (a magnitude that allows casting the
+    Returns the scores (a magnitude that allows casting the
     optimization problem as a maximization one) for the
-    given Auto-Sklearn Scorer object
+    given Auto-Sklearn Scorer objects.
 
     Parameters
     ----------
@@ -405,82 +436,83 @@ def calculate_score(
     task_type: int
         To understand if the problem task is classification
         or regression
-    metric: Scorer
-        Object that host a function to calculate how good the
+    metrics: Sequence[Scorer]
+        A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
     Returns
     -------
-    float or Dict[str, float]
+    Dict[str, float]
     """
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
+    _validate_metrics(metrics=metrics, scoring_functions=scoring_functions)
+
+    to_score = list(metrics)
     if scoring_functions:
-        score_dict = dict()
-        if task_type in REGRESSION_TASKS:
-            for metric_ in scoring_functions + [metric]:
+        to_score.extend(scoring_functions)
 
-                try:
-                    score_dict[metric_.name] = _compute_scorer(
-                        metric_, prediction, solution, task_type
-                    )
-                except ValueError as e:
-                    print(e, e.args[0])
-                    if (
-                        e.args[0]
-                        == "Mean Squared Logarithmic Error cannot be used when "
-                        "targets contain negative values."
-                    ):
-                        continue
-                    else:
-                        raise e
+    score_dict = dict()
+    if task_type in REGRESSION_TASKS:
+        for metric_ in to_score:
 
-        else:
-            for metric_ in scoring_functions + [metric]:
-
-                # TODO maybe annotate metrics to define which cases they can
-                # handle?
-
-                try:
-                    score_dict[metric_.name] = _compute_scorer(
-                        metric_, prediction, solution, task_type
-                    )
-                except ValueError as e:
-                    if e.args[0] == "multiclass format is not supported":
-                        continue
-                    elif (
-                        e.args[0] == "Samplewise metrics are not available "
-                        "outside of multilabel classification."
-                    ):
-                        continue
-                    elif (
-                        e.args[0] == "Target is multiclass but "
-                        "average='binary'. Please choose another average "
-                        "setting, one of [None, 'micro', 'macro', 'weighted']."
-                    ):
-                        continue
-                    else:
-                        raise e
-
-        return score_dict
+            try:
+                score_dict[metric_.name] = _compute_single_scorer(
+                    metric_, prediction, solution, task_type
+                )
+            except ValueError as e:
+                print(e, e.args[0])
+                if (
+                    e.args[0] == "Mean Squared Logarithmic Error cannot be used when "
+                    "targets contain negative values."
+                ):
+                    continue
+                else:
+                    raise e
 
     else:
-        return _compute_scorer(metric, prediction, solution, task_type)
+        for metric_ in to_score:
+
+            # TODO maybe annotate metrics to define which cases they can
+            # handle?
+
+            try:
+                score_dict[metric_.name] = _compute_single_scorer(
+                    metric_, prediction, solution, task_type
+                )
+            except ValueError as e:
+                if e.args[0] == "multiclass format is not supported":
+                    continue
+                elif (
+                    e.args[0] == "Samplewise metrics are not available "
+                    "outside of multilabel classification."
+                ):
+                    continue
+                elif (
+                    e.args[0] == "Target is multiclass but "
+                    "average='binary'. Please choose another average "
+                    "setting, one of [None, 'micro', 'macro', 'weighted']."
+                ):
+                    continue
+                else:
+                    raise e
+
+    return score_dict
 
 
-def calculate_loss(
+def calculate_losses(
     solution: np.ndarray,
     prediction: np.ndarray,
     task_type: int,
-    metric: Scorer,
+    metrics: Sequence[Scorer],
     scoring_functions: Optional[List[Scorer]] = None,
-) -> Union[float, Dict[str, float]]:
+) -> Dict[str, float]:
     """
-    Returns a loss (a magnitude that allows casting the
+    Returns the losses (a magnitude that allows casting the
     optimization problem as a minimization one) for the
-    given Auto-Sklearn Scorer object
+    given Auto-Sklearn Scorer objects.
 
     Parameters
     ----------
@@ -491,45 +523,39 @@ def calculate_loss(
     task_type: int
         To understand if the problem task is classification
         or regression
-    metric: Scorer
-        Object that host a function to calculate how good the
+    metrics: Sequence[Scorer]
+        A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
 
     Returns
     -------
-    float or Dict[str, float]
+    Dict[str, float]
         A loss function for each of the provided scorer objects
     """
-    score = calculate_score(
+    score = calculate_scores(
         solution=solution,
         prediction=prediction,
         task_type=task_type,
-        metric=metric,
+        metrics=metrics,
         scoring_functions=scoring_functions,
     )
+    scoring_functions = scoring_functions if scoring_functions else []
 
-    if scoring_functions:
-        score = cast(Dict, score)
-        # we expect a dict() object for which we should calculate the loss
-        loss_dict = dict()
-        for metric_ in scoring_functions + [metric]:
-            # TODO: When metrics are annotated with type_of_target support
-            # we can remove this check
-            if metric_.name not in score:
-                continue
-            # maybe metric argument is not in scoring_functions
-            # so append it to the list. Rather than check if such
-            # is the case, redefining loss_dict[metric] is less expensive
-            loss_dict[metric_.name] = metric_._optimum - score[metric_.name]
-        return loss_dict
-    else:
-        rval = metric._optimum - cast(float, score)
-        return rval
+    # we expect a dict() object for which we should calculate the loss
+    loss_dict = dict()
+    for metric_ in scoring_functions + list(metrics):
+        # maybe metric argument is not in scoring_functions
+        # TODO: When metrics are annotated with type_of_target support
+        # we can remove this check
+        if metric_.name not in score:
+            continue
+        loss_dict[metric_.name] = metric_._optimum - score[metric_.name]
+    return loss_dict
 
 
-def calculate_metric(
+def compute_single_metric(
     metric: Scorer, prediction: np.ndarray, solution: np.ndarray, task_type: int
 ) -> float:
     """
@@ -553,7 +579,7 @@ def calculate_metric(
     -------
     float
     """
-    score = _compute_scorer(
+    score = _compute_single_scorer(
         solution=solution,
         prediction=prediction,
         metric=metric,
@@ -562,7 +588,7 @@ def calculate_metric(
     return metric._sign * score
 
 
-def _compute_scorer(
+def _compute_single_scorer(
     metric: Scorer, prediction: np.ndarray, solution: np.ndarray, task_type: int
 ) -> float:
     """

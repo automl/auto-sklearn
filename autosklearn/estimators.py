@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from __future__ import annotations
+
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
 
 import dask.distributed
 import joblib
@@ -46,7 +48,7 @@ class AutoSklearnEstimator(BaseEstimator):
         smac_scenario_args=None,
         logging_config=None,
         metadata_directory=None,
-        metric=None,
+        metric: Scorer | Sequence[Scorer] | None = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
         get_trials_callback=None,
@@ -417,7 +419,7 @@ class AutoSklearnEstimator(BaseEstimator):
             smac_scenario_args=self.smac_scenario_args,
             logging_config=self.logging_config,
             metadata_directory=self.metadata_directory,
-            metric=self.metric,
+            metrics=[self.metric] if isinstance(self.metric, Scorer) else self.metric,
             scoring_functions=self.scoring_functions,
             get_trials_callback=self.get_trials_callback,
             dataset_compression=self.dataset_compression,
@@ -792,6 +794,9 @@ class AutoSklearnEstimator(BaseEstimator):
             What column to sort by. If that column is not present, the
             sorting defaults to the ``"model_id"`` index column.
 
+            Defaults to the metric optimized. Sort by the first objective
+            in case of a multi-objective optimization problem
+
         sort_order: "auto" or "ascending" or "descending" = "auto"
             Which sort order to apply to the ``sort_by`` column. If left
             as ``"auto"``, it will sort by a sensible default where "better" is
@@ -816,7 +821,16 @@ class AutoSklearnEstimator(BaseEstimator):
         # TODO validate that `self` is fitted. This is required for
         #      self.ensemble_ to get the identifiers of models it will generate
         #      weights for.
-        column_types = AutoSklearnEstimator._leaderboard_columns()
+        num_metrics = (
+            1
+            if self.metric is None or isinstance(self.metric, Scorer)
+            else len(self.metric)
+        )
+        column_types = AutoSklearnEstimator._leaderboard_columns(num_metrics)
+        if num_metrics == 1:
+            multi_objective_cost_names = []
+        else:
+            multi_objective_cost_names = [f"cost_{i}" for i in range(num_metrics)]
 
         # Validation of top_k
         if (
@@ -857,11 +871,26 @@ class AutoSklearnEstimator(BaseEstimator):
             columns = column_types["simple"]
 
         # Validation of sorting
-        if sort_by not in column_types["all"]:
-            raise ValueError(
-                f"sort_by='{sort_by}' must be one of included "
-                f"columns {set(column_types['all'])}"
-            )
+        if sort_by == "cost":
+            sort_by_cost = True
+            if num_metrics == 1:
+                sort_by = ["cost", "model_id"]
+            else:
+                sort_by = multi_objective_cost_names + ["model_id"]
+        else:
+            sort_by_cost = False
+            if isinstance(sort_by, str):
+                if sort_by not in column_types["all"]:
+                    raise ValueError(
+                        f"sort_by='{sort_by}' must be one of included "
+                        f"columns {set(column_types['all'])}"
+                    )
+            elif len(set(sort_by) - set(column_types["all"])) > 0:
+                too_much = set(sort_by) - set(column_types["all"])
+                raise ValueError(
+                    f"sort_by='{too_much}' must be in the included columns "
+                    f"{set(column_types['all'])}"
+                )
 
         valid_sort_orders = ["auto", "ascending", "descending"]
         if not (isinstance(sort_order, str) and sort_order in valid_sort_orders):
@@ -871,30 +900,37 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first.
-        def has_key(rv, key):
+        def additional_info_has_key(rv, key):
             return rv.additional_info and key in rv.additional_info
 
-        model_runs = {
-            rval.additional_info["num_run"]: {
-                "model_id": rval.additional_info["num_run"],
-                "seed": rkey.seed,
-                "budget": rkey.budget,
-                "duration": rval.time,
-                "config_id": rkey.config_id,
-                "start_time": rval.starttime,
-                "end_time": rval.endtime,
-                "status": str(rval.status),
-                "cost": rval.cost,
-                "train_loss": rval.additional_info["train_loss"]
-                if has_key(rval, "train_loss")
-                else None,
-                "config_origin": rval.additional_info["configuration_origin"]
-                if has_key(rval, "configuration_origin")
-                else None,
-            }
-            for rkey, rval in self.automl_.runhistory_.data.items()
-            if has_key(rval, "num_run")
-        }
+        model_runs = {}
+        for rkey, rval in self.automl_.runhistory_.data.items():
+            if not additional_info_has_key(rval, "num_run"):
+                continue
+            else:
+                model_key = rval.additional_info["num_run"]
+                model_run = {
+                    "model_id": rval.additional_info["num_run"],
+                    "seed": rkey.seed,
+                    "budget": rkey.budget,
+                    "duration": rval.time,
+                    "config_id": rkey.config_id,
+                    "start_time": rval.starttime,
+                    "end_time": rval.endtime,
+                    "status": str(rval.status),
+                    "train_loss": rval.additional_info["train_loss"]
+                    if additional_info_has_key(rval, "train_loss")
+                    else None,
+                    "config_origin": rval.additional_info["configuration_origin"]
+                    if additional_info_has_key(rval, "configuration_origin")
+                    else None,
+                }
+                if num_metrics == 1:
+                    model_run["cost"] = rval.cost
+                else:
+                    for cost_idx, cost in enumerate(rval.cost):
+                        model_run[f"cost_{cost_idx}"] = cost
+                model_runs[model_key] = model_run
 
         # Next we get some info about the model itself
         model_class_strings = {
@@ -942,7 +978,7 @@ class AutoSklearnEstimator(BaseEstimator):
             # collected. I have no clue why this is but to prevent failures, we fill
             # the values with NaN
             if model_id not in model_runs:
-                model_runs[model_id] = {
+                model_run = {
                     "model_id": model_id,
                     "seed": pd.NA,
                     "budget": pd.NA,
@@ -951,10 +987,16 @@ class AutoSklearnEstimator(BaseEstimator):
                     "start_time": pd.NA,
                     "end_time": pd.NA,
                     "status": pd.NA,
-                    "cost": pd.NA,
                     "train_loss": pd.NA,
                     "config_origin": pd.NA,
+                    "type": pd.NA,
                 }
+                if num_metrics == 1:
+                    model_run["cost"] = pd.NA
+                else:
+                    for cost_idx in range(num_metrics):
+                        model_run[f"cost_{cost_idx}"] = pd.NA
+                model_runs[model_id] = model_run
 
             model_runs[model_id]["ensemble_weight"] = weight
 
@@ -973,8 +1015,13 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # `rank` relies on `cost` so we include `cost`
         # We drop it later if it's not requested
-        if "rank" in columns and "cost" not in columns:
-            columns = [*columns, "cost"]
+        if "rank" in columns:
+            if num_metrics == 1 and "cost" not in columns:
+                columns = [*columns, "cost"]
+            elif num_metrics > 1 and any(
+                cost_name not in columns for cost_name in multi_objective_cost_names
+            ):
+                columns = columns + list(multi_objective_cost_names)
 
         # Finally, convert into a tabular format by converting the dict into
         # column wise orientation.
@@ -989,42 +1036,64 @@ class AutoSklearnEstimator(BaseEstimator):
         # Give it an index, even if not in the `include`
         dataframe.set_index("model_id", inplace=True)
 
-        # Add the `rank` column if needed, dropping `cost` if it's not
+        # Add the `rank` column if needed
         # requested by the user
         if "rank" in columns:
-            dataframe.sort_values(by="cost", ascending=True, inplace=True)
+            if num_metrics == 1:
+                dataframe.sort_values(by="cost", ascending=True, inplace=True)
+            else:
+                dataframe.sort_values(by="cost_0", ascending=True, inplace=True)
             dataframe.insert(
                 column="rank",
                 value=range(1, len(dataframe) + 1),
                 loc=list(columns).index("rank") - 1,
             )  # account for `model_id`
 
-            if "cost" not in columns:
-                dataframe.drop("cost", inplace=True)
-
         # Decide on the sort order depending on what it gets sorted by
         descending_columns = ["ensemble_weight", "duration"]
         if sort_order == "auto":
-            ascending_param = False if sort_by in descending_columns else True
+            ascending_param = [
+                False if sby in descending_columns else True for sby in sort_by
+            ]
         else:
             ascending_param = False if sort_order == "descending" else True
 
         # Sort by the given column name, defaulting to 'model_id' if not present
-        if sort_by not in dataframe.columns:
+        if (
+            (not sort_by_cost and len(set(sort_by) - set(dataframe.columns)) > 0)
+            or (sort_by_cost and "cost" not in dataframe.columns)
+            or (
+                sort_by_cost
+                and any(
+                    cost_name not in dataframe.columns
+                    for cost_name in multi_objective_cost_names
+                )
+            )
+        ):
             self.automl_._logger.warning(
                 f"sort_by = '{sort_by}' was not present"
                 ", defaulting to sort on the index "
                 "'model_id'"
             )
             sort_by = "model_id"
+            sort_by_cost = False
+            ascending_param = True
 
-        # Cost can be the same but leave rank all over the place
-        if "rank" in columns and sort_by == "cost":
+        # Single objective
+        if sort_by_cost:
             dataframe.sort_values(
-                by=[sort_by, "rank"], ascending=[ascending_param, True], inplace=True
+                by=sort_by, ascending=[True] * len(sort_by), inplace=True
             )
         else:
             dataframe.sort_values(by=sort_by, ascending=ascending_param, inplace=True)
+
+        if num_metrics == 1:
+            if "cost" not in columns and "cost" in dataframe.columns:
+                dataframe.drop("cost", inplace=True)
+        else:
+            for cost_name in multi_objective_cost_names:
+                if cost_name not in columns and cost_name in dataframe.columns:
+                    dataframe.drop(cost_name, inplace=True)
 
         # Lastly, just grab the top_k
         if top_k == "all" or top_k >= len(dataframe):
@@ -1035,27 +1104,39 @@ class AutoSklearnEstimator(BaseEstimator):
         return dataframe
 
     @staticmethod
-    def _leaderboard_columns() -> Dict[Literal["all", "simple", "detailed"], List[str]]:
-        all = [
-            "model_id",
-            "rank",
-            "ensemble_weight",
-            "type",
-            "cost",
-            "duration",
-            "config_id",
-            "train_loss",
-            "seed",
-            "start_time",
-            "end_time",
-            "budget",
-            "status",
-            "data_preprocessors",
-            "feature_preprocessors",
-            "balancing_strategy",
-            "config_origin",
-        ]
-        simple = ["model_id", "rank", "ensemble_weight", "type", "cost", "duration"]
+    def _leaderboard_columns(
+        num_metrics: int,
+    ) -> Dict[Literal["all", "simple", "detailed"], List[str]]:
+        if num_metrics == 1:
+            cost_list = ["cost"]
+        else:
+            cost_list = [f"cost_{i}" for i in range(num_metrics)]
+        all = (
+            [
+                "model_id",
+                "rank",
+                "ensemble_weight",
+                "type",
+            ]
+            + cost_list
+            + [
+                "duration",
+                "config_id",
+                "train_loss",
+                "seed",
+                "start_time",
+                "end_time",
+                "budget",
+                "status",
+                "data_preprocessors",
+                "feature_preprocessors",
+                "balancing_strategy",
+                "config_origin",
+            ]
+        )
+        simple = (
+            ["model_id", "rank", "ensemble_weight", "type"] + cost_list + ["duration"]
+        )
         detailed = all
         return {"all": all, "detailed": detailed, "simple": simple}
 
