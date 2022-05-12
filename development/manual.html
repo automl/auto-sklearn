@@ -107,6 +107,7 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Manual</a><ul>
+<li><a class="reference internal" href="#auto-sklearn-2-0">Auto-sklearn 2.0</a></li>
 <li><a class="reference internal" href="#resource-limits">Resource limits</a></li>
 <li><a class="reference internal" href="#the-search-space">The search space</a></li>
 <li><a class="reference internal" href="#model-selection">Model selection</a></li>
@@ -132,7 +133,20 @@ simple classification to advanced uses such as feature importance, parallel runs
 and customization. They can be found in the <a class="reference internal" href="examples/index.html#sphx-glr-examples"><span class="std std-ref">Examples</span></a>.</p>
 </details><details class="summary-b-material-from-talks-and-presentations-b">
 <summary><b>Material from talks and presentations</b></summary><p>We provide resources for talks, tutorials and presentations on <em>auto-sklearn</em> under <a class="reference external" href="https://github.com/automl/auto-sklearn-talks">auto-sklearn-talks</a></p>
-</details><div class="section" id="resource-limits">
+</details><div class="section" id="auto-sklearn-2-0">
+<span id="askl2"></span><h2>Auto-sklearn 2.0<a class="headerlink" href="#auto-sklearn-2-0" title="Permalink to this headline">¶</a></h2>
+<p>Auto-sklearn 2.0 includes latest research on automatically configuring the AutoML system itself
+and contains a multitude of improvements which speed up the fitting the AutoML system.
+Concretely, Auto-sklearn 2.0 automatically sets the <a class="reference internal" href="#bestmodel"><span class="std std-ref">Model selection</span></a>, decides whether it can use
+the efficient bandit strategy <em>Successive Halving</em> and uses meta-feature free <em>Portfolios</em> for
+efficient meta-learning.</p>
+<p><em>auto-sklearn 2.0</em> has the same interface as regular <em>auto-sklearn</em> and you can use it via</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.experimental.askl2</span> <span class="kn">import</span> <span class="n">AutoSklearn2Classifier</span>
+</pre></div>
+</div>
+<p>A paper describing our advances is available on <a class="reference external" href="https://arxiv.org/abs/2007.04074">arXiv</a>.</p>
+</div>
+<div class="section" id="resource-limits">
 <span id="limits"></span><h2>Resource limits<a class="headerlink" href="#resource-limits" title="Permalink to this headline">¶</a></h2>
 <p>A crucial feature of <em>auto-sklearn</em> is limiting the resources (memory and time) which the scikit-learn algorithms are
 allowed to use. Especially for large datasets, on which algorithms can take several hours and make the machine swap,

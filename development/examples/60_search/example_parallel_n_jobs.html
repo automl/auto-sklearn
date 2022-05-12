@@ -175,7 +175,7 @@ To run <em>Auto-sklearn</em> on multiple machines check the example
   self.metafeatures = self.metafeatures.append(metafeatures)
 /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.algorithm_runs[metric].append(runs)
-[ERROR] [2022-05-12 21:09:43,038:asyncio.events]
+[ERROR] [2022-05-12 21:15:03,582:asyncio.events]
 Traceback (most recent call last):
   File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 759, in wrapper
     return await func(*args, **kwargs)
@@ -188,7 +188,7 @@ Traceback (most recent call last):
   File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/asyncio/tasks.py&quot;, line 659, in sleep
     return await future
 asyncio.exceptions.CancelledError
-[ERROR] [2022-05-12 21:09:43,075:asyncio.events]
+[ERROR] [2022-05-12 21:15:03,598:asyncio.events]
 Traceback (most recent call last):
   File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 759, in wrapper
     return await func(*args, **kwargs)
@@ -209,14 +209,14 @@ auto-sklearn results:
   Dataset name: breast_cancer
   Metric: accuracy
   Best validation score: 0.985816
-  Number of target algorithm runs: 47
-  Number of successful target algorithm runs: 45
+  Number of target algorithm runs: 42
+  Number of successful target algorithm runs: 41
   Number of crashed target algorithm runs: 0
-  Number of target algorithms that exceeded the time limit: 2
+  Number of target algorithms that exceeded the time limit: 1
   Number of target algorithms that exceeded the memory limit: 0
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  5.368 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  10.091 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-n-jobs-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_n_jobs.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>
