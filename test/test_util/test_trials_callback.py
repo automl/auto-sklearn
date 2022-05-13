@@ -62,7 +62,6 @@ class VerifyTrialsCallBack(unittest.TestCase):
             time_left_for_this_task=30,
             initial_configurations_via_metalearning=0,
             per_run_time_limit=10,
-            memory_limit=1024,
             delete_tmp_folder_after_terminate=False,
             n_jobs=1,
             include={"feature_preprocessor": ["pca"], "classifier": ["sgd"]},

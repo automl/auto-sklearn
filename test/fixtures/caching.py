@@ -1,19 +1,22 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
+import os
 import pickle
 import shutil
-import traceback
+import tempfile
 from functools import partial
 from pathlib import Path
 
-from autosklearn.automl import AutoML
+from filelock import FileLock
 
 from pytest import FixtureRequest
 from pytest_cases import fixture
 
 from test.conftest import AUTOSKLEARN_CACHE_NAME
+
+LOCK_DIR = Path(tempfile.gettempdir())
 
 
 class Cache:
@@ -73,8 +76,10 @@ class Cache:
         verbose : int = 0
             Whether to be verbose or not. Currently only has one level (> 0)
         """
+        self.key = key
         self.dir = cache_dir / key
         self.verbose = verbose > 0
+        self._lock: FileLock = None
 
     def items(self) -> list[Path]:
         """Get any paths associated to items in this dir"""
@@ -87,7 +92,7 @@ class Cache:
         """Path to an item for this cache"""
         return self.dir / name
 
-    def _load(self, name: str) -> Any:
+    def load(self, name: str) -> Any:
         """Load an item from the cache with a given name"""
         if self.verbose:
             print(f"Loading cached item {self.path(name)}")
@@ -95,7 +100,7 @@ class Cache:
         with self.path(name).open("rb") as f:
             return pickle.load(f)
 
-    def _save(self, item: Any, name: str) -> None:
+    def save(self, item: Any, name: str) -> None:
         """Dump an item to cache with a name"""
         if self.verbose:
             print(f"Saving cached item {self.path(name)}")
@@ -108,53 +113,28 @@ class Cache:
         shutil.rmtree(self.dir)
         self.dir.mkdir()
 
+    def __enter__(self):
+        if int(os.environ.get("PYTEST_XDIST_WORKER_COUNT", 1)) <= 1:
+            return self
+        else:
+            path = LOCK_DIR / f"{self.key}.lock"
+            self._lock = FileLock(path)
+            self._lock.acquire(poll_interval=1.0)
+            if self.verbose:
+                print(f"locked cache {path}")
 
-class AutoMLCache(Cache):
-    def save(self, model: AutoML) -> None:
-        """Save the model"""
-        self._save(model, "model")
+            return self
 
-    def model(self) -> Optional[AutoML]:
-        """Returns the saved model if it can.
-
-        In the case of an issue loading an existing model file, it will delete
-        this cache item.
-        """
-        if "model" not in self:
-            return None
-
-        # Try to load the model, if there was an issue, delete all cached items
-        # for the model and return None
-        try:
-            model = self._load("model")
-        except Exception:
-            model = None
-            print(traceback.format_exc())
-            self.reset()
-        finally:
-            return model
-
-    def backend_path(self) -> Path:
-        """The path for the backend of the automl model"""
-        return self.path("backend")
+    def __exit__(self, *args, **kwargs):
+        if self._lock is not None:
+            self._lock.release()
 
 
 @fixture
-def cache(request: FixtureRequest) -> Callable[[str], Cache]:
+def make_cache(request: FixtureRequest) -> Callable[[str], Cache]:
     """Gives the access to a cache."""
     pytest_cache = request.config.cache
     assert pytest_cache is not None
 
     cache_dir = pytest_cache.mkdir(AUTOSKLEARN_CACHE_NAME)
     return partial(Cache, cache_dir=cache_dir)
-
-
-@fixture
-def automl_cache(request: FixtureRequest) -> Callable[[str], AutoMLCache]:
-    """Gives access to an automl cache"""
-    pytest_cache = request.config.cache
-    assert pytest_cache is not None
-
-    cache_dir = pytest_cache.mkdir(AUTOSKLEARN_CACHE_NAME)
-    verbosity = request.config.getoption("verbose")
-    return partial(AutoMLCache, cache_dir=cache_dir, verbose=verbosity)

@@ -62,7 +62,7 @@ from autosklearn.data.validation import (
     convert_if_sparse,
 )
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.ensemble_builder import EnsembleBuilderManager
+from autosklearn.ensemble_building import EnsembleBuilderManager
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
@@ -303,6 +303,8 @@ class AutoML(BaseEstimator):
         self._label_num = None
         self._parser = None
         self._can_predict = False
+        self._read_at_most = None
+        self._max_ensemble_build_iterations = None
         self.models_: Optional[dict] = None
         self.cv_models_: Optional[dict] = None
         self.ensemble_ = None
@@ -808,9 +810,9 @@ class AutoML(BaseEstimator):
                     max_models_on_disc=self._max_models_on_disc,
                     seed=self._seed,
                     precision=self.precision,
-                    max_iterations=None,
-                    read_at_most=np.inf,
-                    ensemble_memory_limit=self._memory_limit,
+                    max_iterations=self._max_ensemble_build_iterations,
+                    read_at_most=self._read_at_most,
+                    memory_limit=self._memory_limit,
                     random_state=self._seed,
                     logger_port=self._logger_port,
                     pynisher_context=self._multiprocessing_context,
@@ -923,7 +925,7 @@ class AutoML(BaseEstimator):
                 )
                 result = proc_ensemble.futures.pop().result()
                 if result:
-                    ensemble_history, _, _, _, _ = result
+                    ensemble_history, _ = result
                     self.ensemble_performance_history.extend(ensemble_history)
                 self._logger.info("Ensemble script finished, continue shutdown.")
 
@@ -1524,8 +1526,8 @@ class AutoML(BaseEstimator):
             seed=self._seed,
             precision=precision if precision else self.precision,
             max_iterations=1,
-            read_at_most=np.inf,
-            ensemble_memory_limit=self._memory_limit,
+            read_at_most=None,
+            memory_limit=self._memory_limit,
             random_state=self._seed,
             logger_port=self._logger_port,
             pynisher_context=self._multiprocessing_context,
@@ -1538,7 +1540,7 @@ class AutoML(BaseEstimator):
                 "Error building the ensemble - please check the log file and command "
                 "line output for error messages."
             )
-        self.ensemble_performance_history, _, _, _, _ = result
+        self.ensemble_performance_history, _ = result
         self._ensemble_size = ensemble_size
 
         self._load_models()
@@ -2096,6 +2098,15 @@ class AutoML(BaseEstimator):
 
         return ensemble_dict
 
+    def has_ensemble(self) -> bool:
+        """
+        Returns
+        -------
+        bool
+            Whether this AutoML instance has an ensemble
+        """
+        return self.ensemble_ is not None
+
     def _create_search_space(
         self,
         tmp_dir: str,
@@ -2154,7 +2165,7 @@ class AutoMLClassifier(AutoML):
         y: SUPPORTED_TARGET_TYPES | spmatrix,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
-        feat_type: Optional[list[bool]] = None,
+        feat_type: Optional[list[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
@@ -2244,7 +2255,7 @@ class AutoMLRegressor(AutoML):
         y: SUPPORTED_TARGET_TYPES | spmatrix,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
         y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
-        feat_type: Optional[list[bool]] = None,
+        feat_type: Optional[list[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,

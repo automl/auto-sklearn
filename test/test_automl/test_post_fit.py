@@ -20,7 +20,10 @@ def test_holdout_loaded_models(automl: AutoML) -> None:
     * The cv_models_ attr should remain None
     """
     assert automl.ensemble_ is not None
-    assert set(automl.models_.keys()) == set(automl.ensemble_.identifiers_)
+
+    ensemble_identifiers = automl.ensemble_.get_selected_model_identifiers()
+
+    assert set(automl.models_.keys()) == set(ensemble_identifiers)
     assert automl.cv_models_ is None
 
 
@@ -39,8 +42,11 @@ def test_cv_loaded_models(automl: AutoML) -> None:
     * The cv_models_ should contain the identifiers of what's in the ensemble
     """
     assert automl.ensemble_ is not None
-    assert set(automl.models_.keys()) == set(automl.ensemble_.identifiers_)
-    assert set(automl.cv_models_.keys()) == set(automl.ensemble_.identifiers_)
+
+    ensemble_identifiers = automl.ensemble_.get_selected_model_identifiers()
+
+    assert set(automl.models_.keys()) == set(ensemble_identifiers)
+    assert set(automl.cv_models_.keys()) == set(ensemble_identifiers)
 
 
 @parametrize_with_cases("automl", cases=cases, has_tag=["fitted", "no_ensemble"])

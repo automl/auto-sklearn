@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Callable
 
+from functools import partial
+
 from dask.distributed import Client, get_client
 
 from pytest import FixtureRequest, fixture
@@ -13,31 +15,36 @@ active_clients: dict[str, Callable] = {}
 @fixture(autouse=True)
 def clean_up_any_dask_clients(request: FixtureRequest) -> None:
     """Auto injected fixture to close dask clients after each test"""
-    yield
-    if any(active_clients):
-        for adr in list(active_clients.keys()):
-            if request.config.getoption("verbose") > 1:
-                print(f"\nFixture closing dask_client at {adr}")
+    yield  # Give control to the function
 
-            close = active_clients[adr]
-            close()
-            del active_clients[adr]
+    # Initiate cleanup
+    id = request.node.nodeid
+    if id in active_clients:
+        if request.config.getoption("verbose") > 1:
+            print(f"\nFixture closing dask_client for {id}")
+
+        close = active_clients[id]
+        close()
 
 
-def create_test_dask_client(n_workers: int = 2) -> Client:
+def create_test_dask_client(
+    id: str,
+    n_workers: int = 2,
+) -> Client:
     """Factory to make a Dask client and a function to close it
-    them
+    them.
 
     Parameters
     ----------
+    id: str
+        An id to associate with this dask client
+
     n_workers: int = 2
-        inside asklea
-        inside AutoML.
 
     Returns
     -------
-    Client, Callable
-        The client and a function to call to close that client
+    Client
+        The client
     """
     # Workers are in subprocesses to not create deadlocks with the pynisher
     # and logging.
@@ -57,13 +64,13 @@ def create_test_dask_client(n_workers: int = 2) -> Client:
         except Exception:
             pass
 
-    active_clients[adr] = close
+    active_clients[id] = close
 
     return client
 
 
 @fixture
-def make_dask_client() -> Callable[[int], Client]:
+def make_dask_client(request: FixtureRequest) -> Callable[[int], Client]:
     """Factory to make a Dask client and a function to close it
 
     Parameters
@@ -76,7 +83,7 @@ def make_dask_client() -> Callable[[int], Client]:
     Client, Callable
         The client and a function to call to close that client
     """
-    return create_test_dask_client
+    return partial(create_test_dask_client, id=request.node.nodeid)
 
 
 # TODO remove in favour of make_dask_client
