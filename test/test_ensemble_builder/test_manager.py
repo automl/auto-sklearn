@@ -19,7 +19,7 @@ def case_real_runs(
     """Uses real runs from a fitted automl instance"""
     manager = make_ensemble_builder_manager(
         backend=automl._backend,
-        metric=automl._metric,
+        metric=automl._metrics,
         task=automl._task,
         dataset_name=automl._dataset_name,
         seed=automl._seed,
