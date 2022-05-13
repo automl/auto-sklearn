@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, Union, cast
+from typing import Any, Dict, Sequence, Type, Union, cast
 
 import copy
 import glob
@@ -42,6 +42,7 @@ import pytest
 import unittest
 import unittest.mock
 
+import test.conftest
 from test.test_automl.automl_utils import (
     count_succeses,
     include_single_scores,
@@ -383,6 +384,74 @@ def test_cv_results(tmp_dir):
     assert hasattr(cls, "classes_")
 
 
+def test_cv_results_multi_objective(tmp_dir):
+    # TODO restructure and actually use real SMAC output from a long run
+    # to do this unittest!
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+
+    cls = AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
+        seed=1,
+        initial_configurations_via_metalearning=0,
+        metric=[autosklearn.metrics.precision_macro, autosklearn.metrics.roc_auc],
+        scoring_functions=[autosklearn.metrics.accuracy, autosklearn.metrics.roc_auc],
+    )
+
+    params = cls.get_params()
+    original_params = copy.deepcopy(params)
+
+    cls.fit(X_train, Y_train)
+
+    cv_results = cls.cv_results_
+    assert isinstance(cv_results, dict), type(cv_results)
+    assert "mean_test_score" not in cv_results
+    assert "rank_test_scores" not in cv_results
+    for expected_column in (
+        "mean_test_precision_macro",
+        "mean_test_roc_auc",
+        "mean_fit_time",
+        "rank_test_precision_macro",
+        "rank_test_roc_auc",
+        "metric_roc_auc",
+        "metric_accuracy",
+    ):
+        assert isinstance(cv_results[expected_column], np.ndarray), type(
+            cv_results[expected_column]
+        )
+
+    assert isinstance(cv_results["params"], list), type(cv_results["params"])
+    cv_result_items = [
+        isinstance(val, npma.MaskedArray)
+        for key, val in cv_results.items()
+        if key.startswith("param_")
+    ]
+    assert all(cv_result_items), cv_results.items()
+
+    # Compare the state of the model parameters with the original parameters
+    new_params = clone(cls).get_params()
+    for param_name, original_value in original_params.items():
+        new_value = new_params[param_name]
+
+        # Taken from Sklearn code:
+        # We should never change or mutate the internal state of input
+        # parameters by default. To check this we use the joblib.hash function
+        # that introspects recursively any subobjects to compute a checksum.
+        # The only exception to this rule of immutable constructor parameters
+        # is possible RandomState instance but in this check we explicitly
+        # fixed the random_state params recursively to be integer seeds.
+        assert joblib.hash(new_value) == joblib.hash(original_value), (
+            "Estimator %s should not change or mutate "
+            " the parameter %s from %s to %s during fit."
+            % (cls, param_name, original_value, new_value)
+        )
+
+    # Comply with https://scikit-learn.org/dev/glossary.html#term-classes
+    is_classifier(cls)
+    assert hasattr(cls, "classes_")
+
+
 @pytest.mark.parametrize(
     "estimator_type,dataset_name",
     [(AutoSklearnClassifier, "iris"), (AutoSklearnRegressor, "boston")],
@@ -393,7 +462,7 @@ def test_leaderboard(
     # Comprehensive test tasks a substantial amount of time, manually set if
     # required.
     MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 3  # [0, len(valid_columns) + 1]
-    column_types = AutoSklearnEstimator._leaderboard_columns()
+    column_types = AutoSklearnEstimator._leaderboard_columns(num_metrics=1)
 
     # Create a dict of all possible param values for each param
     # with some invalid one's of the incorrect type
@@ -470,6 +539,160 @@ def test_leaderboard(
         # Else all valid combinations should be validated
         else:
             leaderboard = model.leaderboard(**params)
+
+            # top_k should never be less than the rows given back
+            # It can however be larger
+            if isinstance(params["top_k"], int):
+                assert params["top_k"] >= len(leaderboard)
+
+            # Check the right columns are present and in the right order
+            # The model_id is set as the index, not included in pandas columns
+            columns = list(leaderboard.columns)
+
+            def exclude(lst, s):
+                return [x for x in lst if x != s]
+
+            if params["include"] is not None:
+                # Include with only single str should be the only column
+                if isinstance(params["include"], str):
+                    assert params["include"] in columns and len(columns) == 1
+                # Include as a list should have all the columns without model_id
+                else:
+                    assert columns == exclude(params["include"], "model_id")
+            elif params["detailed"]:
+                assert columns == exclude(column_types["detailed"], "model_id")
+            else:
+                assert columns == exclude(column_types["simple"], "model_id")
+
+            # Ensure that if it's ensemble only
+            # Can only check if 'ensemble_weight' is present
+            if params["ensemble_only"] and "ensemble_weight" in columns:
+                assert all(leaderboard["ensemble_weight"] > 0)
+
+
+@pytest.mark.parametrize(
+    "estimator_type,dataset_name,metrics",
+    [
+        (
+            AutoSklearnClassifier,
+            "iris",
+            (autosklearn.metrics.accuracy, autosklearn.metrics.balanced_accuracy),
+        ),
+        (
+            AutoSklearnRegressor,
+            "boston",
+            (autosklearn.metrics.r2, autosklearn.metrics.root_mean_squared_error),
+        ),
+    ],
+)
+def test_leaderboard_multi_objective(
+    tmp_dir: str,
+    estimator_type: Type[AutoSklearnEstimator],
+    dataset_name: str,
+    metrics: Sequence[autosklearn.metrics.Scorer],
+):
+    # Comprehensive test tasks a substantial amount of time, manually set if
+    # required.
+    MAX_COMBO_SIZE_FOR_INCLUDE_PARAM = 3  # [0, len(valid_columns) + 1]
+    column_types = AutoSklearnEstimator._leaderboard_columns(num_metrics=2)
+
+    # Create a dict of all possible param values for each param
+    # with some invalid one's of the incorrect type
+    include_combinations = itertools.chain(
+        itertools.combinations(column_types["all"], item_count)
+        for item_count in range(1, MAX_COMBO_SIZE_FOR_INCLUDE_PARAM)
+    )
+    valid_params = {
+        "detailed": [True, False],
+        "ensemble_only": [True, False],
+        "top_k": [-10, 0, 1, 10, "all"],
+        "sort_by": [
+            "cost",
+            "cost_0",
+            "cost_1",
+            ["cost_1", "cost_0"],
+            *column_types["all"],
+            "invalid",
+        ],
+        "sort_order": ["ascending", "descending", "auto", "invalid", None],
+        "include": itertools.chain([None, "invalid", "type"], include_combinations),
+    }
+
+    # Create a generator of all possible combinations of valid_params
+    params_generator = iter(
+        dict(zip(valid_params.keys(), param_values))
+        for param_values in itertools.product(*valid_params.values())
+    )
+
+    X_train, Y_train, _, _ = putil.get_dataset(dataset_name)
+    model = estimator_type(
+        time_left_for_this_task=30,
+        per_run_time_limit=5,
+        tmp_folder=os.path.join(tmp_dir, "backend"),
+        seed=test.conftest.DEFAULT_SEED,
+        metric=metrics,
+    )
+
+    model.fit(X_train, Y_train)
+
+    for params in params_generator:
+        # Convert from iterator to solid list
+        if params["include"] is not None and not isinstance(params["include"], str):
+            params["include"] = list(params["include"])
+
+        # Invalid top_k should raise an error, is a positive int or 'all'
+        if not (params["top_k"] == "all" or params["top_k"] > 0):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Invalid sort_by column
+        elif (
+            params["sort_by"] not in column_types["all"]
+            and params["sort_by"] != "cost"
+            and params["sort_by"] != ["cost_1", "cost_0"]
+            and params["sort_by"] not in ["cost_0", "cost_1"]
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Shouldn't accept an invalid sort order
+        elif params["sort_order"] not in ["ascending", "descending", "auto"]:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # include is single str but not valid
+        elif (
+            isinstance(params["include"], str)
+            and params["include"] not in column_types["all"]
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Crash if include is list but contains invalid column
+        elif (
+            isinstance(params["include"], list)
+            and len(set(params["include"]) - set(column_types["all"])) != 0
+        ):
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Can't have just model_id, in both single str and list case
+        elif params["include"] == "model_id" or params["include"] == ["model_id"]:
+            with pytest.raises(ValueError):
+                model.leaderboard(**params)
+
+        # Else all valid combinations should be validated
+        else:
+            leaderboard = model.leaderboard(**params)
+            assert "cost" not in leaderboard.columns
+
+            if params["include"] is None:
+                assert "cost_0" in leaderboard.columns
+                assert "cost_1" in leaderboard.columns
+            else:
+                for cost_name in ["cost_0", "cost_1"]:
+                    if cost_name in params["include"]:
+                        assert cost_name in leaderboard.columns
 
             # top_k should never be less than the rows given back
             # It can however be larger

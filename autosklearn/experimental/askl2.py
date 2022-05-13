@@ -93,6 +93,8 @@ class SmacObjectCallback:
         metalearning_configurations,
         n_jobs,
         dask_client,
+        multi_objective_algorithm,
+        multi_objective_kwargs,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.intensification.simple_intensifier import SimpleIntensifier
@@ -122,6 +124,8 @@ class SmacObjectCallback:
             run_id=seed,
             n_jobs=n_jobs,
             dask_client=dask_client,
+            multi_objective_algorithm=multi_objective_algorithm,
+            multi_objective_kwargs=multi_objective_kwargs,
         )
 
 
@@ -141,6 +145,8 @@ class SHObjectCallback:
         metalearning_configurations,
         n_jobs,
         dask_client,
+        multi_objective_algorithm,
+        multi_objective_kwargs,
     ):
         from smac.facade.smac_ac_facade import SMAC4AC
         from smac.intensification.successive_halving import SuccessiveHalving
@@ -178,6 +184,8 @@ class SHObjectCallback:
             },
             dask_client=dask_client,
             n_jobs=n_jobs,
+            multi_objective_algorithm=multi_objective_algorithm,
+            multi_objective_kwargs=multi_objective_kwargs,
         )
         smac4ac.solver.epm_chooser.min_samples_model = int(
             len(scenario.cs.get_hyperparameters()) / 2

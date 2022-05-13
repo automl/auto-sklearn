@@ -14,6 +14,8 @@ from filelock import FileLock
 from pytest import FixtureRequest
 from pytest_cases import fixture
 
+from test.conftest import AUTOSKLEARN_CACHE_NAME
+
 LOCK_DIR = Path(tempfile.gettempdir())
 
 
@@ -134,7 +136,5 @@ def make_cache(request: FixtureRequest) -> Callable[[str], Cache]:
     pytest_cache = request.config.cache
     assert pytest_cache is not None
 
-    cache_dir = pytest_cache.mkdir("autosklearn-cache")
-    verbosity = request.config.getoption("verbose")
-
-    return partial(Cache, cache_dir=cache_dir, verbose=verbosity)
+    cache_dir = pytest_cache.mkdir(AUTOSKLEARN_CACHE_NAME)
+    return partial(Cache, cache_dir=cache_dir)

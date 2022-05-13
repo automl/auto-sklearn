@@ -25,22 +25,10 @@ the technology behind *auto-sklearn* by reading our paper published at
 `NeurIPS 2015 <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
-.. topic:: NEW: Auto-sklearn 2.0
+.. topic:: NEW: Text feature support
 
-    Auto-sklearn 2.0 includes latest research on automatically configuring the AutoML system itself
-    and contains a multitude of improvements which speed up the fitting the AutoML system.
-
-*auto-sklearn 2.0* works the same way as regular *auto-sklearn* and you can use it via
-
-.. code:: python
-
-    from autosklearn.experimental.askl2 import AutoSklearn2Classifier
-
-A paper describing our advances is available on `arXiv <https://arxiv.org/abs/2007.04074>`_.
-
-.. topic:: NEW: Material from tutorials and presentations
-
-    We provide slides and notebooks from talks and tutorials here: `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
+    Auto-sklearn now supports text features, check our new example:
+    :ref:`sphx_glr_examples_40_advanced_example_text_preprocessing.py`
 
 
 Example
@@ -64,7 +52,6 @@ Example
 
 This will run for one hour and should result in an accuracy above 0.98.
 
-
 Manual
 ******
 
@@ -74,6 +61,11 @@ Manual
 * :ref:`extending`
 * :ref:`faq`
 
+Additional Material
+*******************
+
+We provide slides and notebooks from talks and tutorials here:
+`auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
 
 License
 *******

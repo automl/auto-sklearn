@@ -20,7 +20,7 @@ from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.metrics import Scorer, calculate_loss, calculate_score
+from autosklearn.metrics import Scorer, calculate_losses, calculate_scores
 from autosklearn.util.disk import rmtree
 from autosklearn.util.functional import cut, findwhere, split
 from autosklearn.util.logging_ import get_named_client_logger
@@ -557,13 +557,13 @@ class EnsembleBuilder:
             run_preds = [r.predictions(kind, precision=self.precision) for r in models]
             pred = ensemble.predict(run_preds)
 
-            score = calculate_score(
+            score = calculate_scores(
                 solution=pred_targets,
                 prediction=pred,
                 task_type=self.task_type,
-                metric=self.metric,
+                metrics=[self.metric],
                 scoring_functions=None,
-            )
+            )[self.metric.name]
             performance_stamp[f"ensemble_{score_name}_score"] = score
             self.ensemble_history.append(performance_stamp)
 
@@ -895,12 +895,12 @@ class EnsembleBuilder:
 
         try:
             predictions = run.predictions(kind, precision=self.precision)
-            loss: float = calculate_loss(  # type: ignore
+            loss: float = calculate_losses(  # type: ignore
                 solution=targets,
                 prediction=predictions,
                 task_type=self.task_type,
-                metric=self.metric,
-            )
+                metrics=[self.metric],
+            )[self.metric.name]
         except Exception as e:
             self.logger.error(f"Error getting loss {run}:{e}{traceback.format_exc()}")
             loss = np.inf

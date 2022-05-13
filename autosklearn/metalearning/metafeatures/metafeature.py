@@ -15,19 +15,18 @@ class AbstractMetaFeature(object):
         pass
 
     @abstractmethod
-    def _calculate(cls, X, y, logger, categorical):
+    def _calculate(cls, X, y, logger, feat_type):
         pass
 
-    def __call__(self, X, y, logger, categorical=None):
-        if categorical is None:
-            categorical = [False for i in range(X.shape[1])]
+    def __call__(self, X, y, logger, feat_type=None):
+        if feat_type is None:
+            feat_type = {i: "numerical" for i in range(X.shape[1])}
         starttime = time.time()
-
         try:
             if scipy.sparse.issparse(X) and hasattr(self, "_calculate_sparse"):
-                value = self._calculate_sparse(X, y, logger, categorical)
+                value = self._calculate_sparse(X, y, logger, feat_type)
             else:
-                value = self._calculate(X, y, logger, categorical)
+                value = self._calculate(X, y, logger, feat_type)
             comment = ""
         except MemoryError:
             value = None

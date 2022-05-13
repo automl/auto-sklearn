@@ -1,5 +1,18 @@
 # -*- encoding: utf-8 -*-
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from __future__ import annotations
+
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import functools
 import json
@@ -85,23 +98,30 @@ def fit_predict_try_except_decorator(
         queue.close()
 
 
-def get_cost_of_crash(metric: Scorer) -> float:
+def get_cost_of_crash(metrics: Sequence[Scorer]) -> List[float] | float:
+    """Return the cost of crash.
 
-    # The metric must always be defined to extract optimum/worst
-    if not isinstance(metric, Scorer):
-        raise ValueError("The metric must be stricly be an instance of Scorer")
+    Return value can be either a list (multi-objective optimization) or a
+    raw float (single objective) because SMAC assumes different types in the
+    two different cases.
+    """
+    costs = []
+    for metric in metrics:
+        if not isinstance(metric, Scorer):
+            raise ValueError("The metric {metric} must be an instance of Scorer")
 
-    # Autosklearn optimizes the err. This function translates
-    # worst_possible_result to be a minimization problem.
-    # For metrics like accuracy that are bounded to [0,1]
-    # metric.optimum==1 is the worst cost.
-    # A simple guide is to use greater_is_better embedded as sign
-    if metric._sign < 0:
-        worst_possible_result = metric._worst_possible_result
-    else:
-        worst_possible_result = metric._optimum - metric._worst_possible_result
+        # Autosklearn optimizes the err. This function translates
+        # worst_possible_result to be a minimization problem.
+        # For metrics like accuracy that are bounded to [0,1]
+        # metric.optimum==1 is the worst cost.
+        # A simple guide is to use greater_is_better embedded as sign
+        if metric._sign < 0:
+            worst_possible_result = metric._worst_possible_result
+        else:
+            worst_possible_result = metric._optimum - metric._worst_possible_result
+        costs.append(worst_possible_result)
 
-    return worst_possible_result
+    return costs if len(costs) > 1 else costs[0]
 
 
 def _encode_exit_status(
@@ -126,7 +146,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         resampling_strategy: Union[
             str, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
         ],
-        metric: Scorer,
+        metrics: Sequence[Scorer],
         cost_for_crash: float,
         abort_on_first_run_crash: bool,
         port: int,
@@ -144,7 +164,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         disable_file_output: bool = False,
         init_params: Optional[Dict[str, Any]] = None,
         budget_type: Optional[str] = None,
-        ta: Optional[Callable] = None,
+        ta: Optional[Callable] = None,  # Required by SMAC's parent class
         **resampling_strategy_args: Any,
     ):
         if resampling_strategy == "holdout":
@@ -186,13 +206,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             par_factor=par_factor,
             cost_for_crash=self.worst_possible_result,
             abort_on_first_run_crash=abort_on_first_run_crash,
+            multi_objectives=multi_objectives,
         )
 
         self.backend = backend
         self.autosklearn_seed = autosklearn_seed
         self.resampling_strategy = resampling_strategy
         self.initial_num_run = initial_num_run
-        self.metric = metric
+        self.metrics = metrics
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
         self.scoring_functions = scoring_functions
@@ -356,7 +377,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             config=config,
             backend=self.backend,
             port=self.port,
-            metric=self.metric,
+            metrics=self.metrics,
             seed=self.autosklearn_seed,
             num_run=num_run,
             scoring_functions=self.scoring_functions,
@@ -550,4 +571,33 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         autosklearn.evaluation.util.empty_queue(queue)
         self.logger.info("Finished evaluating configuration %d" % config_id)
+
+        # Do some sanity checking (for multi objective)
+        if len(self.multi_objectives) > 1:
+            error = (
+                f"Returned costs {cost} does not match the number of objectives"
+                f" {len(self.multi_objectives)}."
+            )
+
+            # If dict convert to array
+            # Make sure the ordering is correct
+            if isinstance(cost, dict):
+                ordered_cost = []
+                for name in self.multi_objectives:
+                    if name not in cost:
+                        raise RuntimeError(
+                            f"Objective {name} was not found "
+                            f"in the returned costs ({cost})"
+                        )
+
+                    ordered_cost.append(cost[name])
+                cost = ordered_cost
+
+            if isinstance(cost, list):
+                if len(cost) != len(self.multi_objectives):
+                    raise RuntimeError(error)
+
+            if isinstance(cost, float):
+                raise RuntimeError(error)
+
         return status, cost, runtime, additional_run_info
