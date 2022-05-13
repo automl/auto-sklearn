@@ -4,7 +4,7 @@
 [tool.pytest.ini_options]
 testpaths = ["test"]
 minversion = "3.7"
-#addopts = "--cov=autosklearn"
+addopts = "--forked"
 
 [tool.coverage.run]
 branch = true
@@ -96,7 +96,6 @@ module = [
     "autosklearn.automl",
     "autosklearn.smbo",
     "autosklearn.experimental.askl2",
-    "autosklearn.ensemble_builder",
     "autosklearn.ensembles.singlebest_ensemble",
     "autosklearn.ensembles.ensemble_selection",
     "autosklearn.evaluation", #__init__

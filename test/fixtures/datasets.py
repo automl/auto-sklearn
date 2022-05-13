@@ -17,7 +17,6 @@ from autosklearn.constants import (
 from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.pipeline.util import get_dataset
-from autosklearn.util.functional import normalize
 
 from pytest import fixture
 
@@ -41,7 +40,6 @@ def astype(
 @fixture
 def make_sklearn_dataset() -> Callable:
     """
-
     Parameters
     ----------
     name : str = "iris"
@@ -62,6 +60,12 @@ def make_sklearn_dataset() -> Callable:
     make_binary : bool = False
         Whether to force the data into being binary
 
+    task: Optional[int] = None
+        The task of the data, required for the datamanager
+
+    feat_type: Optional[Dict | str] = None
+        The features types for the data if making a XYDataManager
+
     as_datamanager: bool = False
         Wether to return the information as an XYDataManager
 
@@ -77,9 +81,9 @@ def make_sklearn_dataset() -> Callable:
         train_size_maximum: int = 150,
         make_multilabel: bool = False,
         make_binary: bool = False,
-        as_datamanager: bool = False,
         task: Optional[int] = None,
         feat_type: Optional[Dict | str] = None,
+        as_datamanager: bool = False,
     ) -> Any:
         X, y, Xt, yt = get_dataset(
             dataset=name,
@@ -93,6 +97,7 @@ def make_sklearn_dataset() -> Callable:
         if not as_datamanager:
             return (X, y, Xt, yt)
         else:
+
             assert task is not None and feat_type is not None
             if isinstance(feat_type, str):
                 feat_type = {i: feat_type for i in range(X.shape[1])}
@@ -128,7 +133,7 @@ def _make_binary_data(
         weights = np.ones_like(classes) / len(classes)
 
     assert len(weights) == len(classes)
-    weights = normalize(np.asarray(weights))
+    weights = weights / np.sum(weights, keepdims=True)
 
     X = rs.rand(*dims)
     y = rs.choice([0, 1], dims[0], p=weights)
@@ -157,7 +162,7 @@ def _make_multiclass_data(
         weights = np.ones_like(classes) / len(classes)
 
     assert len(weights) == len(classes)
-    weights = normalize(np.asarray(weights))
+    weights = weights / np.sum(weights, keepdims=True)
 
     X = rs.rand(*dims)
     y = rs.choice(classes, dims[0], p=weights)
@@ -188,7 +193,7 @@ def _make_multilabel_data(
         weights = np.ones(classes.shape[0]) / len(classes)
 
     assert len(weights) == len(classes)
-    weights = normalize(np.asarray(weights))
+    weights = weights / np.sum(weights, keepdims=True)
 
     X = rs.rand(*dims)
 

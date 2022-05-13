@@ -33,7 +33,7 @@ from autosklearn.constants import (
     TASK_TYPES_TO_STRING,
 )
 from autosklearn.data.abstract_data_manager import AbstractDataManager
-from autosklearn.ensemble_builder import EnsembleBuilderManager
+from autosklearn.ensemble_building import EnsembleBuilderManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.metalearning.metafeatures.metafeatures import (
     calculate_all_metafeatures_encoded_labels,

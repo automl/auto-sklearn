@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from autosklearn.automl import AutoML
+from autosklearn.ensemble_building.builder import CANDIDATES_FILENAME
 
 from pytest import mark
 from pytest_cases import parametrize_with_cases
@@ -67,10 +68,9 @@ def test_paths_created_with_ensemble(automl: AutoML) -> None:
     expected = [
         partial / fixture
         for fixture in (
-            "ensemble_read_preds.pkl",
-            "ensemble_read_losses.pkl",
             "ensembles",
             "ensemble_history.json",
+            CANDIDATES_FILENAME,
         )
     ]
 
@@ -80,6 +80,12 @@ def test_paths_created_with_ensemble(automl: AutoML) -> None:
 
 @parametrize_with_cases("automl", cases=cases, has_tag="fitted")
 def test_at_least_one_model_and_predictions(automl: AutoML) -> None:
+    """
+    Expects
+    -------
+    * There should be at least one models saved
+    * Each model saved should have predictions for the ensemble
+    """
     assert automl._backend is not None
     runs_dir = Path(automl._backend.get_runs_directory())
 
@@ -100,6 +106,11 @@ def test_at_least_one_model_and_predictions(automl: AutoML) -> None:
 
 @parametrize_with_cases("automl", cases=cases, filter=has_ensemble)
 def test_at_least_one_ensemble(automl: AutoML) -> None:
+    """
+    Expects
+    -------
+    * There should be at least one ensemble generated
+    """
     assert automl._backend is not None
     ens_dir = Path(automl._backend.get_ensemble_dir())
 

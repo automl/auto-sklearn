@@ -30,9 +30,11 @@ class MockLogger(PicklableClientLogger):
         self.port = port or MOCKPORT
 
         # Overwrite the logging implementations with mocks
-        attrs = ["debug", "info", "warning", "error", "exception", "critical", "log"]
-        for attr in attrs:
-            setattr(self, attr, Mock(return_value=None))
-
-        # This mock logger is enabled for all levels
-        setattr(self, "isEnabledFor", Mock(return_value=True))
+        self.debug = Mock(return_value=None)  # type: ignore
+        self.info = Mock(return_value=None)  # type: ignore
+        self.warning = Mock(return_value=None)  # type: ignore
+        self.error = Mock(return_value=None)  # type: ignore
+        self.exception = Mock(return_value=None)  # type: ignore
+        self.critical = Mock(return_value=None)  # type: ignore
+        self.log = Mock(return_value=None)  # type: ignore
+        self.isEnabledFor = Mock(return_value=True)  # type: ignore
