@@ -28,7 +28,7 @@ import autosklearn.estimators  # noqa F401
 import autosklearn.pipeline.util as putil
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.data.validation import InputValidator
-from autosklearn.ensemble_builder import MODEL_FN_RE
+from autosklearn.ensemble_building.run import Run
 from autosklearn.estimators import (
     AutoSklearnClassifier,
     AutoSklearnEstimator,
@@ -60,6 +60,8 @@ def test_fit_n_jobs(tmp_dir):
     Y_train += 1
     Y_test += 1
 
+    n_jobs = 2
+
     class get_smac_object_wrapper:
         def __call__(self, *args, **kwargs):
             self.n_jobs = kwargs["n_jobs"]
@@ -78,49 +80,52 @@ def test_fit_n_jobs(tmp_dir):
         per_run_time_limit=5,
         tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
-        initial_configurations_via_metalearning=0,
-        ensemble_size=5,
-        n_jobs=2,
-        include={"classifier": ["sgd"], "feature_preprocessor": ["no_preprocessing"]},
+        n_jobs=n_jobs,
         get_smac_object_callback=get_smac_object_wrapper_instance,
         max_models_on_disc=None,
     )
-
     automl.fit(X_train, Y_train)
 
     # Test that the argument is correctly passed to SMAC
-    assert getattr(get_smac_object_wrapper_instance, "n_jobs") == 2
-    assert getattr(get_smac_object_wrapper_instance, "dask_n_jobs") == 2
-    assert getattr(get_smac_object_wrapper_instance, "dask_client_n_jobs") == 2
+    assert get_smac_object_wrapper_instance.n_jobs == n_jobs
+    assert get_smac_object_wrapper_instance.dask_n_jobs == n_jobs
+    assert get_smac_object_wrapper_instance.dask_client_n_jobs == n_jobs
 
-    available_num_runs = set()
-    for run_key, run_value in automl.automl_.runhistory_.data.items():
+    runhistory_data = automl.automl_.runhistory_.data
+
+    successful_runs = {
+        run_value.additional_info["num_run"]
+        for run_value in runhistory_data.values()
         if (
             run_value.additional_info is not None
             and "num_run" in run_value.additional_info
-        ):
-            available_num_runs.add(run_value.additional_info["num_run"])
+            and run_value.status == StatusType.SUCCESS
+        )
+    }
+
     available_predictions = set()
     predictions = glob.glob(
         os.path.join(
-            automl.automl_._backend.get_runs_directory(),
-            "*",
-            "predictions_ensemble*.npy",
+            automl.automl_._backend.get_runs_directory(), "*", "predictions_ensemble_*"
         )
     )
     seeds = set()
     for prediction in predictions:
         prediction = os.path.split(prediction)[1]
-        match = re.match(MODEL_FN_RE, prediction.replace("predictions_ensemble", ""))
+        match = re.match(Run.RE_MODEL_PREDICTION_FILE, prediction)
         if match:
-            num_run = int(match.group(2))
-            available_predictions.add(num_run)
-            seed = int(match.group(1))
-            seeds.add(seed)
+            print(match)
+            seed, num_run, _ = match.groups()
+            available_predictions.add(int(num_run))
+            seeds.add(int(seed))
 
     # Remove the dummy prediction, it is not part of the runhistory
-    available_predictions.remove(1)
-    assert available_num_runs.issubset(available_predictions)
+    if 1 in available_predictions:
+        available_predictions.remove(1)
+
+    # Make sure all predictions available are associated with a successful run
+    # Don't want a rogue prediction file
+    assert available_predictions <= successful_runs
 
     assert len(seeds) == 1
 
