@@ -13,13 +13,13 @@ from autosklearn.util.stopwatch import StopWatch
 import pytest
 
 
-@pytest.mark.parametrize("context", ["fork", "forkserver"])
+@pytest.mark.parametrize("context", ["fork", "forkserver", "spawn"])
 def test_smbo_metalearning_configurations(backend, context, dask_client) -> None:
     # Get the inputs to the optimizer
     X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
     config_space = AutoML(
         delete_tmp_folder_after_terminate=False,
-        metric=autosklearn.metrics.accuracy,
+        metrics=[autosklearn.metrics.accuracy],
         time_left_for_this_task=20,
         per_run_time_limit=5,
     ).fit(
@@ -38,7 +38,7 @@ def test_smbo_metalearning_configurations(backend, context, dask_client) -> None
         total_walltime_limit=10,
         func_eval_time_limit=5,
         memory_limit=4096,
-        metric=autosklearn.metrics.accuracy,
+        metrics=[autosklearn.metrics.accuracy],
         stopwatch=stopwatch,
         n_jobs=1,
         dask_client=dask_client,

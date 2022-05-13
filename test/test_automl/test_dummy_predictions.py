@@ -66,7 +66,7 @@ def test_produces_correct_output(
     * It should produce predictions "predictions_ensemble_1337_1_0.0.npy"
     """
     seed = 1337
-    automl = make_automl(metric=metric, seed=seed)
+    automl = make_automl(metrics=[metric], seed=seed)
     automl._logger = mock_logger
 
     datamanager = make_sklearn_dataset(
@@ -115,7 +115,7 @@ def test_runs_with_correct_args(
     dataset = "iris"
     task = MULTICLASS_CLASSIFICATION
 
-    automl = make_automl(metric=accuracy)
+    automl = make_automl(metrics=[accuracy])
     automl._logger = mock_logger
 
     datamanager = make_sklearn_dataset(
@@ -159,7 +159,7 @@ def test_crash_due_to_memory_exception(
     dataset = "iris"
     task = MULTICLASS_CLASSIFICATION
 
-    automl = make_automl(metric=accuracy)
+    automl = make_automl(metrics=[accuracy])
     automl._logger = mock_logger
 
     datamanager = make_sklearn_dataset(
@@ -181,5 +181,5 @@ def test_crash_due_to_memory_exception(
 
 def test_raises_if_no_metric_set(make_automl: Callable[..., AutoML]) -> None:
     automl = make_automl()
-    with pytest.raises(ValueError, match="Metric was not set"):
+    with pytest.raises(ValueError, match="Metric/Metrics was/were not set"):
         automl._do_dummy_prediction()

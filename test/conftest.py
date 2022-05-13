@@ -11,21 +11,8 @@ changes.
 
 **Documenting Tests**
 To ease in understanding of tests, what is being tested and what's expected of the test,
-each test should be documented with what it's parameters/fixtures are as well as what
-the test expects to happen, regardless of the tests implemntation.
-
-    Parameters
-    ----------
-    param1: Type
-        ...
-
-    param2: Type
-        ...
-
-    Fixtures
-    --------
-    make_something: Callable[..., Something]
-        Factory to make Something
+each test should doc expected bhaviour, not describe the steps of the test.
+Commenst relating to how a test does things can be left in the tests and not the doc.
 
     Expects
     -------
@@ -53,7 +40,7 @@ Uses pytest's cache functionality for long training models so they can be shared
 tests and between different test runs. This is primarly used with `cases` so that tests
 requiring the same kind of expensive case and used cached values.
 
-Use `pytest --cache-clear` to clear the cahce
+Use `pytest --cached` to use this feature.
 
 See `test/test_automl/cases.py` for example of how the fixtures from
 `test/fixtures/caching.py` can be used to cache objects between tests.
@@ -87,6 +74,7 @@ short. A convention we use is to prefix them with `make`, for example,
 from typing import Any, Iterator, List, Optional
 
 import re
+import shutil
 import signal
 from pathlib import Path
 
@@ -99,7 +87,7 @@ DEFAULT_SEED = 0
 
 
 HERE = Path(__file__)
-AUTOSKLEARN_CACHE_NAME = "autosklearn"
+AUTOSKLEARN_CACHE_NAME = "autosklearn-cache"
 
 
 def walk(path: Path, include: Optional[str] = None) -> Iterator[Path]:
@@ -162,6 +150,18 @@ def pytest_sessionstart(session: Session) -> None:
     session : Session
         The pytest session object
     """
+    config = session.config
+    cache = config.cache
+
+    if cache is None:
+        return
+
+    # We specifically only remove the cached items dir, not any information
+    # about previous tests which also exist in `.pytest_cache`
+    if not config.getoption("--cached"):
+        dir = cache.mkdir(AUTOSKLEARN_CACHE_NAME)
+        shutil.rmtree(dir)
+
     return
 
 
@@ -202,7 +202,6 @@ def pytest_collection_modifyitems(
 def pytest_configure(config: Config) -> None:
     """Used to register marks"""
     config.addinivalue_line("markers", "todo: Mark test as todo")
-    config.addinivalue_line("markers", "slow: Mark test as slow")
 
 
 pytest_plugins = fixture_modules()
@@ -224,4 +223,10 @@ def pytest_addoption(parser: Parser) -> None:
         action="store_true",
         default=False,
         help="Disable tests marked as slow",
+    )
+    parser.addoption(
+        "--cached",
+        action="store_true",
+        default=False,
+        help="Cache everything between invocations of pytest",
     )
