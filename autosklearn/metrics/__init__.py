@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 import collections
 from functools import partial
@@ -32,11 +32,13 @@ class Scorer(object, metaclass=ABCMeta):
         worst_possible_result: float,
         sign: float,
         kwargs: Any,
+        needs_x: bool = False,
     ) -> None:
         self.name = name
         self._kwargs = kwargs
         self._score_func = score_func
         self._optimum = optimum
+        self._needs_x = needs_x
         self._worst_possible_result = worst_possible_result
         self._sign = sign
 
@@ -45,6 +47,7 @@ class Scorer(object, metaclass=ABCMeta):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        x_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         pass
@@ -58,6 +61,7 @@ class _PredictScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        x_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate predicted target values for X relative to y_true.
@@ -104,12 +108,13 @@ class _PredictScorer(Scorer):
         else:
             raise ValueError(type_true)
 
+        sc_args = {}  # type: Dict[str, Union[List[float], np.ndarray]]
         if sample_weight is not None:
-            return self._sign * self._score_func(
-                y_true, y_pred, sample_weight=sample_weight, **self._kwargs
-            )
-        else:
-            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+            sc_args["sample_weight"] = sample_weight
+        if self._needs_x is True:
+            sc_args["x_data"] = x_data
+
+        return self._sign * self._score_func(y_true, y_pred, **sc_args, **self._kwargs)
 
 
 class _ProbaScorer(Scorer):
@@ -117,6 +122,7 @@ class _ProbaScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        x_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate predicted probabilities for X relative to y_true.
@@ -156,12 +162,13 @@ class _ProbaScorer(Scorer):
                         y_true, y_pred, labels=labels, **self._kwargs
                     )
 
+        sc_args = {}  # type: Dict[str, Union[List[float], np.ndarray]]
         if sample_weight is not None:
-            return self._sign * self._score_func(
-                y_true, y_pred, sample_weight=sample_weight, **self._kwargs
-            )
-        else:
-            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+            sc_args["sample_weight"] = sample_weight
+        if self._needs_x is True:
+            sc_args["x_data"] = x_data
+
+        return self._sign * self._score_func(y_true, y_pred, **sc_args, **self._kwargs)
 
 
 class _ThresholdScorer(Scorer):
@@ -169,6 +176,7 @@ class _ThresholdScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        x_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate decision function output for X relative to y_true.
@@ -199,22 +207,25 @@ class _ThresholdScorer(Scorer):
         elif isinstance(y_pred, list):
             y_pred = np.vstack([p[:, -1] for p in y_pred]).T
 
+        sc_args = {}  # type: Dict[str, Union[List[float], np.ndarray]]
         if sample_weight is not None:
-            return self._sign * self._score_func(
-                y_true, y_pred, sample_weight=sample_weight, **self._kwargs
-            )
-        else:
-            return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
+            sc_args["sample_weight"] = sample_weight
+        if self._needs_x is True:
+            sc_args["x_data"] = x_data
+
+        return self._sign * self._score_func(y_true, y_pred, **sc_args, **self._kwargs)
 
 
 def make_scorer(
     name: str,
     score_func: Callable,
+    *,
     optimum: float = 1.0,
     worst_possible_result: float = 0.0,
     greater_is_better: bool = True,
     needs_proba: bool = False,
     needs_threshold: bool = False,
+    needs_x: bool = False,
     **kwargs: Any,
 ) -> Scorer:
     """Make a scorer from a performance metric or loss function.
@@ -224,6 +235,9 @@ def make_scorer(
 
     Parameters
     ----------
+    name: str
+        Descriptive name of the metric
+
     score_func : callable
         Score function (or loss function) with signature
         ``score_func(y, y_pred, **kwargs)``.
@@ -231,6 +245,10 @@ def make_scorer(
     optimum : int or float, default=1
         The best score achievable by the score function, i.e. maximum in case of
         scorer function and minimum in case of loss function.
+
+    worst_possible_result : int of float, default=0
+        The worst score achievable by the score function, i.e. minimum in case of
+        scorer function and maximum in case of loss function.
 
     greater_is_better : boolean, default=True
         Whether score_func is a score function (default), meaning high is good,
@@ -245,27 +263,34 @@ def make_scorer(
         Whether score_func takes a continuous decision certainty.
         This only works for binary classification.
 
+    needs_x : boolean, default=False
+        Whether score_func requires X in __call__ to compute a metric.
+
     **kwargs : additional arguments
         Additional parameters to be passed to score_func.
 
     Returns
     -------
     scorer : callable
-        Callable object that returns a scalar score; greater is better.
+        Callable object that returns a scalar score; greater is better or set
+        greater_is_better to False.
     """
     sign = 1 if greater_is_better else -1
+    if needs_proba and needs_threshold:
+        raise ValueError(
+            "Set either needs_proba or needs_threshold to True, but not both."
+        )
+
+    cls = None  # type: Any
     if needs_proba:
-        return _ProbaScorer(
-            name, score_func, optimum, worst_possible_result, sign, kwargs
-        )
+        cls = _ProbaScorer
     elif needs_threshold:
-        return _ThresholdScorer(
-            name, score_func, optimum, worst_possible_result, sign, kwargs
-        )
+        cls = _ThresholdScorer
     else:
-        return _PredictScorer(
-            name, score_func, optimum, worst_possible_result, sign, kwargs
-        )
+        cls = _PredictScorer
+    return cls(
+        name, score_func, optimum, worst_possible_result, sign, kwargs, needs_x=needs_x
+    )
 
 
 # Standard regression scores
@@ -420,6 +445,8 @@ def calculate_scores(
     prediction: np.ndarray,
     task_type: int,
     metrics: Sequence[Scorer],
+    *,
+    x_data: Optional[np.ndarray] = None,
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
@@ -460,7 +487,11 @@ def calculate_scores(
 
             try:
                 score_dict[metric_.name] = _compute_single_scorer(
-                    metric_, prediction, solution, task_type
+                    metric_,
+                    prediction,
+                    solution,
+                    task_type,
+                    x_data,
                 )
             except ValueError as e:
                 print(e, e.args[0])
@@ -480,7 +511,11 @@ def calculate_scores(
 
             try:
                 score_dict[metric_.name] = _compute_single_scorer(
-                    metric_, prediction, solution, task_type
+                    metric_,
+                    prediction,
+                    solution,
+                    task_type,
+                    x_data,
                 )
             except ValueError as e:
                 if e.args[0] == "multiclass format is not supported":
@@ -507,6 +542,8 @@ def calculate_losses(
     prediction: np.ndarray,
     task_type: int,
     metrics: Sequence[Scorer],
+    *,
+    x_data: Optional[np.ndarray] = None,
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
@@ -526,6 +563,8 @@ def calculate_losses(
     metrics: Sequence[Scorer]
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
+    x_data: Optional[np.ndarray]
+        X data necessary for some metrics
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
 
@@ -537,6 +576,7 @@ def calculate_losses(
     score = calculate_scores(
         solution=solution,
         prediction=prediction,
+        x_data=x_data,
         task_type=task_type,
         metrics=metrics,
         scoring_functions=scoring_functions,
@@ -556,7 +596,11 @@ def calculate_losses(
 
 
 def compute_single_metric(
-    metric: Scorer, prediction: np.ndarray, solution: np.ndarray, task_type: int
+    metric: Scorer,
+    prediction: np.ndarray,
+    solution: np.ndarray,
+    task_type: int,
+    x_data: Optional[np.ndarray] = None,
 ) -> float:
     """
     Returns a metric for the given Auto-Sklearn Scorer object.
@@ -583,13 +627,18 @@ def compute_single_metric(
         solution=solution,
         prediction=prediction,
         metric=metric,
+        x_data=x_data,
         task_type=task_type,
     )
     return metric._sign * score
 
 
 def _compute_single_scorer(
-    metric: Scorer, prediction: np.ndarray, solution: np.ndarray, task_type: int
+    metric: Scorer,
+    prediction: np.ndarray,
+    solution: np.ndarray,
+    task_type: int,
+    x_data: Optional[np.ndarray] = None,
 ) -> float:
     """
     Returns a score (a magnitude that allows casting the
@@ -612,6 +661,24 @@ def _compute_single_scorer(
     -------
     float
     """
+    if metric._needs_x:
+        if x_data is None:
+            raise ValueError(
+                f"Metric {metric.name} needs x_data, but x_data is {x_data}"
+            )
+        elif x_data.shape[0] != solution.shape[0]:
+            raise ValueError(
+                f"x_data has wrong length. "
+                f"Should be {solution.shape[0]}, but is {x_data.shape[0]}"
+            )
+        if task_type in REGRESSION_TASKS:
+            # TODO put this into the regression metric itself
+            cprediction = sanitize_array(prediction)
+            score = metric(solution, cprediction, x_data=x_data)
+        else:
+            score = metric(solution, prediction, x_data=x_data)
+        return score
+
     if task_type in REGRESSION_TASKS:
         # TODO put this into the regression metric itself
         cprediction = sanitize_array(prediction)

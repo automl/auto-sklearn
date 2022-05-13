@@ -235,7 +235,7 @@ class TrainEvaluator(AbstractEvaluator):
         )
         self.X_train = self.datamanager.data["X_train"]
         self.Y_train = self.datamanager.data["Y_train"]
-        self.Y_optimization: Optional[SUPPORTED_TARGET_TYPES] = None
+        self.X_targets = [None] * self.num_cv_folds
         self.Y_targets = [None] * self.num_cv_folds
         self.Y_train_targets = np.ones(self.Y_train.shape) * np.NaN
         self.models = [None] * self.num_cv_folds
@@ -265,6 +265,7 @@ class TrainEvaluator(AbstractEvaluator):
                     self.Y_train,
                     groups=self.resampling_strategy_args.get("groups"),
                 ):
+                    self.X_optimization = self.X_train[test_split]
                     self.Y_optimization = self.Y_train[test_split]
                     self.Y_actual_train = self.Y_train[train_split]
                     self._partial_fit_and_predict_iterative(
@@ -359,6 +360,7 @@ class TrainEvaluator(AbstractEvaluator):
                                 if hasattr(self.Y_train, "iloc")
                                 else self.Y_train[train_indices]
                             )
+                            self.X_targets[i] = self.X_train[test_indices]
                             self.Y_targets[i] = self.Y_train[test_indices]
 
                             Xt, fit_params = model.fit_transformer(
@@ -400,6 +402,8 @@ class TrainEvaluator(AbstractEvaluator):
                             if hasattr(self.Y_train, "iloc")
                             else self.Y_train[train_indices],
                             train_pred,
+                            # TODO: Check whether this is the correct xdata
+                            x_data=Xt_array[i],
                         )
                         train_losses[i] = train_loss
                         # Number of training data points for this fold.
@@ -408,8 +412,7 @@ class TrainEvaluator(AbstractEvaluator):
 
                         # Compute validation loss of this fold and store it.
                         optimization_loss = self._loss(
-                            self.Y_targets[i],
-                            opt_pred,
+                            self.Y_targets[i], opt_pred, x_data=self.X_targets[i]
                         )
                         opt_losses[i] = optimization_loss
                         # number of optimization data points for this fold.
@@ -455,6 +458,7 @@ class TrainEvaluator(AbstractEvaluator):
                             weights=opt_fold_weights_percentage,
                         )
 
+                    X_targets = self.X_targets
                     Y_targets = self.Y_targets
                     Y_train_targets = self.Y_train_targets
 
@@ -463,6 +467,13 @@ class TrainEvaluator(AbstractEvaluator):
                             Y_optimization_pred[i]
                             for i in range(self.num_cv_folds)
                             if Y_optimization_pred[i] is not None
+                        ]
+                    )
+                    X_targets = np.concatenate(
+                        [
+                            X_targets[i]
+                            for i in range(self.num_cv_folds)
+                            if X_targets[i] is not None
                         ]
                     )
                     Y_targets = np.concatenate(
@@ -501,6 +512,7 @@ class TrainEvaluator(AbstractEvaluator):
                     else:
                         Y_test_preds = None
 
+                    self.X_optimization = X_targets
                     self.Y_optimization = Y_targets
                     self.Y_actual_train = Y_train_targets
 
@@ -602,6 +614,7 @@ class TrainEvaluator(AbstractEvaluator):
                 train_loss = self._loss(
                     self.Y_train_targets[train_split],
                     train_pred,
+                    x_data=self.X_train[train_split],
                 )
                 train_losses.append(train_loss)
                 # number of training data points for this fold. Used for weighting
@@ -610,8 +623,7 @@ class TrainEvaluator(AbstractEvaluator):
 
                 # Compute validation loss of this fold and store it.
                 optimization_loss = self._loss(
-                    self.Y_targets[i],
-                    opt_pred,
+                    self.Y_targets[i], opt_pred, x_data=self.X_targets[i]
                 )
                 opt_losses.append(optimization_loss)
                 # number of optimization data points for this fold. Used for weighting
@@ -644,6 +656,7 @@ class TrainEvaluator(AbstractEvaluator):
                     weights=opt_fold_weights,
                 )
 
+            X_targets = self.X_targets
             Y_targets = self.Y_targets
             Y_train_targets = self.Y_train_targets
 
@@ -652,6 +665,13 @@ class TrainEvaluator(AbstractEvaluator):
                     Y_optimization_pred[i]
                     for i in range(self.num_cv_folds)
                     if Y_optimization_pred[i] is not None
+                ]
+            )
+            X_targets = np.concatenate(
+                [
+                    X_targets[i]
+                    for i in range(self.num_cv_folds)
+                    if X_targets[i] is not None
                 ]
             )
             Y_targets = np.concatenate(
@@ -686,6 +706,7 @@ class TrainEvaluator(AbstractEvaluator):
                 if len(np.shape(Y_test_pred)) == 3:
                     Y_test_pred = np.nanmean(Y_test_pred, axis=0)
 
+            self.X_optimization = X_targets
             self.Y_optimization = Y_targets
             self.Y_actual_train = Y_train_targets
 
@@ -754,6 +775,7 @@ class TrainEvaluator(AbstractEvaluator):
                 break
 
         if self.num_cv_folds > 1:
+            self.X_optimization = self.X_train[test_split]
             self.Y_optimization = self.Y_train[test_split]
             self.Y_actual_train = self.Y_train[train_split]
 
@@ -981,6 +1003,11 @@ class TrainEvaluator(AbstractEvaluator):
         else:
             self.models[fold] = model
 
+        self.X_targets[fold] = (
+            self.X_train.iloc[test_indices]
+            if hasattr(self.X_train, "iloc")
+            else self.X_train[test_indices]
+        )
         self.Y_targets[fold] = (
             self.Y_train.iloc[test_indices]
             if hasattr(self.Y_train, "iloc")
@@ -1026,6 +1053,7 @@ class TrainEvaluator(AbstractEvaluator):
 
         model = self._get_model()
         self.indices[fold] = (train_indices, test_indices)
+        self.X_targets[fold] = self.X_train[test_indices]
         self.Y_targets[fold] = self.Y_train[test_indices]
         self.Y_train_targets[train_indices] = (
             self.Y_train.iloc[train_indices]

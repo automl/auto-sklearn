@@ -25,6 +25,7 @@ from autosklearn.constants import (
     MULTIOUTPUT_REGRESSION,
     REGRESSION_TASKS,
 )
+from autosklearn.data.validation import SUPPORTED_TARGET_TYPES
 from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents, _addons
 from autosklearn.pipeline.implementations.util import (
@@ -273,7 +274,8 @@ class AbstractEvaluator(object):
                 port=self.port,
             )
 
-        self.Y_optimization: Optional[Union[List, np.ndarray]] = None
+        self.X_optimization: Optional[SUPPORTED_TARGET_TYPES] = None
+        self.Y_optimization: Optional[SUPPORTED_TARGET_TYPES] = None
         self.Y_actual_train = None
 
         self.budget = budget
@@ -328,6 +330,7 @@ class AbstractEvaluator(object):
         self,
         y_true: np.ndarray,
         y_hat: np.ndarray,
+        x_data: Optional[np.ndarray] = None,
     ) -> Dict[str, float]:
         """Auto-sklearn follows a minimization goal.
         The calculate_loss internally translate a score function to
@@ -354,6 +357,7 @@ class AbstractEvaluator(object):
                 y_hat,
                 self.task_type,
                 self.metrics,
+                x_data=x_data,
                 scoring_functions=self.scoring_functions,
             )
 
@@ -522,7 +526,12 @@ class AbstractEvaluator(object):
         # This file can be written independently of the others down bellow
         if "y_optimization" not in self.disable_file_output:
             if self.output_y_hat_optimization:
-                self.backend.save_targets_ensemble(self.Y_optimization)
+                self.backend.save_additional_data(
+                    self.Y_optimization, what="targets_ensemble"
+                )
+                self.backend.save_additional_data(
+                    self.X_optimization, what="input_ensemble"
+                )
 
         models: Optional[BaseEstimator] = None
         if hasattr(self, "models"):
