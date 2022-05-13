@@ -39,7 +39,6 @@ from sklearn.model_selection._split import (
 )
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
-from smac.callbacks import IncorporateRunResultCallback
 from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.stats.stats import Stats
 from smac.tae import StatusType
@@ -104,6 +103,7 @@ from autosklearn.util.logging_ import (
 )
 from autosklearn.util.parallel import preload_modules
 from autosklearn.util.single_thread_client import SingleThreadedClient
+from autosklearn.util.smac_wrap import SMACCallback, SmacRunCallback
 from autosklearn.util.stopwatch import StopWatch
 
 import unittest.mock
@@ -218,7 +218,7 @@ class AutoML(BaseEstimator):
         logging_config: Optional[Mapping] = None,
         metrics: Sequence[Scorer] | None = None,
         scoring_functions: Optional[list[Scorer]] = None,
-        get_trials_callback: Optional[IncorporateRunResultCallback] = None,
+        get_trials_callback: SMACCallback | None = None,
         dataset_compression: bool | Mapping[str, Any] = True,
         allow_string_features: bool = True,
     ):
@@ -246,6 +246,11 @@ class AutoML(BaseEstimator):
                 dataset_compression,
                 memory_limit=memory_limit,
             )
+
+        # If we got something callable for `get_trials_callback`, wrap it so SMAC
+        # will accept it.
+        if get_trials_callback is not None and callable(get_trials_callback):
+            get_trials_callback = SmacRunCallback(get_trials_callback)
 
         self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self._time_for_task = time_left_for_this_task

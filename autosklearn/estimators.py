@@ -22,6 +22,7 @@ from autosklearn.data.validation import (
 )
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.util.smac_wrap import SMACCallback
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -51,7 +52,7 @@ class AutoSklearnEstimator(BaseEstimator):
         metric: Scorer | Sequence[Scorer] | None = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        get_trials_callback=None,
+        get_trials_callback: SMACCallback | None = None,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
         allow_string_features: bool = True,
     ):
@@ -266,10 +267,19 @@ class AutoSklearnEstimator(BaseEstimator):
             Whether to load the models after fitting Auto-sklearn.
 
         get_trials_callback: callable
-            Callback function to create an object of subclass defined in module
-            `smac.callbacks <https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html>`_.
-            This is an advanced feature. Use only if you are familiar with
-            `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
+            A callable with the following definition.
+
+            * (smac.SMBO, smac.RunInfo, smac.RunValue, time_left: float) -> bool | None
+
+            This will be called after SMAC, the underlying optimizer for autosklearn,
+            finishes training each run.
+
+            You can use this to record your own information about the optimization
+            process. You can also use this to enable a early stopping based on some
+            critera.
+
+            See the example:
+            :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>`.
 
         dataset_compression: Union[bool, Mapping[str, Any]] = True
             We compress datasets so that they fit into some predefined amount of memory.
