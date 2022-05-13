@@ -117,7 +117,7 @@ def make_ensemble_builder(
             backend = automl._backend
             dataset_name = automl._dataset_name
             task_type = automl._task
-            metric = automl._metrics
+            metric = automl._metrics[0]
             kwargs = {
                 "ensemble_size": automl._ensemble_size,
                 "ensemble_nbest": automl._ensemble_nbest,
