@@ -1113,29 +1113,33 @@ def test_check_estimator_signature(class_):
     ],
 )
 def test_selector_file_askl2_can_be_created(selector_path):
-
+    
     with unittest.mock.patch("os.environ.get") as mock_foo:
         mock_foo.return_value = selector_path
         if selector_path is not None and not os.access(selector_path, os.W_OK):
             with pytest.raises(PermissionError):
                 importlib.reload(autosklearn.experimental.askl2)
-                autosklearn.experimental.askl2.train_selectors()
+                
         else:
             importlib.reload(autosklearn.experimental.askl2)
-            autosklearn.experimental.askl2.train_selectors()
-            for metric in autosklearn.experimental.askl2.metrics:
+            automl = AutoSklearn2Classifier(
+                time_left_for_this_task=60,
+                delete_tmp_folder_after_terminate=False,
+                tmp_folder=selector_path
+            )
+            for metric in automl.metrics:
                 assert os.path.exists(
-                    autosklearn.experimental.askl2.selector_files[metric.name]
+                    automl.selector_files[metric.name]
                 )
                 if selector_path is None or not os.access(selector_path, os.W_OK):
                     # We default to home in worst case
                     assert os.path.expanduser("~") in str(
-                        autosklearn.experimental.askl2.selector_files[metric.name]
+                        automl.selector_files[metric.name]
                     )
                 else:
                     # a dir provided via XDG_CACHE_HOME
                     assert selector_path in str(
-                        autosklearn.experimental.askl2.selector_files[metric.name]
+                        automl.selector_files[metric.name]
                     )
     # Re import it at the end so we do not affect other test
     importlib.reload(autosklearn.experimental.askl2)
