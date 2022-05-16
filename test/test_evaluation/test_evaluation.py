@@ -495,7 +495,7 @@ class EvaluationTest(unittest.TestCase):
         config = unittest.mock.Mock()
         config.config_id = 198
 
-        delattr(self.backend, "save_targets_ensemble")
+        delattr(self.backend, "save_additional_data")
         ta = ExecuteTaFuncWithQueue(
             backend=self.backend,
             port=self.logger_port,
@@ -531,10 +531,10 @@ class EvaluationTest(unittest.TestCase):
             info[1].additional_info["error"],
             (
                 """AttributeError("'BackendMock' object has no attribute """
-                """'save_targets_ensemble'",)""",
+                """'save_additional_data'",)""",
                 """AttributeError("'BackendMock' object has no attribute """
-                """'save_targets_ensemble'")""",
-                """AttributeError('save_targets_ensemble')""",
+                """'save_additional_data'")""",
+                """AttributeError('save_additional_data')""",
             ),
         )
         self.assertNotIn("exitcode", info[1].additional_info)

@@ -570,7 +570,7 @@ class TestCalculateScore(unittest.TestCase):
             y_pred,
             BINARY_CLASSIFICATION,
             [autosklearn.metrics.accuracy],
-            scoring_functions,
+            scoring_functions=scoring_functions,
         )
 
         self.assertIsInstance(score_dict, dict)
@@ -600,7 +600,7 @@ class TestCalculateScore(unittest.TestCase):
             y_pred,
             REGRESSION,
             [autosklearn.metrics.root_mean_squared_error],
-            scoring_functions,
+            scoring_functions=scoring_functions,
         )
 
         self.assertIsInstance(score_dict, dict)

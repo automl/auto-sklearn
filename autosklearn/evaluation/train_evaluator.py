@@ -7,6 +7,9 @@ import multiprocessing
 import warnings
 
 import numpy as np
+import pandas
+import pandas as pd
+import scipy.sparse
 from ConfigSpace import Configuration
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import (
@@ -265,7 +268,11 @@ class TrainEvaluator(AbstractEvaluator):
                     self.Y_train,
                     groups=self.resampling_strategy_args.get("groups"),
                 ):
-                    self.X_optimization = self.X_train[test_split]
+                    self.X_optimization = (
+                        self.X_train.iloc[test_split]
+                        if hasattr(self.X_train, "iloc")
+                        else self.X_train[test_split]
+                    )
                     self.Y_optimization = self.Y_train[test_split]
                     self.Y_actual_train = self.Y_train[train_split]
                     self._partial_fit_and_predict_iterative(
@@ -360,7 +367,12 @@ class TrainEvaluator(AbstractEvaluator):
                                 if hasattr(self.Y_train, "iloc")
                                 else self.Y_train[train_indices]
                             )
-                            self.X_targets[i] = self.X_train[test_indices]
+                            self.X_targets[i] = (
+                                self.X_train.iloc[test_indices]
+                                if hasattr(self.X_train, "iloc")
+                                else self.X_train[train_indices]
+                            )
+
                             self.Y_targets[i] = self.Y_train[test_indices]
 
                             Xt, fit_params = model.fit_transformer(
@@ -469,13 +481,35 @@ class TrainEvaluator(AbstractEvaluator):
                             if Y_optimization_pred[i] is not None
                         ]
                     )
-                    X_targets = np.concatenate(
-                        [
-                            X_targets[i]
-                            for i in range(self.num_cv_folds)
-                            if X_targets[i] is not None
-                        ]
-                    )
+
+                    if isinstance(X_targets[0], np.ndarray):
+                        X_targets = np.concatenate(
+                            [
+                                X_targets[i]
+                                for i in range(self.num_cv_folds)
+                                if X_targets[i] is not None
+                            ]
+                        )
+                    elif isinstance(X_targets[0], scipy.sparse.spmatrix):
+                        X_targets = scipy.sparse.vstack(
+                            [
+                                X_targets[i]
+                                for i in range(self.num_cv_folds)
+                                if X_targets[i] is not None
+                            ]
+                        )
+                    elif isinstance(X_targets[0], pd.DataFrame):
+                        X_targets = pd.concat(
+                            [
+                                X_targets[i]
+                                for i in range(self.num_cv_folds)
+                                if X_targets[i] is not None
+                            ],
+                            axis=0,
+                        )
+                    else:
+                        raise ValueError(f"Unknown datatype {type(X_targets[0])}")
+
                     Y_targets = np.concatenate(
                         [
                             Y_targets[i]
@@ -614,7 +648,9 @@ class TrainEvaluator(AbstractEvaluator):
                 train_loss = self._loss(
                     self.Y_train_targets[train_split],
                     train_pred,
-                    x_data=self.X_train[train_split],
+                    x_data=self.X_train.iloc[train_split]
+                    if hasattr(self.X_train, "iloc")
+                    else self.X_train[train_split],
                 )
                 train_losses.append(train_loss)
                 # number of training data points for this fold. Used for weighting
@@ -667,13 +703,33 @@ class TrainEvaluator(AbstractEvaluator):
                     if Y_optimization_pred[i] is not None
                 ]
             )
-            X_targets = np.concatenate(
-                [
-                    X_targets[i]
-                    for i in range(self.num_cv_folds)
-                    if X_targets[i] is not None
-                ]
-            )
+            if isinstance(X_targets[0], np.ndarray):
+                X_targets = np.concatenate(
+                    [
+                        X_targets[i]
+                        for i in range(self.num_cv_folds)
+                        if X_targets[i] is not None
+                    ]
+                )
+            elif isinstance(X_targets[0], scipy.sparse.spmatrix):
+                X_targets = scipy.sparse.vstack(
+                    [
+                        X_targets[i]
+                        for i in range(self.num_cv_folds)
+                        if X_targets[i] is not None
+                    ]
+                )
+            elif isinstance(X_targets[0], pd.DataFrame):
+                X_targets = pd.concat(
+                    [
+                        X_targets[i]
+                        for i in range(self.num_cv_folds)
+                        if X_targets[i] is not None
+                    ],
+                    axis=0,
+                )
+            else:
+                raise ValueError(f"Unknown datatype {type(X_targets[0])}")
             Y_targets = np.concatenate(
                 [
                     Y_targets[i]
