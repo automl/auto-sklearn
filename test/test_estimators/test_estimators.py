@@ -1113,13 +1113,16 @@ def test_check_estimator_signature(class_):
     ],
 )
 def test_selector_file_askl2_can_be_created(selector_path):
+
     with unittest.mock.patch("os.environ.get") as mock_foo:
         mock_foo.return_value = selector_path
         if selector_path is not None and not os.access(selector_path, os.W_OK):
             with pytest.raises(PermissionError):
                 importlib.reload(autosklearn.experimental.askl2)
+                autosklearn.experimental.askl2.train_selectors()
         else:
             importlib.reload(autosklearn.experimental.askl2)
+            autosklearn.experimental.askl2.train_selectors()
             for metric in autosklearn.experimental.askl2.metrics:
                 assert os.path.exists(
                     autosklearn.experimental.askl2.selector_files[metric.name]

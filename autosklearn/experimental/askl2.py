@@ -18,7 +18,11 @@ import autosklearn.experimental.selector
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import Scorer, accuracy, balanced_accuracy, log_loss, roc_auc
 
-def train_selectors():
+metrics = (balanced_accuracy, roc_auc, log_loss)
+selector_files = {}
+
+
+def train_selectors(selected_metric=None):
     global metrics
     global selector_files
     global strategies
@@ -26,39 +30,50 @@ def train_selectors():
     metrics = (balanced_accuracy, roc_auc, log_loss)
     selector_files = {}
     this_directory = pathlib.Path(__file__).resolve().parent
-    for metric in metrics:
-        training_data_file = this_directory / metric.name / 'askl2_training_data.json'
+
+    if selected_metric is not None:
+        metric_list = [selected_metric]
+    else:
+        metric_list = metrics
+    for metric in metric_list:
+        training_data_file = this_directory / metric.name / "askl2_training_data.json"
         with open(training_data_file) as fh:
             training_data = json.load(fh)
             fh.seek(0)
             m = hashlib.md5()
-            m.update(fh.read().encode('utf8'))
+            m.update(fh.read().encode("utf8"))
         training_data_hash = m.hexdigest()[:10]
         selector_filename = "askl2_selector_%s_%s_%s_%s.pkl" % (
             autosklearn.__version__,
             sklearn.__version__,
             metric.name,
-            training_data_hash
+            training_data_hash,
         )
-        selector_directory = os.environ.get('XDG_CACHE_HOME')
+        selector_directory = os.environ.get("XDG_CACHE_HOME")
         if selector_directory is None:
             selector_directory = pathlib.Path.home()
-        selector_directory = pathlib.Path(selector_directory).joinpath('auto-sklearn').expanduser()
+        selector_directory = (
+            pathlib.Path(selector_directory).joinpath("auto-sklearn").expanduser()
+        )
         selector_files[metric.name] = selector_directory / selector_filename
-        metafeatures = pd.DataFrame(training_data['metafeatures'])
-        strategies = training_data['strategies']
-        y_values = pd.DataFrame(training_data['y_values'], columns=strategies, index=metafeatures.index)
-        minima_for_methods = training_data['minima_for_methods']
-        maxima_for_methods = training_data['maxima_for_methods']
-        default_strategies = training_data['tie_break_order']
+        metafeatures = pd.DataFrame(training_data["metafeatures"])
+        strategies = training_data["strategies"]
+        y_values = pd.DataFrame(
+            training_data["y_values"], columns=strategies, index=metafeatures.index
+        )
+        minima_for_methods = training_data["minima_for_methods"]
+        maxima_for_methods = training_data["maxima_for_methods"]
+        default_strategies = training_data["tie_break_order"]
         if not selector_files[metric.name].exists():
             selector = autosklearn.experimental.selector.OVORF(
-                configuration=training_data['configuration'],
+                configuration=training_data["configuration"],
                 random_state=np.random.RandomState(1),
                 n_estimators=500,
                 tie_break_order=default_strategies,
             )
-            selector = autosklearn.experimental.selector.FallbackWrapper(selector, default_strategies)
+            selector = autosklearn.experimental.selector.FallbackWrapper(
+                selector, default_strategies
+            )
             selector.fit(
                 X=metafeatures,
                 y=y_values,
@@ -68,13 +83,16 @@ def train_selectors():
             selector_files[metric.name].parent.mkdir(exist_ok=True, parents=True)
 
             try:
-                with open(selector_files[metric.name], 'wb') as fh:
+                with open(selector_files[metric.name], "wb") as fh:
                     pickle.dump(selector, fh)
             except Exception as e:
-                print("AutoSklearn2Classifier needs to create a selector file under "
+                print(
+                    "AutoSklearn2Classifier needs to create a selector file under "
                     "the user's home directory or XDG_CACHE_HOME. Nevertheless "
-                    "the path {} is not writable.".format(selector_files[metric.name]))
+                    "the path {} is not writable.".format(selector_files[metric.name])
+                )
                 raise e
+
 
 class SmacObjectCallback:
     def __init__(self, portfolio):
@@ -335,7 +353,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             "classifier": include_estimators,
             "feature_preprocessor": include_preprocessors,
         }
-        train_selectors()
+        train_selectors(selected_metric=metric)
         super().__init__(
             time_left_for_this_task=time_left_for_this_task,
             per_run_time_limit=per_run_time_limit,
