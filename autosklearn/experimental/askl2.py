@@ -19,8 +19,6 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import Scorer, accuracy, balanced_accuracy, log_loss, roc_auc
 
 
-
-
 class SmacObjectCallback:
     def __init__(self, portfolio):
         self.portfolio = portfolio
@@ -319,7 +317,9 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         else:
             metric_list = self.metrics
         for metric in metric_list:
-            training_data_file = self.this_directory / metric.name / "askl2_training_data.json"
+            training_data_file = (
+                self.this_directory / metric.name / "askl2_training_data.json"
+            )
             with open(training_data_file) as fh:
                 training_data = json.load(fh)
                 fh.seek(0)
@@ -342,7 +342,9 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             metafeatures = pd.DataFrame(training_data["metafeatures"])
             self.strategies = training_data["strategies"]
             y_values = pd.DataFrame(
-                training_data["y_values"], columns=self.strategies, index=metafeatures.index
+                training_data["y_values"],
+                columns=self.strategies,
+                index=metafeatures.index,
             )
             minima_for_methods = training_data["minima_for_methods"]
             maxima_for_methods = training_data["maxima_for_methods"]
@@ -363,7 +365,9 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
                     minima=minima_for_methods,
                     maxima=maxima_for_methods,
                 )
-                self.selector_files[metric.name].parent.mkdir(exist_ok=True, parents=True)
+                self.selector_files[metric.name].parent.mkdir(
+                    exist_ok=True, parents=True
+                )
 
                 try:
                     with open(self.selector_files[metric.name], "wb") as fh:
@@ -372,7 +376,9 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
                     print(
                         "AutoSklearn2Classifier needs to create a selector file under "
                         "the user's home directory or XDG_CACHE_HOME. Nevertheless "
-                        "the path {} is not writable.".format(self.selector_files[metric.name])
+                        "the path {} is not writable.".format(
+                            self.selector_files[metric.name]
+                        )
                     )
                     raise e
 
