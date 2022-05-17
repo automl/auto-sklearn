@@ -527,8 +527,6 @@ class AutoSklearnEstimator(BaseEstimator):
         All parameters are ``None`` by default. If no other value is given,
         the default values which were set in a call to ``fit()`` are used.
 
-        Calling this function is only necessary if ``ensemble_size==0``.
-
         Parameters
         ----------
         y : array-like
