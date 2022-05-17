@@ -434,7 +434,6 @@ class TrainEvaluator(AbstractEvaluator):
                             if hasattr(self.Y_train, "iloc")
                             else self.Y_train[train_indices],
                             train_pred,
-                            # TODO: Check whether this is the correct xdata
                             x_data=Xt_array[i],
                         )
                         train_losses[i] = train_loss
