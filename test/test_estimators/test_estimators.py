@@ -1128,7 +1128,7 @@ def test_selector_file_askl2_can_be_created(selector_path):
             automl = AutoSklearn2Classifier(
                 time_left_for_this_task=60, delete_tmp_folder_after_terminate=False
             )
-            for metric in automl.metrics:
+            for metric in automl.selector_metrics:
                 assert os.path.exists(automl.selector_files[metric.name])
                 if selector_path is None or not os.access(selector_path, os.W_OK):
                     # We default to home in worst case

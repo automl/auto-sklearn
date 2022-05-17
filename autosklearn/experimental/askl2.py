@@ -308,14 +308,15 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         )
 
     def train_selectors(self, selected_metric=None):
-        self.metrics = (balanced_accuracy, roc_auc, log_loss)
+        self.selector_metrics = (balanced_accuracy, roc_auc, log_loss)
         self.selector_files = {}
         self.this_directory = pathlib.Path(__file__).resolve().parent
 
         if selected_metric is not None:
             metric_list = [selected_metric]
         else:
-            metric_list = self.metrics
+            metric_list = self.selector_metrics
+
         for metric in metric_list:
             training_data_file = (
                 self.this_directory / metric.name / "askl2_training_data.json"
@@ -423,7 +424,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             else:
                 self.metric = log_loss
 
-        if self.metric in self.metrics:
+        if self.metric in self.selector_metrics:
             metric_name = self.metric.name
             selector_file = self.selector_files[metric_name]
         else:
