@@ -181,8 +181,8 @@ def _fit_with_budget(
 
 
 def concat_data(
-    data: List(Any), num_cv_folds: int
-) -> Union(np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix):
+    data: List[Any], num_cv_folds: int
+) -> Union[np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix]:
     if isinstance(data[0], np.ndarray):
         return np.concatenate(
             [data[i] for i in range(num_cv_folds) if data[i] is not None]
