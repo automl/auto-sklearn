@@ -64,6 +64,8 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
 
+        if self.dataset_properties is None:
+            raise ValueError
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -71,15 +73,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.categ_ppl = CategoricalPreprocessingPipeline(
-            config=None,
-            steps=pipeline,
-            dataset_properties=dataset_properties,
-            include=include,
-            exclude=exclude,
-            random_state=random_state,
-            init_params=init_params,
-        )
+        self.categ_ppl = None
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -87,15 +81,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.numer_ppl = NumericalPreprocessingPipeline(
-            config=None,
-            steps=pipeline,
-            dataset_properties=dataset_properties,
-            include=include,
-            exclude=exclude,
-            random_state=random_state,
-            init_params=init_params,
-        )
+        self.numer_ppl = None
 
         # The pipeline that will be applied to the text features (i.e. columns)
         # of the dataset
@@ -104,21 +90,41 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.txt_ppl = TextPreprocessingPipeline(
-            config=None,
-            steps=pipeline,
-            dataset_properties=dataset_properties,
-            include=include,
-            exclude=exclude,
-            random_state=random_state,
-            init_params=init_params,
-        )
+        self.txt_ppl = None
+
         self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
         if "categorical" in dataset_properties["feat_type"].values():
+            self.categ_ppl = CategoricalPreprocessingPipeline(
+                config=None,
+                steps=pipeline,
+                dataset_properties=dataset_properties,
+                include=include,
+                exclude=exclude,
+                random_state=random_state,
+                init_params=init_params,
+            )
             self._transformers.append(("categorical_transformer", self.categ_ppl))
         if "numerical" in dataset_properties["feat_type"].values():
+            self.numer_ppl = NumericalPreprocessingPipeline(
+                config=None,
+                steps=pipeline,
+                dataset_properties=dataset_properties,
+                include=include,
+                exclude=exclude,
+                random_state=random_state,
+                init_params=init_params,
+            )
             self._transformers.append(("numerical_transformer", self.numer_ppl))
         if "string" in dataset_properties["feat_type"].values():
+            self.txt_ppl = TextPreprocessingPipeline(
+                config=None,
+                steps=pipeline,
+                dataset_properties=dataset_properties,
+                include=include,
+                exclude=exclude,
+                random_state=random_state,
+                init_params=init_params,
+            )
             self._transformers.append(("text_transformer", self.txt_ppl))
 
         if self.config:
