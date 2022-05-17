@@ -79,7 +79,8 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_size : int, optional (default=50)
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
-            replacement. If set to ``0`` no ensemble is fit.
+            replacement. If set to ``0`` no ensemble is fit and the single
+            best model is loaded.
 
         ensemble_nbest : int, optional (default=50)
             Only consider the ``ensemble_nbest`` models when building an
@@ -526,8 +527,7 @@ class AutoSklearnEstimator(BaseEstimator):
         All parameters are ``None`` by default. If no other value is given,
         the default values which were set in a call to ``fit()`` are used.
 
-        Calling this function is only necessary if ``ensemble_size==0``, for
-        example when executing *auto-sklearn* in parallel.
+        Calling this function is only necessary if ``ensemble_size==0``.
 
         Parameters
         ----------

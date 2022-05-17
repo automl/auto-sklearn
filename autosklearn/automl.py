@@ -1554,52 +1554,42 @@ class AutoML(BaseEstimator):
             self.ensemble_ = None
 
         # If no ensemble is loaded, try to get the best performing model
-        if not self.ensemble_:
+        if (
+            not self.ensemble_
+            and not (
+                self._disable_evaluator_output is True
+                or (
+                    isinstance(self._disable_evaluator_output, list)
+                    and "model" in self._disable_evaluator_output
+                )
+            )
+            and self._resampling_strategy
+            not in (
+                "partial-cv",
+                "partial-cv-iterative-fit",
+            )
+        ):
             self.ensemble_ = self._load_best_individual_model()
 
-        if self.ensemble_:
-            identifiers = self.ensemble_.get_selected_model_identifiers()
-            self.models_ = self._backend.load_models_by_identifiers(identifiers)
+        identifiers = self.ensemble_.get_selected_model_identifiers()
+        self.models_ = self._backend.load_models_by_identifiers(identifiers)
 
-            if self._resampling_strategy in ("cv", "cv-iterative-fit"):
-                self.cv_models_ = self._backend.load_cv_models_by_identifiers(
-                    identifiers
-                )
-            else:
-                self.cv_models_ = None
-
-            if len(self.models_) == 0 and self._resampling_strategy not in [
-                "partial-cv",
-                "partial-cv-iterative-fit",
-            ]:
-                raise ValueError("No models fitted!")
-
-            if (
-                self._resampling_strategy in ["cv", "cv-iterative-fit"]
-                and len(self.cv_models_) == 0
-            ):
-                raise ValueError("No models fitted!")
-
-        elif self._disable_evaluator_output is False or (
-            isinstance(self._disable_evaluator_output, list)
-            and "model" not in self._disable_evaluator_output
-        ):
-            model_names = self._backend.list_all_models(self._seed)
-
-            if len(model_names) == 0 and self._resampling_strategy not in [
-                "partial-cv",
-                "partial-cv-iterative-fit",
-            ]:
-                raise ValueError("No models fitted!")
-
-            self.ensemble_ = None
-            self.models_ = []
-            self.cv_models_ = None
-
+        if self._resampling_strategy in ("cv", "cv-iterative-fit"):
+            self.cv_models_ = self._backend.load_cv_models_by_identifiers(identifiers)
         else:
-            self.ensemble_ = None
-            self.models_ = []
             self.cv_models_ = None
+
+        if len(self.models_) == 0 and self._resampling_strategy not in [
+            "partial-cv",
+            "partial-cv-iterative-fit",
+        ]:
+            raise ValueError("No models fitted!")
+
+        elif (
+            self._resampling_strategy in ["cv", "cv-iterative-fit"]
+            and len(self.cv_models_) == 0
+        ):
+            raise ValueError("No models fitted!")
 
     def _load_best_individual_model(self):
         """
@@ -1608,11 +1598,11 @@ class AutoML(BaseEstimator):
         by AutoML.
         This is a robust mechanism to be able to predict,
         even though no ensemble was found by ensemble builder.
+        It is also used to load the single best model in case
+        the user does not want to build an ensemble.
         """
         # We also require that the model is fit and a task is defined
-        # The ensemble size must also be greater than 1, else it means
-        # that the user intentionally does not want an ensemble
-        if not self._task or self._ensemble_size < 1:
+        if not self._task:
             return None
 
         # SingleBest contains the best model found by AutoML
