@@ -283,11 +283,11 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         transformer: BaseEstimator,
     ) -> ConfigurationSpace:
         transformer_lst = []
-        if "numerical" in dataset_properties["feat_type"]:
+        if "numerical" in dataset_properties["feat_type"].values():
             transformer_lst.append("numerical_transformer")
-        if "categorical" in dataset_properties["feat_type"]:
+        if "categorical" in dataset_properties["feat_type"].values():
             transformer_lst.append("categorical_transformer")
-        if "string" in dataset_properties["feat_type"]:
+        if "string" in dataset_properties["feat_type"].values():
             transformer_lst.append("text_transformer")
 
         for st_name, st_operation in transformer:
