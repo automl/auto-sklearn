@@ -180,6 +180,26 @@ def _fit_with_budget(
         raise ValueError(budget_type)
 
 
+def concat_data(
+    data: List(Any), num_cv_folds: int
+) -> Union(np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix):
+    if isinstance(data[0], np.ndarray):
+        return np.concatenate(
+            [data[i] for i in range(num_cv_folds) if data[i] is not None]
+        )
+    elif isinstance(data[0], scipy.sparse.spmatrix):
+        return scipy.sparse.vstack(
+            [data[i] for i in range(num_cv_folds) if data[i] is not None]
+        )
+    elif isinstance(data[0], pd.DataFrame):
+        return pd.concat(
+            [data[i] for i in range(num_cv_folds) if data[i] is not None],
+            axis=0,
+        )
+    else:
+        raise ValueError(f"Unknown datatype {type(data[0])}")
+
+
 class TrainEvaluator(AbstractEvaluator):
     def __init__(
         self,
@@ -474,49 +494,11 @@ class TrainEvaluator(AbstractEvaluator):
                     Y_targets = self.Y_targets
                     Y_train_targets = self.Y_train_targets
 
-                    Y_optimization_preds = np.concatenate(
-                        [
-                            Y_optimization_pred[i]
-                            for i in range(self.num_cv_folds)
-                            if Y_optimization_pred[i] is not None
-                        ]
+                    Y_optimization_pred = concat_data(
+                        Y_optimization_pred, num_cv_folds=self.num_cv_folds
                     )
-
-                    if isinstance(X_targets[0], np.ndarray):
-                        X_targets = np.concatenate(
-                            [
-                                X_targets[i]
-                                for i in range(self.num_cv_folds)
-                                if X_targets[i] is not None
-                            ]
-                        )
-                    elif isinstance(X_targets[0], scipy.sparse.spmatrix):
-                        X_targets = scipy.sparse.vstack(
-                            [
-                                X_targets[i]
-                                for i in range(self.num_cv_folds)
-                                if X_targets[i] is not None
-                            ]
-                        )
-                    elif isinstance(X_targets[0], pd.DataFrame):
-                        X_targets = pd.concat(
-                            [
-                                X_targets[i]
-                                for i in range(self.num_cv_folds)
-                                if X_targets[i] is not None
-                            ],
-                            axis=0,
-                        )
-                    else:
-                        raise ValueError(f"Unknown datatype {type(X_targets[0])}")
-
-                    Y_targets = np.concatenate(
-                        [
-                            Y_targets[i]
-                            for i in range(self.num_cv_folds)
-                            if Y_targets[i] is not None
-                        ]
-                    )
+                    X_targets = concat_data(X_targets, num_cv_folds=self.num_cv_folds)
+                    Y_targets = concat_data(Y_targets, num_cv_folds=self.num_cv_folds)
 
                     if self.X_valid is not None:
                         Y_valid_preds = np.array(
@@ -562,7 +544,7 @@ class TrainEvaluator(AbstractEvaluator):
                     self.finish_up(
                         loss=opt_loss,
                         train_loss=train_loss,
-                        opt_pred=Y_optimization_preds,
+                        opt_pred=Y_optimization_pred,
                         valid_pred=Y_valid_preds,
                         test_pred=Y_test_preds,
                         additional_run_info=additional_run_info,
@@ -696,47 +678,11 @@ class TrainEvaluator(AbstractEvaluator):
             Y_targets = self.Y_targets
             Y_train_targets = self.Y_train_targets
 
-            Y_optimization_pred = np.concatenate(
-                [
-                    Y_optimization_pred[i]
-                    for i in range(self.num_cv_folds)
-                    if Y_optimization_pred[i] is not None
-                ]
+            Y_optimization_pred = concat_data(
+                Y_optimization_pred, num_cv_folds=self.num_cv_folds
             )
-            if isinstance(X_targets[0], np.ndarray):
-                X_targets = np.concatenate(
-                    [
-                        X_targets[i]
-                        for i in range(self.num_cv_folds)
-                        if X_targets[i] is not None
-                    ]
-                )
-            elif isinstance(X_targets[0], scipy.sparse.spmatrix):
-                X_targets = scipy.sparse.vstack(
-                    [
-                        X_targets[i]
-                        for i in range(self.num_cv_folds)
-                        if X_targets[i] is not None
-                    ]
-                )
-            elif isinstance(X_targets[0], pd.DataFrame):
-                X_targets = pd.concat(
-                    [
-                        X_targets[i]
-                        for i in range(self.num_cv_folds)
-                        if X_targets[i] is not None
-                    ],
-                    axis=0,
-                )
-            else:
-                raise ValueError(f"Unknown datatype {type(X_targets[0])}")
-            Y_targets = np.concatenate(
-                [
-                    Y_targets[i]
-                    for i in range(self.num_cv_folds)
-                    if Y_targets[i] is not None
-                ]
-            )
+            X_targets = concat_data(X_targets, num_cv_folds=self.num_cv_folds)
+            Y_targets = concat_data(Y_targets, num_cv_folds=self.num_cv_folds)
 
             if self.X_valid is not None:
                 Y_valid_pred = np.array(
