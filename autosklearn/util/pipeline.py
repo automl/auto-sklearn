@@ -88,7 +88,11 @@ def _get_regression_configuration_space(
     if info["is_sparse"] == 1:
         sparse = True
 
-    dataset_properties = {"multioutput": multioutput, "sparse": sparse}
+    dataset_properties = {
+        "multioutput": multioutput,
+        "sparse": sparse,
+        "feat_type": info["feat_type"],
+    }
 
     configuration_space = SimpleRegressionPipeline(
         dataset_properties=dataset_properties,
@@ -146,6 +150,7 @@ def _get_classification_configuration_space(
         "multilabel": multilabel,
         "multiclass": multiclass,
         "sparse": sparse,
+        "feat_type": info["feat_type"],
     }
 
     return SimpleClassificationPipeline(

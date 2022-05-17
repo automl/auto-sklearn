@@ -51,6 +51,7 @@ class XYDataManager(AbstractDataManager):
         }
 
         self.info["label_num"] = label_num[task]
+        self.info["feat_type"] = feat_type
 
         self.data["X_train"] = X
         self.data["Y_train"] = y
