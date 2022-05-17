@@ -113,12 +113,14 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             random_state=random_state,
             init_params=init_params,
         )
+        self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
+        if "categorical" in dataset_properties["feat_type"].values():
+            self._transformers.append(("categorical_transformer", self.categ_ppl))
+        if "numerical" in dataset_properties["feat_type"].values():
+            self._transformers.append(("numerical_transformer", self.numer_ppl))
+        if "string" in dataset_properties["feat_type"].values():
+            self._transformers.append(("text_transformer", self.txt_ppl))
 
-        self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
-            ("categorical_transformer", self.categ_ppl),
-            ("numerical_transformer", self.numer_ppl),
-            ("text_transformer", self.txt_ppl),
-        ]
         if self.config:
             self.set_hyperparameters(self.config, init_params=init_params)
         self.column_transformer = column_transformer
