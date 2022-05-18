@@ -1553,7 +1553,13 @@ class AutoML(BaseEstimator):
         else:
             self.ensemble_ = None
 
-        # If no ensemble is loaded, try to get the best performing model
+        # If no ensemble is loaded, try to get the best performing model.
+        # This is triggered if
+        # 1. self._ensemble_size == 0 (see if-statement above)
+        # 2. if the ensemble builder crashed and no ensemble is available
+        # 3. if the ensemble cannot be built because of arguments passed
+        #    by the user (disable_evaluator_output and
+        #    resampling_strategy)
         if (
             not self.ensemble_
             and not (
