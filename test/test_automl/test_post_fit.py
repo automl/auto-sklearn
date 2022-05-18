@@ -1,4 +1,5 @@
 from autosklearn.automl import AutoML
+from autosklearn.ensembles.singlebest_ensemble import SingleBest
 
 from pytest_cases import parametrize_with_cases
 
@@ -59,10 +60,10 @@ def test_no_ensemble(automl: AutoML) -> None:
 
     Expects
     -------
-    * The ensemble should remain None
-    * The models_ should be empty
+    * Auto-sklearn loads a single best model
+    * The models_ should be of size 1
     * The cv_models_ should remain None
     """
-    assert automl.ensemble_ is None
-    assert automl.models_ == []
+    assert isinstance(automl.ensemble_, SingleBest)
+    assert len(automl.models_) == 1
     assert automl.cv_models_ is None
