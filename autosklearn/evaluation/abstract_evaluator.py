@@ -25,7 +25,10 @@ from autosklearn.constants import (
     MULTIOUTPUT_REGRESSION,
     REGRESSION_TASKS,
 )
-from autosklearn.data.validation import SUPPORTED_TARGET_TYPES
+from autosklearn.data.target_validator import (
+    SUPPORTED_TARGET_TYPES,
+    SUPPORTED_XDATA_TYPES,
+)
 from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents, _addons
 from autosklearn.pipeline.implementations.util import (
@@ -274,7 +277,7 @@ class AbstractEvaluator(object):
                 port=self.port,
             )
 
-        self.X_optimization: Optional[SUPPORTED_TARGET_TYPES] = None
+        self.X_optimization: Optional[SUPPORTED_XDATA_TYPES] = None
         self.Y_optimization: Optional[SUPPORTED_TARGET_TYPES] = None
         self.Y_actual_train = None
 
@@ -330,7 +333,7 @@ class AbstractEvaluator(object):
         self,
         y_true: np.ndarray,
         y_hat: np.ndarray,
-        x_data: Optional[np.ndarray] = None,
+        x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
     ) -> Dict[str, float]:
         """Auto-sklearn follows a minimization goal.
         The calculate_loss internally translate a score function to

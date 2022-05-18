@@ -19,6 +19,7 @@ from autosklearn.constants import (
     REGRESSION_TASKS,
     TASK_TYPES,
 )
+from autosklearn.data.target_validator import SUPPORTED_XDATA_TYPES
 
 from .util import sanitize_array
 
@@ -446,7 +447,7 @@ def calculate_scores(
     task_type: int,
     metrics: Sequence[Scorer],
     *,
-    x_data: Optional[np.ndarray] = None,
+    x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
@@ -543,7 +544,7 @@ def calculate_losses(
     task_type: int,
     metrics: Sequence[Scorer],
     *,
-    x_data: Optional[np.ndarray] = None,
+    x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
@@ -638,7 +639,7 @@ def _compute_single_scorer(
     prediction: np.ndarray,
     solution: np.ndarray,
     task_type: int,
-    x_data: Optional[np.ndarray] = None,
+    x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
 ) -> float:
     """
     Returns a score (a magnitude that allows casting the
