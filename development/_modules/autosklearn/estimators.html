@@ -192,7 +192,8 @@
 <span class="sd">        ensemble_size : int, optional (default=50)</span>
 <span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
 <span class="sd">            selection from libraries of models*. Models are drawn with</span>
-<span class="sd">            replacement. If set to ``0`` no ensemble is fit.</span>
+<span class="sd">            replacement. If set to ``0`` no ensemble is fit and the single</span>
+<span class="sd">            best model is loaded.</span>
 
 <span class="sd">        ensemble_nbest : int, optional (default=50)</span>
 <span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
@@ -638,9 +639,6 @@
 
 <span class="sd">        All parameters are ``None`` by default. If no other value is given,</span>
 <span class="sd">        the default values which were set in a call to ``fit()`` are used.</span>
-
-<span class="sd">        Calling this function is only necessary if ``ensemble_size==0``, for</span>
-<span class="sd">        example when executing *auto-sklearn* in parallel.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>

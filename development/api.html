@@ -160,7 +160,8 @@ should start from scratch.</p>
 </dd>
 <dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
-replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit and the single
+best model is loaded.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
 ensemble.</p>
@@ -443,8 +444,6 @@ md5 hash of the dataset.</p>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
-<p>Calling this function is only necessary if <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>, for
-example when executing <em>auto-sklearn</em> in parallel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -1019,8 +1018,6 @@ md5 hash of the dataset.</p>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
-<p>Calling this function is only necessary if <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>, for
-example when executing <em>auto-sklearn</em> in parallel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -1472,7 +1469,8 @@ should start from scratch.</p>
 </dd>
 <dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
-replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit and the single
+best model is loaded.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
 ensemble.</p>
@@ -1753,8 +1751,6 @@ md5 hash of the dataset.</p>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
-<p>Calling this function is only necessary if <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>, for
-example when executing <em>auto-sklearn</em> in parallel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
