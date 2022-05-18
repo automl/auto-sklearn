@@ -264,7 +264,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             Not all keys returned by scikit-learn are supported yet.
 
         """  # noqa (links are too long)
-
+        self.required_training = False  # Boolean to indicate if selectors were trained.
         include_estimators = [
             "extra_trees",
             "passive_aggressive",
@@ -351,6 +351,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             maxima_for_methods = training_data["maxima_for_methods"]
             default_strategies = training_data["tie_break_order"]
             if not self.selector_files[metric.name].exists():
+                self.required_training = True
                 selector = autosklearn.experimental.selector.OVORF(
                     configuration=training_data["configuration"],
                     random_state=np.random.RandomState(1),

@@ -1176,6 +1176,21 @@ def test_askl2_fits_selector_for_given_metrics_at_init(metric):
             str(automl.selector_files[metric.name])
         )  # check if the path exists
 
+        # check if selector is retrained when
+        # another object with the same metric is created
+        automl_1 = AutoSklearn2Classifier(
+            time_left_for_this_task=60,
+            delete_tmp_folder_after_terminate=False,
+            metric=metric,
+        )
+        assert (
+            len(automl_1.selector_files) == 1
+        )  # only one selector file should have been created
+        assert os.path.exists(
+            str(automl_1.selector_files[metric.name])
+        )  # check if the path exists
+        assert not automl_1.required_training
+
     clear_folder(selector_path)
 
 
