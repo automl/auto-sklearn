@@ -1396,6 +1396,10 @@ class AutoML(BaseEstimator):
                 "Predict is currently not implemented for resampling "
                 f"strategy {self._resampling_strategy}, please call refit()."
             )
+        elif self._disable_evaluator_output is not False:
+            raise NotImplementedError(
+                "Predict cannot be called when evaluator output is disabled."
+            )
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
@@ -1577,25 +1581,19 @@ class AutoML(BaseEstimator):
         ):
             self.ensemble_ = self._load_best_individual_model()
 
-        identifiers = self.ensemble_.get_selected_model_identifiers()
-        self.models_ = self._backend.load_models_by_identifiers(identifiers)
+        if self.ensemble_ is not None:
+            identifiers = self.ensemble_.get_selected_model_identifiers()
+            self.models_ = self._backend.load_models_by_identifiers(identifiers)
 
-        if self._resampling_strategy in ("cv", "cv-iterative-fit"):
-            self.cv_models_ = self._backend.load_cv_models_by_identifiers(identifiers)
+            if self._resampling_strategy in ("cv", "cv-iterative-fit"):
+                self.cv_models_ = self._backend.load_cv_models_by_identifiers(
+                    identifiers
+                )
+            else:
+                self.cv_models_ = None
         else:
-            self.cv_models_ = None
-
-        if len(self.models_) == 0 and self._resampling_strategy not in [
-            "partial-cv",
-            "partial-cv-iterative-fit",
-        ]:
-            raise ValueError("No models fitted!")
-
-        elif (
-            self._resampling_strategy in ["cv", "cv-iterative-fit"]
-            and len(self.cv_models_) == 0
-        ):
-            raise ValueError("No models fitted!")
+            self.models_ = []
+            self.cv_models_ = []
 
     def _load_best_individual_model(self):
         """
