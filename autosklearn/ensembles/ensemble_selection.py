@@ -20,6 +20,10 @@ class EnsembleSelection(AbstractEnsemble):
         metric: Scorer,
         bagging: bool = False,
         mode: str = "fast",
+        use_best: bool = False,
+        tie_breaker_default: str = "random",
+        tie_breaker_metric: Optional[Scorer] = None,
+        round_losses: bool = False,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
         """An ensemble of selected algorithms
@@ -32,13 +36,54 @@ class EnsembleSelection(AbstractEnsemble):
         task_type: int
             An identifier indicating which task is being performed.
         metric: Scorer
-            The metric used to evaluate the models
+            The metric used to evaluate the selected ensembles. Used as a loss.
         bagging: bool = False
             Whether to use bagging in ensemble selection
         mode: str in ['fast', 'slow'] = 'fast'
             Which kind of ensemble generation to use
             *   'slow' - The original method used in Rich Caruana's ensemble selection.
             *   'fast' - A faster version of Rich Caruanas' ensemble selection.
+        use_best: bool = False
+            If True, ensemble selection returns the best ensemble found during the
+            greedy search. If False, it returns the last ensemble found. This dynamical
+            changes the ensemble_size to a number in [1, ensemble_size].
+        tie_breaker_default: str in ['random', 'first']
+            The default tie breaker strategy that is used.
+            *   'random' - Randomly select an element from the list of best ensembles in
+                           case of ties. This can generate better weight vectors (better
+                            ensemble performance).
+            *   'first' - Select the first element from the list of best ensembles in
+                          case of ties. This can generate smaller ensembles such that
+                          less base models are needed (better ensemble efficiency).
+            The default tie breaker strategy is also used if a second metric can not
+            break the tie fully. To some extent, the selected strategy is always the
+             fall-back or final tie breaker.
+        tie_breaker_metric: Scorer = None
+            If None, ensemble ties are broken mainly based on tie_breaker_default.
+            If not None, a Scorer metric is expected. This metric is used to break ties
+            of ensembles. If any ties remain, tie_breaker_default is used.
+        round_losses: bool = False
+            If True, the loss computed during the evaluation of an ensemble is rounded
+            to 6 decimals. Rounding is disabled if the loss values are very small
+            (<1e-4) to avoid falsifying the result for evaluations with small losses.
+
+            Rounding avoids that the loss will differ only as a result of floating-point
+            errors. Assuming multiple losses are equal (with perfect precision) but were
+            computed with different starting values by different base models, it might
+            be that a floating-point error makes one loss smaller than the other. Then,
+            the minimum would be selected and instead of selecting all models with equal
+            loss, only the one model with the smallest loss is selected because it had
+            more "luck" with floating-point errors.
+
+            This is bad because it avoids ties, which we could break based on a second
+            metric or which we could break by randomness/first selection. In the case
+            of a second metric, the scores might differ more drastically and thus we
+            want to round the losses to achieve the tie. In the case of randomness, the
+            probability to select a base model would be incorrect without rounding (if a
+            model is not in the set of ties even with theoretical equal loss, it has no
+            chance of being selected). In case of selecting the first element from a
+            tie, the ensemble size would be unnecessarily inflated without rounding.
+
 
         random_state: Optional[int | RandomState] = None
             The random_state used for ensemble selection.
@@ -52,6 +97,10 @@ class EnsembleSelection(AbstractEnsemble):
         self.metric = metric
         self.bagging = bagging
         self.mode = mode
+        self.use_best = use_best
+        self.tie_breaker_default = tie_breaker_default
+        self.tie_breaker_metric = tie_breaker_metric
+        self.round_losses = round_losses
 
         # Behaviour similar to sklearn
         #   int - Deteriministic with succesive calls to fit
@@ -69,6 +118,7 @@ class EnsembleSelection(AbstractEnsemble):
         # in the EnsembleSelection so this should
         # be fine
         self.metric = None  # type: ignore
+        self.tie_breaker_metric = None  # type: ignore
         return self.__dict__
 
     def fit(
@@ -92,11 +142,28 @@ class EnsembleSelection(AbstractEnsemble):
             )
         if self.mode not in ("fast", "slow"):
             raise ValueError("Unknown mode %s" % self.mode)
+        if self.tie_breaker_default not in ("random", "first"):
+            raise ValueError(
+                "Unknown tie_breaker_default %s" % self.tie_breaker_default
+            )
+        if (self.tie_breaker_metric is not None) and (
+            not isinstance(self.tie_breaker_metric, Scorer)
+        ):
+            raise ValueError(
+                "The provided tie_breaker_metric must be an instance of Scorer, "
+                "nevertheless it is {}({})".format(
+                    self.tie_breaker_metric,
+                    type(self.tie_breaker_metric),
+                )
+            )
 
         if self.bagging:
             self._bagging(predictions, labels)
         else:
             self._fit(predictions, labels)
+
+        if self.use_best:
+            self._select_best_ensemble()
         self._calculate_weights()
         self.identifiers_ = identifiers
         return self
@@ -124,6 +191,9 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble = []  # type: List[np.ndarray]
         trajectory = []
         order = []
+        rounding_epsilon = 1e-4
+        round_to_decimals = 6
+        tie_break_random = self.tie_breaker_default == "random"
 
         ensemble_size = self.ensemble_size
 
@@ -172,10 +242,57 @@ class EnsembleSelection(AbstractEnsemble):
                     scoring_functions=None,
                 )[self.metric.name]
 
+            # Rounding Losses
+            if self.round_losses and (np.abs(np.nanmin(losses)) > rounding_epsilon):
+                losses = losses.round(round_to_decimals)
+
             all_best = np.argwhere(losses == np.nanmin(losses)).flatten()
 
-            best = rand.choice(all_best)
+            # Tie breaking
+            if len(all_best) > 1:
 
+                # Break Ties with a second metric
+                if self.tie_breaker_metric is not None:
+                    losses_tiebreak = np.zeros((len(all_best)), dtype=np.float64)
+                    fant_ensemble_prediction_tiebreak = np.zeros(
+                        weighted_ensemble_prediction.shape, dtype=np.float64
+                    )
+                    predictions_tiebreak = [
+                        predictions[tied_pred_idx] for tied_pred_idx in all_best
+                    ]
+
+                    # Default Eval Loop from above
+                    # TODO do we want this to become a function?
+                    for j, pred in enumerate(predictions_tiebreak):
+                        np.add(
+                            weighted_ensemble_prediction,
+                            pred,
+                            out=fant_ensemble_prediction_tiebreak,
+                        )
+                        np.multiply(
+                            fant_ensemble_prediction_tiebreak,
+                            (1.0 / float(s + 1)),
+                            out=fant_ensemble_prediction_tiebreak,
+                        )
+
+                        losses_tiebreak[j] = calculate_losses(
+                            solution=labels,
+                            prediction=fant_ensemble_prediction_tiebreak,
+                            task_type=self.task_type,
+                            metrics=[self.tie_breaker_metric],
+                            scoring_functions=None,
+                        )[self.tie_breaker_metric.name]
+
+                    all_best_tied = np.argwhere(
+                        losses_tiebreak == np.nanmin(losses_tiebreak)
+                    ).flatten()
+                    all_best = all_best[all_best_tied]
+
+            # Select one element of all_best
+            # The default case for tie-breaking: select random; else first element
+            best = rand.choice(all_best) if tie_break_random else all_best[0]
+
+            # Save selection data
             ensemble.append(predictions[best])
             trajectory.append(losses[best])
             order.append(best)
@@ -232,6 +349,18 @@ class EnsembleSelection(AbstractEnsemble):
             dtype=np.float64,
         )
         self.train_loss_ = trajectory[-1]
+
+    def _select_best_ensemble(self):
+        """Select the best ensemble based on the trajectories"""
+
+        # Get best ensemble (assuming trajectories are losses as above)
+        idx_best_ensemble = self.trajectory_.index(np.min(self.trajectory_))
+
+        # Make the object only keep all data up until the best ensemble
+        self.indices_ = self.indices_[: idx_best_ensemble + 1]
+        self.ensemble_size = idx_best_ensemble + 1
+        self.train_loss_ = self.trajectory_[idx_best_ensemble]
+        self.trajectory_ = self.trajectory_[: idx_best_ensemble + 1]
 
     def _calculate_weights(self) -> None:
         ensemble_members = Counter(self.indices_).most_common()
