@@ -1281,7 +1281,7 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
 
     predictions = automl_fitted.predict(X_test)
     assert (
-        sklearn.metrics.accuracy_score(y_test, predictions) >= 2 / 3
+        sklearn.metrics.accuracy_score(y_test, predictions) >= 4 / 5
     ), print_debug_information(automl)
 
     pickle.dumps(automl_fitted)
@@ -1310,7 +1310,7 @@ def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
 
     predictions = automl_fitted.predict(X_test)
     assert (
-        sklearn.metrics.accuracy_score(y_test, predictions) >= 2 / 3
+        sklearn.metrics.accuracy_score(y_test, predictions) >= 4 / 5
     ), print_debug_information(automl)
 
     assert "boosting" not in str(automl.get_configuration_space(X=X_train, y=y_train))

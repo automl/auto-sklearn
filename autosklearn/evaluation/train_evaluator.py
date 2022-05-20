@@ -493,7 +493,7 @@ class TrainEvaluator(AbstractEvaluator):
                     Y_targets = self.Y_targets
                     Y_train_targets = self.Y_train_targets
 
-                    Y_optimization_pred = concat_data(
+                    Y_optimization_pred_concat = concat_data(
                         Y_optimization_pred, num_cv_folds=self.num_cv_folds
                     )
                     X_targets = concat_data(X_targets, num_cv_folds=self.num_cv_folds)
@@ -543,7 +543,7 @@ class TrainEvaluator(AbstractEvaluator):
                     self.finish_up(
                         loss=opt_loss,
                         train_loss=train_loss,
-                        opt_pred=Y_optimization_pred,
+                        opt_pred=Y_optimization_pred_concat,
                         valid_pred=Y_valid_preds,
                         test_pred=Y_test_preds,
                         additional_run_info=additional_run_info,
