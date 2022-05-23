@@ -33,13 +33,13 @@ class Scorer(object, metaclass=ABCMeta):
         worst_possible_result: float,
         sign: float,
         kwargs: Any,
-        needs_x: bool = False,
+        needs_X: bool = False,
     ) -> None:
         self.name = name
         self._kwargs = kwargs
         self._score_func = score_func
         self._optimum = optimum
-        self._needs_x = needs_x
+        self._needs_X = needs_X
         self._worst_possible_result = worst_possible_result
         self._sign = sign
 
@@ -75,6 +75,10 @@ class _PredictScorer(Scorer):
         y_pred : array-like, [n_samples x n_classes]
             Model predictions
 
+        x_data : array-like [n_samples x n_features]
+            X data used to obtain the predictions: each row x_j corresponds to the input
+             used to obtain predictions y_j
+
         sample_weight : array-like, optional (default=None)
             Sample weights.
 
@@ -109,13 +113,15 @@ class _PredictScorer(Scorer):
         else:
             raise ValueError(type_true)
 
-        sc_args = {}  # type: Dict[str, Union[List[float], np.ndarray]]
+        scorer_kwargs = {}  # type: Dict[str, Union[List[float], np.ndarray]]
         if sample_weight is not None:
-            sc_args["sample_weight"] = sample_weight
-        if self._needs_x is True:
-            sc_args["x_data"] = x_data
+            scorer_kwargs["sample_weight"] = sample_weight
+        if self._needs_X is True:
+            scorer_kwargs["x_data"] = x_data
 
-        return self._sign * self._score_func(y_true, y_pred, **sc_args, **self._kwargs)
+        return self._sign * self._score_func(
+            y_true, y_pred, **scorer_kwargs, **self._kwargs
+        )
 
 
 class _ProbaScorer(Scorer):
@@ -135,6 +141,10 @@ class _ProbaScorer(Scorer):
 
         y_pred : array-like, [n_samples x n_classes]
             Model predictions
+
+        x_data : array-like [n_samples x n_features]
+            X data used to obtain the predictions: each row x_j corresponds to the input
+             used to obtain predictions y_j
 
         sample_weight : array-like, optional (default=None)
             Sample weights.
@@ -163,13 +173,15 @@ class _ProbaScorer(Scorer):
                         y_true, y_pred, labels=labels, **self._kwargs
                     )
 
-        sc_args = {}  # type: Dict[str, Union[List[float], np.ndarray]]
+        scorer_kwargs = {}  # type: Dict[str, Union[List[float], np.ndarray]]
         if sample_weight is not None:
-            sc_args["sample_weight"] = sample_weight
-        if self._needs_x is True:
-            sc_args["x_data"] = x_data
+            scorer_kwargs["sample_weight"] = sample_weight
+        if self._needs_X is True:
+            scorer_kwargs["x_data"] = x_data
 
-        return self._sign * self._score_func(y_true, y_pred, **sc_args, **self._kwargs)
+        return self._sign * self._score_func(
+            y_true, y_pred, **scorer_kwargs, **self._kwargs
+        )
 
 
 class _ThresholdScorer(Scorer):
@@ -190,6 +202,10 @@ class _ThresholdScorer(Scorer):
         y_pred : array-like, [n_samples x n_classes]
             Model predictions
 
+        x_data : array-like [n_samples x n_features]
+            X data used to obtain the predictions: each row x_j corresponds to the input
+             used to obtain predictions y_j
+
         sample_weight : array-like, optional (default=None)
             Sample weights.
 
@@ -208,13 +224,15 @@ class _ThresholdScorer(Scorer):
         elif isinstance(y_pred, list):
             y_pred = np.vstack([p[:, -1] for p in y_pred]).T
 
-        sc_args = {}  # type: Dict[str, Union[List[float], np.ndarray]]
+        scorer_kwargs = {}  # type: Dict[str, Union[List[float], np.ndarray]]
         if sample_weight is not None:
-            sc_args["sample_weight"] = sample_weight
-        if self._needs_x is True:
-            sc_args["x_data"] = x_data
+            scorer_kwargs["sample_weight"] = sample_weight
+        if self._needs_X is True:
+            scorer_kwargs["x_data"] = x_data
 
-        return self._sign * self._score_func(y_true, y_pred, **sc_args, **self._kwargs)
+        return self._sign * self._score_func(
+            y_true, y_pred, **scorer_kwargs, **self._kwargs
+        )
 
 
 def make_scorer(
@@ -226,7 +244,7 @@ def make_scorer(
     greater_is_better: bool = True,
     needs_proba: bool = False,
     needs_threshold: bool = False,
-    needs_x: bool = False,
+    needs_X: bool = False,
     **kwargs: Any,
 ) -> Scorer:
     """Make a scorer from a performance metric or loss function.
@@ -264,7 +282,7 @@ def make_scorer(
         Whether score_func takes a continuous decision certainty.
         This only works for binary classification.
 
-    needs_x : boolean, default=False
+    needs_X : boolean, default=False
         Whether score_func requires X in __call__ to compute a metric.
 
     **kwargs : additional arguments
@@ -290,7 +308,7 @@ def make_scorer(
     else:
         cls = _PredictScorer
     return cls(
-        name, score_func, optimum, worst_possible_result, sign, kwargs, needs_x=needs_x
+        name, score_func, optimum, worst_possible_result, sign, kwargs, needs_X=needs_X
     )
 
 
@@ -467,6 +485,8 @@ def calculate_scores(
     metrics: Sequence[Scorer]
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
+    x_data : array-like [n_samples x n_features]
+        X data used to obtain the predictions
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
     Returns
@@ -565,7 +585,7 @@ def calculate_losses(
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
     x_data: Optional[np.ndarray]
-        X data necessary for some metrics
+        X data used to obtain the predictions
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
 
@@ -619,6 +639,8 @@ def compute_single_metric(
     metric: Scorer
         Object that host a function to calculate how good the
         prediction is according to the solution.
+    x_data : array-like [n_samples x n_features]
+        X data used to obtain the predictions
 
     Returns
     -------
@@ -658,11 +680,13 @@ def _compute_single_scorer(
     metric: Scorer
         Object that host a function to calculate how good the
         prediction is according to the solution.
+    x_data : array-like [n_samples x n_features]
+        X data used to obtain the predictions
     Returns
     -------
     float
     """
-    if metric._needs_x:
+    if metric._needs_X:
         if x_data is None:
             raise ValueError(
                 f"Metric {metric.name} needs x_data, but x_data is {x_data}"

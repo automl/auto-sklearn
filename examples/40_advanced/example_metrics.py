@@ -46,10 +46,10 @@ def error_wk(solution, prediction, extra_argument):
     return np.mean(solution != prediction)
 
 
-def metric_which_needs_x(solution, prediction, x_data, consider_col, threshold):
+def metric_which_needs_x(solution, prediction, x_data, consider_col, val_threshold):
     # custom function defining accuracy
     assert x_data is not None
-    rel_idx = x_data[:, consider_col] > threshold
+    rel_idx = x_data[:, consider_col] > val_threshold
     return np.mean(solution[rel_idx] == prediction[rel_idx])
 
 
@@ -210,7 +210,7 @@ accuracy_scorer = autosklearn.metrics.make_scorer(
     optimum=1,
     greater_is_better=True,
     needs_proba=False,
-    needs_x=True,
+    needs_X=True,
     needs_threshold=False,
     consider_col=1,
     threshold=20,
@@ -230,6 +230,6 @@ score = metric_which_needs_x(
     predictions,
     x_data=X_test,
     consider_col=1,
-    threshold=18.8,
+    val_threshold=18.8,
 )
 print(f"Error score {score:.3f} using {error_rate.name:s}")
