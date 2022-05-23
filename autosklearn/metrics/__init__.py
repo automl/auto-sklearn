@@ -48,7 +48,7 @@ class Scorer(object, metaclass=ABCMeta):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        x_data: Optional[np.ndarray] = None,
+        X_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         pass
@@ -62,7 +62,7 @@ class _PredictScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        x_data: Optional[np.ndarray] = None,
+        X_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate predicted target values for X relative to y_true.
@@ -75,7 +75,7 @@ class _PredictScorer(Scorer):
         y_pred : array-like, [n_samples x n_classes]
             Model predictions
 
-        x_data : array-like [n_samples x n_features]
+        X_data : array-like [n_samples x n_features]
             X data used to obtain the predictions: each row x_j corresponds to the input
              used to obtain predictions y_j
 
@@ -117,7 +117,7 @@ class _PredictScorer(Scorer):
         if sample_weight is not None:
             scorer_kwargs["sample_weight"] = sample_weight
         if self._needs_X is True:
-            scorer_kwargs["x_data"] = x_data
+            scorer_kwargs["X_data"] = X_data
 
         return self._sign * self._score_func(
             y_true, y_pred, **scorer_kwargs, **self._kwargs
@@ -129,7 +129,7 @@ class _ProbaScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        x_data: Optional[np.ndarray] = None,
+        X_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate predicted probabilities for X relative to y_true.
@@ -142,7 +142,7 @@ class _ProbaScorer(Scorer):
         y_pred : array-like, [n_samples x n_classes]
             Model predictions
 
-        x_data : array-like [n_samples x n_features]
+        X_data : array-like [n_samples x n_features]
             X data used to obtain the predictions: each row x_j corresponds to the input
              used to obtain predictions y_j
 
@@ -177,7 +177,7 @@ class _ProbaScorer(Scorer):
         if sample_weight is not None:
             scorer_kwargs["sample_weight"] = sample_weight
         if self._needs_X is True:
-            scorer_kwargs["x_data"] = x_data
+            scorer_kwargs["X_data"] = X_data
 
         return self._sign * self._score_func(
             y_true, y_pred, **scorer_kwargs, **self._kwargs
@@ -189,7 +189,7 @@ class _ThresholdScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        x_data: Optional[np.ndarray] = None,
+        X_data: Optional[np.ndarray] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate decision function output for X relative to y_true.
@@ -202,7 +202,7 @@ class _ThresholdScorer(Scorer):
         y_pred : array-like, [n_samples x n_classes]
             Model predictions
 
-        x_data : array-like [n_samples x n_features]
+        X_data : array-like [n_samples x n_features]
             X data used to obtain the predictions: each row x_j corresponds to the input
              used to obtain predictions y_j
 
@@ -228,7 +228,7 @@ class _ThresholdScorer(Scorer):
         if sample_weight is not None:
             scorer_kwargs["sample_weight"] = sample_weight
         if self._needs_X is True:
-            scorer_kwargs["x_data"] = x_data
+            scorer_kwargs["X_data"] = X_data
 
         return self._sign * self._score_func(
             y_true, y_pred, **scorer_kwargs, **self._kwargs
@@ -465,7 +465,7 @@ def calculate_scores(
     task_type: int,
     metrics: Sequence[Scorer],
     *,
-    x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
+    X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
@@ -485,7 +485,7 @@ def calculate_scores(
     metrics: Sequence[Scorer]
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
-    x_data : array-like [n_samples x n_features]
+    X_data : array-like [n_samples x n_features]
         X data used to obtain the predictions
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
@@ -512,7 +512,7 @@ def calculate_scores(
                     prediction,
                     solution,
                     task_type,
-                    x_data,
+                    X_data,
                 )
             except ValueError as e:
                 print(e, e.args[0])
@@ -536,7 +536,7 @@ def calculate_scores(
                     prediction,
                     solution,
                     task_type,
-                    x_data,
+                    X_data,
                 )
             except ValueError as e:
                 if e.args[0] == "multiclass format is not supported":
@@ -564,7 +564,7 @@ def calculate_losses(
     task_type: int,
     metrics: Sequence[Scorer],
     *,
-    x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
+    X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
     scoring_functions: Optional[List[Scorer]] = None,
 ) -> Dict[str, float]:
     """
@@ -584,7 +584,7 @@ def calculate_losses(
     metrics: Sequence[Scorer]
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
-    x_data: Optional[np.ndarray]
+    X_data: Optional[np.ndarray]
         X data used to obtain the predictions
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
@@ -597,7 +597,7 @@ def calculate_losses(
     score = calculate_scores(
         solution=solution,
         prediction=prediction,
-        x_data=x_data,
+        X_data=X_data,
         task_type=task_type,
         metrics=metrics,
         scoring_functions=scoring_functions,
@@ -621,7 +621,7 @@ def compute_single_metric(
     prediction: np.ndarray,
     solution: np.ndarray,
     task_type: int,
-    x_data: Optional[np.ndarray] = None,
+    X_data: Optional[np.ndarray] = None,
 ) -> float:
     """
     Returns a metric for the given Auto-Sklearn Scorer object.
@@ -639,7 +639,7 @@ def compute_single_metric(
     metric: Scorer
         Object that host a function to calculate how good the
         prediction is according to the solution.
-    x_data : array-like [n_samples x n_features]
+    X_data : array-like [n_samples x n_features]
         X data used to obtain the predictions
 
     Returns
@@ -650,7 +650,7 @@ def compute_single_metric(
         solution=solution,
         prediction=prediction,
         metric=metric,
-        x_data=x_data,
+        X_data=X_data,
         task_type=task_type,
     )
     return metric._sign * score
@@ -661,7 +661,7 @@ def _compute_single_scorer(
     prediction: np.ndarray,
     solution: np.ndarray,
     task_type: int,
-    x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
+    X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
 ) -> float:
     """
     Returns a score (a magnitude that allows casting the
@@ -680,28 +680,28 @@ def _compute_single_scorer(
     metric: Scorer
         Object that host a function to calculate how good the
         prediction is according to the solution.
-    x_data : array-like [n_samples x n_features]
+    X_data : array-like [n_samples x n_features]
         X data used to obtain the predictions
     Returns
     -------
     float
     """
     if metric._needs_X:
-        if x_data is None:
+        if X_data is None:
             raise ValueError(
-                f"Metric {metric.name} needs x_data, but x_data is {x_data}"
+                f"Metric {metric.name} needs X_data, but X_data is {X_data}"
             )
-        elif x_data.shape[0] != solution.shape[0]:
+        elif X_data.shape[0] != solution.shape[0]:
             raise ValueError(
-                f"x_data has wrong length. "
-                f"Should be {solution.shape[0]}, but is {x_data.shape[0]}"
+                f"X_data has wrong length. "
+                f"Should be {solution.shape[0]}, but is {X_data.shape[0]}"
             )
         if task_type in REGRESSION_TASKS:
             # TODO put this into the regression metric itself
             cprediction = sanitize_array(prediction)
-            score = metric(solution, cprediction, x_data=x_data)
+            score = metric(solution, cprediction, X_data=X_data)
         else:
-            score = metric(solution, prediction, x_data=x_data)
+            score = metric(solution, prediction, X_data=X_data)
         return score
 
     if task_type in REGRESSION_TASKS:

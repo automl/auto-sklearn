@@ -434,7 +434,7 @@ class TrainEvaluator(AbstractEvaluator):
                             if hasattr(self.Y_train, "iloc")
                             else self.Y_train[train_indices],
                             train_pred,
-                            x_data=Xt_array[i],
+                            X_data=Xt_array[i],
                         )
                         train_losses[i] = train_loss
                         # Number of training data points for this fold.
@@ -443,7 +443,7 @@ class TrainEvaluator(AbstractEvaluator):
 
                         # Compute validation loss of this fold and store it.
                         optimization_loss = self._loss(
-                            self.Y_targets[i], opt_pred, x_data=self.X_targets[i]
+                            self.Y_targets[i], opt_pred, X_data=self.X_targets[i]
                         )
                         opt_losses[i] = optimization_loss
                         # number of optimization data points for this fold.
@@ -629,7 +629,7 @@ class TrainEvaluator(AbstractEvaluator):
                 train_loss = self._loss(
                     self.Y_train_targets[train_split],
                     train_pred,
-                    x_data=self.X_train.iloc[train_split]
+                    X_data=self.X_train.iloc[train_split]
                     if hasattr(self.X_train, "iloc")
                     else self.X_train[train_split],
                 )
@@ -640,7 +640,7 @@ class TrainEvaluator(AbstractEvaluator):
 
                 # Compute validation loss of this fold and store it.
                 optimization_loss = self._loss(
-                    self.Y_targets[i], opt_pred, x_data=self.X_targets[i]
+                    self.Y_targets[i], opt_pred, X_data=self.X_targets[i]
                 )
                 opt_losses.append(optimization_loss)
                 # number of optimization data points for this fold. Used for weighting

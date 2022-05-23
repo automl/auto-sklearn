@@ -46,10 +46,10 @@ def error_wk(solution, prediction, extra_argument):
     return np.mean(solution != prediction)
 
 
-def metric_which_needs_x(solution, prediction, x_data, consider_col, val_threshold):
+def metric_which_needs_x(solution, prediction, X_data, consider_col, val_threshold):
     # custom function defining accuracy
-    assert x_data is not None
-    rel_idx = x_data[:, consider_col] > val_threshold
+    assert X_data is not None
+    rel_idx = X_data[:, consider_col] > val_threshold
     return np.mean(solution[rel_idx] == prediction[rel_idx])
 
 
@@ -199,7 +199,7 @@ print(f"Error score {score:.3f} using {error_rate.name:s}")
 # Sixth example: Use a metric with additional argument which also needs xdata
 # ===============================================================
 """
-Finally, *Auto-sklearn* also support metric that require the train data (aka x_data) to
+Finally, *Auto-sklearn* also support metric that require the train data (aka X_data) to
 compute a value. This can be useful if one only cares about the score on a subset of the
 data.
 """
@@ -228,7 +228,7 @@ predictions = cls.predict(X_test)
 score = metric_which_needs_x(
     y_test,
     predictions,
-    x_data=X_test,
+    X_data=X_test,
     consider_col=1,
     val_threshold=18.8,
 )

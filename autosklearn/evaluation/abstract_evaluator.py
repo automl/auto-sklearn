@@ -333,7 +333,7 @@ class AbstractEvaluator(object):
         self,
         y_true: np.ndarray,
         y_hat: np.ndarray,
-        x_data: Optional[SUPPORTED_XDATA_TYPES] = None,
+        X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
     ) -> Dict[str, float]:
         """Auto-sklearn follows a minimization goal.
         The calculate_loss internally translate a score function to
@@ -360,7 +360,7 @@ class AbstractEvaluator(object):
                 y_hat,
                 self.task_type,
                 self.metrics,
-                x_data=x_data,
+                X_data=X_data,
                 scoring_functions=self.scoring_functions,
             )
 
