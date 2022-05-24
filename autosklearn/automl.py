@@ -2010,11 +2010,17 @@ class AutoML(BaseEstimator):
             )
         )[0]
         if len(idx_success) > 0:
+            key = (
+                "mean_test_score"
+                if len(self._metrics) == 1
+                else f"mean_test_" f"{self._metrics[0].name}"
+            )
+
             if not self._metrics[0]._optimum:
-                idx_best_run = np.argmin(cv_results["mean_test_score"][idx_success])
+                idx_best_run = np.argmin(cv_results[key][idx_success])
             else:
-                idx_best_run = np.argmax(cv_results["mean_test_score"][idx_success])
-            best_score = cv_results["mean_test_score"][idx_success][idx_best_run]
+                idx_best_run = np.argmax(cv_results[key][idx_success])
+            best_score = cv_results[key][idx_success][idx_best_run]
             sio.write("  Best validation score: %f\n" % best_score)
         num_runs = len(cv_results["status"])
         sio.write("  Number of target algorithm runs: %d\n" % num_runs)

@@ -78,7 +78,7 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
 
     assert mock_fit.call_count == 1
     # Check that the ids of runs in the ensemble were all candidates
-    candidates = mock_fit.call_args.kwargs["candidates"]
+    candidates = mock_fit.call_args[1]["candidates"]
     candidate_ids = {run.id for run in candidates}
     assert ensemble_ids <= candidate_ids
 

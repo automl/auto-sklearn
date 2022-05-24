@@ -86,7 +86,7 @@ def test__load_pareto_front(automl: AutoML) -> None:
     """
     # Check that the predict function works
     X = np.array([[1.0, 1.0, 1.0, 1.0]])
-    print(automl.predict(X))
+
     assert automl.predict_proba(X).shape == (1, 3)
     assert automl.predict(X).shape == (1,)
 
@@ -98,3 +98,9 @@ def test__load_pareto_front(automl: AutoML) -> None:
         assert y_pred.shape == (1, 3)
         y_pred = ensemble.predict(X)
         assert y_pred in ["setosa", "versicolor", "virginica"]
+
+    statistics = automl.sprint_statistics()
+    assert "Metrics" in statistics
+    assert ("Best validation score: 0.9" in statistics) or (
+        "Best validation score: 1.0" in statistics
+    ), statistics
