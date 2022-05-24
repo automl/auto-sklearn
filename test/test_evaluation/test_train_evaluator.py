@@ -816,7 +816,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         )
 
         self.assertEqual(rval, (None, {}))
-        self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 1)
+        self.assertEqual(self.backend_mock.save_additional_data.call_count, 2)
         self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 1)
         self.assertEqual(
             self.backend_mock.save_numrun_to_dir.call_args_list[-1][1].keys(),
@@ -845,7 +845,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             D.data["Y_test"],
         )
         self.assertEqual(rval, (None, {}))
-        self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 2)
+        self.assertEqual(self.backend_mock.save_additional_data.call_count, 4)
         self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 2)
         self.assertEqual(
             self.backend_mock.save_numrun_to_dir.call_args_list[-1][1].keys(),
@@ -1109,6 +1109,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.file_output.return_value = (None, {})
         evaluator.model = unittest.mock.Mock()
         evaluator.model.estimator_supports_iterative_fit.return_value = False
+        evaluator.X_targets[0] = np.array([1, 0] * 23)
         evaluator.Y_targets[0] = np.array([1] * 23)
         evaluator.Y_train_targets = np.array([1] * 69)
         rval = evaluator.fit_predict_and_loss(iterative=False)
@@ -1269,6 +1270,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(finish_up_mock.call_count, 1)
         self.assertEqual(finish_up_mock.call_args[1]["additional_run_info"], 14678)
 
+    @unittest.mock.patch("autosklearn.evaluation.train_evaluator.concat_data")
     @unittest.mock.patch.object(TrainEvaluator, "_loss")
     @unittest.mock.patch.object(TrainEvaluator, "finish_up")
     @unittest.mock.patch("autosklearn.automl_common.common.utils.backend.Backend")
@@ -1281,6 +1283,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_mock,
         finish_up_mock,
         loss_mock,
+        _,
     ):
         class Counter:
             counter = 0
@@ -1330,6 +1333,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             finish_up_mock.call_args[1]["additional_run_info"], {"val": 14678}
         )
 
+    @unittest.mock.patch("autosklearn.evaluation.train_evaluator.concat_data")
     @unittest.mock.patch.object(TrainEvaluator, "_loss")
     @unittest.mock.patch.object(TrainEvaluator, "finish_up")
     @unittest.mock.patch("autosklearn.automl_common.common.utils.backend.Backend")
@@ -1337,11 +1341,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         "autosklearn.pipeline.classification.SimpleClassificationPipeline"
     )
     def test_fit_predict_and_loss_budget_2_additional_run_info(
-        self,
-        mock,
-        backend_mock,
-        finish_up_mock,
-        loss_mock,
+        self, mock, backend_mock, finish_up_mock, loss_mock, _
     ):
         mock.estimator_supports_iterative_fit.return_value = False
         mock.fit_transformer.return_value = ("Xt", {})

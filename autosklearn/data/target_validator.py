@@ -17,6 +17,7 @@ from sklearn.utils.multiclass import type_of_target
 from autosklearn.util.logging_ import PickableLoggerAdapter
 
 SUPPORTED_TARGET_TYPES = Union[List, pd.Series, pd.DataFrame, np.ndarray, spmatrix]
+SUPPORTED_XDATA_TYPES = Union[pd.Series, pd.DataFrame, np.ndarray, spmatrix]
 
 
 class TargetValidator(BaseEstimator):
