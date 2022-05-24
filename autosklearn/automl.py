@@ -1779,12 +1779,12 @@ class AutoML(BaseEstimator):
                 time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(run_value.endtime))
             )
             cost = run_value.cost
+            train_loss = run_value.additional_info["train_loss"]
             if len(self._metrics) > 1:
                 cost = cost[0]
+                train_loss = train_loss[0]
             val_score = metric._optimum - (metric._sign * cost)
-            train_score = metric._optimum - (
-                metric._sign * run_value.additional_info["train_loss"]
-            )
+            train_score = metric._optimum - (metric._sign * train_loss)
             scores = {
                 "Timestamp": endtime,
                 "single_best_optimization_score": val_score,

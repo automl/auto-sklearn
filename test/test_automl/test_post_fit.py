@@ -1,3 +1,6 @@
+import numpy as np
+from sklearn.ensemble import VotingClassifier, VotingRegressor
+
 from autosklearn.automl import AutoML
 
 from pytest_cases import parametrize_with_cases
@@ -66,3 +69,32 @@ def test_no_ensemble(automl: AutoML) -> None:
     assert automl.ensemble_ is None
     assert len(automl.models_) == 0
     assert len(automl.cv_models_) == 0
+
+
+@parametrize_with_cases("automl", cases, has_tag=["multiobjective"])
+def test__load_pareto_front(automl: AutoML) -> None:
+    """
+    Parameters
+    ----------
+    automl : AutoML
+        An AutoML object fitted with multiple objective metrics
+
+    Expects
+    -------
+    * Auto-sklearn can predict and has a model
+    * _load_pareto_front returns one scikit-learn ensemble
+    """
+    # Check that the predict function works
+    X = np.array([[1.0, 1.0, 1.0, 1.0]])
+    print(automl.predict(X))
+    assert automl.predict_proba(X).shape == (1, 3)
+    assert automl.predict(X).shape == (1,)
+
+    pareto_front = automl._load_pareto_front()
+    assert len(pareto_front) == 1
+    for ensemble in pareto_front:
+        assert isinstance(ensemble, (VotingClassifier, VotingRegressor))
+        y_pred = ensemble.predict_proba(X)
+        assert y_pred.shape == (1, 3)
+        y_pred = ensemble.predict(X)
+        assert y_pred in ["setosa", "versicolor", "virginica"]
