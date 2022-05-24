@@ -197,7 +197,7 @@ print(f"Error score {score:.3f} using {error_rate.name:s}")
 
 #############################################################################
 # Sixth example: Use a metric with additional argument which also needs xdata
-# ===============================================================
+# ===========================================================================
 """
 Finally, *Auto-sklearn* also support metric that require the train data (aka X_data) to
 compute a value. This can be useful if one only cares about the score on a subset of the
