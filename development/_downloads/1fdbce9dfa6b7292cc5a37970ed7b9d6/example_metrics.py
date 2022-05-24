@@ -46,6 +46,13 @@ def error_wk(solution, prediction, extra_argument):
     return np.mean(solution != prediction)
 
 
+def metric_which_needs_x(solution, prediction, X_data, consider_col, val_threshold):
+    # custom function defining accuracy
+    assert X_data is not None
+    rel_idx = X_data[:, consider_col] > val_threshold
+    return np.mean(solution[rel_idx] == prediction[rel_idx])
+
+
 ############################################################################
 # Data Loading
 # ============
@@ -185,4 +192,44 @@ cls.fit(X_train, y_train)
 
 predictions = cls.predict(X_test)
 score = error_rate(y_test, predictions)
+print(f"Error score {score:.3f} using {error_rate.name:s}")
+
+
+#############################################################################
+# Sixth example: Use a metric with additional argument which also needs xdata
+# ===========================================================================
+"""
+Finally, *Auto-sklearn* also support metric that require the train data (aka X_data) to
+compute a value. This can be useful if one only cares about the score on a subset of the
+data.
+"""
+
+accuracy_scorer = autosklearn.metrics.make_scorer(
+    name="accu_X",
+    score_func=metric_which_needs_x,
+    optimum=1,
+    greater_is_better=True,
+    needs_proba=False,
+    needs_X=True,
+    needs_threshold=False,
+    consider_col=1,
+    val_threshold=18.8,
+)
+cls = autosklearn.classification.AutoSklearnClassifier(
+    time_left_for_this_task=60,
+    per_run_time_limit=30,
+    seed=1,
+    metric=accuracy_scorer,
+    ensemble_size=0,
+)
+cls.fit(X_train, y_train)
+
+predictions = cls.predict(X_test)
+score = metric_which_needs_x(
+    y_test,
+    predictions,
+    X_data=X_test,
+    consider_col=1,
+    val_threshold=18.8,
+)
 print(f"Error score {score:.3f} using {error_rate.name:s}")

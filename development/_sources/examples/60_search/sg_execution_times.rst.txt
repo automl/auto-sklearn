@@ -5,16 +5,16 @@
 
 Computation times
 =================
-**09:41.163** total execution time for **examples_60_search** files:
+**10:13.516** total execution time for **examples_60_search** files:
 
 +--------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_60_search_example_successive_halving.py` (``example_successive_halving.py``)                     | 03:01.019 | 0.0 MB |
+| :ref:`sphx_glr_examples_60_search_example_successive_halving.py` (``example_successive_halving.py``)                     | 03:09.372 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py` (``example_parallel_n_jobs.py``)                           | 02:08.345 | 0.0 MB |
+| :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py` (``example_parallel_n_jobs.py``)                           | 02:10.900 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_60_search_example_sequential.py` (``example_sequential.py``)                                     | 02:00.857 | 0.0 MB |
+| :ref:`sphx_glr_examples_60_search_example_sequential.py` (``example_sequential.py``)                                     | 02:05.789 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_60_search_example_random_search.py` (``example_random_search.py``)                               | 01:50.195 | 0.0 MB |
+| :ref:`sphx_glr_examples_60_search_example_random_search.py` (``example_random_search.py``)                               | 02:01.854 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py` (``example_parallel_manual_spawning_cli.py``) | 00:40.747 | 0.0 MB |
+| :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py` (``example_parallel_manual_spawning_cli.py``) | 00:45.601 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------------+-----------+--------+

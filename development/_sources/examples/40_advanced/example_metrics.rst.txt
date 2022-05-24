@@ -55,7 +55,7 @@ classification problem.
 Custom Metrics
 ==============
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-49
+.. GENERATED FROM PYTHON SOURCE LINES 27-56
 
 .. code-block:: default
 
@@ -81,6 +81,11 @@ Custom Metrics
         return np.mean(solution != prediction)
 
 
+    def metric_which_needs_x(solution, prediction, X_data, consider_col, val_threshold):
+        # custom function defining accuracy
+        assert X_data is not None
+        rel_idx = X_data[:, consider_col] > val_threshold
+        return np.mean(solution[rel_idx] == prediction[rel_idx])
 
 
 
@@ -88,12 +93,14 @@ Custom Metrics
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-52
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 57-59
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-58
+.. GENERATED FROM PYTHON SOURCE LINES 59-65
 
 .. code-block:: default
 
@@ -110,12 +117,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-61
+.. GENERATED FROM PYTHON SOURCE LINES 66-68
 
 Print a list of available metrics
 =================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-68
+.. GENERATED FROM PYTHON SOURCE LINES 68-75
 
 .. code-block:: default
 
@@ -165,12 +172,12 @@ Print a list of available metrics
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-71
+.. GENERATED FROM PYTHON SOURCE LINES 76-78
 
 First example: Use predefined accuracy metric
 =============================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-87
+.. GENERATED FROM PYTHON SOURCE LINES 78-94
 
 .. code-block:: default
 
@@ -211,12 +218,12 @@ First example: Use predefined accuracy metric
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-90
+.. GENERATED FROM PYTHON SOURCE LINES 95-97
 
 Second example: Use own accuracy metric
 =======================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-113
+.. GENERATED FROM PYTHON SOURCE LINES 97-120
 
 .. code-block:: default
 
@@ -255,17 +262,17 @@ Second example: Use own accuracy metric
 
     ################################################################################
     Use self defined accuracy metric
-    Accuracy score 0.937 using accu
+    Accuracy score 0.951 using accu
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-116
+.. GENERATED FROM PYTHON SOURCE LINES 121-123
 
 Third example: Use own error metric
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-139
+.. GENERATED FROM PYTHON SOURCE LINES 123-146
 
 .. code-block:: default
 
@@ -304,17 +311,17 @@ Third example: Use own error metric
 
     ################################################################################
     Use self defined error metric
-    Error score -0.063 using error
+    Error score -0.049 using error
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 140-142
+.. GENERATED FROM PYTHON SOURCE LINES 147-149
 
 Fourth example: Use own accuracy metric with additional argument
 ================================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-163
+.. GENERATED FROM PYTHON SOURCE LINES 149-170
 
 .. code-block:: default
 
@@ -351,17 +358,17 @@ Fourth example: Use own accuracy metric with additional argument
 
     ################################################################################
     Use self defined accuracy with additional argument
-    Accuracy score 0.937 using accu_add
+    Accuracy score 0.951 using accu_add
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 164-166
+.. GENERATED FROM PYTHON SOURCE LINES 171-173
 
 Fifth example: Use own accuracy metric with additional argument
 ===============================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 166-189
+.. GENERATED FROM PYTHON SOURCE LINES 173-198
 
 .. code-block:: default
 
@@ -392,6 +399,8 @@ Fifth example: Use own accuracy metric with additional argument
 
 
 
+
+
 .. rst-class:: sphx-glr-script-out
 
  Out:
@@ -400,19 +409,80 @@ Fifth example: Use own accuracy metric with additional argument
 
     ################################################################################
     Use self defined error with additional argument
-    [WARNING] [2022-05-18 20:58:43,017:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:58:47,227:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:58:51,271:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:58:52,307:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:00,255:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:02,339:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:03,437:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:08,699:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:14,435:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:20,104:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:21,226:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-    [WARNING] [2022-05-18 20:59:28,085:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:18,462:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:21,924:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:25,198:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:26,038:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:32,413:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:34,060:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:34,915:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:39,243:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:43,978:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:48,841:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:49,862:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:25:55,573:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:26:00,589:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+    [WARNING] [2022-05-24 12:26:01,458:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
     Error score 0.615 using error_add
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 199-201
+
+Sixth example: Use a metric with additional argument which also needs xdata
+===========================================================================
+
+.. GENERATED FROM PYTHON SOURCE LINES 201-236
+
+.. code-block:: default
+
+    """
+    Finally, *Auto-sklearn* also support metric that require the train data (aka X_data) to
+    compute a value. This can be useful if one only cares about the score on a subset of the
+    data.
+    """
+
+    accuracy_scorer = autosklearn.metrics.make_scorer(
+        name="accu_X",
+        score_func=metric_which_needs_x,
+        optimum=1,
+        greater_is_better=True,
+        needs_proba=False,
+        needs_X=True,
+        needs_threshold=False,
+        consider_col=1,
+        val_threshold=18.8,
+    )
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=60,
+        per_run_time_limit=30,
+        seed=1,
+        metric=accuracy_scorer,
+        ensemble_size=0,
+    )
+    cls.fit(X_train, y_train)
+
+    predictions = cls.predict(X_test)
+    score = metric_which_needs_x(
+        y_test,
+        predictions,
+        X_data=X_test,
+        consider_col=1,
+        val_threshold=18.8,
+    )
+    print(f"Error score {score:.3f} using {error_rate.name:s}")
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Error score 0.919 using error_add
 
 
 
@@ -420,7 +490,7 @@ Fifth example: Use own accuracy metric with additional argument
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  43.799 seconds)
+   **Total running time of the script:** ( 6 minutes  23.045 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_metrics.py:

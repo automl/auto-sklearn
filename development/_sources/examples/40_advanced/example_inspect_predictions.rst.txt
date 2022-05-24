@@ -90,14 +90,14 @@ accelerometer and gyroscope data collected by a phone. For more information see
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:189: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
-    Train score 0.9951428571428571
-    Test score 0.9833333333333333
+    Train score 0.9962857142857143
+    Test score 0.984
 
 
 
@@ -154,11 +154,11 @@ in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_i
  .. code-block:: none
 
     gyro_y    : 0.001 +/- 0.001
-    gyro_x    : 0.027 +/- 0.003
-    gyro_z    : 0.041 +/- 0.005
-    acceleration_x: 0.067 +/- 0.007
-    acceleration_z: 0.142 +/- 0.006
-    acceleration_y: 0.264 +/- 0.008
+    gyro_x    : 0.024 +/- 0.003
+    gyro_z    : 0.038 +/- 0.003
+    acceleration_x: 0.051 +/- 0.006
+    acceleration_z: 0.144 +/- 0.006
+    acceleration_y: 0.270 +/- 0.007
 
 
 
@@ -248,7 +248,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  15.203 seconds)
+   **Total running time of the script:** ( 3 minutes  42.058 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:

@@ -115,6 +115,7 @@
 <li><a class="reference internal" href="#third-example-use-own-error-metric">Third example: Use own error metric</a></li>
 <li><a class="reference internal" href="#fourth-example-use-own-accuracy-metric-with-additional-argument">Fourth example: Use own accuracy metric with additional argument</a></li>
 <li><a class="reference internal" href="#fifth-example-use-own-accuracy-metric-with-additional-argument">Fifth example: Use own accuracy metric with additional argument</a></li>
+<li><a class="reference internal" href="#sixth-example-use-a-metric-with-additional-argument-which-also-needs-xdata">Sixth example: Use a metric with additional argument which also needs xdata</a></li>
 </ul>
 </li>
 </ul>
@@ -167,6 +168,13 @@ classification problem.</p>
     <span class="c1"># custom function defining error and accepting an additional argument</span>
     <span class="k">assert</span> <span class="n">extra_argument</span> <span class="ow">is</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">solution</span> <span class="o">!=</span> <span class="n">prediction</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">metric_which_needs_x</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">X_data</span><span class="p">,</span> <span class="n">consider_col</span><span class="p">,</span> <span class="n">val_threshold</span><span class="p">):</span>
+    <span class="c1"># custom function defining accuracy</span>
+    <span class="k">assert</span> <span class="n">X_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">rel_idx</span> <span class="o">=</span> <span class="n">X_data</span><span class="p">[:,</span> <span class="n">consider_col</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">val_threshold</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">solution</span><span class="p">[</span><span class="n">rel_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">prediction</span><span class="p">[</span><span class="n">rel_idx</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -274,7 +282,7 @@ Accuracy score 0.951 using accuracy
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy metric
-Accuracy score 0.937 using accu
+Accuracy score 0.951 using accu
 </pre></div>
 </div>
 </div>
@@ -306,7 +314,7 @@ Accuracy score 0.937 using accu
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined error metric
-Error score -0.063 using error
+Error score -0.049 using error
 </pre></div>
 </div>
 </div>
@@ -336,7 +344,7 @@ Error score -0.063 using error
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined accuracy with additional argument
-Accuracy score 0.937 using accu_add
+Accuracy score 0.951 using accu_add
 </pre></div>
 </div>
 </div>
@@ -369,22 +377,68 @@ Accuracy score 0.937 using accu_add
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>################################################################################
 Use self defined error with additional argument
-[WARNING] [2022-05-18 20:58:43,017:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:58:47,227:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:58:51,271:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:58:52,307:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:00,255:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:02,339:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:03,437:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:08,699:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:14,435:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:20,104:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:21,226:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
-[WARNING] [2022-05-18 20:59:28,085:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:18,462:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:21,924:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:25,198:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:26,038:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:32,413:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:34,060:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:34,915:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:39,243:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:43,978:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:48,841:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:49,862:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:25:55,573:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:26:00,589:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
+[WARNING] [2022-05-24 12:26:01,458:smac.runhistory.runhistory2epm.RunHistory2EPM4LogCost] Got cost of smaller/equal to 0. Replace by 0.000010 since we use log cost.
 Error score 0.615 using error_add
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  43.799 seconds)</p>
+</div>
+<div class="section" id="sixth-example-use-a-metric-with-additional-argument-which-also-needs-xdata">
+<h2>Sixth example: Use a metric with additional argument which also needs xdata<a class="headerlink" href="#sixth-example-use-a-metric-with-additional-argument-which-also-needs-xdata" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Finally, *Auto-sklearn* also support metric that require the train data (aka X_data) to</span>
+<span class="sd">compute a value. This can be useful if one only cares about the score on a subset of the</span>
+<span class="sd">data.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">accuracy_scorer</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">make_scorer</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;accu_X&quot;</span><span class="p">,</span>
+    <span class="n">score_func</span><span class="o">=</span><span class="n">metric_which_needs_x</span><span class="p">,</span>
+    <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">needs_X</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">consider_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">val_threshold</span><span class="o">=</span><span class="mf">18.8</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">accuracy_scorer</span><span class="p">,</span>
+    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">metric_which_needs_x</span><span class="p">(</span>
+    <span class="n">y_test</span><span class="p">,</span>
+    <span class="n">predictions</span><span class="p">,</span>
+    <span class="n">X_data</span><span class="o">=</span><span class="n">X_test</span><span class="p">,</span>
+    <span class="n">consider_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">val_threshold</span><span class="o">=</span><span class="mf">18.8</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error score </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> using </span><span class="si">{</span><span class="n">error_rate</span><span class="o">.</span><span class="n">name</span><span class="si">:</span><span class="s2">s</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Error score 0.919 using error_add
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  23.045 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-metrics-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_metrics.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

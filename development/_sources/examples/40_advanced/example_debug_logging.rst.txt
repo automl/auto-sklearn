@@ -173,15 +173,15 @@ Build and fit a classifier
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:188: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:189: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
-    2022-05-18 20:47:44,431 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-18 20:47:44.413358'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}, {'Timestamp': Timestamp('2022-05-18 20:47:44.413358'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.05.18-20.47.44 for iteration 0.
-    2022-05-18 20:47:48,879 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-18 20:47:48.861657'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}, {'Timestamp': Timestamp('2022-05-18 20:47:48.861657'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.05.18-20.47.48 for iteration 1.
-    tmp_folder/AutoML(1):c1c74a34-d6eb-11ec-87ff-212bc38b9c36.log
-    tmp_folder/distributed.log
-    tmp_folder/.auto-sklearn
-    tmp_folder/space.json
+    2022-05-24 12:14:01,779 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-24 12:14:01.764743'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}, {'Timestamp': Timestamp('2022-05-24 12:14:01.764743'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.05.24-12.14.01 for iteration 0.
+    2022-05-24 12:14:05,444 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-05-24 12:14:05.429275'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}, {'Timestamp': Timestamp('2022-05-24 12:14:05.429275'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.05.24-12.14.05 for iteration 1.
     tmp_folder/smac3-output
+    tmp_folder/AutoML(1):fd1accfd-db5a-11ec-8836-a34ed8fff731.log
+    tmp_folder/space.json
+    tmp_folder/.auto-sklearn
+    tmp_folder/distributed.log
 
 
 
@@ -189,7 +189,7 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.501 seconds)
+   **Total running time of the script:** ( 0 minutes  12.670 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_debug_logging.py:
