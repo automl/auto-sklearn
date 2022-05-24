@@ -11,6 +11,7 @@ from sklearn.utils import check_random_state
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import TASK_TYPES
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.ensemble_building.run import Run
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer, calculate_losses
@@ -104,6 +105,7 @@ class EnsembleSelection(AbstractEnsemble):
     def fit(
         self,
         base_models_predictions: List[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
         runs: Sequence[Run],
@@ -127,7 +129,11 @@ class EnsembleSelection(AbstractEnsemble):
         if self.bagging:
             self._bagging(base_models_predictions, true_targets)
         else:
-            self._fit(base_models_predictions, true_targets)
+            self._fit(
+                predictions=base_models_predictions,
+                X_data=X_data,
+                labels=true_targets,
+            )
         self._calculate_weights()
         self.identifiers_ = model_identifiers
         return self
@@ -135,17 +141,19 @@ class EnsembleSelection(AbstractEnsemble):
     def _fit(
         self,
         predictions: List[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES,
         labels: np.ndarray,
     ) -> EnsembleSelection:
         if self.mode == "fast":
-            self._fast(predictions, labels)
+            self._fast(predictions, X_data, labels)
         else:
-            self._slow(predictions, labels)
+            self._slow(predictions, X_data, labels)
         return self
 
     def _fast(
         self,
         predictions: List[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES,
         labels: np.ndarray,
     ) -> None:
         """Fast version of Rich Caruana's ensemble selection method."""
@@ -200,6 +208,7 @@ class EnsembleSelection(AbstractEnsemble):
                     prediction=fant_ensemble_prediction,
                     task_type=self.task_type,
                     metrics=[self.metric],
+                    X_data=X_data,
                     scoring_functions=None,
                 )[self.metric.name]
 
@@ -219,7 +228,12 @@ class EnsembleSelection(AbstractEnsemble):
         self.trajectory_ = trajectory
         self.train_loss_ = trajectory[-1]
 
-    def _slow(self, predictions: List[np.ndarray], labels: np.ndarray) -> None:
+    def _slow(
+        self,
+        predictions: List[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES,
+        labels: np.ndarray,
+    ) -> None:
         """Rich Caruana's ensemble selection method."""
         self.num_input_models_ = len(predictions)
 
@@ -242,6 +256,7 @@ class EnsembleSelection(AbstractEnsemble):
                     prediction=ensemble_prediction,
                     task_type=self.task_type,
                     metrics=[self.metric],
+                    X_data=X_data,
                     scoring_functions=None,
                 )[self.metric.name]
                 ensemble.pop()

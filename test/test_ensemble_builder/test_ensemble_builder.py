@@ -607,9 +607,10 @@ def test_loss_with_no_ensemble_targets(
     * Should give a loss of np.inf if run has no predictions of a given kind
     """
     run = make_run(predictions=None)
+    X_data = builder.X_data()
     metric = builder.metrics[0]
 
-    assert builder.loss(run, metric=metric, kind=kind) == np.inf
+    assert builder.loss(run, metric=metric, X_data=X_data, kind=kind) == np.inf
 
 
 @parametrize("kind", ["ensemble", "test"])
@@ -623,12 +624,13 @@ def test_loss_with_targets(
     -------
     * Should give a loss < np.inf if the predictions exist
     """
+    X_data = builder.X_data(kind)
     targets = builder.targets(kind)
     metric = builder.metrics[0]
 
     run = make_run(predictions={kind: targets})
 
-    assert builder.loss(run, metric=metric, kind=kind) < np.inf
+    assert builder.loss(run, metric=metric, X_data=X_data, kind=kind) < np.inf
 
 
 def test_delete_runs(builder: EnsembleBuilder, make_run: Callable[..., Run]) -> None:
@@ -680,13 +682,16 @@ def test_fit_ensemble_produces_ensemble(
     -------
     * Should produce an ensemble if all runs have predictions
     """
+    X_data = builder.X_data("ensemble")
     targets = builder.targets("ensemble")
     assert targets is not None
 
     predictions = targets
     runs = [make_run(predictions={"ensemble": predictions}) for _ in range(10)]
 
-    ensemble = builder.fit_ensemble(candidates=runs, targets=targets, runs=runs)
+    ensemble = builder.fit_ensemble(
+        candidates=runs, X_data=X_data, targets=targets, runs=runs
+    )
 
     assert ensemble is not None
 
@@ -701,6 +706,7 @@ def test_fit_with_error_gives_no_ensemble(
     * A run without predictions will raise an error will cause `fit_ensemble` to fail
       as it requires all runs to have valid predictions
     """
+    X_data = builder.X_data("ensemble")
     targets = builder.targets("ensemble")
     assert targets is not None
 
@@ -712,7 +718,7 @@ def test_fit_with_error_gives_no_ensemble(
     runs.append(bad_run)
 
     with pytest.raises(FileNotFoundError):
-        builder.fit_ensemble(candidates=runs, targets=targets, runs=runs)
+        builder.fit_ensemble(candidates=runs, X_data=X_data, targets=targets, runs=runs)
 
 
 @parametrize("time_buffer", [1, 5])

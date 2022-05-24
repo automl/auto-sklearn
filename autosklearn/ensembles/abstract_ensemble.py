@@ -6,6 +6,7 @@ from typing import Dict, List, Sequence, Tuple, Union
 import numpy as np
 
 from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.ensemble_building.run import Run
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
@@ -26,6 +27,7 @@ class AbstractEnsemble(ABC):
     def fit(
         self,
         base_models_predictions: np.ndarray | List[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
         runs: Sequence[Run],
@@ -44,6 +46,8 @@ class AbstractEnsemble(ABC):
 
             Can be a list of 2d numpy arrays as well to prevent copying all
             predictions into a single, large numpy array.
+
+        X_data : list-like or sparse data
 
         true_targets : array of shape [n_targets]
 

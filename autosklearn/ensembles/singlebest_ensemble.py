@@ -8,6 +8,7 @@ import numpy as np
 from smac.runhistory.runhistory import RunHistory
 
 from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.ensemble_building.run import Run
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer
@@ -52,6 +53,7 @@ class SingleBest(AbstractEnsemble):
     def fit(
         self,
         base_models_predictions: np.ndarray | List[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
         runs: Sequence[Run],

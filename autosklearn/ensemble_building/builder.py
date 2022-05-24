@@ -18,6 +18,7 @@ import pynisher
 from sklearn.utils.validation import check_random_state
 
 from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building.run import Run, RunID
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
@@ -169,7 +170,9 @@ class EnsembleBuilder:
 
         # Data we may need
         datamanager: XYDataManager = self.backend.load_datamanager()
+        self._X_test: SUPPORTED_FEAT_TYPES | None = datamanager.data.get("X_test", None)
         self._y_test: np.ndarray | None = datamanager.data.get("Y_test", None)
+        self._X_ensemble: SUPPORTED_FEAT_TYPES | None = None
         self._y_ensemble: np.ndarray | None = None
 
     @property
@@ -222,6 +225,29 @@ class EnsembleBuilder:
 
         elif kind == "test":
             return self._y_test
+
+        else:
+            raise NotImplementedError(kind)
+
+    def X_data(self, kind: str = "ensemble") -> SUPPORTED_FEAT_TYPES:
+        """The ensemble targets used for training the ensemble
+
+        It will attempt to load and cache them in memory but
+        return None if it can't.
+
+        Returns
+        -------
+        np.ndarray | None
+            The ensemble targets, if they can be loaded
+        """
+        if kind == "ensemble":
+            if self._X_ensemble is None:
+                if os.path.exists(self.backend._get_input_ensemble_filename()):
+                    self._X_ensemble = self.backend.load_input_ensemble()
+            return self._X_ensemble
+
+        elif kind == "test":
+            return self._X_test
 
         else:
             raise NotImplementedError(kind)
@@ -424,7 +450,10 @@ class EnsembleBuilder:
         for run in requires_update:
             run.record_modified_times()  # So we don't count as modified next time
             run.losses = {
-                metric.name: self.loss(run, metric=metric) for metric in self.metrics
+                metric.name: self.loss(
+                    run, metric=metric, X_data=self.X_data("ensemble")
+                )
+                for metric in self.metrics
             }
 
         # Get the dummy and real runs
@@ -520,9 +549,11 @@ class EnsembleBuilder:
             return self.ensemble_history, self.ensemble_nbest
 
         targets = cast(np.ndarray, self.targets("ensemble"))  # Sure they exist
+        X_data = self.X_data("ensemble")
 
         ensemble = self.fit_ensemble(
-            candidates,
+            candidates=candidates,
+            X_data=X_data,
             targets=targets,
             runs=runs,
             ensemble_class=self.ensemble_class,
@@ -556,12 +587,14 @@ class EnsembleBuilder:
 
             run_preds = [r.predictions(kind, precision=self.precision) for r in models]
             pred = ensemble.predict(run_preds)
+            X_data = self.X_data(kind)
 
             scores = calculate_scores(
                 solution=pred_targets,
                 prediction=pred,
                 task_type=self.task_type,
                 metrics=self.metrics,
+                X_data=X_data,
                 scoring_functions=None,
             )
             performance_stamp[f"ensemble_{score_name}_score"] = scores[
@@ -773,6 +806,7 @@ class EnsembleBuilder:
     def fit_ensemble(
         self,
         candidates: list[Run],
+        X_data: SUPPORTED_FEAT_TYPES,
         targets: np.ndarray,
         *,
         runs: list[Run],
@@ -793,6 +827,9 @@ class EnsembleBuilder:
         ----------
         candidates: list[Run]
             List of runs to build an ensemble from
+
+        X_data: SUPPORTED_FEAT_TYPES
+            The base level data.
 
         targets: np.ndarray
             The targets to build the ensemble with
@@ -851,6 +888,7 @@ class EnsembleBuilder:
 
         ensemble.fit(
             base_models_predictions=predictions_train,
+            X_data=X_data,
             true_targets=targets,
             model_identifiers=[run.id for run in candidates],
             runs=runs,
@@ -953,7 +991,13 @@ class EnsembleBuilder:
 
         return keep, delete
 
-    def loss(self, run: Run, metric: Scorer, kind: str = "ensemble") -> float:
+    def loss(
+        self,
+        run: Run,
+        metric: Scorer,
+        X_data: SUPPORTED_FEAT_TYPES,
+        kind: str = "ensemble",
+    ) -> float:
         """Calculate the loss for a run
 
         Parameters
@@ -984,6 +1028,7 @@ class EnsembleBuilder:
                 prediction=predictions,
                 task_type=self.task_type,
                 metric=metric,
+                X_data=X_data,
             )
         except Exception as e:
             tb = traceback.format_exc()

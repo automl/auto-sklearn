@@ -22,6 +22,8 @@ def testEnsembleSelection(backend):
 
     # We create a problem such that we encourage the addition of members to the ensemble
     # Fundamentally, the average of 10 sequential number is 5.5
+    # X_data will be ignored and is therefore random
+    X_data = np.random.random(size=(100, 2))
     y_true = np.full((100), 5.5)
     predictions = []
     for i in range(1, 20):
@@ -31,6 +33,7 @@ def testEnsembleSelection(backend):
 
     ensemble.fit(
         base_models_predictions=predictions,
+        X_data=X_data,
         true_targets=y_true,
         model_identifiers=[(i, i, i) for i in range(20)],
         runs=[],

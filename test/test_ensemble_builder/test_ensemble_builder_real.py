@@ -59,8 +59,15 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
     builder.delete_runs = mock_delete  # type: ignore
 
     # So we can capture the candidate runs used, we still wrap the actual fitting
-    with patch.object(builder, "fit_ensemble", wraps=builder.fit_ensemble) as mock_fit:
-        history, nbest = builder.main()
+    with patch(
+        "autosklearn.ensembles.ensemble_selection.EnsembleSelection"
+        ".get_validation_performance"
+    ) as mock_get_validation_performance:
+        mock_get_validation_performance.return_value = 0.2
+        with patch.object(
+            builder, "fit_ensemble", wraps=builder.fit_ensemble
+        ) as mock_fit:
+            history, nbest = builder.main()
 
     # Check the ensemble was fitted once
     mock_save.assert_called_once()
@@ -69,8 +76,9 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
     ensemble_ids = set(ens.get_selected_model_identifiers())
     assert len(ensemble_ids) > 0
 
+    assert mock_fit.call_count == 1
     # Check that the ids of runs in the ensemble were all candidates
-    candidates = mock_fit.call_args[0][0]  # `fit_ensemble(candidates, ...)`
+    candidates = mock_fit.call_args.kwargs["candidates"]
     candidate_ids = {run.id for run in candidates}
     assert ensemble_ids <= candidate_ids
 

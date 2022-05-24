@@ -48,7 +48,7 @@ class Scorer(object, metaclass=ABCMeta):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        X_data: Optional[np.ndarray] = None,
+        X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         pass
@@ -62,7 +62,7 @@ class _PredictScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        X_data: Optional[np.ndarray] = None,
+        X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate predicted target values for X relative to y_true.
@@ -129,7 +129,7 @@ class _ProbaScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        X_data: Optional[np.ndarray] = None,
+        X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate predicted probabilities for X relative to y_true.
@@ -189,7 +189,7 @@ class _ThresholdScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        X_data: Optional[np.ndarray] = None,
+        X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
         """Evaluate decision function output for X relative to y_true.
@@ -563,6 +563,7 @@ def calculate_loss(
     prediction: np.ndarray,
     task_type: int,
     metric: Scorer,
+    X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
 ) -> float:
     """Calculate the loss with a given metric
 
@@ -579,12 +580,16 @@ def calculate_loss(
 
     metric: Scorer
         The metric to use
+
+    X_data: Optional[SUPPORTED_XDATA_TYPES]
+        X data used to obtain the predictions
     """
     losses = calculate_losses(
         solution=solution,
         prediction=prediction,
         task_type=task_type,
         metrics=[metric],
+        X_data=X_data,
     )
     return losses[metric.name]
 
@@ -615,7 +620,7 @@ def calculate_losses(
     metrics: Sequence[Scorer]
         A list of objects that hosts a function to calculate how good the
         prediction is according to the solution.
-    X_data: Optional[np.ndarray]
+    X_data: Optional[SUPPORTED_XDATA_TYPES]
         X data used to obtain the predictions
     scoring_functions: List[Scorer]
         A list of metrics to calculate multiple losses
@@ -652,7 +657,7 @@ def compute_single_metric(
     prediction: np.ndarray,
     solution: np.ndarray,
     task_type: int,
-    X_data: Optional[np.ndarray] = None,
+    X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
 ) -> float:
     """
     Returns a metric for the given Auto-Sklearn Scorer object.
