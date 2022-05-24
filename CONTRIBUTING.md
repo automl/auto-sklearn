@@ -61,7 +61,7 @@ Following that we'll tell you about how you can test your changes locally and th
     # If you missed the --recurse-submodules arg during clone or need to install the
     # submodule manually, then execute the following line:
     #
-    # git submodule udate --init --recursive
+    # git submodule update --init --recursive
     ```
 
     The reason to create a new branch is two fold:
@@ -207,16 +207,16 @@ Sometimes, the new functionality isn't so clear from a simple parameter descript
 Lastly, if the feature really is a game changer or you're very proud of it, consider making an `example_*.py` that will be run and rendered in the online docs!
 
 ## Testing
-*   Let's assume you've made some changes, now we have to make sure they work.
+* Let's assume you've made some changes, now we have to make sure they work.
     Begin by simply running all the tests.
     If there's any errors, they'll pop up once it's complete.
     ```bash
     pytest
     ```
-    *   Note that these may take a while so check out `pytest --help` to see how you can run tests so that only previous failures run or only certain tests are run.
+    * Note that these may take a while so check out `pytest --help` to see how you can run tests so that only previous failures run or only certain tests are run.
         This can help you try changes and get results faster.
         Do however run one last full `pytest` once you are finished and happy!
-    *   Here are some we find particularly useful
+    * Here are some we find particularly useful
         ```
         # Run tests in specific file like 'test_estimators.py'
         pytest "test/test_automl/test_estimators.py"
@@ -236,9 +236,18 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
         # Exit on the first test failure
         pytest -x
         ```
-    *   More advanced editors like PyCharm may have built in integrations which could be good to check out!
+    * More advanced editors like PyCharm may have built in integrations which could be good to check out!
+    * Running all unittests will take a while, here's how you can run them in parallel
+        ```
+        export OPENBLAS_NUM_THREADS=1
+        export MKL_NUM_THREADS=1
+        export OMP_NUM_THREADS=1
+      
+        pytest -n 4
+        ```
 
-*   Now we are going to use [sphinx](https://www.sphinx-doc.org/en/master/) to generate all the documentation and make sure there are no issues.
+
+* Now we are going to use [sphinx](https://www.sphinx-doc.org/en/master/) to generate all the documentation and make sure there are no issues.
     ```bash
     make doc
     ```
@@ -261,7 +270,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     xdg-open ./doc/build/html/index.html
     ```
 
-*   Once you've made all your changes and all the tests pass successfully, we need to make sure that the code fits a certain format and that the [typing](https://docs.python.org/3/library/typing.html) is correct.
+* Once you've made all your changes and all the tests pass successfully, we need to make sure that the code fits a certain format and that the [typing](https://docs.python.org/3/library/typing.html) is correct.
     * Formatting and import sorting can helps keep things uniform across all coding styles. We use [`black`](https://black.readthedocs.io/en/stable/) and [`isort`](https://isort.readthedocs.io/en/latest/) to do this for us. To automatically run these formatters across the code base, just run the following command:
     ```bash
     make format

@@ -17,6 +17,34 @@ import unittest
 
 
 class TestScorer(unittest.TestCase):
+    def test_needs_X(self):
+        y_true = np.array([0, 0, 1, 1])
+        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
+
+        def dummy_metric(y_true, y_pred, X_data=None, **kwargs):
+            if not np.array_equal(np.array([45]), X_data):
+                raise ValueError(f"is {X_data}")
+            return 1
+
+        scorer = autosklearn.metrics._PredictScorer(
+            "accuracy", dummy_metric, 1, 0, 1, {}, needs_X=True
+        )
+        scorer(y_true, y_pred, X_data=np.array([45]))
+
+        scorer_nox = autosklearn.metrics._PredictScorer(
+            "accuracy", dummy_metric, 1, 0, 1, {}, needs_X=False
+        )
+        with self.assertRaises(ValueError) as cm:
+            scorer_nox(y_true, y_pred, X_data=np.array([32]))
+        the_exception = cm.exception
+        # X_data is not forwarded
+        self.assertEqual(the_exception.args[0], "is None")
+
+        scorer_nox = autosklearn.metrics._PredictScorer(
+            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}, needs_X=False
+        )
+        scorer_nox(y_true, y_pred, X_data=np.array([32]))
+
     def test_predict_scorer_binary(self):
         y_true = np.array([0, 0, 1, 1])
         y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
@@ -570,7 +598,7 @@ class TestCalculateScore(unittest.TestCase):
             y_pred,
             BINARY_CLASSIFICATION,
             [autosklearn.metrics.accuracy],
-            scoring_functions,
+            scoring_functions=scoring_functions,
         )
 
         self.assertIsInstance(score_dict, dict)
@@ -600,7 +628,7 @@ class TestCalculateScore(unittest.TestCase):
             y_pred,
             REGRESSION,
             [autosklearn.metrics.root_mean_squared_error],
-            scoring_functions,
+            scoring_functions=scoring_functions,
         )
 
         self.assertIsInstance(score_dict, dict)

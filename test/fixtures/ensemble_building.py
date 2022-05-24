@@ -145,7 +145,9 @@ def make_ensemble_builder(
             # Hence, we take the y_train of the datamanager and use that as the
             # the targets
             if "Y_train" in datamanager.data:
-                backend.save_targets_ensemble(datamanager.data["Y_train"])
+                backend.save_additional_data(
+                    datamanager.data["Y_train"], what="targets_ensemble"
+                )
 
         builder = EnsembleBuilder(
             backend=backend,
