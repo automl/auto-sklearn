@@ -1,7 +1,20 @@
 # -*- encoding: utf-8 -*-
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+)
+
+import warnings
 
 import dask.distributed
 import joblib
@@ -10,6 +23,7 @@ import pandas as pd
 from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
+from sklearn.ensemble import VotingClassifier, VotingRegressor
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
 from typing_extensions import Literal
@@ -20,6 +34,8 @@ from autosklearn.data.validation import (
     SUPPORTED_TARGET_TYPES,
     convert_if_sparse,
 )
+from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
 
@@ -30,7 +46,9 @@ class AutoSklearnEstimator(BaseEstimator):
         time_left_for_this_task=3600,
         per_run_time_limit=None,
         initial_configurations_via_metalearning=25,
-        ensemble_size: int = 50,
+        ensemble_size: int | None = None,
+        ensemble_class: Type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_kwargs: Dict[str, Any] | None = None,
         ensemble_nbest=50,
         max_models_on_disc=50,
         seed=1,
@@ -76,15 +94,31 @@ class AutoSklearnEstimator(BaseEstimator):
             datasets. Disable if the hyperparameter optimization algorithm
             should start from scratch.
 
-        ensemble_size : int, optional (default=50)
+        ensemble_size : int, optional
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
-            replacement. If set to ``0`` no ensemble is fit and the single
-            best model is loaded.
+            replacement. If set to ``0`` no ensemble is fit.
+
+            Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+            this argument via ``ensemble_kwargs={"ensemble_size": int}``
+            if you want to change the ensemble size for ensemble selection.
+
+        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
+            Class implementing the post-hoc ensemble algorithm. Set to
+            ``None`` to disable ensemble building or use ``SingleBest``
+            to obtain only use the single best model instead of an
+            ensemble.
+
+        ensemble_kwargs : Dict, optional
+            Keyword arguments that are passed to the ensemble class upon
+            initialization.
 
         ensemble_nbest : int, optional (default=50)
             Only consider the ``ensemble_nbest`` models when building an
-            ensemble.
+            ensemble. This is inspired by a concept called library pruning
+            introduced in `Getting Most out of Ensemble Selection`. This
+            is independent of the ``ensemble_class`` argument and this
+            pruning step is done prior to constructing an ensemble.
 
         max_models_on_disc: int, optional (default=50),
             Defines the maximum number of models that are kept in the disc.
@@ -352,7 +386,50 @@ class AutoSklearnEstimator(BaseEstimator):
         self.initial_configurations_via_metalearning = (
             initial_configurations_via_metalearning
         )
-        self.ensemble_size = ensemble_size
+        self.ensemble_class = ensemble_class
+
+        # User specified `ensemble_size` explicitly, warn them about deprecation
+        if ensemble_size is not None:
+            # Keep consistent behaviour
+            message = (
+                "`ensemble_size` has been deprecated, please use `ensemble_kwargs = "
+                "{'ensemble_size': %d}`. Inserting `ensemble_size` into "
+                "`ensemble_kwargs` for now. `ensemble_size` will be removed in "
+                "auto-sklearn 0.16."
+            ) % ensemble_size
+            if ensemble_class == EnsembleSelection:
+                if ensemble_kwargs is None:
+                    ensemble_kwargs = {"ensemble_size": ensemble_size}
+                    warnings.warn(message, DeprecationWarning, stacklevel=2)
+                elif "ensemble_size" not in ensemble_kwargs:
+                    ensemble_kwargs["ensemble_size"] = ensemble_size
+                    warnings.warn(message, DeprecationWarning, stacklevel=2)
+                else:
+                    warnings.warn(
+                        "Deprecated argument `ensemble_size` is both provided "
+                        "as an argument to the constructor and passed inside "
+                        "`ensemble_kwargs`. Will ignore the argument and use "
+                        "the value given in `ensemble_kwargs` (%d). `ensemble_size` "
+                        "will be removed in auto-sklearn 0.16."
+                        % ensemble_kwargs["ensemble_size"],
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
+            else:
+                warnings.warn(
+                    "`ensemble_size` has been deprecated, please use "
+                    "`ensemble_kwargs = {'ensemble_size': %d} if this "
+                    "was intended. Ignoring `ensemble_size` because "
+                    "`ensemble_class` != EnsembleSelection. "
+                    "`ensemble_size` will be removed in auto-sklearn 0.16."
+                    % ensemble_size,
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+        self.ensemble_size = (
+            ensemble_size  # Otherwise sklean.base.get_params() will complain
+        )
+        self.ensemble_kwargs = ensemble_kwargs
         self.ensemble_nbest = ensemble_nbest
         self.max_models_on_disc = max_models_on_disc
         self.seed = seed
@@ -404,7 +481,8 @@ class AutoSklearnEstimator(BaseEstimator):
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
             initial_configurations_via_metalearning=initial_configs,
-            ensemble_size=self.ensemble_size,
+            ensemble_class=self.ensemble_class,
+            ensemble_kwargs=self.ensemble_kwargs,
             ensemble_nbest=self.ensemble_nbest,
             max_models_on_disc=self.max_models_on_disc,
             seed=self.seed,
@@ -516,11 +594,13 @@ class AutoSklearnEstimator(BaseEstimator):
     def fit_ensemble(
         self,
         y,
-        task=None,
-        precision=32,
-        dataset_name=None,
-        ensemble_nbest=None,
-        ensemble_size=None,
+        task: int = None,
+        precision: Literal[16, 21, 64] = 32,
+        dataset_name: Optional[str] = None,
+        ensemble_size: int | None = None,
+        ensemble_kwargs: Optional[Dict[str, Any]] = None,
+        ensemble_nbest: Optional[int] = None,
+        ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
     ):
         """Fit an ensemble to models trained during an optimization process.
 
@@ -537,26 +617,84 @@ class AutoSklearnEstimator(BaseEstimator):
             the task type (binary classification, multiclass classification,
             multilabel classification or regression).
 
-        precision : str
+        precision : int
             Numeric precision used when loading ensemble data. Can be either
-            ``'16'``, ``'32'`` or ``'64'``.
+            ``16``, ``32`` or ``64``.
 
         dataset_name : str
             Name of the current data set.
 
-        ensemble_nbest : int
-            Determines how many models should be considered from the ensemble
-            building. This is inspired by a concept called library pruning
-            introduced in `Getting Most out of Ensemble Selection`.
+        ensemble_size : int, optional
+            Number of models added to the ensemble built by *Ensemble
+            selection from libraries of models*. Models are drawn with
+            replacement. If set to ``0`` no ensemble is fit.
 
-        ensemble_size : int
-            Size of the ensemble built by `Ensemble Selection`.
+            Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+            this argument via ``ensemble_kwargs={"ensemble_size": int}``
+            if you want to change the ensemble size for ensemble selection.
+
+        ensemble_kwargs : Dict, optional
+            Keyword arguments that are passed to the ensemble class upon
+            initialization.
+
+        ensemble_nbest : int
+            Only consider the ``ensemble_nbest`` models when building an
+            ensemble. This is inspired by a concept called library pruning
+            introduced in `Getting Most out of Ensemble Selection`. This
+            is independent of the ``ensemble_class`` argument and this
+            pruning step is done prior to constructing an ensemble.
+
+        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
+            Class implementing the post-hoc ensemble algorithm. Set to
+            ``None`` to disable ensemble building or use ``SingleBest``
+            to obtain only use the single best model instead of an
+            ensemble.
 
         Returns
         -------
         self
 
         """
+
+        # User specified `ensemble_size` explicitly, warn them about deprecation
+        if ensemble_size is not None:
+            # Keep consistent behaviour
+            message = (
+                "`ensemble_size` has been deprecated, please use `ensemble_kwargs = "
+                "{'ensemble_size': %d}`. Inserting `ensemble_size` into "
+                "`ensemble_kwargs` for now. `ensemble_size` will be removed in "
+                "auto-sklearn 0.16."
+            ) % ensemble_size
+            if ensemble_class == EnsembleSelection:
+                if ensemble_kwargs is None:
+                    ensemble_kwargs = {"ensemble_size": ensemble_size}
+                    warnings.warn(message, DeprecationWarning, stacklevel=2)
+                elif "ensemble_size" not in ensemble_kwargs:
+                    ensemble_kwargs["ensemble_size"] = ensemble_size
+                    warnings.warn(message, DeprecationWarning, stacklevel=2)
+                else:
+                    warnings.warn(
+                        "Deprecated argument `ensemble_size` is both provided "
+                        "as an argument to the constructor and passed inside "
+                        "`ensemble_kwargs`. Will ignore the argument and use "
+                        "the value given in `ensemble_kwargs` (%d). `ensemble_size` "
+                        "will be removed in auto-sklearn 0.16."
+                        % ensemble_kwargs["ensemble_size"],
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
+            else:
+                warnings.warn(
+                    "`ensemble_size` has been deprecated, please use "
+                    "`ensemble_kwargs = {'ensemble_size': %d} if this "
+                    "was intended. Ignoring `ensemble_size` because "
+                    "`ensemble_class` != EnsembleSelection. "
+                    "`ensemble_size` will be removed in auto-sklearn 0.16."
+                    % ensemble_size,
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+
         if self.automl_ is None:
             # Build a dummy automl object to call fit_ensemble
             # The ensemble size is honored in the .automl_.fit_ensemble
@@ -568,7 +706,8 @@ class AutoSklearnEstimator(BaseEstimator):
             precision=precision,
             dataset_name=dataset_name,
             ensemble_nbest=ensemble_nbest,
-            ensemble_size=ensemble_size,
+            ensemble_class=ensemble_class,
+            ensemble_kwargs=ensemble_kwargs,
         )
         return self
 
@@ -964,13 +1103,11 @@ class AutoSklearnEstimator(BaseEstimator):
             )
 
         # Get the models ensemble weight if it has one
-        # TODO both implementing classes of AbstractEnsemble have a property
-        #      `identifiers_` and `weights_`, might be good to put it as an
-        #       abstract property
-        # TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely
-        #      tied together by ordering, might be better to store as tuple
-        for i, weight in enumerate(self.automl_.ensemble_.weights_):
-            (_, model_id, _) = self.automl_.ensemble_.identifiers_[i]
+        for (
+            _,
+            model_id,
+            _,
+        ), weight in self.automl_.ensemble_.get_identifiers_with_weights():
 
             # We had issues where the model's in the ensembles are not in the runhistory
             # collected. I have no clue why this is but to prevent failures, we fill
@@ -1185,6 +1322,9 @@ class AutoSklearnEstimator(BaseEstimator):
             else self.automl_.configuration_space
         )
 
+    def get_pareto_front(self) -> Sequence[VotingClassifier | VotingRegressor]:
+        return self.automl_._load_pareto_front()
+
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
     """This class implements the classification task."""
@@ -1193,7 +1333,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         """Fit *auto-sklearn* to given training set (X, y).
 
         Fit both optimizes the machine learning models and builds an ensemble
-        out of them. To disable ensembling, set ``ensemble_size==0``.
+        out of them.
 
         Parameters
         ----------
@@ -1327,7 +1467,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator, RegressorMixin):
         """Fit *Auto-sklearn* to given training set (X, y).
 
         Fit both optimizes the machine learning models and builds an ensemble
-        out of them. To disable ensembling, set ``ensemble_size==0``.
+        out of them.
 
         Parameters
         ----------

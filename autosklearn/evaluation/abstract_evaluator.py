@@ -345,24 +345,14 @@ class AbstractEvaluator(object):
         ----------
             y_true
         """
-        if not isinstance(self.configuration, Configuration):
-            # Dummy prediction
-            rval = {}
-            for metric in self.scoring_functions if self.scoring_functions else []:
-                rval[metric.name] = metric._worst_possible_result
-            for metric in self.metrics:
-                rval[metric.name] = metric._worst_possible_result
-            return rval
-
-        else:
-            return calculate_losses(
-                y_true,
-                y_hat,
-                self.task_type,
-                self.metrics,
-                X_data=X_data,
-                scoring_functions=self.scoring_functions,
-            )
+        return calculate_losses(
+            y_true,
+            y_hat,
+            self.task_type,
+            self.metrics,
+            X_data=X_data,
+            scoring_functions=self.scoring_functions,
+        )
 
     def finish_up(
         self,
@@ -410,6 +400,12 @@ class AbstractEvaluator(object):
             return self.duration, file_out_loss, self.seed, additional_run_info_
 
         loss_ = loss
+        for metric in self.metrics:
+            if metric.name not in loss_:
+                raise ValueError(
+                    f"Unable to compute optimization metric {metric.name}. Are you "
+                    f"sure {metric.name} is applicable for the given task type?"
+                )
         if len(self.metrics) == 1:
             loss = loss_[self.metrics[0].name]
         else:

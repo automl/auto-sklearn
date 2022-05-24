@@ -66,7 +66,7 @@ if __name__ == "__main__":
         "time_left_for_this_task": time_limit,
         "per_run_time_limit": per_run_time_limit,
         "initial_configurations_via_metalearning": 0,
-        "ensemble_size": 0,
+        "ensemble_class": None,
         "ensemble_nbest": 0,
         "seed": seed,
         "memory_limit": 3072,

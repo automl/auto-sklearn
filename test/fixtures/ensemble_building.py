@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+import copy
 import math
 import pickle
 import sys
@@ -31,14 +32,22 @@ def make_run(tmp_path: Path) -> Callable[..., Run]:
         modified: bool = False,
         budget: float = 0.0,
         loss: float | None = None,
+        losses: dict[str, float] | list[float] | None = None,
         model_size: int | None = None,
         mem_usage: float | None = None,
         predictions: str | list[str] | dict[str, np.ndarray] | None = "ensemble",
     ) -> Run:
+        if loss is not None and losses is not None:
+            raise ValueError("Can only specify either `loss` or `losses`")
+
+        if isinstance(loss, dict):
+            raise ValueError("Please use `losses` for dict of losses")
+
         if dummy:
             assert id is None
             id = 1
-            loss = loss if loss is not None else 50_000
+            if loss is None and losses is None:
+                losses = {"metric_0": 50_000}
 
         if id is None:
             id = np.random.randint(sys.maxsize)
@@ -80,7 +89,13 @@ def make_run(tmp_path: Path) -> Callable[..., Run]:
                 run.recorded_mtimes[k] = v + 1e-4
 
         if loss is not None:
-            run.loss = loss
+            losses = [loss]
+
+        if isinstance(losses, list):
+            losses = {f"metric_{i}": loss for i, loss in enumerate(losses)}
+
+        if isinstance(losses, dict):
+            run.losses = losses
 
         if mem_usage is not None:
             run._mem_usage = mem_usage
@@ -109,7 +124,7 @@ def make_ensemble_builder(
         backend: Backend | None = None,
         dataset_name: str = "TEST",
         task_type: int = BINARY_CLASSIFICATION,
-        metric: Scorer = accuracy,
+        metrics: Scorer = copy.deepcopy([accuracy]),
         **kwargs: Any,
     ) -> EnsembleBuilder:
 
@@ -117,9 +132,10 @@ def make_ensemble_builder(
             backend = automl._backend
             dataset_name = automl._dataset_name
             task_type = automl._task
-            metric = automl._metrics[0]
+            metrics = automl._metrics
             kwargs = {
-                "ensemble_size": automl._ensemble_size,
+                "ensemble_class": automl._ensemble_class,
+                "ensemble_kwargs": automl._ensemble_kwargs,
                 "ensemble_nbest": automl._ensemble_nbest,
                 "max_models_on_disc": automl._max_models_on_disc,
                 "precision": automl.precision,
@@ -153,7 +169,7 @@ def make_ensemble_builder(
             backend=backend,
             dataset_name=dataset_name,
             task_type=task_type,
-            metric=metric,
+            metrics=metrics,
             **kwargs,
         )
 

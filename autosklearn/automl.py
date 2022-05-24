@@ -1,6 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Tuple
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+)
 
 import copy
 import io
@@ -13,6 +23,7 @@ import platform
 import sys
 import tempfile
 import time
+import types
 import uuid
 import warnings
 
@@ -30,7 +41,7 @@ from dask.distributed import Client, LocalCluster
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator
 from sklearn.dummy import DummyClassifier, DummyRegressor
-from sklearn.ensemble import VotingRegressor
+from sklearn.ensemble import VotingClassifier, VotingRegressor
 from sklearn.metrics._classification import type_of_target
 from sklearn.model_selection._split import (
     BaseCrossValidator,
@@ -63,6 +74,11 @@ from autosklearn.data.validation import (
 )
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.ensemble_building import EnsembleBuilderManager
+from autosklearn.ensembles.abstract_ensemble import (
+    AbstractEnsemble,
+    AbstractMultiObjectiveEnsemble,
+)
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.singlebest_ensemble import SingleBest
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
@@ -199,7 +215,8 @@ class AutoML(BaseEstimator):
         temporary_directory: Optional[str] = None,
         delete_tmp_folder_after_terminate: bool = True,
         initial_configurations_via_metalearning: int = 25,
-        ensemble_size: int = 1,
+        ensemble_class: Type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_kwargs: Dict[str, Any] | None = None,
         ensemble_nbest: int = 1,
         max_models_on_disc: int = 1,
         seed: int = 1,
@@ -251,7 +268,8 @@ class AutoML(BaseEstimator):
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
         self._metrics = metrics
-        self._ensemble_size = ensemble_size
+        self._ensemble_class = ensemble_class
+        self._ensemble_kwargs = ensemble_kwargs
         self._ensemble_nbest = ensemble_nbest
         self._max_models_on_disc = max_models_on_disc
         self._seed = seed
@@ -451,7 +469,7 @@ class AutoML(BaseEstimator):
         ta = ExecuteTaFuncWithQueue(
             backend=self._backend,
             autosklearn_seed=self._seed,
-            multi_objectives=["cost"],
+            multi_objectives=[metric.name for metric in self._metrics],
             resampling_strategy=self._resampling_strategy,
             initial_num_run=dummy_run_num,
             stats=stats,
@@ -517,7 +535,7 @@ class AutoML(BaseEstimator):
         """Fit AutoML to given training set (X, y).
 
         Fit both optimizes the machine learning models and builds an ensemble
-        out of them. To disable ensembling, set ``ensemble_size==0``.
+        out of them.
 
         # TODO PR1213
         #
@@ -714,7 +732,9 @@ class AutoML(BaseEstimator):
         # If no dask client was provided, we create one, so that we can
         # start a ensemble process in parallel to smbo optimize
         if self._dask_client is None and (
-            self._ensemble_size > 0 or self._n_jobs is not None and self._n_jobs > 1
+            self._ensemble_class is not None
+            or self._n_jobs is not None
+            and self._n_jobs > 1
         ):
             self._create_dask_client()
         else:
@@ -781,17 +801,17 @@ class AutoML(BaseEstimator):
             time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
             proc_ensemble = None
             if time_left_for_ensembles <= 0:
-                # Fit only raises error when ensemble_size is not zero but
+                # Fit only raises error when an ensemble class is given but
                 # time_left_for_ensembles is zero.
-                if self._ensemble_size > 0:
+                if self._ensemble_class is not None:
                     raise ValueError(
                         "Not starting ensemble builder because there "
                         "is no time left. Try increasing the value "
                         "of time_left_for_this_task."
                     )
-            elif self._ensemble_size <= 0:
+            elif self._ensemble_class is None:
                 self._logger.info(
-                    "Not starting ensemble builder because " "ensemble size is <= 0."
+                    "Not starting ensemble builder because no ensemble class is given."
                 )
             else:
                 self._logger.info(
@@ -804,8 +824,9 @@ class AutoML(BaseEstimator):
                     backend=copy.deepcopy(self._backend),
                     dataset_name=dataset_name,
                     task=self._task,
-                    metric=self._metrics[0],
-                    ensemble_size=self._ensemble_size,
+                    metrics=self._metrics,
+                    ensemble_class=self._ensemble_class,
+                    ensemble_kwargs=self._ensemble_kwargs,
                     ensemble_nbest=self._ensemble_nbest,
                     max_models_on_disc=self._max_models_on_disc,
                     seed=self._seed,
@@ -988,7 +1009,8 @@ class AutoML(BaseEstimator):
             "  initial_configurations_via_metalearning: %d",
             self._initial_configurations_via_metalearning,
         )
-        self._logger.debug("  ensemble_size: %d", self._ensemble_size)
+        self._logger.debug("  ensemble_class: %s", self._ensemble_class)
+        self._logger.debug("  ensemble_kwargs: %s", self._ensemble_kwargs)
         self._logger.debug("  ensemble_nbest: %f", self._ensemble_nbest)
         self._logger.debug("  max_models_on_disc: %s", str(self._max_models_on_disc))
         self._logger.debug("  seed: %d", self._seed)
@@ -1107,7 +1129,7 @@ class AutoML(BaseEstimator):
                 "partial-cv",
                 "partial-cv-iterative-fit",
             ]
-            and self._ensemble_size != 0
+            and self._ensemble_class is not None
         ):
             raise ValueError(
                 "Resampling strategy %s cannot be used "
@@ -1163,9 +1185,9 @@ class AutoML(BaseEstimator):
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
-        # Refit is not applicable when ensemble_size is set to zero.
+        # Refit is not applicable when no ensemble class is provided
         if self.ensemble_ is None:
-            raise ValueError("Refit can only be called if 'ensemble_size != 0'")
+            raise ValueError("Refit can only be called if an ensemble class is given")
 
         random_state = check_random_state(self._seed)
 
@@ -1404,13 +1426,13 @@ class AutoML(BaseEstimator):
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
-        # If self.ensemble_ is None, it means that ensemble_size is set to zero.
+        # If self.ensemble_ is None, it means that ensemble_class is None.
         # In such cases, raise error because predict and predict_proba cannot
         # be called.
         if self.ensemble_ is None:
             raise ValueError(
                 "Predict and predict_proba can only be called "
-                "if 'ensemble_size != 0'"
+                "if ensemble class is given."
             )
 
         # Make sure that input is valid
@@ -1478,19 +1500,15 @@ class AutoML(BaseEstimator):
         precision: Literal[16, 32, 64] = 32,
         dataset_name: Optional[str] = None,
         ensemble_nbest: Optional[int] = None,
-        ensemble_size: Optional[int] = None,
+        ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
+        ensemble_kwargs: Optional[Dict[str, Any]] = None,
     ):
         check_is_fitted(self)
 
-        # check for the case when ensemble_size is less than 0
-        if ensemble_size is not None and ensemble_size <= 0:
-            raise ValueError("`ensemble_size` must be >= 0 for `fit_ensemble`")
-
-        if ensemble_size is None and (
-            self._ensemble_size is None or self._ensemble_size <= 0
-        ):
+        if ensemble_class is None and self._ensemble_class is None:
             raise ValueError(
-                "Please pass `ensemble_size` to `fit_ensemble` if not setting in init"
+                "Please pass `ensemble_class` either to `fit_ensemble()` "
+                "or the constructor."
             )
 
         # AutoSklearn does not handle sparse y for now
@@ -1523,8 +1541,15 @@ class AutoML(BaseEstimator):
             backend=copy.deepcopy(self._backend),
             dataset_name=dataset_name if dataset_name else self._dataset_name,
             task=task if task else self._task,
-            metric=self._metrics[0],
-            ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
+            metrics=self._metrics,
+            ensemble_class=(
+                ensemble_class if ensemble_class is not None else self._ensemble_class
+            ),
+            ensemble_kwargs=(
+                ensemble_kwargs
+                if ensemble_kwargs is not None
+                else self._ensemble_kwargs
+            ),
             ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
             max_models_on_disc=self._max_models_on_disc,
             seed=self._seed,
@@ -1545,21 +1570,21 @@ class AutoML(BaseEstimator):
                 "line output for error messages."
             )
         self.ensemble_performance_history, _ = result
-        self._ensemble_size = ensemble_size
+        self._ensemble_class = ensemble_class
 
         self._load_models()
         self._close_dask_client()
         return self
 
     def _load_models(self):
-        if self._ensemble_size > 0:
+        if self._ensemble_class is not None:
             self.ensemble_ = self._backend.load_ensemble(self._seed)
         else:
             self.ensemble_ = None
 
         # If no ensemble is loaded, try to get the best performing model.
         # This is triggered if
-        # 1. self._ensemble_size == 0 (see if-statement above)
+        # 1. self._ensemble_class is None (see if-statement above)
         # 2. if the ensemble builder crashed and no ensemble is available
         # 3. if the ensemble cannot be built because of arguments passed
         #    by the user (disable_evaluator_output and
@@ -1581,7 +1606,7 @@ class AutoML(BaseEstimator):
         ):
             self.ensemble_ = self._load_best_individual_model()
 
-        if self.ensemble_ is not None:
+        if self.ensemble_:
             identifiers = self.ensemble_.get_selected_model_identifiers()
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
 
@@ -1611,18 +1636,106 @@ class AutoML(BaseEstimator):
 
         # SingleBest contains the best model found by AutoML
         ensemble = SingleBest(
-            metric=self._metrics[0],
+            metrics=self._metrics,
+            task_type=self._task,
             seed=self._seed,
             run_history=self.runhistory_,
             backend=self._backend,
+            random_state=self._seed,
         )
         self._logger.warning(
             "No valid ensemble was created. Please check the log"
             "file for errors. Default to the best individual estimator:{}".format(
-                ensemble.identifiers_
+                ensemble.get_identifiers_with_weights()[0][0]
             )
         )
         return ensemble
+
+    def _load_pareto_front(self) -> Sequence[VotingClassifier | VotingRegressor]:
+        if len(self._metrics) <= 1:
+            raise ValueError("Pareto front is only available for two or more metrics.")
+
+        if self._ensemble_class is not None:
+            self.ensemble_ = self._backend.load_ensemble(self._seed)
+        else:
+            self.ensemble_ = None
+
+        # If no ensemble is loaded we cannot do anything
+        if not self.ensemble_:
+
+            raise ValueError(
+                "Pareto front can only be accessed if an ensemble is available."
+            )
+
+        if isinstance(self.ensemble_, AbstractMultiObjectiveEnsemble):
+            pareto_front = self.ensemble_.get_pareto_front()
+        else:
+            self._logger.warning(
+                "Pareto front not available for single objective ensemble "
+                "method. The Pareto front will only include the single ensemble "
+                "constructed by %s",
+                type(self.ensemble_),
+            )
+            pareto_front = [self.ensemble_]
+
+        ensembles = []
+        for ensemble in pareto_front:
+            identifiers = ensemble.get_selected_model_identifiers()
+            weights = {
+                identifier: weight
+                for identifier, weight in ensemble.get_identifiers_with_weights()
+            }
+
+            if self._task in CLASSIFICATION_TASKS:
+                voter = VotingClassifier(
+                    estimators=None,
+                    voting="soft",
+                )
+            else:
+                voter = VotingRegressor(estimators=None)
+
+            if self._resampling_strategy in ("cv", "cv-iterative-fit"):
+                models = self._backend.load_cv_models_by_identifiers(identifiers)
+            else:
+                models = self._backend.load_models_by_identifiers(identifiers)
+
+            if len(models) == 0:
+                raise ValueError("No models fitted!")
+
+            weight_vector = []
+            estimators = []
+            for identifier in identifiers:
+                weight_vector.append(weights[identifier])
+                estimators.append(models[identifier])
+
+            voter.estimators = estimators
+            voter.estimators_ = estimators
+            voter.weights = weight_vector
+
+            if self._task in CLASSIFICATION_TASKS:
+                # Scikit-learn would raise a shape error here which we
+                # have to work around.
+
+                def inverse_transform(self, y):
+                    if len(y.shape) == 1:
+                        y = y.reshape((-1, 1))
+                        reshaped = True
+                    else:
+                        reshaped = False
+                    y = self.old_inverse_transform(y)
+                    if reshaped:
+                        return y.flatten()
+                    else:
+                        return y
+
+                voter.le_ = copy.deepcopy(self.InputValidator.target_validator.encoder)
+                functype = types.MethodType
+                voter.le_.old_inverse_transform = voter.le_.inverse_transform
+                voter.le_.inverse_transform = functype(inverse_transform, voter.le_)
+
+            ensembles.append(voter)
+
+        return ensembles
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
@@ -1710,7 +1823,7 @@ class AutoML(BaseEstimator):
 
         performance_over_time = individual_performance_frame
 
-        if self._ensemble_size != 0:
+        if self._ensemble_class is not None:
             ensemble_performance_frame = pd.DataFrame(self.ensemble_performance_history)
             best_values = pd.Series(
                 {"ensemble_optimization_score": -np.inf, "ensemble_test_score": -np.inf}
@@ -2004,9 +2117,10 @@ class AutoML(BaseEstimator):
 
         ensemble_dict = {}
 
-        # check for ensemble_size == 0
-        if self._ensemble_size == 0:
-            warnings.warn("No models in the ensemble. Kindly check the ensemble size.")
+        if self._ensemble_class is not None:
+            warnings.warn(
+                "No models in the ensemble. Kindly provide an ensemble class."
+            )
             return ensemble_dict
 
         # check for condition when ensemble_size > 0 but there is no ensemble to load
@@ -2029,8 +2143,7 @@ class AutoML(BaseEstimator):
                 "No model found. Try increasing 'time_left_for_this_task'."
             )
 
-        for i, weight in enumerate(self.ensemble_.weights_):
-            (_, model_id, _) = self.ensemble_.identifiers_[i]
+        for (_, model_id, _), weight in self.ensemble_.get_identifiers_with_weights():
             table_dict[model_id]["ensemble_weight"] = weight
 
         table = pd.DataFrame.from_dict(table_dict, orient="index")

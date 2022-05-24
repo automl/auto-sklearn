@@ -146,7 +146,7 @@ if __name__ == "__main__":
                 y_train,
                 task=MULTICLASS_CLASSIFICATION,
                 dataset_name="digits",
-                ensemble_size=20,
+                ensemble_kwargs={"ensemble_size": 20},
                 ensemble_nbest=50,
             )
 

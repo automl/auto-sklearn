@@ -15,6 +15,7 @@ Tags:
     {cv, holdout} - Whether explicitly cv or holdout was used
     {no_ensemble} - Fit with no ensemble size
     {cached} - If the resulting case is then cached
+    {multiobjective} - If the automl instance is multiobjective
 """
 from __future__ import annotations
 
@@ -213,7 +214,8 @@ def case_classifier_fitted_no_ensemble(
     make_automl_classifier: Callable[..., AutoMLClassifier],
     make_sklearn_dataset: Callable[..., Tuple[np.ndarray, ...]],
 ) -> AutoMLClassifier:
-    """Case of a fitted classifier but enemble_size was set to 0"""
+    """Case of a fitted classifier but ensemble was disabled by
+    not writing models to disk"""
     key = f"case_classifier_fitted_no_ensemble_{dataset}"
 
     # This locks the cache for this item while we check, required for pytest-xdist
@@ -223,7 +225,8 @@ def case_classifier_fitted_no_ensemble(
             model = make_automl_classifier(
                 temporary_directory=cache.path("backend"),
                 delete_tmp_folder_after_terminate=False,
-                ensemble_size=0,
+                ensemble_class=None,
+                disable_evaluator_output=True,
             )
 
             X, y, Xt, yt = make_sklearn_dataset(name=dataset)

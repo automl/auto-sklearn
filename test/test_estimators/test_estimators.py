@@ -306,7 +306,7 @@ def test_performance_over_time_no_ensemble(tmp_dir):
         per_run_time_limit=5,
         tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
-        ensemble_size=0,
+        ensemble_class=None,
         initial_configurations_via_metalearning=0,
     )
 
@@ -395,8 +395,11 @@ def test_cv_results_multi_objective(tmp_dir):
         tmp_folder=os.path.join(tmp_dir, "backend"),
         seed=1,
         initial_configurations_via_metalearning=0,
-        metric=[autosklearn.metrics.precision_macro, autosklearn.metrics.roc_auc],
-        scoring_functions=[autosklearn.metrics.accuracy, autosklearn.metrics.roc_auc],
+        metric=[autosklearn.metrics.precision_macro, autosklearn.metrics.recall_macro],
+        scoring_functions=[
+            autosklearn.metrics.accuracy,
+            autosklearn.metrics.balanced_accuracy,
+        ],
     )
 
     params = cls.get_params()
@@ -410,11 +413,11 @@ def test_cv_results_multi_objective(tmp_dir):
     assert "rank_test_scores" not in cv_results
     for expected_column in (
         "mean_test_precision_macro",
-        "mean_test_roc_auc",
+        "mean_test_recall_macro",
         "mean_fit_time",
         "rank_test_precision_macro",
-        "rank_test_roc_auc",
-        "metric_roc_auc",
+        "rank_test_recall_macro",
+        "metric_balanced_accuracy",
         "metric_accuracy",
     ):
         assert isinstance(cv_results[expected_column], np.ndarray), type(
@@ -1231,7 +1234,9 @@ def test_autosklearn_classification_methods_returns_self(dask_client):
 
     assert automl is automl_fitted
 
-    automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+    automl_ensemble_fitted = automl.fit_ensemble(
+        y_train, ensemble_kwargs={"ensemble_size": 5}
+    )
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
@@ -1253,7 +1258,9 @@ def test_autosklearn_regression_methods_returns_self(dask_client):
     automl_fitted = automl.fit(X_train, y_train)
     assert automl is automl_fitted
 
-    automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+    automl_ensemble_fitted = automl.fit_ensemble(
+        y_train, ensemble_kwargs={"ensemble_size": 5}
+    )
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
@@ -1272,7 +1279,9 @@ def test_autosklearn2_classification_methods_returns_self(dask_client):
 
     assert automl is automl_fitted
 
-    automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+    automl_ensemble_fitted = automl.fit_ensemble(
+        y_train, ensemble_kwargs={"ensemble_size": 5}
+    )
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
@@ -1301,7 +1310,9 @@ def test_autosklearn2_classification_methods_returns_self_sparse(dask_client):
 
     assert automl is automl_fitted
 
-    automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+    automl_ensemble_fitted = automl.fit_ensemble(
+        y_train, ensemble_kwargs={"ensemble_size": 5}
+    )
     assert automl is automl_ensemble_fitted
 
     automl_refitted = automl.refit(X_train.copy(), y_train.copy())
@@ -1627,7 +1638,9 @@ def test_autosklearn_anneal(as_frame):
 
     assert automl is automl_fitted
 
-    automl_ensemble_fitted = automl.fit_ensemble(y, ensemble_size=5)
+    automl_ensemble_fitted = automl.fit_ensemble(
+        y, ensemble_kwargs={"ensemble_size": 5}
+    )
     assert automl is automl_ensemble_fitted
 
     # We want to make sure we can learn from this data.

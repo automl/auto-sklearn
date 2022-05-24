@@ -14,6 +14,8 @@ future.
 """
 from pprint import pprint
 
+import matplotlib.pyplot as plt
+import numpy as np
 import sklearn.datasets
 import sklearn.metrics
 
@@ -25,7 +27,11 @@ import autosklearn.metrics
 # Data Loading
 # ============
 
-X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
+X, y = sklearn.datasets.fetch_openml(data_id=31, return_X_y=True, as_frame=True)
+# Change the target to align with scikit-learn's convention that
+# ``1`` is the minority class. In this example it is predicting
+# that a credit is "bad", i.e. that it will default.
+y = np.array([1 if val == "bad" else 0 for val in y])
 X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
     X, y, random_state=1
 )
@@ -35,11 +41,11 @@ X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
 # ==========================
 
 automl = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    tmp_folder="/tmp/autosklearn_multi_objective_example_tmp",
+    time_left_for_this_task=120,
     metric=[autosklearn.metrics.precision, autosklearn.metrics.recall],
+    delete_tmp_folder_after_terminate=False,
 )
-automl.fit(X_train, y_train, dataset_name="breast_cancer")
+automl.fit(X_train, y_train, dataset_name="German Credit")
 
 ############################################################################
 # Compute the two competing metrics
@@ -63,3 +69,22 @@ print(automl.leaderboard())
 # to *auto-sklearn*.
 
 pprint(automl.cv_results_)
+
+############################################################################
+# Visualize the Pareto front
+# ==========================
+plot_values = []
+pareto_front = automl.get_pareto_front()
+for ensemble in pareto_front:
+    predictions = ensemble.predict(X_test)
+    precision = sklearn.metrics.precision_score(y_test, predictions)
+    recall = sklearn.metrics.recall_score(y_test, predictions)
+    plot_values.append((precision, recall))
+fig = plt.figure()
+ax = fig.add_subplot(111)
+for precision, recall in plot_values:
+    ax.scatter(precision, recall, c="blue")
+ax.set_xlabel("Precision")
+ax.set_ylabel("Recall")
+ax.set_title("Pareto front")
+plt.show()

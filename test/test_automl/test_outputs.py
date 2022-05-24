@@ -20,7 +20,7 @@ def test_datamanager_stored_contents() -> None:
     ...
 
 
-@parametrize_with_cases("automl", cases=cases, has_tag="fitted")
+@parametrize_with_cases("automl", cases=cases, filter=has_ensemble)
 def test_paths_created(automl: AutoML) -> None:
     """
     Parameters
@@ -78,7 +78,7 @@ def test_paths_created_with_ensemble(automl: AutoML) -> None:
         assert path.exists()
 
 
-@parametrize_with_cases("automl", cases=cases, has_tag="fitted")
+@parametrize_with_cases("automl", cases=cases, filter=has_ensemble)
 def test_at_least_one_model_and_predictions(automl: AutoML) -> None:
     """
     Expects

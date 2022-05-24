@@ -1,12 +1,17 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import random
+import warnings
 from collections import Counter
 
 import numpy as np
 from sklearn.utils import check_random_state
 
+from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import TASK_TYPES
+from autosklearn.ensemble_building.run import Run
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.base import BasePipeline
@@ -15,12 +20,13 @@ from autosklearn.pipeline.base import BasePipeline
 class EnsembleSelection(AbstractEnsemble):
     def __init__(
         self,
-        ensemble_size: int,
         task_type: int,
-        metric: Scorer,
+        metrics: Sequence[Scorer] | Scorer,
+        random_state: Optional[Union[int, np.random.RandomState]],
+        backend: Backend,
+        ensemble_size: int = 50,
         bagging: bool = False,
         mode: str = "fast",
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
         """An ensemble of selected algorithms
 
@@ -31,25 +37,50 @@ class EnsembleSelection(AbstractEnsemble):
         ----------
         task_type: int
             An identifier indicating which task is being performed.
-        metric: Scorer
-            The metric used to evaluate the models
-        bagging: bool = False
-            Whether to use bagging in ensemble selection
-        mode: str in ['fast', 'slow'] = 'fast'
-            Which kind of ensemble generation to use
-            *   'slow' - The original method used in Rich Caruana's ensemble selection.
-            *   'fast' - A faster version of Rich Caruanas' ensemble selection.
+
+        metrics: Sequence[Scorer] | Scorer
+            The metric used to evaluate the models. If multiple metrics are passed,
+            ensemble selection only optimizes for the first
 
         random_state: Optional[int | RandomState] = None
             The random_state used for ensemble selection.
-            *   None - Uses numpy's default RandomState object
-            *   int - Successive calls to fit will produce the same results
-            *   RandomState - Truely random, each call to fit will produce
-                              different results, even with the same object.
-        """
+
+            * None - Uses numpy's default RandomState object
+            * int - Successive calls to fit will produce the same results
+            * RandomState - Truly random, each call to fit will produce
+              different results, even with the same object.
+
+        backend : Backend
+            Gives access to the backend of Auto-sklearn. Not used by Ensemble Selection.
+
+        bagging: bool = False
+            Whether to use bagging in ensemble selection
+
+        mode: str in ['fast', 'slow'] = 'fast'
+            Which kind of ensemble generation to use
+            * 'slow' - The original method used in Rich Caruana's ensemble selection.
+            * 'fast' - A faster version of Rich Caruanas' ensemble selection.
+
+        References
+        ----------
+        | Ensemble selection from libraries of models
+        | Rich Caruana, Alexandru Niculescu-Mizil, Geoff Crew and Alex Ksikes
+        | ICML 2004
+        | https://dl.acm.org/doi/10.1145/1015330.1015432
+        | https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf
+        """  # noqa: E501
         self.ensemble_size = ensemble_size
         self.task_type = task_type
-        self.metric = metric
+        if isinstance(metrics, Sequence):
+            if len(metrics) > 1:
+                warnings.warn(
+                    "Ensemble selection can only optimize one metric, "
+                    "but multiple metrics were passed, dropping all "
+                    "except for the first metric."
+                )
+            self.metric = metrics[0]
+        else:
+            self.metric = metrics
         self.bagging = bagging
         self.mode = mode
 
@@ -68,15 +99,15 @@ class EnsembleSelection(AbstractEnsemble):
         # one in __main__. we don't use the metric
         # in the EnsembleSelection so this should
         # be fine
-        self.metric = None  # type: ignore
-        return self.__dict__
+        return {key: value for key, value in self.__dict__.items() if key != "metrics"}
 
     def fit(
         self,
-        predictions: List[np.ndarray],
-        labels: np.ndarray,
-        identifiers: List[Tuple[int, int, float]],
-    ) -> AbstractEnsemble:
+        base_models_predictions: List[np.ndarray],
+        true_targets: np.ndarray,
+        model_identifiers: List[Tuple[int, int, float]],
+        runs: Sequence[Run],
+    ) -> EnsembleSelection:
         self.ensemble_size = int(self.ensemble_size)
         if self.ensemble_size < 1:
             raise ValueError("Ensemble size cannot be less than one!")
@@ -94,18 +125,18 @@ class EnsembleSelection(AbstractEnsemble):
             raise ValueError("Unknown mode %s" % self.mode)
 
         if self.bagging:
-            self._bagging(predictions, labels)
+            self._bagging(base_models_predictions, true_targets)
         else:
-            self._fit(predictions, labels)
+            self._fit(base_models_predictions, true_targets)
         self._calculate_weights()
-        self.identifiers_ = identifiers
+        self.identifiers_ = model_identifiers
         return self
 
     def _fit(
         self,
         predictions: List[np.ndarray],
         labels: np.ndarray,
-    ) -> AbstractEnsemble:
+    ) -> EnsembleSelection:
         if self.mode == "fast":
             self._fast(predictions, labels)
         else:
@@ -273,23 +304,25 @@ class EnsembleSelection(AbstractEnsemble):
             dtype=np.int64,
         )
 
-    def predict(self, predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
+    def predict(
+        self, base_models_predictions: Union[np.ndarray, List[np.ndarray]]
+    ) -> np.ndarray:
 
-        average = np.zeros_like(predictions[0], dtype=np.float64)
-        tmp_predictions = np.empty_like(predictions[0], dtype=np.float64)
+        average = np.zeros_like(base_models_predictions[0], dtype=np.float64)
+        tmp_predictions = np.empty_like(base_models_predictions[0], dtype=np.float64)
 
         # if predictions.shape[0] == len(self.weights_),
         # predictions include those of zero-weight models.
-        if len(predictions) == len(self.weights_):
-            for pred, weight in zip(predictions, self.weights_):
+        if len(base_models_predictions) == len(self.weights_):
+            for pred, weight in zip(base_models_predictions, self.weights_):
                 np.multiply(pred, weight, out=tmp_predictions)
                 np.add(average, tmp_predictions, out=average)
 
         # if prediction model.shape[0] == len(non_null_weights),
         # predictions do not include those of zero-weight models.
-        elif len(predictions) == np.count_nonzero(self.weights_):
+        elif len(base_models_predictions) == np.count_nonzero(self.weights_):
             non_null_weights = [w for w in self.weights_ if w > 0]
-            for pred, weight in zip(predictions, non_null_weights):
+            for pred, weight in zip(base_models_predictions, non_null_weights):
                 np.multiply(pred, weight, out=tmp_predictions)
                 np.add(average, tmp_predictions, out=average)
 
@@ -322,7 +355,7 @@ class EnsembleSelection(AbstractEnsemble):
         )
 
     def get_models_with_weights(
-        self, models: BasePipeline
+        self, models: Dict[Tuple[int, int, float], BasePipeline]
     ) -> List[Tuple[float, BasePipeline]]:
         output = []
         for i, weight in enumerate(self.weights_):
@@ -334,6 +367,11 @@ class EnsembleSelection(AbstractEnsemble):
         output.sort(reverse=True, key=lambda t: t[0])
 
         return output
+
+    def get_identifiers_with_weights(
+        self,
+    ) -> List[Tuple[Tuple[int, int, float], float]]:
+        return list(zip(self.identifiers_, self.weights_))
 
     def get_selected_model_identifiers(self) -> List[Tuple[int, int, float]]:
         output = []

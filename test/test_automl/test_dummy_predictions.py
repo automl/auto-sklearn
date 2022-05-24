@@ -12,7 +12,7 @@ from autosklearn.constants import (
     REGRESSION,
 )
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.metrics import Scorer, accuracy, r2
+from autosklearn.metrics import Scorer, accuracy, precision, r2
 from autosklearn.util.logging_ import PicklableClientLogger
 
 import pytest
@@ -182,4 +182,30 @@ def test_crash_due_to_memory_exception(
 def test_raises_if_no_metric_set(make_automl: Callable[..., AutoML]) -> None:
     automl = make_automl()
     with pytest.raises(ValueError, match="Metric/Metrics was/were not set"):
+        automl._do_dummy_prediction()
+
+
+def test_raises_invalid_metric(
+    mock_logger: PicklableClientLogger,
+    make_automl: Callable[..., AutoML],
+    make_sklearn_dataset: Callable[..., XYDataManager],
+) -> None:
+    dataset = "iris"
+    task = MULTICLASS_CLASSIFICATION
+
+    automl = make_automl(metrics=[accuracy, precision])
+    automl._logger = mock_logger
+
+    datamanager = make_sklearn_dataset(
+        dataset,
+        as_datamanager=True,
+        task=task,
+        feat_type="numerical",
+    )
+    automl._backend.save_datamanager(datamanager)
+
+    with pytest.raises(
+        ValueError,
+        match="Are you sure precision is applicable for the given task type",
+    ):
         automl._do_dummy_prediction()
