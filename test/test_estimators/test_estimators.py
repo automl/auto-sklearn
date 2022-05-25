@@ -8,7 +8,6 @@ import itertools
 import os
 import pickle
 import re
-import shutil
 import tempfile
 
 import joblib
@@ -1143,27 +1142,22 @@ def test_selector_file_askl2_can_be_created(selector_path):
     importlib.reload(autosklearn.experimental.askl2)
 
 
-def clear_folder(folder_path):
-    # clear all files in the selector_path
-    for file in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file)
-        if file_path.endswith(".pkl") and os.path.isfile(file_path):
-            shutil.rmtree(file_path)
+def test_path(path):
+    assert path.is_dir()
+    assert len(list(path.iterdir())) == 0
 
 
 @pytest.mark.parametrize(
     "metric",
     [metric for _, metric in autosklearn.metrics.CLASSIFICATION_METRICS.items()],
 )
-def test_askl2_fits_selector_for_given_metrics_at_init(metric):
+def test_askl2_fits_selector_for_given_metrics_at_init(tmp_path, metric):
 
-    selector_path = os.path.join(
-        tempfile.gettempdir(), "auto=sklearn"
-    )  # selector files will be created in /tmp/auto-sklearn
-    clear_folder(selector_path)
+    test_path(tmp_path)
+    temp_dir = str(tmp_path)
 
     with unittest.mock.patch("os.environ.get") as mock_foo:
-        mock_foo.return_value = tempfile.gettempdir()
+        mock_foo.return_value = temp_dir
         automl = AutoSklearn2Classifier(
             time_left_for_this_task=60,
             delete_tmp_folder_after_terminate=False,
@@ -1191,17 +1185,14 @@ def test_askl2_fits_selector_for_given_metrics_at_init(metric):
         )  # check if the path exists
         assert not automl_1.required_training
 
-    clear_folder(selector_path)
 
+def test_askl2_fit_when_no_metric_specified(tmp_path):
 
-def test_askl2_fit_when_no_metric_specified():
-    selector_path = os.path.join(
-        tempfile.gettempdir(), "auto=sklearn"
-    )  # selector files will be created in /tmp/auto-sklearn
-    clear_folder(selector_path)
+    test_path(tmp_path)
+    temp_dir = str(tmp_path)
 
     with unittest.mock.path("os.environ.get") as mock_foo:
-        mock_foo.return_value = tempfile.gettempdir()
+        mock_foo.return_value = temp_dir
         automl = AutoSklearn2Classifier(
             time_left_for_this_task=60, delete_tmp_folder_after_terminate=False
         )
@@ -1209,14 +1200,11 @@ def test_askl2_fit_when_no_metric_specified():
         for metric in automl.selector_metrics:
             assert os.path.exists(str(automl.selector_files[metric.name]))
 
-    clear_folder(selector_path)
 
+def test_askl2_fit_with_custom_metric(tmp_path):
 
-def test_askl2_fit_with_custom_metric():
-    selector_path = os.path.join(
-        tempfile.gettempdir(), "auto=sklearn"
-    )  # selector files will be created in /tmp/auto-sklearn
-    clear_folder(selector_path)
+    test_path(tmp_path)
+    temp_dir = str(tmp_path)
 
     # custom metric
     def accuracy(solution, prediction):
@@ -1232,7 +1220,7 @@ def test_askl2_fit_with_custom_metric():
         needs_threshold=False,
     )
     with unittest.mock.patch("os.environ.get") as mock_foo:
-        mock_foo.return_value = tempfile.gettempdir()
+        mock_foo.return_value = temp_dir
         automl = AutoSklearn2Classifier(
             time_left_for_this_task=60,
             delete_tmp_folder_after_terminate=False,
@@ -1244,8 +1232,6 @@ def test_askl2_fit_with_custom_metric():
         assert os.path.exists(
             str(automl.selector_files[accuracy_scorer.name])
         )  # check if the path exists
-
-    clear_folder(selector_path)
 
 
 def test_check_askl2_same_arguments_as_askl() -> None:
