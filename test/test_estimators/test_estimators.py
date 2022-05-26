@@ -1188,7 +1188,7 @@ def test_askl2_fit_when_no_metric_specified(tmp_path):
     assert len(list(tmp_path.iterdir())) == 0
     temp_dir = str(tmp_path)
 
-    with unittest.mock.path("os.environ.get") as mock_foo:
+    with unittest.mock.patch("os.environ.get") as mock_foo:
         mock_foo.return_value = temp_dir
         automl = AutoSklearn2Classifier(
             time_left_for_this_task=60, delete_tmp_folder_after_terminate=False
@@ -1196,40 +1196,6 @@ def test_askl2_fit_when_no_metric_specified(tmp_path):
         assert len(automl.selector_files) == 3
         for metric in automl.selector_metrics:
             assert os.path.exists(str(automl.selector_files[metric.name]))
-
-
-def test_askl2_fit_with_custom_metric(tmp_path):
-
-    assert tmp_path.is_dir()
-    assert len(list(tmp_path.iterdir())) == 0
-    temp_dir = str(tmp_path)
-
-    # custom metric
-    def accuracy(solution, prediction):
-        # custom function defining accuracy
-        return np.mean(solution == prediction)
-
-    accuracy_scorer = autosklearn.metrics.make_scorer(
-        name="accu",
-        score_func=accuracy,
-        optimum=1,
-        greater_is_better=True,
-        needs_proba=False,
-        needs_threshold=False,
-    )
-    with unittest.mock.patch("os.environ.get") as mock_foo:
-        mock_foo.return_value = temp_dir
-        automl = AutoSklearn2Classifier(
-            time_left_for_this_task=60,
-            delete_tmp_folder_after_terminate=False,
-            metric=accuracy_scorer,
-        )
-        assert (
-            len(automl.selector_files) == 1
-        )  # only one selector file should have been created
-        assert os.path.exists(
-            str(automl.selector_files[accuracy_scorer.name])
-        )  # check if the path exists
 
 
 def test_check_askl2_same_arguments_as_askl() -> None:
