@@ -18,6 +18,8 @@ import autosklearn.experimental.selector
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import Scorer, accuracy, balanced_accuracy, log_loss, roc_auc
 
+selector_metrics = (balanced_accuracy, roc_auc, log_loss)
+
 
 class SmacObjectCallback:
     def __init__(self, portfolio):

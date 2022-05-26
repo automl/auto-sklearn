@@ -1142,18 +1142,14 @@ def test_selector_file_askl2_can_be_created(selector_path):
     importlib.reload(autosklearn.experimental.askl2)
 
 
-def test_path(path):
-    assert path.is_dir()
-    assert len(list(path.iterdir())) == 0
-
-
 @pytest.mark.parametrize(
     "metric",
-    [metric for _, metric in autosklearn.metrics.CLASSIFICATION_METRICS.items()],
+    [metric for metric in autosklearn.experimental.askl2.selector_metrics],
 )
 def test_askl2_fits_selector_for_given_metrics_at_init(tmp_path, metric):
 
-    test_path(tmp_path)
+    assert tmp_path.is_dir()
+    assert len(list(tmp_path.iterdir())) == 0
     temp_dir = str(tmp_path)
 
     with unittest.mock.patch("os.environ.get") as mock_foo:
@@ -1188,7 +1184,8 @@ def test_askl2_fits_selector_for_given_metrics_at_init(tmp_path, metric):
 
 def test_askl2_fit_when_no_metric_specified(tmp_path):
 
-    test_path(tmp_path)
+    assert tmp_path.is_dir()
+    assert len(list(tmp_path.iterdir())) == 0
     temp_dir = str(tmp_path)
 
     with unittest.mock.path("os.environ.get") as mock_foo:
@@ -1203,7 +1200,8 @@ def test_askl2_fit_when_no_metric_specified(tmp_path):
 
 def test_askl2_fit_with_custom_metric(tmp_path):
 
-    test_path(tmp_path)
+    assert tmp_path.is_dir()
+    assert len(list(tmp_path.iterdir())) == 0
     temp_dir = str(tmp_path)
 
     # custom metric
