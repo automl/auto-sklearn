@@ -65,11 +65,7 @@ class MetaBase(object):
                 'Dataset %s already in meta-data. Removing occurence.', name.lower()
             )
             self.metafeatures.drop(name.lower(), inplace=True)
-        self.metafeatures = self.metafeatures.append(metafeatures)
-
-        runs = pd.Series([], name=name, dtype=float)
-        for metric in self.algorithm_runs.keys():
-            self.algorithm_runs[metric].append(runs)
+        self.metafeatures = pd.concat([self.metafeatures, pd.DataFrame(metafeatures).T])
 
     def get_runs(self, dataset_name, performance_measure=None):
         """Return a list of all runs for a dataset."""
