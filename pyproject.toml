@@ -96,8 +96,6 @@ module = [
     "autosklearn.automl",
     "autosklearn.smbo",
     "autosklearn.experimental.askl2",
-    "autosklearn.ensembles.singlebest_ensemble",
-    "autosklearn.ensembles.ensemble_selection",
     "autosklearn.evaluation", #__init__
     "autosklearn.evaluation.abstract_evaluator",
     "autosklearn.evaluation.test_evaluator",

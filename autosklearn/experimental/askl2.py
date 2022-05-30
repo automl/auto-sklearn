@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 import hashlib
@@ -16,6 +18,8 @@ from ConfigSpace import Configuration
 import autosklearn
 import autosklearn.experimental.selector
 from autosklearn.classification import AutoSklearnClassifier
+from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer, accuracy, balanced_accuracy, log_loss, roc_auc
 
 metrics = (balanced_accuracy, roc_auc, log_loss)
@@ -198,7 +202,9 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         self,
         time_left_for_this_task: int = 3600,
         per_run_time_limit=None,
-        ensemble_size: int = 50,
+        ensemble_size: int | None = None,
+        ensemble_class: AbstractEnsemble | None = EnsembleSelection,
+        ensemble_kwargs: Dict[str, Any] | None = None,
         ensemble_nbest: Union[float, int] = 50,
         max_models_on_disc: int = 50,
         seed: int = 1,
@@ -232,14 +238,24 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             that typical machine learning algorithms can be fit on the
             training data.
 
-        ensemble_size : int, optional (default=50)
+        ensemble_size : int, optional
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
             replacement. If set to ``0`` no ensemble is fit.
 
-        ensemble_nbest : int, optional (default=50)
-            Only consider the ``ensemble_nbest`` models when building an
+            Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+            this argument via ``ensemble_kwargs={"ensemble_size": int}``
+            if you want to change the ensemble size for ensemble selection.
+
+        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
+            Class implementing the post-hoc ensemble algorithm. Set to
+            ``None`` to disable ensemble building or use ``SingleBest``
+            to obtain only use the single best model instead of an
             ensemble.
+
+        ensemble_kwargs : Dict, optional
+            Keyword arguments that are passed to the ensemble class upon
+            initialization.
 
         max_models_on_disc: int, optional (default=50),
             Defines the maximum number of models that are kept in the disc.
@@ -352,6 +368,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             per_run_time_limit=per_run_time_limit,
             initial_configurations_via_metalearning=0,
             ensemble_size=ensemble_size,
+            ensemble_class=ensemble_class,
+            ensemble_kwargs=ensemble_kwargs,
             ensemble_nbest=ensemble_nbest,
             max_models_on_disc=max_models_on_disc,
             seed=seed,

@@ -84,6 +84,7 @@ def make_sklearn_dataset() -> Callable:
         task: Optional[int] = None,
         feat_type: Optional[Dict | str] = None,
         as_datamanager: bool = False,
+        return_target_as_string: bool = False,
     ) -> Any:
         X, y, Xt, yt = get_dataset(
             dataset=name,
@@ -92,6 +93,7 @@ def make_sklearn_dataset() -> Callable:
             train_size_maximum=train_size_maximum,
             make_multilabel=make_multilabel,
             make_binary=make_binary,
+            return_target_as_string=return_target_as_string,
         )
 
         if not as_datamanager:

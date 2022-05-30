@@ -59,8 +59,15 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
     builder.delete_runs = mock_delete  # type: ignore
 
     # So we can capture the candidate runs used, we still wrap the actual fitting
-    with patch.object(builder, "fit_ensemble", wraps=builder.fit_ensemble) as mock_fit:
-        history, nbest = builder.main()
+    with patch(
+        "autosklearn.ensembles.ensemble_selection.EnsembleSelection"
+        ".get_validation_performance"
+    ) as mock_get_validation_performance:
+        mock_get_validation_performance.return_value = 0.2
+        with patch.object(
+            builder, "fit_ensemble", wraps=builder.fit_ensemble
+        ) as mock_fit:
+            history, nbest = builder.main()
 
     # Check the ensemble was fitted once
     mock_save.assert_called_once()
@@ -69,8 +76,9 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
     ensemble_ids = set(ens.get_selected_model_identifiers())
     assert len(ensemble_ids) > 0
 
+    assert mock_fit.call_count == 1
     # Check that the ids of runs in the ensemble were all candidates
-    candidates = mock_fit.call_args[0][0]  # `fit_ensemble(candidates, ...)`
+    candidates = mock_fit.call_args[1]["candidates"]
     candidate_ids = {run.id for run in candidates}
     assert ensemble_ids <= candidate_ids
 
@@ -89,10 +97,19 @@ def test_run_builds_valid_ensemble(builder: EnsembleBuilder) -> None:
         assert not any(deleted_ids & candidate_ids)
         assert not any(deleted_ids & ensemble_ids)
 
-        # Make sure that the best deleted model is better than the worst candidate
-        best_deleted = min(deleted, key=lambda r: (r.loss, r.num_run))
-        worst_candidate = max(candidates, key=lambda r: (r.loss, r.num_run))
+        # Make sure that the best deleted model is still worse than the worst candidate
+        # This does not necessarily hold with respect to any single metric in the
+        # multiobjective case as the best deleted may have been deleted with respect to
+        # some other metric when compared to the worst candidate, we can't know which.
+        if len(builder.metrics) == 1:
+            metric = builder.metrics[0]
+            best_deleted = min(
+                deleted, key=lambda r: (r.losses[metric.name], r.num_run)
+            )
+            worst_candidate = max(
+                candidates, key=lambda r: (r.losses[metric.name], r.num_run)
+            )
 
-        a = (worst_candidate.loss, worst_candidate.num_run)
-        b = (best_deleted.loss, best_deleted.num_run)
-        assert a <= b
+            a = (worst_candidate.losses[metric.name], worst_candidate.num_run)
+            b = (best_deleted.losses[metric.name], best_deleted.num_run)
+            assert a <= b

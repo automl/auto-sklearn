@@ -44,7 +44,9 @@ class Run:
         self.num_run = int(num_run)
         self.budget = float(budget)
 
-        self.loss: float = np.inf
+        # These are ordered based on preference
+        self.losses: dict[str, float] = {}
+
         self._mem_usage: float | None = None
 
         # Items that will be delete when the run is saved back to file
@@ -160,7 +162,7 @@ class Run:
         return hash(self.id)
 
     def __repr__(self) -> str:
-        return f"Run(id={self.id}, loss={self.loss})"
+        return f"Run(id={self.id}, losses={self.losses})"
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Run) and other.id == self.id

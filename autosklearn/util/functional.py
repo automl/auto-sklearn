@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, TypeVar
+from typing import Callable, Hashable, Iterable, Iterator, TypeVar
 
 from functools import reduce
-from itertools import chain, tee
+from itertools import chain, cycle, islice, tee
 
 T = TypeVar("T")
 
@@ -153,7 +153,7 @@ def findwhere(itr: Iterable[T], func: Callable[[T], bool], *, default: int = -1)
     return next((i for i, t in enumerate(itr) if func(t)), default)
 
 
-def pairs(itr: Iterable[T]) -> Iterable[tuple[T, T]]:
+def pairs(itr: Iterable[T]) -> Iterator[tuple[T, T]]:
     """An iterator over pairs of items in the iterator
 
     ..code:: python
@@ -186,3 +186,72 @@ def pairs(itr: Iterable[T]) -> Iterable[tuple[T, T]]:
     itr2 = chain([peek], itr2)
 
     return iter((a, b) for a, b in zip(itr1, itr2))
+
+
+def roundrobin(
+    *iterables: Iterable[T],
+    duplicates: bool = True,
+    key: Callable[[T], Hashable] | None = None,
+) -> Iterator[T]:
+    """Performs a round robin iteration of several iterables
+
+    Adapted from https://docs.python.org/3/library/itertools.html#recipes
+
+    ..code:: python
+
+        colours = ["orange", "red", "green"]
+        fruits = ["apple", "banana", "orange"]
+
+        list(roundrobin(colors, fruits))
+        # ["orange", "apple", "red", "banana", "green", "orange"]
+
+        list(roundrobin(colors, fruits, duplicates=False))
+        # ["orange", "apple", "red", "banana", "green"]
+
+    Parameters
+    ----------
+    *iterables: Iterable[T]
+        Any amount of iterables
+
+    duplicates: bool = True
+        Whether duplicates are allowed
+
+    key: Callable[[T], Hashable] | None = None
+        A key to use when checking for duplicates
+
+    Returns
+    -------
+    Iterator[T]
+        A round robin iterator over the iterables passed
+    """
+    active_iterators = len(iterables)
+    nexts = cycle(iter(it).__next__ for it in iterables)  # roundrobin workhorse
+
+    # We split up the algorithm into removing duplicates and not. This removes the if
+    # statement from within the loop at the cost of duplication.
+    if duplicates:
+        while active_iterators > 0:
+            try:
+                for nxt in nexts:
+                    yield nxt()
+            except StopIteration:
+                active_iterators -= 1
+                nexts = cycle(islice(nexts, active_iterators))
+
+    else:
+        seen = set()
+        key = key if key is not None else lambda x: x  # Identity if None
+
+        while active_iterators > 0:
+            try:
+                for nxt in nexts:
+                    item = nxt()
+                    identifier = key(item)
+
+                    if identifier not in seen:
+                        seen.add(identifier)
+                        yield item
+
+            except StopIteration:
+                active_iterators -= 1
+                nexts = cycle(islice(nexts, active_iterators))

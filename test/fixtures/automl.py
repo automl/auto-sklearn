@@ -6,6 +6,7 @@ from functools import partial
 
 from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
 from autosklearn.automl_common.common.utils.backend import Backend
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 
 from pytest import FixtureRequest, fixture
 from unittest.mock import Mock
@@ -43,8 +44,8 @@ def _create_automl(
         "time_left_for_this_task": 30,
         "per_run_time_limit": 5,
         "seed": DEFAULT_SEED,
-        "n_jobs": 2,
-        "ensemble_size": 10,
+        "ensemble_class": EnsembleSelection,
+        "ensemble_kwargs": {"ensemble_size": 10},
         "ensemble_nbest": 10,
         "max_models_on_disc": 10,
         "initial_configurations_via_metalearning": 5,

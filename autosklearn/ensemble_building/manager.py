@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, Sequence, Type
 
 import logging.handlers
 import time
@@ -8,6 +8,7 @@ import traceback
 
 import dask.distributed
 import numpy as np
+from sklearn.utils.validation import check_random_state
 from smac.callbacks import IncorporateRunResultCallback
 from smac.optimizer.smbo import SMBO
 from smac.runhistory.runhistory import RunInfo, RunValue
@@ -15,6 +16,8 @@ from smac.tae.base import StatusType
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.ensemble_building.builder import EnsembleBuilder
+from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer
 from autosklearn.util.logging_ import get_named_client_logger
 
@@ -25,11 +28,12 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         backend: Backend,
         dataset_name: str,
         task: int,
-        metric: Scorer,
+        metrics: Sequence[Scorer],
         time_left_for_ensembles: float = np.inf,
         max_iterations: int | None = None,
         pynisher_context: str = "fork",
-        ensemble_size: int = 50,
+        ensemble_class: Type[AbstractEnsemble] = EnsembleSelection,
+        ensemble_kwargs: Dict[str, Any] | None = None,
         ensemble_nbest: int | float = 50,
         max_models_on_disc: int | float | None = None,
         seed: int = 1,
@@ -53,8 +57,8 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         task: int
             Type of ML task
 
-        metric: Scorer
-            Metric to compute the loss of the given predictions
+        metrics: Sequence[Scorer]
+            Metrics to optimize the ensemble for
 
         time_left_for_ensemble: float = np.inf
             How much time is left for the task in seconds.
@@ -67,8 +71,15 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         pynisher_context: "spawn" | "fork" | "forkserver" = "fork"
             The multiprocessing context for pynisher.
 
-        ensemble_size: int = 50
-            maximal size of ensemble
+        ensemble_class : Type[AbstractEnsemble] (default=EnsembleSelection)
+            Class implementing the post-hoc ensemble algorithm. Set to
+            ``None`` to disable ensemble building or use ``SingleBest``
+            to obtain only use the single best model instead of an
+            ensemble.
+
+        ensemble_kwargs : Dict, optional
+            Keyword arguments that are passed to the ensemble class upon
+            initialization.
 
         ensemble_nbest: int | float = 50
             If int: consider only the n best prediction
@@ -114,8 +125,9 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.backend = backend
         self.dataset_name = dataset_name
         self.task = task
-        self.metric = metric
-        self.ensemble_size = ensemble_size
+        self.metrics = metrics
+        self.ensemble_class = ensemble_class
+        self.ensemble_kwargs = ensemble_kwargs
         self.ensemble_nbest = ensemble_nbest
         self.max_models_on_disc = max_models_on_disc
         self.seed = seed
@@ -123,7 +135,7 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         self.max_iterations = max_iterations
         self.read_at_most = read_at_most
         self.memory_limit = memory_limit
-        self.random_state = random_state
+        self.random_state = check_random_state(random_state)
         self.logger_port = logger_port
         self.pynisher_context = pynisher_context
 
@@ -223,8 +235,9 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
                         backend=self.backend,
                         dataset_name=self.dataset_name,
                         task_type=self.task,
-                        metric=self.metric,
-                        ensemble_size=self.ensemble_size,
+                        metrics=self.metrics,
+                        ensemble_class=self.ensemble_class,
+                        ensemble_kwargs=self.ensemble_kwargs,
                         ensemble_nbest=self.ensemble_nbest,
                         max_models_on_disc=self.max_models_on_disc,
                         seed=self.seed,
@@ -263,9 +276,10 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         backend: Backend,
         dataset_name: str,
         task_type: int,
-        metric: Scorer,
+        metrics: Sequence[Scorer],
         pynisher_context: str,
-        ensemble_size: int = 50,
+        ensemble_class: Type[AbstractEnsemble] = EnsembleSelection,
+        ensemble_kwargs: Dict[str, Any] | None = None,
         ensemble_nbest: int | float = 50,
         max_models_on_disc: int | float | None = None,
         seed: int = 1,
@@ -297,14 +311,21 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         task_type: int
             type of ML task
 
-        metric: Scorer
-            Metric to compute the loss of the given predictions
+        metrics: Sequence[Scorer]
+            Metrics to optimize the ensemble for.
 
         pynisher_context: "fork" | "spawn" | "forkserver" = "fork"
             Context to use for multiprocessing, can be either fork, spawn or forkserver.
 
-        ensemble_size: int = 50
-            Maximal size of ensemble
+        ensemble_class : Type[AbstractEnsemble] (default=EnsembleSelection)
+            Class implementing the post-hoc ensemble algorithm. Set to
+            ``None`` to disable ensemble building or use ``SingleBest``
+            to obtain only use the single best model instead of an
+            ensemble.
+
+        ensemble_kwargs : Dict, optional
+            Keyword arguments that are passed to the ensemble class upon
+            initialization.
 
         ensemble_nbest: int | float = 50
             If int: consider only the n best prediction
@@ -348,19 +369,21 @@ class EnsembleBuilderManager(IncorporateRunResultCallback):
         (ensemble_history: list[dict[str, Any]], nbest: int | float)
             The ensemble history and the nbest chosen members
         """
+        random_state = check_random_state(random_state)
         result = EnsembleBuilder(
             backend=backend,
             dataset_name=dataset_name,
             task_type=task_type,
-            metric=metric,
-            ensemble_size=ensemble_size,
+            metrics=metrics,
+            ensemble_class=ensemble_class,
+            ensemble_kwargs=ensemble_kwargs,
             ensemble_nbest=ensemble_nbest,
             max_models_on_disc=max_models_on_disc,
             seed=seed,
             precision=precision,
             memory_limit=memory_limit,
             read_at_most=read_at_most,
-            random_state=random_state,
+            random_state=random_state.randint(10000000),
             logger_port=logger_port,
         ).run(
             end_at=end_at,

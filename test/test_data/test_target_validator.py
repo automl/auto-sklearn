@@ -516,8 +516,8 @@ def test_unknown_categories_in_targets(input_data_targettest):
     elif isinstance(input_data_targettest, np.ndarray):
         input_data_targettest[-1] = 5000
 
-    x_t = validator.transform(input_data_targettest)
-    assert x_t[-1].item(0) == -1
+    with pytest.raises(ValueError, match="Found unknown categories"):
+        validator.transform(input_data_targettest)
 
 
 def test_is_single_column_target():

@@ -332,7 +332,10 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         budget: float = 0.0,
         instance_specific: Optional[str] = None,
     ) -> Tuple[
-        StatusType, float, float, Dict[str, Union[int, float, str, Dict, List, Tuple]]
+        StatusType,
+        float | list[float],
+        float,
+        Dict[str, Union[int, float, str, Dict, List, Tuple]],
     ]:
 
         # Additional information of each of the tae executions

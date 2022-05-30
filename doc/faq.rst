@@ -388,9 +388,17 @@ Ensembling
 
     The following hyperparameters control how the ensemble is constructed:
 
-    * ``ensemble_size`` determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.
+    * ``ensemble_class`` class object implementing :class:`autosklearn.ensembles.AbstractEnsemble`,
+      will be instantiated by *auto-sklearn*'s ensemble builder.
+    * ``ensemble_kwargs`` are keyword arguments that are passed to the ``ensemble_class`` upon
+      instantiation. See below for an example argument.
     * ``ensemble_nbest`` allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer *n*, such that only the best *n* models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, ``ensemble_nbest`` would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in `Caruana et al. (2006) <https://dl.acm.org/doi/10.1109/ICDM.2006.76>`_).
     * ``max_models_on_disc`` defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by *auto-sklearn*. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of ``ensemble_size``, ``ensemble_nbest`` and ``max_models_on_disc`` determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.
+
+    The default method for Auto-sklearn is :class:`autosklearn.ensembles.EnsembleSelection`,
+    which features the argument ``ensemble_size``. that determines the maximal size of the
+    ensemble. Models can be added repeatedly, so the number of different models is usually
+    less than the ``ensemble_size``.
 
 .. collapse:: <b>Which models are in the final ensemble?</b>
 
@@ -513,17 +521,18 @@ Other
 
     In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Automated Machine Learning
     <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning>`_
-    set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
+    set ``ensemble_class=autosklearn.ensembles.SingleBest`` and ``initial_configurations_via_metalearning=0``:
 
     .. code:: python
 
         import autosklearn.classification
+        import autosklearn.ensembles
         automl = autosklearn.classification.AutoSklearnClassifier(
-            ensemble_size=1,
+            ensemble_class=autosklearn.ensembles.SingleBest,
             initial_configurations_via_metalearning=0
         )
 
-    An ensemble of size one will result in always choosing the current best model
-    according to its performance on the validation set. Setting the initial
-    configurations found by meta-learning to zero makes *auto-sklearn* use the
-    regular SMAC algorithm for suggesting new hyperparameter configurations.
+    This will always choose the best model according to the validation set.
+    Setting the initial configurations found by meta-learning to zero makes
+    *auto-sklearn* use the regular SMAC algorithm for suggesting new
+    hyperparameter configurations.

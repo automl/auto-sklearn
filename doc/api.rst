@@ -111,4 +111,20 @@ Extension Interfaces
 .. autoclass:: autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm
     :members:
 
+.. _api_ensemble:
 
+=========
+Ensembles
+=========
+
+.. autoclass:: autosklearn.ensembles.AbstractEnsemble
+    :members:
+
+.. autoclass:: autosklearn.ensembles.AbstractMultiObjectiveEnsemble
+    :members:
+
+.. autoclass:: autosklearn.ensembles.EnsembleSelection
+    :members:
+
+.. autoclass:: autosklearn.ensembles.SingleBest
+    :members:

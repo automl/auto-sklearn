@@ -135,7 +135,7 @@ class Test(unittest.TestCase):
             per_run_time_limit=5,
             metadata_directory=nonexistent_dir,  # user specified metadata_dir
             dask_client=dask_client,
-            ensemble_size=0,
+            ensemble_class=None,
         )
         X, y = load_breast_cancer(return_X_y=True)
         self.assertRaisesRegex(
