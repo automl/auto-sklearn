@@ -128,10 +128,10 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight            type      cost  duration
     model_id                                                           
-    31           1             0.48  ard_regression  0.428169  0.762559
-    25           2             0.26             sgd  0.436679  0.677411
-    33           3             0.20   liblinear_svr  0.472547  0.777577
-    29           4             0.06  ard_regression  0.493390  0.668757
+    31           1             0.48  ard_regression  0.428169  0.818530
+    25           2             0.26             sgd  0.436679  0.695193
+    33           3             0.20   liblinear_svr  0.472547  0.804050
+    29           4             0.06  ard_regression  0.493390  0.697902
 
 
 
@@ -158,50 +158,9 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   25: {   'cost': 0.43667876507897496,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7efcb501cac0>,
-                'ensemble_weight': 0.26,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7efcb2900490>,
-                'model_id': 25,
-                'rank': 1,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7efcb4e31ca0>,
-                'sklearn_regressor': SGDRegressor(alpha=0.0006517033225329654, epsilon=0.012150149892783745,
-                 eta0=0.016444224834275295, l1_ratio=1.7462342366289323e-09,
-                 loss='epsilon_insensitive', max_iter=16, penalty='elasticnet',
-                 power_t=0.21521743568582094, random_state=1,
-                 tol=0.002431731981071206, warm_start=True)},
-        29: {   'cost': 0.49338956176198634,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7efcb5067d30>,
-                'ensemble_weight': 0.06,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7efcaeb7a100>,
-                'model_id': 29,
-                'rank': 2,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7efcaeb7a430>,
-                'sklearn_regressor': ARDRegression(alpha_1=0.0003658795897322683, alpha_2=8.92755085837738e-05,
-                  copy_X=False, lambda_1=2.7018753584355872e-06,
-                  lambda_2=1.345477555564763e-07,
-                  threshold_lambda=28013.994606205768, tol=0.00033715305179437166)},
-        31: {   'cost': 0.428169158594341,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7efcb088f130>,
-                'ensemble_weight': 0.48,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7efcb08ffdf0>,
-                'model_id': 31,
-                'rank': 3,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7efcb01ed9d0>,
-                'sklearn_regressor': ARDRegression(alpha_1=0.0008154544266182765, alpha_2=5.59538372768849e-10,
-                  copy_X=False, lambda_1=0.0006960494791085091,
-                  lambda_2=0.00035440029631338203,
-                  threshold_lambda=6133.542143966113, tol=0.004462344005356406)},
-        33: {   'cost': 0.4725467145542245,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7efcb53e3ee0>,
-                'ensemble_weight': 0.2,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7efcaf041a00>,
-                'model_id': 33,
-                'rank': 4,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7efcaf237b50>,
-                'sklearn_regressor': LinearSVR(C=71.4085586379967, dual=False, epsilon=0.03951022702573597,
-              loss='squared_epsilon_insensitive', random_state=1,
-              tol=0.006317097934562396)}}
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+      warnings.warn(
+    {}
 
 
 
@@ -281,7 +240,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.256 seconds)
+   **Total running time of the script:** ( 2 minutes  0.614 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

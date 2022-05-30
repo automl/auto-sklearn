@@ -175,9 +175,9 @@ To run <em>Auto-sklearn</em> on multiple machines check the example
   self.metafeatures = self.metafeatures.append(metafeatures)
 /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.algorithm_runs[metric].append(runs)
-[ERROR] [2022-05-24 12:29:20,311:asyncio.events]
+[ERROR] [2022-05-30 14:25:51,156:asyncio.events]
 Traceback (most recent call last):
-  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 759, in wrapper
+  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 761, in wrapper
     return await func(*args, **kwargs)
   File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py&quot;, line 1225, in _reconnect
     await self._ensure_connected(timeout=timeout)
@@ -188,13 +188,13 @@ Traceback (most recent call last):
   File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/asyncio/tasks.py&quot;, line 659, in sleep
     return await future
 asyncio.exceptions.CancelledError
-[ERROR] [2022-05-24 12:29:20,335:asyncio.events]
+[ERROR] [2022-05-30 14:25:51,183:asyncio.events]
 Traceback (most recent call last):
-  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 759, in wrapper
+  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 761, in wrapper
     return await func(*args, **kwargs)
-  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py&quot;, line 1404, in _handle_report
+  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py&quot;, line 1414, in _handle_report
     await self._reconnect()
-  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 759, in wrapper
+  File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py&quot;, line 761, in wrapper
     return await func(*args, **kwargs)
   File &quot;/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py&quot;, line 1225, in _reconnect
     await self._ensure_connected(timeout=timeout)
@@ -209,14 +209,14 @@ auto-sklearn results:
   Dataset name: breast_cancer
   Metric: accuracy
   Best validation score: 0.985816
-  Number of target algorithm runs: 48
+  Number of target algorithm runs: 47
   Number of successful target algorithm runs: 47
   Number of crashed target algorithm runs: 0
-  Number of target algorithms that exceeded the time limit: 1
+  Number of target algorithms that exceeded the time limit: 0
   Number of target algorithms that exceeded the memory limit: 0
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  10.900 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  4.080 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-n-jobs-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_n_jobs.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>

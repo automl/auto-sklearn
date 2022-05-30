@@ -111,7 +111,9 @@
     <div class="body col-md-9 content" role="main">
       
   <h1>Source code for autosklearn.experimental.askl2</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -129,6 +131,8 @@
 <span class="kn">import</span> <span class="nn">autosklearn</span>
 <span class="kn">import</span> <span class="nn">autosklearn.experimental.selector</span>
 <span class="kn">from</span> <span class="nn">autosklearn.classification</span> <span class="kn">import</span> <span class="n">AutoSklearnClassifier</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.abstract_ensemble</span> <span class="kn">import</span> <span class="n">AbstractEnsemble</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.ensemble_selection</span> <span class="kn">import</span> <span class="n">EnsembleSelection</span>
 <span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">roc_auc</span>
 
 <span class="n">metrics</span> <span class="o">=</span> <span class="p">(</span><span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">)</span>
@@ -311,7 +315,9 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">time_left_for_this_task</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>
         <span class="n">per_run_time_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">AbstractEnsemble</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">EnsembleSelection</span><span class="p">,</span>
+        <span class="n">ensemble_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -345,14 +351,24 @@
 <span class="sd">            that typical machine learning algorithms can be fit on the</span>
 <span class="sd">            training data.</span>
 
-<span class="sd">        ensemble_size : int, optional (default=50)</span>
+<span class="sd">        ensemble_size : int, optional</span>
 <span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
 <span class="sd">            selection from libraries of models*. Models are drawn with</span>
 <span class="sd">            replacement. If set to ``0`` no ensemble is fit.</span>
 
-<span class="sd">        ensemble_nbest : int, optional (default=50)</span>
-<span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
+<span class="sd">            Deprecated - will be removed in Auto-sklearn 0.16. Please pass</span>
+<span class="sd">            this argument via ``ensemble_kwargs={&quot;ensemble_size&quot;: int}``</span>
+<span class="sd">            if you want to change the ensemble size for ensemble selection.</span>
+
+<span class="sd">        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)</span>
+<span class="sd">            Class implementing the post-hoc ensemble algorithm. Set to</span>
+<span class="sd">            ``None`` to disable ensemble building or use ``SingleBest``</span>
+<span class="sd">            to obtain only use the single best model instead of an</span>
 <span class="sd">            ensemble.</span>
+
+<span class="sd">        ensemble_kwargs : Dict, optional</span>
+<span class="sd">            Keyword arguments that are passed to the ensemble class upon</span>
+<span class="sd">            initialization.</span>
 
 <span class="sd">        max_models_on_disc: int, optional (default=50),</span>
 <span class="sd">            Defines the maximum number of models that are kept in the disc.</span>
@@ -465,6 +481,8 @@
             <span class="n">per_run_time_limit</span><span class="o">=</span><span class="n">per_run_time_limit</span><span class="p">,</span>
             <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">ensemble_size</span><span class="o">=</span><span class="n">ensemble_size</span><span class="p">,</span>
+            <span class="n">ensemble_class</span><span class="o">=</span><span class="n">ensemble_class</span><span class="p">,</span>
+            <span class="n">ensemble_kwargs</span><span class="o">=</span><span class="n">ensemble_kwargs</span><span class="p">,</span>
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="n">ensemble_nbest</span><span class="p">,</span>
             <span class="n">max_models_on_disc</span><span class="o">=</span><span class="n">max_models_on_disc</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>

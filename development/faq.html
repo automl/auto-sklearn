@@ -434,10 +434,17 @@ interpretable.</p>
 <details class="summary-b-what-can-i-configure-wrt-the-ensemble-building-process-b">
 <summary><b>What can I configure wrt the ensemble building process?</b></summary><p>The following hyperparameters control how the ensemble is constructed:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code> determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> class object implementing <a class="reference internal" href="api.html#autosklearn.ensembles.AbstractEnsemble" title="autosklearn.ensembles.AbstractEnsemble"><code class="xref py py-class docutils literal notranslate"><span class="pre">autosklearn.ensembles.AbstractEnsemble</span></code></a>,
+will be instantiated by <em>auto-sklearn</em>’s ensemble builder.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_kwargs</span></code> are keyword arguments that are passed to the <code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> upon
+instantiation. See below for an example argument.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer <em>n</em>, such that only the best <em>n</em> models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in <a class="reference external" href="https://dl.acm.org/doi/10.1109/ICDM.2006.76">Caruana et al. (2006)</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by <em>auto-sklearn</em>. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> and <code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.</p></li>
 </ul>
+<p>The default method for Auto-sklearn is <a class="reference internal" href="api.html#autosklearn.ensembles.EnsembleSelection" title="autosklearn.ensembles.EnsembleSelection"><code class="xref py py-class docutils literal notranslate"><span class="pre">autosklearn.ensembles.EnsembleSelection</span></code></a>,
+which features the argument <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>. that determines the maximal size of the
+ensemble. Models can be added repeatedly, so the number of different models is usually
+less than the <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>.</p>
 </details><details class="summary-b-which-models-are-in-the-final-ensemble-b">
 <summary><b>Which models are in the final ensemble?</b></summary><p>The results obtained from the final ensemble can be printed by calling <code class="docutils literal notranslate"><span class="pre">show_models()</span></code> or  <code class="docutils literal notranslate"><span class="pre">leaderboard()</span></code>.
 The <em>auto-sklearn</em> ensemble is composed of scikit-learn models that can be inspected as exemplified
@@ -527,18 +534,19 @@ possible to follow the
 from scikit-learn.</p>
 </details><details class="summary-b-vanilla-auto-sklearn-b">
 <summary><b>Vanilla auto-sklearn</b></summary><p>In order to obtain <em>vanilla auto-sklearn</em> as used in <a class="reference external" href="https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning">Efficient and Robust Automated Machine Learning</a>
-set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
+set <code class="docutils literal notranslate"><span class="pre">ensemble_class=autosklearn.ensembles.SingleBest</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="kn">import</span> <span class="nn">autosklearn.ensembles</span>
 <span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ensemble_class</span><span class="o">=</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">ensembles</span><span class="o">.</span><span class="n">SingleBest</span><span class="p">,</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>An ensemble of size one will result in always choosing the current best model
-according to its performance on the validation set. Setting the initial
-configurations found by meta-learning to zero makes <em>auto-sklearn</em> use the
-regular SMAC algorithm for suggesting new hyperparameter configurations.</p>
+<p>This will always choose the best model according to the validation set.
+Setting the initial configurations found by meta-learning to zero makes
+<em>auto-sklearn</em> use the regular SMAC algorithm for suggesting new
+hyperparameter configurations.</p>
 </details></div>
 </div>
 

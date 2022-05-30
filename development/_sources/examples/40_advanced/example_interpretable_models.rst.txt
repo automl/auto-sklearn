@@ -189,7 +189,7 @@ and can change from use case to use case.
                 "select_percentile_classification",
             ],
         },
-        ensemble_size=1,
+        ensemble_kwargs={"ensemble_size": 1},
     )
     automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
@@ -208,7 +208,7 @@ and can change from use case to use case.
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.algorithm_runs[metric].append(runs)
 
-    AutoSklearnClassifier(ensemble_size=1,
+    AutoSklearnClassifier(ensemble_kwargs={'ensemble_size': 1},
                           include={'classifier': ['decision_tree', 'lda', 'sgd'],
                                    'feature_preprocessor': ['no_preprocessing',
                                                             'polynomial',
@@ -240,17 +240,9 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   30: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7efcb4f53f40>,
-                'cost': 0.007092198581560294,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7efcb5068df0>,
-                'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7efcb4f53f10>,
-                'model_id': 30,
-                'rank': 1,
-                'sklearn_classifier': SGDClassifier(alpha=0.0006495626813184486, eta0=0.011953139360987991,
-                  learning_rate='invscaling', max_iter=1024, random_state=1,
-                  tol=2.4312560271235232e-05, warm_start=True)}}
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+      warnings.warn(
+    {}
 
 
 
@@ -277,7 +269,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.965034965034965
+    Accuracy score: 0.951048951048951
 
 
 
@@ -285,7 +277,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.045 seconds)
+   **Total running time of the script:** ( 1 minutes  56.625 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:

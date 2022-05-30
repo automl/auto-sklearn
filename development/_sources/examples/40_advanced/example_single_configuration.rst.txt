@@ -163,75 +163,70 @@ Fit an user provided configuration
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:189: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
-    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7efcb2832940>, 'balancing': Balancing(random_state=1), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7efcaeacee50>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7efcb0a05940>}
+    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7ff238bd7c10>, 'balancing': Balancing(random_state=1), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7ff238c23220>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7ff238c23520>}
     RunInfo(config=Configuration(values={
       'balancing:strategy': 'none',
       'classifier:__choice__': 'random_forest',
-      'classifier:random_forest:bootstrap': 'False',
+      'classifier:random_forest:bootstrap': 'True',
       'classifier:random_forest:criterion': 'entropy',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.19393750630999695,
+      'classifier:random_forest:max_features': 0.8833408664098339,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 3,
+      'classifier:random_forest:min_samples_leaf': 7,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'encoding',
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
       'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.3241827158975454,
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.011201477546165298,
       'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent',
-      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none',
-      'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding',
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute': 7,
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_absolute',
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 2,
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': True,
-      'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 5,
-      'feature_preprocessor:__choice__': 'polynomial',
-      'feature_preprocessor:polynomial:degree': 3,
-      'feature_preprocessor:polynomial:include_bias': 'True',
-      'feature_preprocessor:polynomial:interaction_only': 'False',
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax',
+      'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding_distinct',
+      'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute': 2,
+      'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': 'min_df_absolute',
+      'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': 1,
+      'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 4300,
+      'feature_preprocessor:__choice__': 'pca',
+      'feature_preprocessor:pca:keep_variance': 0.7979437529861716,
+      'feature_preprocessor:pca:whiten': 'True',
     })
     , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.014218009478673022, time=3.414442300796509, status=<StatusType.SUCCESS: 1>, starttime=1653394313.88012, endtime=1653394317.3143306, additional_info={'duration': 3.328977584838867, 'num_run': 2, 'train_loss': 0.00420364315740307, 'configuration_origin': None})
+    RunValue(cost=0.05876777251184839, time=7.398266792297363, status=<StatusType.SUCCESS: 1>, starttime=1653919657.8426127, endtime=1653919665.2627723, additional_info={'duration': 7.307480096817017, 'num_run': 2, 'train_loss': 0.01681457262961228, 'configuration_origin': None})
     Passed Configuration: Configuration(values={
       'balancing:strategy': 'none',
       'classifier:__choice__': 'random_forest',
-      'classifier:random_forest:bootstrap': 'False',
+      'classifier:random_forest:bootstrap': 'True',
       'classifier:random_forest:criterion': 'entropy',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.19393750630999695,
+      'classifier:random_forest:max_features': 0.8833408664098339,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 3,
+      'classifier:random_forest:min_samples_leaf': 7,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'encoding',
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
       'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.3241827158975454,
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.011201477546165298,
       'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent',
-      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none',
-      'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding',
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute': 7,
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_absolute',
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 2,
-      'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': True,
-      'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 5,
-      'feature_preprocessor:__choice__': 'polynomial',
-      'feature_preprocessor:polynomial:degree': 3,
-      'feature_preprocessor:polynomial:include_bias': 'True',
-      'feature_preprocessor:polynomial:interaction_only': 'False',
+      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax',
+      'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding_distinct',
+      'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute': 2,
+      'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': 'min_df_absolute',
+      'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': 1,
+      'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 4300,
+      'feature_preprocessor:__choice__': 'pca',
+      'feature_preprocessor:pca:keep_variance': 0.7979437529861716,
+      'feature_preprocessor:pca:whiten': 'True',
     })
 
-    Random Forest: RandomForestClassifier(bootstrap=False, criterion='entropy', max_features=5,
-                           min_samples_leaf=3, min_samples_split=11,
-                           n_estimators=512, n_jobs=1, random_state=1,
-                           warm_start=True)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:189: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+    Random Forest: RandomForestClassifier(criterion='entropy', max_features=10, min_samples_leaf=7,
+                           min_samples_split=11, n_estimators=512, n_jobs=1,
+                           random_state=1, warm_start=True)
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
       self.metafeatures = self.metafeatures.append(metafeatures)
@@ -244,7 +239,7 @@ Fit an user provided configuration
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  13.938 seconds)
+   **Total running time of the script:** ( 2 minutes  32.777 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_single_configuration.py:

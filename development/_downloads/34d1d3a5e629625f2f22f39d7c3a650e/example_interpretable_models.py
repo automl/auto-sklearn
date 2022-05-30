@@ -67,7 +67,7 @@ automl = autosklearn.classification.AutoSklearnClassifier(
             "select_percentile_classification",
         ],
     },
-    ensemble_size=1,
+    ensemble_kwargs={"ensemble_size": 1},
 )
 automl.fit(X_train, y_train, dataset_name="breast_cancer")
 

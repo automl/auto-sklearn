@@ -81,7 +81,6 @@ print("Use predefined accuracy metric")
 scorer = autosklearn.metrics.accuracy
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
-    per_run_time_limit=30,
     seed=1,
     metric=scorer,
 )
@@ -107,7 +106,6 @@ accuracy_scorer = autosklearn.metrics.make_scorer(
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
-    per_run_time_limit=30,
     seed=1,
     metric=accuracy_scorer,
 )
@@ -133,7 +131,6 @@ error_rate = autosklearn.metrics.make_scorer(
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
-    per_run_time_limit=30,
     seed=1,
     metric=error_rate,
 )
@@ -184,7 +181,6 @@ error_rate = autosklearn.metrics.make_scorer(
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
-    per_run_time_limit=30,
     seed=1,
     metric=error_rate,
 )
@@ -217,10 +213,8 @@ accuracy_scorer = autosklearn.metrics.make_scorer(
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
-    per_run_time_limit=30,
     seed=1,
     metric=accuracy_scorer,
-    ensemble_size=0,
 )
 cls.fit(X_train, y_train)
 
@@ -232,4 +226,4 @@ score = metric_which_needs_x(
     consider_col=1,
     val_threshold=18.8,
 )
-print(f"Error score {score:.3f} using {error_rate.name:s}")
+print(f"Error score {score:.3f} using {accuracy_scorer.name:s}")

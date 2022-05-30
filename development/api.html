@@ -122,6 +122,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#extension-interfaces">Extension Interfaces</a></li>
+<li><a class="reference internal" href="#ensembles">Ensembles</a></li>
 </ul>
 </li>
 </ul>
@@ -138,7 +139,7 @@
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="autosklearn.classification.AutoSklearnClassifier">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.classification.</span></span><span class="sig-name descname"><span class="pre">AutoSklearnClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_left_for_this_task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_run_time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_configurations_via_metalearning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_nbest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_models_on_disc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'holdout'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_strategy_arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delete_tmp_folder_after_terminate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dask_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dask.distributed.Client</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_evaluator_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_smac_object_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smac_scenario_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logging_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Scorer</span> <span class="p"><span class="pre">|</span></span> <span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span> <span class="p"><span class="pre">|</span></span> <span class="pre">None</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_functions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_trials_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_compression</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_string_features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.classification.</span></span><span class="sig-name descname"><span class="pre">AutoSklearnClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">time_left_for_this_task=3600</span></em>, <em class="sig-param"><span class="pre">per_run_time_limit=None</span></em>, <em class="sig-param"><span class="pre">initial_configurations_via_metalearning=25</span></em>, <em class="sig-param"><span class="pre">ensemble_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_class:</span> <span class="pre">Type[AbstractEnsemble]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'autosklearn.ensembles.ensemble_selection.EnsembleSelection'&gt;</span></em>, <em class="sig-param"><span class="pre">ensemble_kwargs:</span> <span class="pre">Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_nbest=50</span></em>, <em class="sig-param"><span class="pre">max_models_on_disc=50</span></em>, <em class="sig-param"><span class="pre">seed=1</span></em>, <em class="sig-param"><span class="pre">memory_limit=3072</span></em>, <em class="sig-param"><span class="pre">include:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">List[str]]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">exclude:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">List[str]]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">resampling_strategy='holdout'</span></em>, <em class="sig-param"><span class="pre">resampling_strategy_arguments=None</span></em>, <em class="sig-param"><span class="pre">tmp_folder=None</span></em>, <em class="sig-param"><span class="pre">delete_tmp_folder_after_terminate=True</span></em>, <em class="sig-param"><span class="pre">n_jobs:</span> <span class="pre">Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">dask_client:</span> <span class="pre">Optional[dask.distributed.Client]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">disable_evaluator_output=False</span></em>, <em class="sig-param"><span class="pre">get_smac_object_callback=None</span></em>, <em class="sig-param"><span class="pre">smac_scenario_args=None</span></em>, <em class="sig-param"><span class="pre">logging_config=None</span></em>, <em class="sig-param"><span class="pre">metadata_directory=None</span></em>, <em class="sig-param"><span class="pre">metric:</span> <span class="pre">Scorer</span> <span class="pre">|</span> <span class="pre">Sequence[Scorer]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">scoring_functions:</span> <span class="pre">Optional[List[Scorer]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">load_models:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></em>, <em class="sig-param"><span class="pre">get_trials_callback=None</span></em>, <em class="sig-param"><span class="pre">dataset_compression:</span> <span class="pre">Union[bool</span></em>, <em class="sig-param"><span class="pre">Mapping[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">True</span></em>, <em class="sig-param"><span class="pre">allow_string_features:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class implements the classification task.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -158,13 +159,26 @@ many configurations which worked well on previously seen
 datasets. Disable if the hyperparameter optimization algorithm
 should start from scratch.</p>
 </dd>
-<dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
+<dt><strong>ensemble_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
-replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit and the single
-best model is loaded.</p>
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+<p>Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+this argument via <code class="docutils literal notranslate"><span class="pre">ensemble_kwargs={&quot;ensemble_size&quot;:</span> <span class="pre">int}</span></code>
+if you want to change the ensemble size for ensemble selection.</p>
+</dd>
+<dt><strong>ensemble_class</strong><span class="classifier">Type[AbstractEnsemble], optional (default=EnsembleSelection)</span></dt><dd><p>Class implementing the post-hoc ensemble algorithm. Set to
+<code class="docutils literal notranslate"><span class="pre">None</span></code> to disable ensemble building or use <code class="docutils literal notranslate"><span class="pre">SingleBest</span></code>
+to obtain only use the single best model instead of an
+ensemble.</p>
+</dd>
+<dt><strong>ensemble_kwargs</strong><span class="classifier">Dict, optional</span></dt><dd><p>Keyword arguments that are passed to the ensemble class upon
+initialization.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
-ensemble.</p>
+ensemble. This is inspired by a concept called library pruning
+introduced in <cite>Getting Most out of Ensemble Selection</cite>. This
+is independent of the <code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> argument and this
+pruning step is done prior to constructing an ensemble.</p>
 </dd>
 <dt><strong>max_models_on_disc: int, optional (default=50),</strong></dt><dd><p>Defines the maximum number of models that are kept in the disc.
 The additional number of models are permanently deleted. Due to the
@@ -403,7 +417,7 @@ used for plotting directly. Please refer to the example
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feat_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit <em>auto-sklearn</em> to given training set (X, y).</p>
 <p>Fit both optimizes the machine learning models and builds an ensemble
-out of them. To disable ensembling, set <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>.</p>
+out of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -440,29 +454,44 @@ md5 hash of the dataset.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="autosklearn.classification.AutoSklearnClassifier.fit_ensemble">
-<span class="sig-name descname"><span class="pre">fit_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_nbest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit_ensemble" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">y</span></em>, <em class="sig-param"><span class="pre">task:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">precision:</span> <span class="pre">Literal[(16</span></em>, <em class="sig-param"><span class="pre">21</span></em>, <em class="sig-param"><span class="pre">64)]</span> <span class="pre">=</span> <span class="pre">32</span></em>, <em class="sig-param"><span class="pre">dataset_name:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_kwargs:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_nbest:</span> <span class="pre">Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_class:</span> <span class="pre">Optional[AbstractEnsemble]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'autosklearn.ensembles.ensemble_selection.EnsembleSelection'&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit_ensemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>y</strong><span class="classifier">array-like</span></dt><dd><p>Target values.</p>
 </dd>
 <dt><strong>task</strong><span class="classifier">int</span></dt><dd><p>A constant from the module <code class="docutils literal notranslate"><span class="pre">autosklearn.constants</span></code>. Determines
 the task type (binary classification, multiclass classification,
 multilabel classification or regression).</p>
 </dd>
-<dt><strong>precision</strong><span class="classifier">str</span></dt><dd><p>Numeric precision used when loading ensemble data. Can be either
-<code class="docutils literal notranslate"><span class="pre">'16'</span></code>, <code class="docutils literal notranslate"><span class="pre">'32'</span></code> or <code class="docutils literal notranslate"><span class="pre">'64'</span></code>.</p>
+<dt><strong>precision</strong><span class="classifier">int</span></dt><dd><p>Numeric precision used when loading ensemble data. Can be either
+<code class="docutils literal notranslate"><span class="pre">16</span></code>, <code class="docutils literal notranslate"><span class="pre">32</span></code> or <code class="docutils literal notranslate"><span class="pre">64</span></code>.</p>
 </dd>
 <dt><strong>dataset_name</strong><span class="classifier">str</span></dt><dd><p>Name of the current data set.</p>
 </dd>
-<dt><strong>ensemble_nbest</strong><span class="classifier">int</span></dt><dd><p>Determines how many models should be considered from the ensemble
-building. This is inspired by a concept called library pruning
-introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
+<dt><strong>ensemble_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
+selection from libraries of models</em>. Models are drawn with
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+<p>Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+this argument via <code class="docutils literal notranslate"><span class="pre">ensemble_kwargs={&quot;ensemble_size&quot;:</span> <span class="pre">int}</span></code>
+if you want to change the ensemble size for ensemble selection.</p>
 </dd>
-<dt><strong>ensemble_size</strong><span class="classifier">int</span></dt><dd><p>Size of the ensemble built by <cite>Ensemble Selection</cite>.</p>
+<dt><strong>ensemble_kwargs</strong><span class="classifier">Dict, optional</span></dt><dd><p>Keyword arguments that are passed to the ensemble class upon
+initialization.</p>
+</dd>
+<dt><strong>ensemble_nbest</strong><span class="classifier">int</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
+ensemble. This is inspired by a concept called library pruning
+introduced in <cite>Getting Most out of Ensemble Selection</cite>. This
+is independent of the <code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> argument and this
+pruning step is done prior to constructing an ensemble.</p>
+</dd>
+<dt><strong>ensemble_class</strong><span class="classifier">Type[AbstractEnsemble], optional (default=EnsembleSelection)</span></dt><dd><p>Class implementing the post-hoc ensemble algorithm. Set to
+<code class="docutils literal notranslate"><span class="pre">None</span></code> to disable ensemble building or use <code class="docutils literal notranslate"><span class="pre">SingleBest</span></code>
+to obtain only use the single best model instead of an
+ensemble.</p>
 </dd>
 </dl>
 </dd>
@@ -870,7 +899,7 @@ possible to update each component of a nested object.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="autosklearn.experimental.askl2.AutoSklearn2Classifier">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.experimental.askl2.</span></span><span class="sig-name descname"><span class="pre">AutoSklearn2Classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_left_for_this_task</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_run_time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_nbest</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_models_on_disc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delete_tmp_folder_after_terminate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dask_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">distributed.client.Client</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_evaluator_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smac_scenario_args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logging_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">autosklearn.metrics.Scorer</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_functions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">autosklearn.metrics.Scorer</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_compression</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_string_features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/experimental/askl2.html#AutoSklearn2Classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.experimental.askl2.</span></span><span class="sig-name descname"><span class="pre">AutoSklearn2Classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">time_left_for_this_task:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">3600</span></em>, <em class="sig-param"><span class="pre">per_run_time_limit=None</span></em>, <em class="sig-param"><span class="pre">ensemble_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_class:</span> <span class="pre">AbstractEnsemble</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'autosklearn.ensembles.ensemble_selection.EnsembleSelection'&gt;</span></em>, <em class="sig-param"><span class="pre">ensemble_kwargs:</span> <span class="pre">Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_nbest:</span> <span class="pre">Union[float</span></em>, <em class="sig-param"><span class="pre">int]</span> <span class="pre">=</span> <span class="pre">50</span></em>, <em class="sig-param"><span class="pre">max_models_on_disc:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">50</span></em>, <em class="sig-param"><span class="pre">seed:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></em>, <em class="sig-param"><span class="pre">memory_limit:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">3072</span></em>, <em class="sig-param"><span class="pre">tmp_folder:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">delete_tmp_folder_after_terminate:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></em>, <em class="sig-param"><span class="pre">n_jobs:</span> <span class="pre">Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">dask_client:</span> <span class="pre">Optional[dask.distributed.Client]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">disable_evaluator_output:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">smac_scenario_args:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">logging_config:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">metric:</span> <span class="pre">Optional[Scorer]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">scoring_functions:</span> <span class="pre">Optional[List[Scorer]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">load_models:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></em>, <em class="sig-param"><span class="pre">dataset_compression:</span> <span class="pre">Union[bool</span></em>, <em class="sig-param"><span class="pre">Mapping[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">True</span></em>, <em class="sig-param"><span class="pre">allow_string_features:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/experimental/askl2.html#AutoSklearn2Classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
@@ -884,12 +913,20 @@ algorithm runs over the time limit. Set this value high enough so
 that typical machine learning algorithms can be fit on the
 training data.</p>
 </dd>
-<dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
+<dt><strong>ensemble_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
 replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+<p>Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+this argument via <code class="docutils literal notranslate"><span class="pre">ensemble_kwargs={&quot;ensemble_size&quot;:</span> <span class="pre">int}</span></code>
+if you want to change the ensemble size for ensemble selection.</p>
 </dd>
-<dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
+<dt><strong>ensemble_class</strong><span class="classifier">Type[AbstractEnsemble], optional (default=EnsembleSelection)</span></dt><dd><p>Class implementing the post-hoc ensemble algorithm. Set to
+<code class="docutils literal notranslate"><span class="pre">None</span></code> to disable ensemble building or use <code class="docutils literal notranslate"><span class="pre">SingleBest</span></code>
+to obtain only use the single best model instead of an
 ensemble.</p>
+</dd>
+<dt><strong>ensemble_kwargs</strong><span class="classifier">Dict, optional</span></dt><dd><p>Keyword arguments that are passed to the ensemble class upon
+initialization.</p>
 </dd>
 <dt><strong>max_models_on_disc: int, optional (default=50),</strong></dt><dd><p>Defines the maximum number of models that are kept in the disc.
 The additional number of models are permanently deleted. Due to the
@@ -977,7 +1014,7 @@ imported into a pandas <code class="docutils literal notranslate"><span class="p
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feat_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/experimental/askl2.html#AutoSklearn2Classifier.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit <em>auto-sklearn</em> to given training set (X, y).</p>
 <p>Fit both optimizes the machine learning models and builds an ensemble
-out of them. To disable ensembling, set <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>.</p>
+out of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -1014,29 +1051,44 @@ md5 hash of the dataset.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="autosklearn.experimental.askl2.AutoSklearn2Classifier.fit_ensemble">
-<span class="sig-name descname"><span class="pre">fit_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_nbest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit_ensemble" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">y</span></em>, <em class="sig-param"><span class="pre">task:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">precision:</span> <span class="pre">Literal[(16</span></em>, <em class="sig-param"><span class="pre">21</span></em>, <em class="sig-param"><span class="pre">64)]</span> <span class="pre">=</span> <span class="pre">32</span></em>, <em class="sig-param"><span class="pre">dataset_name:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_kwargs:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_nbest:</span> <span class="pre">Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_class:</span> <span class="pre">Optional[AbstractEnsemble]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'autosklearn.ensembles.ensemble_selection.EnsembleSelection'&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit_ensemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>y</strong><span class="classifier">array-like</span></dt><dd><p>Target values.</p>
 </dd>
 <dt><strong>task</strong><span class="classifier">int</span></dt><dd><p>A constant from the module <code class="docutils literal notranslate"><span class="pre">autosklearn.constants</span></code>. Determines
 the task type (binary classification, multiclass classification,
 multilabel classification or regression).</p>
 </dd>
-<dt><strong>precision</strong><span class="classifier">str</span></dt><dd><p>Numeric precision used when loading ensemble data. Can be either
-<code class="docutils literal notranslate"><span class="pre">'16'</span></code>, <code class="docutils literal notranslate"><span class="pre">'32'</span></code> or <code class="docutils literal notranslate"><span class="pre">'64'</span></code>.</p>
+<dt><strong>precision</strong><span class="classifier">int</span></dt><dd><p>Numeric precision used when loading ensemble data. Can be either
+<code class="docutils literal notranslate"><span class="pre">16</span></code>, <code class="docutils literal notranslate"><span class="pre">32</span></code> or <code class="docutils literal notranslate"><span class="pre">64</span></code>.</p>
 </dd>
 <dt><strong>dataset_name</strong><span class="classifier">str</span></dt><dd><p>Name of the current data set.</p>
 </dd>
-<dt><strong>ensemble_nbest</strong><span class="classifier">int</span></dt><dd><p>Determines how many models should be considered from the ensemble
-building. This is inspired by a concept called library pruning
-introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
+<dt><strong>ensemble_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
+selection from libraries of models</em>. Models are drawn with
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+<p>Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+this argument via <code class="docutils literal notranslate"><span class="pre">ensemble_kwargs={&quot;ensemble_size&quot;:</span> <span class="pre">int}</span></code>
+if you want to change the ensemble size for ensemble selection.</p>
 </dd>
-<dt><strong>ensemble_size</strong><span class="classifier">int</span></dt><dd><p>Size of the ensemble built by <cite>Ensemble Selection</cite>.</p>
+<dt><strong>ensemble_kwargs</strong><span class="classifier">Dict, optional</span></dt><dd><p>Keyword arguments that are passed to the ensemble class upon
+initialization.</p>
+</dd>
+<dt><strong>ensemble_nbest</strong><span class="classifier">int</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
+ensemble. This is inspired by a concept called library pruning
+introduced in <cite>Getting Most out of Ensemble Selection</cite>. This
+is independent of the <code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> argument and this
+pruning step is done prior to constructing an ensemble.</p>
+</dd>
+<dt><strong>ensemble_class</strong><span class="classifier">Type[AbstractEnsemble], optional (default=EnsembleSelection)</span></dt><dd><p>Class implementing the post-hoc ensemble algorithm. Set to
+<code class="docutils literal notranslate"><span class="pre">None</span></code> to disable ensemble building or use <code class="docutils literal notranslate"><span class="pre">SingleBest</span></code>
+to obtain only use the single best model instead of an
+ensemble.</p>
 </dd>
 </dl>
 </dd>
@@ -1447,7 +1499,7 @@ possible to update each component of a nested object.</p>
 <h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="autosklearn.regression.AutoSklearnRegressor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.regression.</span></span><span class="sig-name descname"><span class="pre">AutoSklearnRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_left_for_this_task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_run_time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_configurations_via_metalearning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_nbest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_models_on_disc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'holdout'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_strategy_arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delete_tmp_folder_after_terminate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dask_client</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dask.distributed.Client</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_evaluator_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_smac_object_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smac_scenario_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logging_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Scorer</span> <span class="p"><span class="pre">|</span></span> <span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span> <span class="p"><span class="pre">|</span></span> <span class="pre">None</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_functions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_trials_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_compression</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_string_features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.regression.</span></span><span class="sig-name descname"><span class="pre">AutoSklearnRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">time_left_for_this_task=3600</span></em>, <em class="sig-param"><span class="pre">per_run_time_limit=None</span></em>, <em class="sig-param"><span class="pre">initial_configurations_via_metalearning=25</span></em>, <em class="sig-param"><span class="pre">ensemble_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_class:</span> <span class="pre">Type[AbstractEnsemble]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'autosklearn.ensembles.ensemble_selection.EnsembleSelection'&gt;</span></em>, <em class="sig-param"><span class="pre">ensemble_kwargs:</span> <span class="pre">Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_nbest=50</span></em>, <em class="sig-param"><span class="pre">max_models_on_disc=50</span></em>, <em class="sig-param"><span class="pre">seed=1</span></em>, <em class="sig-param"><span class="pre">memory_limit=3072</span></em>, <em class="sig-param"><span class="pre">include:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">List[str]]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">exclude:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">List[str]]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">resampling_strategy='holdout'</span></em>, <em class="sig-param"><span class="pre">resampling_strategy_arguments=None</span></em>, <em class="sig-param"><span class="pre">tmp_folder=None</span></em>, <em class="sig-param"><span class="pre">delete_tmp_folder_after_terminate=True</span></em>, <em class="sig-param"><span class="pre">n_jobs:</span> <span class="pre">Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">dask_client:</span> <span class="pre">Optional[dask.distributed.Client]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">disable_evaluator_output=False</span></em>, <em class="sig-param"><span class="pre">get_smac_object_callback=None</span></em>, <em class="sig-param"><span class="pre">smac_scenario_args=None</span></em>, <em class="sig-param"><span class="pre">logging_config=None</span></em>, <em class="sig-param"><span class="pre">metadata_directory=None</span></em>, <em class="sig-param"><span class="pre">metric:</span> <span class="pre">Scorer</span> <span class="pre">|</span> <span class="pre">Sequence[Scorer]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">scoring_functions:</span> <span class="pre">Optional[List[Scorer]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">load_models:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></em>, <em class="sig-param"><span class="pre">get_trials_callback=None</span></em>, <em class="sig-param"><span class="pre">dataset_compression:</span> <span class="pre">Union[bool</span></em>, <em class="sig-param"><span class="pre">Mapping[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">True</span></em>, <em class="sig-param"><span class="pre">allow_string_features:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class implements the regression task.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -1467,13 +1519,26 @@ many configurations which worked well on previously seen
 datasets. Disable if the hyperparameter optimization algorithm
 should start from scratch.</p>
 </dd>
-<dt><strong>ensemble_size</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
+<dt><strong>ensemble_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
 selection from libraries of models</em>. Models are drawn with
-replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit and the single
-best model is loaded.</p>
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+<p>Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+this argument via <code class="docutils literal notranslate"><span class="pre">ensemble_kwargs={&quot;ensemble_size&quot;:</span> <span class="pre">int}</span></code>
+if you want to change the ensemble size for ensemble selection.</p>
+</dd>
+<dt><strong>ensemble_class</strong><span class="classifier">Type[AbstractEnsemble], optional (default=EnsembleSelection)</span></dt><dd><p>Class implementing the post-hoc ensemble algorithm. Set to
+<code class="docutils literal notranslate"><span class="pre">None</span></code> to disable ensemble building or use <code class="docutils literal notranslate"><span class="pre">SingleBest</span></code>
+to obtain only use the single best model instead of an
+ensemble.</p>
+</dd>
+<dt><strong>ensemble_kwargs</strong><span class="classifier">Dict, optional</span></dt><dd><p>Keyword arguments that are passed to the ensemble class upon
+initialization.</p>
 </dd>
 <dt><strong>ensemble_nbest</strong><span class="classifier">int, optional (default=50)</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
-ensemble.</p>
+ensemble. This is inspired by a concept called library pruning
+introduced in <cite>Getting Most out of Ensemble Selection</cite>. This
+is independent of the <code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> argument and this
+pruning step is done prior to constructing an ensemble.</p>
 </dd>
 <dt><strong>max_models_on_disc: int, optional (default=50),</strong></dt><dd><p>Defines the maximum number of models that are kept in the disc.
 The additional number of models are permanently deleted. Due to the
@@ -1712,7 +1777,7 @@ used for plotting directly. Please refer to the example
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feat_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit <em>Auto-sklearn</em> to given training set (X, y).</p>
 <p>Fit both optimizes the machine learning models and builds an ensemble
-out of them. To disable ensembling, set <code class="docutils literal notranslate"><span class="pre">ensemble_size==0</span></code>.</p>
+out of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -1747,29 +1812,44 @@ md5 hash of the dataset.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="autosklearn.regression.AutoSklearnRegressor.fit_ensemble">
-<span class="sig-name descname"><span class="pre">fit_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_nbest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit_ensemble" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">y</span></em>, <em class="sig-param"><span class="pre">task:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">precision:</span> <span class="pre">Literal[(16</span></em>, <em class="sig-param"><span class="pre">21</span></em>, <em class="sig-param"><span class="pre">64)]</span> <span class="pre">=</span> <span class="pre">32</span></em>, <em class="sig-param"><span class="pre">dataset_name:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_kwargs:</span> <span class="pre">Optional[Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_nbest:</span> <span class="pre">Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">ensemble_class:</span> <span class="pre">Optional[AbstractEnsemble]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'autosklearn.ensembles.ensemble_selection.EnsembleSelection'&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit_ensemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit an ensemble to models trained during an optimization process.</p>
 <p>All parameters are <code class="docutils literal notranslate"><span class="pre">None</span></code> by default. If no other value is given,
 the default values which were set in a call to <code class="docutils literal notranslate"><span class="pre">fit()</span></code> are used.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>y</strong><span class="classifier">array-like</span></dt><dd><p>Target values.</p>
 </dd>
 <dt><strong>task</strong><span class="classifier">int</span></dt><dd><p>A constant from the module <code class="docutils literal notranslate"><span class="pre">autosklearn.constants</span></code>. Determines
 the task type (binary classification, multiclass classification,
 multilabel classification or regression).</p>
 </dd>
-<dt><strong>precision</strong><span class="classifier">str</span></dt><dd><p>Numeric precision used when loading ensemble data. Can be either
-<code class="docutils literal notranslate"><span class="pre">'16'</span></code>, <code class="docutils literal notranslate"><span class="pre">'32'</span></code> or <code class="docutils literal notranslate"><span class="pre">'64'</span></code>.</p>
+<dt><strong>precision</strong><span class="classifier">int</span></dt><dd><p>Numeric precision used when loading ensemble data. Can be either
+<code class="docutils literal notranslate"><span class="pre">16</span></code>, <code class="docutils literal notranslate"><span class="pre">32</span></code> or <code class="docutils literal notranslate"><span class="pre">64</span></code>.</p>
 </dd>
 <dt><strong>dataset_name</strong><span class="classifier">str</span></dt><dd><p>Name of the current data set.</p>
 </dd>
-<dt><strong>ensemble_nbest</strong><span class="classifier">int</span></dt><dd><p>Determines how many models should be considered from the ensemble
-building. This is inspired by a concept called library pruning
-introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
+<dt><strong>ensemble_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of models added to the ensemble built by <em>Ensemble
+selection from libraries of models</em>. Models are drawn with
+replacement. If set to <code class="docutils literal notranslate"><span class="pre">0</span></code> no ensemble is fit.</p>
+<p>Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+this argument via <code class="docutils literal notranslate"><span class="pre">ensemble_kwargs={&quot;ensemble_size&quot;:</span> <span class="pre">int}</span></code>
+if you want to change the ensemble size for ensemble selection.</p>
 </dd>
-<dt><strong>ensemble_size</strong><span class="classifier">int</span></dt><dd><p>Size of the ensemble built by <cite>Ensemble Selection</cite>.</p>
+<dt><strong>ensemble_kwargs</strong><span class="classifier">Dict, optional</span></dt><dd><p>Keyword arguments that are passed to the ensemble class upon
+initialization.</p>
+</dd>
+<dt><strong>ensemble_nbest</strong><span class="classifier">int</span></dt><dd><p>Only consider the <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> models when building an
+ensemble. This is inspired by a concept called library pruning
+introduced in <cite>Getting Most out of Ensemble Selection</cite>. This
+is independent of the <code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> argument and this
+pruning step is done prior to constructing an ensemble.</p>
+</dd>
+<dt><strong>ensemble_class</strong><span class="classifier">Type[AbstractEnsemble], optional (default=EnsembleSelection)</span></dt><dd><p>Class implementing the post-hoc ensemble algorithm. Set to
+<code class="docutils literal notranslate"><span class="pre">None</span></code> to disable ensemble building or use <code class="docutils literal notranslate"><span class="pre">SingleBest</span></code>
+to obtain only use the single best model instead of an
+ensemble.</p>
 </dd>
 </dl>
 </dd>
@@ -2526,6 +2606,419 @@ underlying scikit-learn model and returns the transformed array.</p>
 <p class="rubric">Notes</p>
 <p>Please see the <a class="reference external" href="https://scikit-learn.org/stable/developers/develop.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a>
 for further information.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="ensembles">
+<span id="api-ensemble"></span><h2>Ensembles<a class="headerlink" href="#ensembles" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractEnsemble">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.ensembles.</span></span><span class="sig-name descname"><span class="pre">AbstractEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span> <span class="p"><span class="pre">|</span></span> <span class="pre">Scorer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span> <span class="p"><span class="pre">|</span></span> <span class="pre">np.random.RandomState</span> <span class="p"><span class="pre">|</span></span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Backend</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractEnsemble.fit">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_models_predictions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">np.ndarray</span> <span class="p"><span class="pre">|</span></span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">np.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">SUPPORTED_FEAT_TYPES</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_targets</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_identifiers</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#autosklearn.ensembles.AbstractEnsemble" title="autosklearn.ensembles.AbstractEnsemble"><span class="pre">AbstractEnsemble</span></a></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractEnsemble.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractEnsemble.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit an ensemble given predictions of base models and targets.</p>
+<p>Ensemble building maximizes performance (in contrast to
+hyperparameter optimization)!</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>base_models_predictions: np.ndarray</strong></dt><dd><p>shape = (n_base_models, n_data_points, n_targets)
+n_targets is the number of classes in case of classification,
+n_targets is 0 or 1 in case of regression</p>
+<p>Can be a list of 2d numpy arrays as well to prevent copying all
+predictions into a single, large numpy array.</p>
+</dd>
+<dt><strong>X_data</strong><span class="classifier">list-like or sparse data</span></dt><dd></dd>
+<dt><strong>true_targets</strong><span class="classifier">array of shape [n_targets]</span></dt><dd></dd>
+<dt><strong>model_identifiers</strong><span class="classifier">identifier for each base model.</span></dt><dd><p>Can be used for practical text output of the ensemble.</p>
+</dd>
+<dt><strong>runs: Sequence[Run]</strong></dt><dd><p>Additional information for each run executed by SMAC that was
+considered by the ensemble builder.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>self</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractEnsemble.get_identifiers_with_weights">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">get_identifiers_with_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractEnsemble.get_identifiers_with_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractEnsemble.get_identifiers_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a (identifier, weight)-pairs for all models that were passed to the
+ensemble builder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>models</strong><span class="classifier">dict {identifier</span><span class="classifier">model object}</span></dt><dd><p>The identifiers are the same as the one presented to the fit()
+method. Models can be used for nice printing.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[(identifier_1, weight_1), …, (identifier_n, weight_n)]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractEnsemble.get_models_with_weights">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">get_models_with_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">autosklearn.pipeline.base.BasePipeline</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">autosklearn.pipeline.base.BasePipeline</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractEnsemble.get_models_with_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractEnsemble.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of (weight, model) pairs for all models included in the ensemble.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>models</strong><span class="classifier">dict {identifier</span><span class="classifier">model object}</span></dt><dd><p>The identifiers are the same as the one presented to the fit()
+method. Models can be used for nice printing.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[(weight_1, model_1), …, (weight_n, model_n)]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractEnsemble.get_selected_model_identifiers">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">get_selected_model_identifiers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractEnsemble.get_selected_model_identifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractEnsemble.get_selected_model_identifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return identifiers of models in the ensemble.</p>
+<p>This includes models which have a weight of zero!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>list</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractEnsemble.get_validation_performance">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">get_validation_performance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractEnsemble.get_validation_performance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractEnsemble.get_validation_performance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return validation performance of ensemble.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractEnsemble.predict">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_models_predictions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractEnsemble.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractEnsemble.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create ensemble predictions from the base model predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>base_models_predictions</strong><span class="classifier">np.ndarray</span></dt><dd><p>shape = (n_base_models, n_data_points, n_targets)
+Same as in the fit method.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[n_data_points]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="autosklearn.ensembles.AbstractMultiObjectiveEnsemble">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.ensembles.</span></span><span class="sig-name descname"><span class="pre">AbstractMultiObjectiveEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span> <span class="p"><span class="pre">|</span></span> <span class="pre">Scorer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span> <span class="p"><span class="pre">|</span></span> <span class="pre">np.random.RandomState</span> <span class="p"><span class="pre">|</span></span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Backend</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/ensembles/abstract_ensemble.html#AbstractMultiObjectiveEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.AbstractMultiObjectiveEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="autosklearn.ensembles.EnsembleSelection">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.ensembles.</span></span><span class="sig-name descname"><span class="pre">EnsembleSelection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span> <span class="p"><span class="pre">|</span></span> <span class="pre">Scorer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">np.random.RandomState</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Backend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bagging</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'fast'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/ensembles/ensemble_selection.html#EnsembleSelection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.EnsembleSelection" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ensemble of selected algorithms</p>
+<p>Fitting an EnsembleSelection generates an ensemble from the the models
+generated during the search process. Can be further used for prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>task_type: int</strong></dt><dd><p>An identifier indicating which task is being performed.</p>
+</dd>
+<dt><strong>metrics: Sequence[Scorer] | Scorer</strong></dt><dd><p>The metric used to evaluate the models. If multiple metrics are passed,
+ensemble selection only optimizes for the first</p>
+</dd>
+<dt><strong>random_state: Optional[int | RandomState] = None</strong></dt><dd><p>The random_state used for ensemble selection.</p>
+<ul class="simple">
+<li><p>None - Uses numpy’s default RandomState object</p></li>
+<li><p>int - Successive calls to fit will produce the same results</p></li>
+<li><p>RandomState - Truly random, each call to fit will produce
+different results, even with the same object.</p></li>
+</ul>
+</dd>
+<dt><strong>backend</strong><span class="classifier">Backend</span></dt><dd><p>Gives access to the backend of Auto-sklearn. Not used by Ensemble Selection.</p>
+</dd>
+<dt><strong>bagging: bool = False</strong></dt><dd><p>Whether to use bagging in ensemble selection</p>
+</dd>
+<dt><strong>mode: str in [‘fast’, ‘slow’] = ‘fast’</strong></dt><dd><p>Which kind of ensemble generation to use
+* ‘slow’ - The original method used in Rich Caruana’s ensemble selection.
+* ‘fast’ - A faster version of Rich Caruanas’ ensemble selection.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<div class="line-block">
+<div class="line">Ensemble selection from libraries of models</div>
+<div class="line">Rich Caruana, Alexandru Niculescu-Mizil, Geoff Crew and Alex Ksikes</div>
+<div class="line">ICML 2004</div>
+<div class="line"><a class="reference external" href="https://dl.acm.org/doi/10.1145/1015330.1015432">https://dl.acm.org/doi/10.1145/1015330.1015432</a></div>
+<div class="line"><a class="reference external" href="https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf">https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf</a></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.EnsembleSelection.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_models_predictions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">scipy.sparse._base.spmatrix</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_targets</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_identifiers</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">autosklearn.ensemble_building.run.Run</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#autosklearn.ensembles.EnsembleSelection" title="autosklearn.ensembles.ensemble_selection.EnsembleSelection"><span class="pre">autosklearn.ensembles.ensemble_selection.EnsembleSelection</span></a></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/ensemble_selection.html#EnsembleSelection.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.EnsembleSelection.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit an ensemble given predictions of base models and targets.</p>
+<p>Ensemble building maximizes performance (in contrast to
+hyperparameter optimization)!</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>base_models_predictions: np.ndarray</strong></dt><dd><p>shape = (n_base_models, n_data_points, n_targets)
+n_targets is the number of classes in case of classification,
+n_targets is 0 or 1 in case of regression</p>
+<p>Can be a list of 2d numpy arrays as well to prevent copying all
+predictions into a single, large numpy array.</p>
+</dd>
+<dt><strong>X_data</strong><span class="classifier">list-like or sparse data</span></dt><dd></dd>
+<dt><strong>true_targets</strong><span class="classifier">array of shape [n_targets]</span></dt><dd></dd>
+<dt><strong>model_identifiers</strong><span class="classifier">identifier for each base model.</span></dt><dd><p>Can be used for practical text output of the ensemble.</p>
+</dd>
+<dt><strong>runs: Sequence[Run]</strong></dt><dd><p>Additional information for each run executed by SMAC that was
+considered by the ensemble builder.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>self</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.EnsembleSelection.get_identifiers_with_weights">
+<span class="sig-name descname"><span class="pre">get_identifiers_with_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/ensemble_selection.html#EnsembleSelection.get_identifiers_with_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.EnsembleSelection.get_identifiers_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a (identifier, weight)-pairs for all models that were passed to the
+ensemble builder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>models</strong><span class="classifier">dict {identifier</span><span class="classifier">model object}</span></dt><dd><p>The identifiers are the same as the one presented to the fit()
+method. Models can be used for nice printing.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[(identifier_1, weight_1), …, (identifier_n, weight_n)]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.EnsembleSelection.get_models_with_weights">
+<span class="sig-name descname"><span class="pre">get_models_with_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">autosklearn.pipeline.base.BasePipeline</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">autosklearn.pipeline.base.BasePipeline</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/ensemble_selection.html#EnsembleSelection.get_models_with_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.EnsembleSelection.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of (weight, model) pairs for all models included in the ensemble.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>models</strong><span class="classifier">dict {identifier</span><span class="classifier">model object}</span></dt><dd><p>The identifiers are the same as the one presented to the fit()
+method. Models can be used for nice printing.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[(weight_1, model_1), …, (weight_n, model_n)]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.EnsembleSelection.get_selected_model_identifiers">
+<span class="sig-name descname"><span class="pre">get_selected_model_identifiers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/ensemble_selection.html#EnsembleSelection.get_selected_model_identifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.EnsembleSelection.get_selected_model_identifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return identifiers of models in the ensemble.</p>
+<p>This includes models which have a weight of zero!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>list</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.EnsembleSelection.get_validation_performance">
+<span class="sig-name descname"><span class="pre">get_validation_performance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/ensemble_selection.html#EnsembleSelection.get_validation_performance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.EnsembleSelection.get_validation_performance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return validation performance of ensemble.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.EnsembleSelection.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_models_predictions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/ensemble_selection.html#EnsembleSelection.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.EnsembleSelection.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create ensemble predictions from the base model predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>base_models_predictions</strong><span class="classifier">np.ndarray</span></dt><dd><p>shape = (n_base_models, n_data_points, n_targets)
+Same as in the fit method.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[n_data_points]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">autosklearn.ensembles.</span></span><span class="sig-name descname"><span class="pre">SingleBest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Scorer</span><span class="p"><span class="pre">]</span></span> <span class="p"><span class="pre">|</span></span> <span class="pre">Scorer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span> <span class="p"><span class="pre">|</span></span> <span class="pre">np.random.RandomState</span> <span class="p"><span class="pre">|</span></span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Backend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_history</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">RunHistory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest" title="Permalink to this definition">¶</a></dt>
+<dd><p>In the case of a crash, this class searches
+for the best individual model.</p>
+<p>Such model is returned as an ensemble of a single
+object, to comply with the expected interface of an
+AbstractEnsemble.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_models_predictions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">np.ndarray</span> <span class="p"><span class="pre">|</span></span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">np.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">SUPPORTED_FEAT_TYPES</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_targets</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_identifiers</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Run</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#autosklearn.ensembles.AbstractEnsemble" title="autosklearn.ensembles.AbstractEnsemble"><span class="pre">AbstractEnsemble</span></a></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit an ensemble given predictions of base models and targets.</p>
+<p>Ensemble building maximizes performance (in contrast to
+hyperparameter optimization)!</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>base_models_predictions: np.ndarray</strong></dt><dd><p>shape = (n_base_models, n_data_points, n_targets)
+n_targets is the number of classes in case of classification,
+n_targets is 0 or 1 in case of regression</p>
+<p>Can be a list of 2d numpy arrays as well to prevent copying all
+predictions into a single, large numpy array.</p>
+</dd>
+<dt><strong>X_data</strong><span class="classifier">list-like or sparse data</span></dt><dd></dd>
+<dt><strong>true_targets</strong><span class="classifier">array of shape [n_targets]</span></dt><dd></dd>
+<dt><strong>model_identifiers</strong><span class="classifier">identifier for each base model.</span></dt><dd><p>Can be used for practical text output of the ensemble.</p>
+</dd>
+<dt><strong>runs: Sequence[Run]</strong></dt><dd><p>Additional information for each run executed by SMAC that was
+considered by the ensemble builder.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>self</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest.get_identifiers_from_run_history">
+<span class="sig-name descname"><span class="pre">get_identifiers_from_run_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest.get_identifiers_from_run_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest.get_identifiers_from_run_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the run history, to identify the best performing model</p>
+<p>Populates the identifiers attribute, which is used by the backend to access
+the actual model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest.get_identifiers_with_weights">
+<span class="sig-name descname"><span class="pre">get_identifiers_with_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest.get_identifiers_with_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest.get_identifiers_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a (identifier, weight)-pairs for all models that were passed to the
+ensemble builder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>models</strong><span class="classifier">dict {identifier</span><span class="classifier">model object}</span></dt><dd><p>The identifiers are the same as the one presented to the fit()
+method. Models can be used for nice printing.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[(identifier_1, weight_1), …, (identifier_n, weight_n)]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest.get_models_with_weights">
+<span class="sig-name descname"><span class="pre">get_models_with_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">autosklearn.pipeline.base.BasePipeline</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">autosklearn.pipeline.base.BasePipeline</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest.get_models_with_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of (weight, model) pairs for all models included in the ensemble.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>models</strong><span class="classifier">dict {identifier</span><span class="classifier">model object}</span></dt><dd><p>The identifiers are the same as the one presented to the fit()
+method. Models can be used for nice printing.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[(weight_1, model_1), …, (weight_n, model_n)]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest.get_selected_model_identifiers">
+<span class="sig-name descname"><span class="pre">get_selected_model_identifiers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest.get_selected_model_identifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest.get_selected_model_identifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return identifiers of models in the ensemble.</p>
+<p>This includes models which have a weight of zero!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>list</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest.get_validation_performance">
+<span class="sig-name descname"><span class="pre">get_validation_performance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest.get_validation_performance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest.get_validation_performance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return validation performance of ensemble.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autosklearn.ensembles.SingleBest.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/autosklearn/ensembles/singlebest_ensemble.html#SingleBest.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#autosklearn.ensembles.SingleBest.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create ensemble predictions from the base model predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>base_models_predictions</strong><span class="classifier">np.ndarray</span></dt><dd><p>shape = (n_base_models, n_data_points, n_targets)
+Same as in the fit method.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">[n_data_points]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

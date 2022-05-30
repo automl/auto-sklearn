@@ -114,7 +114,20 @@
 <span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Mapping</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Type</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
 <span class="kn">import</span> <span class="nn">joblib</span>
@@ -123,6 +136,7 @@
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">Configuration</span><span class="p">,</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">,</span> <span class="n">RegressorMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">VotingClassifier</span><span class="p">,</span> <span class="n">VotingRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="kn">import</span> <span class="n">type_of_target</span>
 <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory</span> <span class="kn">import</span> <span class="n">RunInfo</span><span class="p">,</span> <span class="n">RunValue</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
@@ -133,6 +147,8 @@
     <span class="n">SUPPORTED_TARGET_TYPES</span><span class="p">,</span>
     <span class="n">convert_if_sparse</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.abstract_ensemble</span> <span class="kn">import</span> <span class="n">AbstractEnsemble</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.ensemble_selection</span> <span class="kn">import</span> <span class="n">EnsembleSelection</span>
 <span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.base</span> <span class="kn">import</span> <span class="n">BasePipeline</span>
 
@@ -143,7 +159,9 @@
         <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
         <span class="n">per_run_time_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
-        <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">EnsembleSelection</span><span class="p">,</span>
+        <span class="n">ensemble_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -189,15 +207,31 @@
 <span class="sd">            datasets. Disable if the hyperparameter optimization algorithm</span>
 <span class="sd">            should start from scratch.</span>
 
-<span class="sd">        ensemble_size : int, optional (default=50)</span>
+<span class="sd">        ensemble_size : int, optional</span>
 <span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
 <span class="sd">            selection from libraries of models*. Models are drawn with</span>
-<span class="sd">            replacement. If set to ``0`` no ensemble is fit and the single</span>
-<span class="sd">            best model is loaded.</span>
+<span class="sd">            replacement. If set to ``0`` no ensemble is fit.</span>
+
+<span class="sd">            Deprecated - will be removed in Auto-sklearn 0.16. Please pass</span>
+<span class="sd">            this argument via ``ensemble_kwargs={&quot;ensemble_size&quot;: int}``</span>
+<span class="sd">            if you want to change the ensemble size for ensemble selection.</span>
+
+<span class="sd">        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)</span>
+<span class="sd">            Class implementing the post-hoc ensemble algorithm. Set to</span>
+<span class="sd">            ``None`` to disable ensemble building or use ``SingleBest``</span>
+<span class="sd">            to obtain only use the single best model instead of an</span>
+<span class="sd">            ensemble.</span>
+
+<span class="sd">        ensemble_kwargs : Dict, optional</span>
+<span class="sd">            Keyword arguments that are passed to the ensemble class upon</span>
+<span class="sd">            initialization.</span>
 
 <span class="sd">        ensemble_nbest : int, optional (default=50)</span>
 <span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
-<span class="sd">            ensemble.</span>
+<span class="sd">            ensemble. This is inspired by a concept called library pruning</span>
+<span class="sd">            introduced in `Getting Most out of Ensemble Selection`. This</span>
+<span class="sd">            is independent of the ``ensemble_class`` argument and this</span>
+<span class="sd">            pruning step is done prior to constructing an ensemble.</span>
 
 <span class="sd">        max_models_on_disc: int, optional (default=50),</span>
 <span class="sd">            Defines the maximum number of models that are kept in the disc.</span>
@@ -465,7 +499,50 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_configurations_via_metalearning</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">initial_configurations_via_metalearning</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span> <span class="o">=</span> <span class="n">ensemble_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_class</span> <span class="o">=</span> <span class="n">ensemble_class</span>
+
+        <span class="c1"># User specified `ensemble_size` explicitly, warn them about deprecation</span>
+        <span class="k">if</span> <span class="n">ensemble_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Keep consistent behaviour</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;`ensemble_size` has been deprecated, please use `ensemble_kwargs = &quot;</span>
+                <span class="s2">&quot;{&#39;ensemble_size&#39;: </span><span class="si">%d</span><span class="s2">}`. Inserting `ensemble_size` into &quot;</span>
+                <span class="s2">&quot;`ensemble_kwargs` for now. `ensemble_size` will be removed in &quot;</span>
+                <span class="s2">&quot;auto-sklearn 0.16.&quot;</span>
+            <span class="p">)</span> <span class="o">%</span> <span class="n">ensemble_size</span>
+            <span class="k">if</span> <span class="n">ensemble_class</span> <span class="o">==</span> <span class="n">EnsembleSelection</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ensemble_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">ensemble_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ensemble_size&quot;</span><span class="p">:</span> <span class="n">ensemble_size</span><span class="p">}</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s2">&quot;ensemble_size&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ensemble_kwargs</span><span class="p">:</span>
+                    <span class="n">ensemble_kwargs</span><span class="p">[</span><span class="s2">&quot;ensemble_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble_size</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Deprecated argument `ensemble_size` is both provided &quot;</span>
+                        <span class="s2">&quot;as an argument to the constructor and passed inside &quot;</span>
+                        <span class="s2">&quot;`ensemble_kwargs`. Will ignore the argument and use &quot;</span>
+                        <span class="s2">&quot;the value given in `ensemble_kwargs` (</span><span class="si">%d</span><span class="s2">). `ensemble_size` &quot;</span>
+                        <span class="s2">&quot;will be removed in auto-sklearn 0.16.&quot;</span>
+                        <span class="o">%</span> <span class="n">ensemble_kwargs</span><span class="p">[</span><span class="s2">&quot;ensemble_size&quot;</span><span class="p">],</span>
+                        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;`ensemble_size` has been deprecated, please use &quot;</span>
+                    <span class="s2">&quot;`ensemble_kwargs = {&#39;ensemble_size&#39;: </span><span class="si">%d</span><span class="s2">} if this &quot;</span>
+                    <span class="s2">&quot;was intended. Ignoring `ensemble_size` because &quot;</span>
+                    <span class="s2">&quot;`ensemble_class` != EnsembleSelection. &quot;</span>
+                    <span class="s2">&quot;`ensemble_size` will be removed in auto-sklearn 0.16.&quot;</span>
+                    <span class="o">%</span> <span class="n">ensemble_size</span><span class="p">,</span>
+                    <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ensemble_size</span>  <span class="c1"># Otherwise sklean.base.get_params() will complain</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_kwargs</span> <span class="o">=</span> <span class="n">ensemble_kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nbest</span> <span class="o">=</span> <span class="n">ensemble_nbest</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span> <span class="o">=</span> <span class="n">max_models_on_disc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
@@ -517,7 +594,8 @@
             <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_left_for_this_task</span><span class="p">,</span>
             <span class="n">per_run_time_limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">per_run_time_limit</span><span class="p">,</span>
             <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="n">initial_configs</span><span class="p">,</span>
-            <span class="n">ensemble_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span><span class="p">,</span>
+            <span class="n">ensemble_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_class</span><span class="p">,</span>
+            <span class="n">ensemble_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_kwargs</span><span class="p">,</span>
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nbest</span><span class="p">,</span>
             <span class="n">max_models_on_disc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_models_on_disc</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
@@ -629,11 +707,13 @@
     <span class="k">def</span> <span class="nf">fit_ensemble</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y</span><span class="p">,</span>
-        <span class="n">task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">precision</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-        <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ensemble_nbest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ensemble_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">precision</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">64</span><span class="p">]</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">dataset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_nbest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]</span> <span class="o">=</span> <span class="n">EnsembleSelection</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fit an ensemble to models trained during an optimization process.</span>
 
@@ -650,26 +730,84 @@
 <span class="sd">            the task type (binary classification, multiclass classification,</span>
 <span class="sd">            multilabel classification or regression).</span>
 
-<span class="sd">        precision : str</span>
+<span class="sd">        precision : int</span>
 <span class="sd">            Numeric precision used when loading ensemble data. Can be either</span>
-<span class="sd">            ``&#39;16&#39;``, ``&#39;32&#39;`` or ``&#39;64&#39;``.</span>
+<span class="sd">            ``16``, ``32`` or ``64``.</span>
 
 <span class="sd">        dataset_name : str</span>
 <span class="sd">            Name of the current data set.</span>
 
-<span class="sd">        ensemble_nbest : int</span>
-<span class="sd">            Determines how many models should be considered from the ensemble</span>
-<span class="sd">            building. This is inspired by a concept called library pruning</span>
-<span class="sd">            introduced in `Getting Most out of Ensemble Selection`.</span>
+<span class="sd">        ensemble_size : int, optional</span>
+<span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
+<span class="sd">            selection from libraries of models*. Models are drawn with</span>
+<span class="sd">            replacement. If set to ``0`` no ensemble is fit.</span>
 
-<span class="sd">        ensemble_size : int</span>
-<span class="sd">            Size of the ensemble built by `Ensemble Selection`.</span>
+<span class="sd">            Deprecated - will be removed in Auto-sklearn 0.16. Please pass</span>
+<span class="sd">            this argument via ``ensemble_kwargs={&quot;ensemble_size&quot;: int}``</span>
+<span class="sd">            if you want to change the ensemble size for ensemble selection.</span>
+
+<span class="sd">        ensemble_kwargs : Dict, optional</span>
+<span class="sd">            Keyword arguments that are passed to the ensemble class upon</span>
+<span class="sd">            initialization.</span>
+
+<span class="sd">        ensemble_nbest : int</span>
+<span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
+<span class="sd">            ensemble. This is inspired by a concept called library pruning</span>
+<span class="sd">            introduced in `Getting Most out of Ensemble Selection`. This</span>
+<span class="sd">            is independent of the ``ensemble_class`` argument and this</span>
+<span class="sd">            pruning step is done prior to constructing an ensemble.</span>
+
+<span class="sd">        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)</span>
+<span class="sd">            Class implementing the post-hoc ensemble algorithm. Set to</span>
+<span class="sd">            ``None`` to disable ensemble building or use ``SingleBest``</span>
+<span class="sd">            to obtain only use the single best model instead of an</span>
+<span class="sd">            ensemble.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        self</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># User specified `ensemble_size` explicitly, warn them about deprecation</span>
+        <span class="k">if</span> <span class="n">ensemble_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Keep consistent behaviour</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;`ensemble_size` has been deprecated, please use `ensemble_kwargs = &quot;</span>
+                <span class="s2">&quot;{&#39;ensemble_size&#39;: </span><span class="si">%d</span><span class="s2">}`. Inserting `ensemble_size` into &quot;</span>
+                <span class="s2">&quot;`ensemble_kwargs` for now. `ensemble_size` will be removed in &quot;</span>
+                <span class="s2">&quot;auto-sklearn 0.16.&quot;</span>
+            <span class="p">)</span> <span class="o">%</span> <span class="n">ensemble_size</span>
+            <span class="k">if</span> <span class="n">ensemble_class</span> <span class="o">==</span> <span class="n">EnsembleSelection</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ensemble_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">ensemble_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ensemble_size&quot;</span><span class="p">:</span> <span class="n">ensemble_size</span><span class="p">}</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s2">&quot;ensemble_size&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ensemble_kwargs</span><span class="p">:</span>
+                    <span class="n">ensemble_kwargs</span><span class="p">[</span><span class="s2">&quot;ensemble_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensemble_size</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Deprecated argument `ensemble_size` is both provided &quot;</span>
+                        <span class="s2">&quot;as an argument to the constructor and passed inside &quot;</span>
+                        <span class="s2">&quot;`ensemble_kwargs`. Will ignore the argument and use &quot;</span>
+                        <span class="s2">&quot;the value given in `ensemble_kwargs` (</span><span class="si">%d</span><span class="s2">). `ensemble_size` &quot;</span>
+                        <span class="s2">&quot;will be removed in auto-sklearn 0.16.&quot;</span>
+                        <span class="o">%</span> <span class="n">ensemble_kwargs</span><span class="p">[</span><span class="s2">&quot;ensemble_size&quot;</span><span class="p">],</span>
+                        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;`ensemble_size` has been deprecated, please use &quot;</span>
+                    <span class="s2">&quot;`ensemble_kwargs = {&#39;ensemble_size&#39;: </span><span class="si">%d</span><span class="s2">} if this &quot;</span>
+                    <span class="s2">&quot;was intended. Ignoring `ensemble_size` because &quot;</span>
+                    <span class="s2">&quot;`ensemble_class` != EnsembleSelection. &quot;</span>
+                    <span class="s2">&quot;`ensemble_size` will be removed in auto-sklearn 0.16.&quot;</span>
+                    <span class="o">%</span> <span class="n">ensemble_size</span><span class="p">,</span>
+                    <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Build a dummy automl object to call fit_ensemble</span>
             <span class="c1"># The ensemble size is honored in the .automl_.fit_ensemble</span>
@@ -681,7 +819,8 @@
             <span class="n">precision</span><span class="o">=</span><span class="n">precision</span><span class="p">,</span>
             <span class="n">dataset_name</span><span class="o">=</span><span class="n">dataset_name</span><span class="p">,</span>
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="n">ensemble_nbest</span><span class="p">,</span>
-            <span class="n">ensemble_size</span><span class="o">=</span><span class="n">ensemble_size</span><span class="p">,</span>
+            <span class="n">ensemble_class</span><span class="o">=</span><span class="n">ensemble_class</span><span class="p">,</span>
+            <span class="n">ensemble_kwargs</span><span class="o">=</span><span class="n">ensemble_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -1077,13 +1216,11 @@
             <span class="p">)</span>
 
         <span class="c1"># Get the models ensemble weight if it has one</span>
-        <span class="c1"># TODO both implementing classes of AbstractEnsemble have a property</span>
-        <span class="c1">#      `identifiers_` and `weights_`, might be good to put it as an</span>
-        <span class="c1">#       abstract property</span>
-        <span class="c1"># TODO `ensemble_.identifiers_` and `ensemble_.weights_` are loosely</span>
-        <span class="c1">#      tied together by ordering, might be better to store as tuple</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_</span><span class="o">.</span><span class="n">weights_</span><span class="p">):</span>
-            <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">_</span><span class="p">,</span>
+            <span class="n">model_id</span><span class="p">,</span>
+            <span class="n">_</span><span class="p">,</span>
+        <span class="p">),</span> <span class="n">weight</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">ensemble_</span><span class="o">.</span><span class="n">get_identifiers_with_weights</span><span class="p">():</span>
 
             <span class="c1"># We had issues where the model&#39;s in the ensembles are not in the runhistory</span>
             <span class="c1"># collected. I have no clue why this is but to prevent failures, we fill</span>
@@ -1298,6 +1435,9 @@
             <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">configuration_space</span>
         <span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">get_pareto_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">VotingClassifier</span> <span class="o">|</span> <span class="n">VotingRegressor</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_load_pareto_set</span><span class="p">()</span>
+
 
 <div class="viewcode-block" id="AutoSklearnClassifier"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassifier</span><span class="p">(</span><span class="n">AutoSklearnEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This class implements the classification task.&quot;&quot;&quot;</span>
@@ -1306,7 +1446,7 @@
         <span class="sd">&quot;&quot;&quot;Fit *auto-sklearn* to given training set (X, y).</span>
 
 <span class="sd">        Fit both optimizes the machine learning models and builds an ensemble</span>
-<span class="sd">        out of them. To disable ensembling, set ``ensemble_size==0``.</span>
+<span class="sd">        out of them.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1440,7 +1580,7 @@
         <span class="sd">&quot;&quot;&quot;Fit *Auto-sklearn* to given training set (X, y).</span>
 
 <span class="sd">        Fit both optimizes the machine learning models and builds an ensemble</span>
-<span class="sd">        out of them. To disable ensembling, set ``ensemble_size==0``.</span>
+<span class="sd">        out of them.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
