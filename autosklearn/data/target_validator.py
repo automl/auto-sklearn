@@ -171,10 +171,8 @@ class TargetValidator(BaseEstimator):
                 f" Data involved = {shape}/{self.type_of_target}"
             )
 
-        # Creat the encoder
-        self.encoder = OrdinalEncoder(
-            handle_unknown="use_encoded_value", unknown_value=-1
-        )
+        # Create the encoder
+        self.encoder = OrdinalEncoder(handle_unknown="error")
 
         # Clear typing to just numpy arrays and pandas
         if isinstance(y_train, List):

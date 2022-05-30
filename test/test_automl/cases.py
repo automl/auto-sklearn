@@ -15,6 +15,7 @@ Tags:
     {cv, holdout} - Whether explicitly cv or holdout was used
     {no_ensemble} - Fit with no ensemble size
     {cached} - If the resulting case is then cached
+    {multiobjective} - If the automl instance is multiobjective
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ from pathlib import Path
 
 import numpy as np
 
+import autosklearn.metrics
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.automl_common.common.utils.backend import Backend
 
@@ -132,6 +134,49 @@ def case_classifier_fitted_cv(
     return model
 
 
+@case(tags=["classifier", "fitted", "holdout", "cached", "multiobjective"])
+@parametrize("dataset", ["iris"])
+def case_classifier_fitted_holdout_multiobjective(
+    dataset: str,
+    make_cache: Callable[[str], Cache],
+    make_backend: Callable[..., Backend],
+    make_automl_classifier: Callable[..., AutoMLClassifier],
+    make_sklearn_dataset: Callable[..., Tuple[np.ndarray, ...]],
+) -> AutoMLClassifier:
+    """Case of a holdout fitted classifier"""
+    resampling_strategy = "holdout"
+
+    key = f"case_classifier_{resampling_strategy}_{dataset}"
+
+    # This locks the cache for this item while we check, required for pytest-xdist
+    with make_cache(key) as cache:
+        if "model" not in cache:
+            # Make the model in the cache
+            model = make_automl_classifier(
+                temporary_directory=cache.path("backend"),
+                delete_tmp_folder_after_terminate=False,
+                resampling_strategy=resampling_strategy,
+                metrics=[
+                    autosklearn.metrics.balanced_accuracy,
+                    autosklearn.metrics.log_loss,
+                ],
+            )
+
+            X, y, Xt, yt = make_sklearn_dataset(
+                name=dataset, return_target_as_string=True
+            )
+            model.fit(X, y, dataset_name=dataset)
+
+            # Save the model
+            cache.save(model, "model")
+
+    # Try the model from the cache
+    model = cache.load("model")
+    model._backend = copy_backend(old=model._backend, new=make_backend())
+
+    return model
+
+
 @case(tags=["regressor", "fitted", "holdout", "cached"])
 @parametrize("dataset", ["boston"])
 def case_regressor_fitted_holdout(
@@ -213,7 +258,8 @@ def case_classifier_fitted_no_ensemble(
     make_automl_classifier: Callable[..., AutoMLClassifier],
     make_sklearn_dataset: Callable[..., Tuple[np.ndarray, ...]],
 ) -> AutoMLClassifier:
-    """Case of a fitted classifier but enemble_size was set to 0"""
+    """Case of a fitted classifier but ensemble was disabled by
+    not writing models to disk"""
     key = f"case_classifier_fitted_no_ensemble_{dataset}"
 
     # This locks the cache for this item while we check, required for pytest-xdist
@@ -223,7 +269,8 @@ def case_classifier_fitted_no_ensemble(
             model = make_automl_classifier(
                 temporary_directory=cache.path("backend"),
                 delete_tmp_folder_after_terminate=False,
-                ensemble_size=0,
+                ensemble_class=None,
+                disable_evaluator_output=True,
             )
 
             X, y, Xt, yt = make_sklearn_dataset(name=dataset)

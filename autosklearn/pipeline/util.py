@@ -50,10 +50,17 @@ def get_dataset(
     train_size_maximum=150,
     make_multilabel=False,
     make_binary=False,
+    return_target_as_string=False,
 ):
     iris = getattr(sklearn.datasets, "load_%s" % dataset)()
     X = iris.data.astype(np.float32)
     Y = iris.target
+
+    if return_target_as_string:
+        if make_binary or make_multilabel or (len(Y.shape) > 1 and Y.shape[1] > 1):
+            raise NotImplementedError()
+        Y = np.array([iris.target_names[y] for y in Y])
+
     rs = np.random.RandomState(42)
     indices = np.arange(X.shape[0])
     train_size = min(int(len(indices) / 3.0 * 2.0), train_size_maximum)

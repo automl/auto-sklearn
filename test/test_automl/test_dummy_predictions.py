@@ -1,4 +1,6 @@
-from typing import Callable, Tuple
+from __future__ import annotations
+
+from typing import Callable, Sequence, Tuple
 
 from pathlib import Path
 
@@ -12,7 +14,7 @@ from autosklearn.constants import (
     REGRESSION,
 )
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.metrics import Scorer, accuracy, r2
+from autosklearn.metrics import Scorer, accuracy, log_loss, precision, r2
 from autosklearn.util.logging_ import PicklableClientLogger
 
 import pytest
@@ -21,17 +23,18 @@ from unittest.mock import patch
 
 
 @parametrize(
-    "dataset, metric, task",
+    "dataset, metrics, task",
     [
-        ("breast_cancer", accuracy, BINARY_CLASSIFICATION),
-        ("wine", accuracy, MULTICLASS_CLASSIFICATION),
-        ("diabetes", r2, REGRESSION),
+        ("breast_cancer", [accuracy], BINARY_CLASSIFICATION),
+        ("breast_cancer", [accuracy, log_loss], BINARY_CLASSIFICATION),
+        ("wine", [accuracy], MULTICLASS_CLASSIFICATION),
+        ("diabetes", [r2], REGRESSION),
     ],
 )
 def test_produces_correct_output(
     dataset: str,
     task: int,
-    metric: Scorer,
+    metrics: Sequence[Scorer],
     mock_logger: PicklableClientLogger,
     make_automl: Callable[..., AutoML],
     make_sklearn_dataset: Callable[..., XYDataManager],
@@ -45,8 +48,8 @@ def test_produces_correct_output(
     task : int
         The task type of the dataset
 
-    metric: Scorer
-        Metric to use, required as fit usually determines the metric to use
+    metrics: Sequence[Scorer]
+        Metric(s) to use, required as fit usually determines the metric to use
 
     Fixtures
     --------
@@ -66,7 +69,7 @@ def test_produces_correct_output(
     * It should produce predictions "predictions_ensemble_1337_1_0.0.npy"
     """
     seed = 1337
-    automl = make_automl(metrics=[metric], seed=seed)
+    automl = make_automl(metrics=metrics, seed=seed)
     automl._logger = mock_logger
 
     datamanager = make_sklearn_dataset(
@@ -182,4 +185,30 @@ def test_crash_due_to_memory_exception(
 def test_raises_if_no_metric_set(make_automl: Callable[..., AutoML]) -> None:
     automl = make_automl()
     with pytest.raises(ValueError, match="Metric/Metrics was/were not set"):
+        automl._do_dummy_prediction()
+
+
+def test_raises_invalid_metric(
+    mock_logger: PicklableClientLogger,
+    make_automl: Callable[..., AutoML],
+    make_sklearn_dataset: Callable[..., XYDataManager],
+) -> None:
+    dataset = "iris"
+    task = MULTICLASS_CLASSIFICATION
+
+    automl = make_automl(metrics=[accuracy, precision])
+    automl._logger = mock_logger
+
+    datamanager = make_sklearn_dataset(
+        dataset,
+        as_datamanager=True,
+        task=task,
+        feat_type="numerical",
+    )
+    automl._backend.save_datamanager(datamanager)
+
+    with pytest.raises(
+        ValueError,
+        match="Are you sure precision is applicable for the given task type",
+    ):
         automl._do_dummy_prediction()
