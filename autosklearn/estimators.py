@@ -1322,8 +1322,8 @@ class AutoSklearnEstimator(BaseEstimator):
             else self.automl_.configuration_space
         )
 
-    def get_pareto_front(self) -> Sequence[VotingClassifier | VotingRegressor]:
-        return self.automl_._load_pareto_front()
+    def get_pareto_set(self) -> Sequence[VotingClassifier | VotingRegressor]:
+        return self.automl_._load_pareto_set()
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):

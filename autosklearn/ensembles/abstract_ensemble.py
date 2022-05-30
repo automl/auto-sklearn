@@ -140,5 +140,5 @@ class AbstractEnsemble(ABC):
 
 
 class AbstractMultiObjectiveEnsemble(AbstractEnsemble):
-    def get_pareto_front(self) -> Sequence[AbstractEnsemble]:
+    def get_pareto_set(self) -> Sequence[AbstractEnsemble]:
         pass

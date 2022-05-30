@@ -9,7 +9,7 @@ competing metrics: `precision` and `recall` (read more on this tradeoff
 in the `scikit-learn docs <https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html>`_.
 
 Auto-sklearn uses `SMAC3's implementation of ParEGO <https://automl.github.io/SMAC3/main/details/multi_objective.html>`_.
-Multi-objective ensembling and proper access to the full Pareto front will be added in the near
+Multi-objective ensembling and proper access to the full Pareto set will be added in the near
 future.
 """
 from pprint import pprint
@@ -71,10 +71,10 @@ print(automl.leaderboard())
 pprint(automl.cv_results_)
 
 ############################################################################
-# Visualize the Pareto front
+# Visualize the Pareto set
 # ==========================
 plot_values = []
-pareto_front = automl.get_pareto_front()
+pareto_front = automl.get_pareto_set()
 for ensemble in pareto_front:
     predictions = ensemble.predict(X_test)
     precision = sklearn.metrics.precision_score(y_test, predictions)
@@ -86,5 +86,5 @@ for precision, recall in plot_values:
     ax.scatter(precision, recall, c="blue")
 ax.set_xlabel("Precision")
 ax.set_ylabel("Recall")
-ax.set_title("Pareto front")
+ax.set_title("Pareto set")
 plt.show()

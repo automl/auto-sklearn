@@ -1651,9 +1651,9 @@ class AutoML(BaseEstimator):
         )
         return ensemble
 
-    def _load_pareto_front(self) -> Sequence[VotingClassifier | VotingRegressor]:
+    def _load_pareto_set(self) -> Sequence[VotingClassifier | VotingRegressor]:
         if len(self._metrics) <= 1:
-            raise ValueError("Pareto front is only available for two or more metrics.")
+            raise ValueError("Pareto set is only available for two or more metrics.")
 
         if self._ensemble_class is not None:
             self.ensemble_ = self._backend.load_ensemble(self._seed)
@@ -1664,22 +1664,22 @@ class AutoML(BaseEstimator):
         if not self.ensemble_:
 
             raise ValueError(
-                "Pareto front can only be accessed if an ensemble is available."
+                "Pareto set can only be accessed if an ensemble is available."
             )
 
         if isinstance(self.ensemble_, AbstractMultiObjectiveEnsemble):
-            pareto_front = self.ensemble_.get_pareto_front()
+            pareto_set = self.ensemble_.get_pareto_set()
         else:
             self._logger.warning(
-                "Pareto front not available for single objective ensemble "
-                "method. The Pareto front will only include the single ensemble "
+                "Pareto set not available for single objective ensemble "
+                "method. The Pareto set will only include the single ensemble "
                 "constructed by %s",
                 type(self.ensemble_),
             )
-            pareto_front = [self.ensemble_]
+            pareto_set = [self.ensemble_]
 
         ensembles = []
-        for ensemble in pareto_front:
+        for ensemble in pareto_set:
             identifiers = ensemble.get_selected_model_identifiers()
             weights = {
                 identifier: weight

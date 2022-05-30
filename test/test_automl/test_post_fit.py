@@ -90,7 +90,7 @@ def test__load_pareto_front(automl: AutoML) -> None:
     assert automl.predict_proba(X).shape == (1, 3)
     assert automl.predict(X).shape == (1,)
 
-    pareto_front = automl._load_pareto_front()
+    pareto_front = automl._load_pareto_set()
     assert len(pareto_front) == 1
     for ensemble in pareto_front:
         assert isinstance(ensemble, (VotingClassifier, VotingRegressor))
