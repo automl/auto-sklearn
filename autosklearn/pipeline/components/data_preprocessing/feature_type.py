@@ -69,6 +69,11 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # load global feat_type
         f = open(f'{os.path.dirname(os.path.realpath(__file__))}/../../../feat_type.json')
         self.feat_type = json.load(f)
+        is_number = True
+        for key in self.feat_type.keys():
+            is_number *= key.isnumeric()
+        if is_number:
+            self.feat_type = {int(key): value for key, value in self.feat_type.items()}
 
         self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
 
@@ -151,10 +156,14 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             else:
                 columns = set(range(n_feats))
             if expected != columns:
-                raise ValueError(
-                    f"Train data has columns={expected} yet the"
-                    f" feat_types are feat={columns}"
-                )
+                try:
+                    # columns = [str(col) for col in columns]
+                    pass
+                except:
+                    raise ValueError(
+                        f"Train data has columns={expected} yet the"
+                        f" feat_types are feat={columns}"
+                    )
             transformer_lst = []
 
             categorical_features = [
