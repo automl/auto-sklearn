@@ -1,6 +1,8 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import json
+import os
 import sklearn.compose
 from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -64,6 +66,12 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
 
+        # load global feat_type
+        f = open(f'{os.path.dirname(os.path.realpath(__file__))}/../../../feat_type.json')
+        self.feat_type = json.load(f)
+
+        self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
+
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -71,15 +79,18 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.categ_ppl = CategoricalPreprocessingPipeline(
-            config=None,
-            steps=pipeline,
-            dataset_properties=dataset_properties,
-            include=include,
-            exclude=exclude,
-            random_state=random_state,
-            init_params=init_params,
-        )
+        self.categ_ppl = None
+        if "categorical" in self.feat_type.values():
+            self.categ_ppl = CategoricalPreprocessingPipeline(
+                config=None,
+                steps=pipeline,
+                dataset_properties=dataset_properties,
+                include=include,
+                exclude=exclude,
+                random_state=random_state,
+                init_params=init_params,
+            )
+            self._transformers.append(("categorical_transformer", self.categ_ppl))
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -87,15 +98,18 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.numer_ppl = NumericalPreprocessingPipeline(
-            config=None,
-            steps=pipeline,
-            dataset_properties=dataset_properties,
-            include=include,
-            exclude=exclude,
-            random_state=random_state,
-            init_params=init_params,
-        )
+        self.numer_ppl = None
+        if "numerical" in self.feat_type.values():
+            self.numer_ppl = NumericalPreprocessingPipeline(
+                config=None,
+                steps=pipeline,
+                dataset_properties=dataset_properties,
+                include=include,
+                exclude=exclude,
+                random_state=random_state,
+                init_params=init_params,
+            )
+            self._transformers.append(("numerical_transformer", self.numer_ppl))
 
         # The pipeline that will be applied to the text features (i.e. columns)
         # of the dataset
@@ -104,21 +118,19 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.txt_ppl = TextPreprocessingPipeline(
-            config=None,
-            steps=pipeline,
-            dataset_properties=dataset_properties,
-            include=include,
-            exclude=exclude,
-            random_state=random_state,
-            init_params=init_params,
-        )
+        self.txt_ppl = None
+        if "string" in self.feat_type.values():
+            self.txt_ppl = TextPreprocessingPipeline(
+                config=None,
+                steps=pipeline,
+                dataset_properties=dataset_properties,
+                include=include,
+                exclude=exclude,
+                random_state=random_state,
+                init_params=init_params,
+            )
+            self._transformers.append(("text_transformer", self.txt_ppl))
 
-        self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
-            ("categorical_transformer", self.categ_ppl),
-            ("numerical_transformer", self.numer_ppl),
-            ("text_transformer", self.txt_ppl),
-        ]
         if self.config:
             self.set_hyperparameters(self.config, init_params=init_params)
         self.column_transformer = column_transformer
@@ -143,29 +155,35 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                     f"Train data has columns={expected} yet the"
                     f" feat_types are feat={columns}"
                 )
+            transformer_lst = []
+
             categorical_features = [
                 key
                 for key, value in self.feat_type.items()
                 if value.lower() == "categorical"
             ]
+            if len(categorical_features) > 0:
+                transformer_lst.append(("categorical_transformer", self.categ_ppl, categorical_features))
+
             numerical_features = [
                 key
                 for key, value in self.feat_type.items()
                 if value.lower() == "numerical"
             ]
+            if len(numerical_features) > 0:
+                transformer_lst.append(("numerical_transformer", self.numer_ppl, numerical_features))
+
             text_features = [
                 key
                 for key, value in self.feat_type.items()
                 if value.lower() == "string"
             ]
+            if len(transformer_lst) > 0:
+                transformer_lst.append(("text_transformer", self.txt_ppl, text_features))
 
             sklearn_transf_spec = [
                 (name, transformer, feature_columns)
-                for name, transformer, feature_columns in [
-                    ("categorical_transformer", self.categ_ppl, categorical_features),
-                    ("numerical_transformer", self.numer_ppl, numerical_features),
-                    ("text_transformer", self.txt_ppl, text_features),
-                ]
+                for name, transformer, feature_columns in transformer_lst
                 if len(feature_columns) > 0
             ]
         else:

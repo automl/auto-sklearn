@@ -8,10 +8,11 @@ import pandas as pd
 
 
 class AlgorithmSelectionProblem(object):
-    def __init__(self, directory):
+    def __init__(self, directory, cs):
         self.logger = logging.getLogger(__name__)
 
         # Create data structures
+        self.cs = cs
         self.dir_ = directory
         self.algorithm_runs = None
         self.configurations = None
@@ -147,9 +148,11 @@ class AlgorithmSelectionProblem(object):
                 configuration = dict()
                 algorithm_id = line["idx"]
                 for hp_name, value in line.items():
+                    # Todo adapt to search space
                     if not value or hp_name == "idx":
                         continue
-
+                    if hp_name not in self.cs.get_hyperparameter_names():
+                        continue
                     try:
                         value = int(value)
                     except Exception:
