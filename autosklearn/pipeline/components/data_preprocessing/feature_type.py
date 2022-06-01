@@ -145,9 +145,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
     ) -> "FeatTypeSplit":
 
         n_feats = X.shape[1]
-        categorical_features = []
-        numerical_features = []
-        text_features = []
         if self.feat_type is not None:
             # Make sure that we are not missing any column!
             expected = set(self.feat_type.keys())
@@ -187,7 +184,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 for key, value in self.feat_type.items()
                 if value.lower() == "string"
             ]
-            if len(transformer_lst) > 0:
+            if len(text_features) > 0:
                 transformer_lst.append(("text_transformer", self.txt_ppl, text_features))
 
             sklearn_transf_spec = [
