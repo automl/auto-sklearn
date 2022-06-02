@@ -1,3 +1,4 @@
+# Not currently in use
 name: Generate Baselines
 
 on:
@@ -7,10 +8,6 @@ on:
         description: 'Place holder'
         required: false
         default: 'Dummy argument'
-
-  push:
-    branches:
-      - development
 
 env:
   AUTOMLBENCHMARK_REPO: 'openml/automlbenchmark'
