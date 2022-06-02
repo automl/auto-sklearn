@@ -265,7 +265,7 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.08598595386343422
+    r2 score:  -0.002661856064922752
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
@@ -276,7 +276,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.667 seconds)
+   **Total running time of the script:** ( 0 minutes  12.491 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:
