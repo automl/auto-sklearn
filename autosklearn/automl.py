@@ -253,7 +253,7 @@ class AutoML(BaseEstimator):
         if (
             get_trials_callback is not None
             and callable(get_trials_callback)
-            and not isinstance(IncorporateRunResultCallback)
+            and not isinstance(get_trials_callback, IncorporateRunResultCallback)
         ):
             get_trials_callback = SmacRunCallback(get_trials_callback)
 
