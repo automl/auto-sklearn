@@ -135,10 +135,6 @@ Build and fit a classifier
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
 
     AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=60,
                           tmp_folder='/tmp/autosklearn_text_example_tmp')
@@ -169,18 +165,16 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight                 type      cost  duration
     model_id                                                                
-    5            1             0.10                  mlp  0.043367  2.268352
-    14           2             0.12                  mlp  0.053571  3.436898
-    9            3             0.08                  mlp  0.063776  2.876913
-    10           4             0.18   passive_aggressive  0.063776  2.266464
-    4            5             0.02          extra_trees  0.091837  3.526360
-    12           6             0.08                  lda  0.091837  2.214282
-    2            7             0.04        random_forest  0.102041  4.585572
-    7            8             0.08        random_forest  0.130102  3.104150
-    3            9             0.08                  mlp  0.137755  3.164114
-    6           10             0.14                  qda  0.153061  2.199568
-    11          11             0.04  k_nearest_neighbors  0.183673  2.252368
-    8           12             0.04           libsvm_svc  0.380102  2.289887
+    5            1             0.28                  mlp  0.043367  2.894814
+    10           2             0.14   passive_aggressive  0.061224  2.755510
+    9            3             0.08                  mlp  0.063776  4.151046
+    12           4             0.04                  lda  0.094388  2.723499
+    2            5             0.10        random_forest  0.096939  5.441519
+    4            6             0.02          extra_trees  0.096939  4.298951
+    3            7             0.12                  mlp  0.137755  4.844525
+    6            8             0.04                  qda  0.150510  2.722116
+    11           9             0.06  k_nearest_neighbors  0.153061  2.775242
+    8           10             0.12           libsvm_svc  0.278061  2.806531
 
 
 
@@ -236,7 +230,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.9645120405576679
+    Accuracy score: 0.9632446134347274
 
 
 
@@ -244,7 +238,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  21.664 seconds)
+   **Total running time of the script:** ( 1 minutes  7.389 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:

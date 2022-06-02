@@ -203,10 +203,6 @@ and can change from use case to use case.
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
 
     AutoSklearnClassifier(ensemble_kwargs={'ensemble_size': 1},
                           include={'classifier': ['decision_tree', 'lda', 'sgd'],
@@ -269,7 +265,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.951048951048951
+    Accuracy score: 0.958041958041958
 
 
 
@@ -277,7 +273,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.625 seconds)
+   **Total running time of the script:** ( 1 minutes  59.589 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:

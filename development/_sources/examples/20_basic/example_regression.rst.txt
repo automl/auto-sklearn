@@ -94,10 +94,6 @@ Build and fit a regressor
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
 
     AutoSklearnRegressor(per_run_time_limit=30, time_left_for_this_task=120,
                          tmp_folder='/tmp/autosklearn_regression_example_tmp')
@@ -126,12 +122,14 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight            type      cost  duration
-    model_id                                                           
-    31           1             0.48  ard_regression  0.428169  0.818530
-    25           2             0.26             sgd  0.436679  0.695193
-    33           3             0.20   liblinear_svr  0.472547  0.804050
-    29           4             0.06  ard_regression  0.493390  0.697902
+              rank  ensemble_weight               type      cost   duration
+    model_id                                                               
+    25           1             0.38                sgd  0.436679   0.908823
+    6            2             0.40     ard_regression  0.455042   0.921170
+    27           3             0.02     ard_regression  0.462249   0.921811
+    29           4             0.16     ard_regression  0.493390   0.878443
+    11           5             0.02      random_forest  0.507400  10.554423
+    7            6             0.02  gradient_boosting  0.518673   1.673570
 
 
 
@@ -194,8 +192,8 @@ predicting the data mean has an R2 score of 0.
 
  .. code-block:: none
 
-    Train R2 score: 0.5922043282790412
-    Test R2 score: 0.4073119977311549
+    Train R2 score: 0.5845958689841146
+    Test R2 score: 0.3969087782855073
 
 
 
@@ -240,7 +238,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  0.614 seconds)
+   **Total running time of the script:** ( 1 minutes  55.340 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

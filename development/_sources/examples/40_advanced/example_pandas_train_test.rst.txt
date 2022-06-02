@@ -167,10 +167,6 @@ Build and fit a classifier
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
 
     AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120)
 
@@ -240,7 +236,7 @@ be directly used for plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  3.256 seconds)
+   **Total running time of the script:** ( 1 minutes  57.552 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

@@ -167,12 +167,7 @@ settings for the <code class="docutils literal notranslate"><span class="pre">Au
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.metafeatures = self.metafeatures.append(metafeatures)
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.algorithm_runs[metric].append(runs)
-
-AutoSklearnClassifier(per_run_time_limit=30,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(per_run_time_limit=30,
                       resampling_strategy_arguments={&#39;train_size&#39;: 0.67},
                       time_left_for_this_task=120,
                       tmp_folder=&#39;/tmp/autosklearn_resampling_example_tmp&#39;)
@@ -186,7 +181,7 @@ AutoSklearnClassifier(per_run_time_limit=30,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.951048951048951
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score holdout:  0.958041958041958
 </pre></div>
 </div>
 </div>
@@ -212,11 +207,7 @@ AutoSklearnClassifier(per_run_time_limit=30,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.metafeatures = self.metafeatures.append(metafeatures)
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.algorithm_runs[metric].append(runs)
-Before re-fit
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Before re-fit
 Accuracy score CV 0.958041958041958
 </pre></div>
 </div>
@@ -234,7 +225,7 @@ final ensemble on the whole dataset.</p>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>After re-fit
-Accuracy score CV 0.958041958041958
+Accuracy score CV 0.951048951048951
 </pre></div>
 </div>
 </div>
@@ -265,16 +256,12 @@ to the use case at hand.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.metafeatures = self.metafeatures.append(metafeatures)
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.algorithm_runs[metric].append(runs)
-auto-sklearn results:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
   Dataset name: breast_cancer
   Metric: accuracy
   Best validation score: 0.964789
-  Number of target algorithm runs: 27
-  Number of successful target algorithm runs: 27
+  Number of target algorithm runs: 24
+  Number of successful target algorithm runs: 24
   Number of crashed target algorithm runs: 0
   Number of target algorithms that exceeded the time limit: 0
   Number of target algorithms that exceeded the memory limit: 0
@@ -307,7 +294,7 @@ splitting it on the first feature.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score custom split 0.951048951048951
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 6 minutes  43.470 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 7 minutes  2.044 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-resampling-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

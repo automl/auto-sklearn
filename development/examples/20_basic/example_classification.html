@@ -157,12 +157,7 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:76: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.metafeatures = self.metafeatures.append(metafeatures)
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:80: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.algorithm_runs[metric].append(runs)
-
-AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120,
                       tmp_folder=&#39;/tmp/autosklearn_classification_example_tmp&#39;)
 </pre></div>
 </div>
@@ -173,29 +168,29 @@ AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120,
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight                type      cost  duration
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight                 type      cost  duration
 model_id
-7            1             0.10         extra_trees  0.014184  1.508070
-16           2             0.04   gradient_boosting  0.021277  1.069927
-2            7             0.02       random_forest  0.028369  1.649826
-3            9             0.08                 mlp  0.028369  0.929094
-6            8             0.02                 mlp  0.028369  1.068695
-11          10             0.04       random_forest  0.028369  2.018981
-14           6             0.04                 mlp  0.028369  1.486160
-19           4             0.12         extra_trees  0.028369  2.764316
-22           3             0.06   gradient_boosting  0.028369  1.120712
-31           5             0.04         extra_trees  0.028369  1.656933
-8           12             0.06       random_forest  0.035461  1.894322
-12          11             0.02   gradient_boosting  0.035461  1.260170
-17          13             0.02   gradient_boosting  0.035461  1.564270
-18          14             0.02       random_forest  0.035461  1.905224
-9           15             0.06         extra_trees  0.042553  1.779394
-30          16             0.12       liblinear_svc  0.042553  0.957406
-15          17             0.02                 mlp  0.049645  3.210093
-28          18             0.04                 mlp  0.056738  0.968477
-29          19             0.04         extra_trees  0.056738  1.733633
-20          20             0.02  passive_aggressive  0.078014  0.758144
-32          21             0.02         extra_trees  0.106383  2.939105
+7            1             0.10          extra_trees  0.014184  2.004601
+31           2             0.04          extra_trees  0.014184  2.326990
+16           4             0.04    gradient_boosting  0.021277  1.369266
+21           3             0.02          extra_trees  0.021277  1.868113
+2            5             0.04        random_forest  0.028369  2.128209
+3            6             0.10                  mlp  0.028369  1.352958
+6            8             0.02                  mlp  0.028369  1.477564
+14          10             0.10                  mlp  0.028369  2.594337
+19           9             0.06          extra_trees  0.028369  3.375372
+26           7             0.02          extra_trees  0.028369  2.810159
+5           13             0.02        random_forest  0.035461  2.558748
+17          12             0.04    gradient_boosting  0.035461  2.110427
+18          11             0.02        random_forest  0.035461  2.490679
+32          14             0.10  k_nearest_neighbors  0.035461  1.093234
+9           15             0.02          extra_trees  0.042553  2.325613
+15          17             0.02                  mlp  0.049645  5.229511
+28          16             0.06          extra_trees  0.049645  2.560032
+4           18             0.04                  mlp  0.056738  2.125066
+24          19             0.06        random_forest  0.070922  2.184559
+29          20             0.06        decision_tree  0.070922  1.369401
+20          21             0.02   passive_aggressive  0.078014  0.954702
 </pre></div>
 </div>
 </div>
@@ -218,10 +213,10 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.951048951048951
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.958041958041958
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  5.836 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  2.609 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
