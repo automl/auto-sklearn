@@ -18,3 +18,6 @@ def test_no_ensemble_produces_empty_show_models(automl: AutoML) -> None:
     * Show models should return an empty dict
     """
     assert automl.show_models() == {}
+
+# TODO
+# test show models with moo
