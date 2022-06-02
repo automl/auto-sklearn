@@ -39,6 +39,7 @@ from sklearn.model_selection._split import (
 )
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
+from smac.callbacks import IncorporateRunResultCallback
 from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.stats.stats import Stats
 from smac.tae import StatusType
@@ -249,7 +250,11 @@ class AutoML(BaseEstimator):
 
         # If we got something callable for `get_trials_callback`, wrap it so SMAC
         # will accept it.
-        if get_trials_callback is not None and callable(get_trials_callback):
+        if (
+            get_trials_callback is not None
+            and callable(get_trials_callback)
+            and not isinstance(IncorporateRunResultCallback)
+        ):
             get_trials_callback = SmacRunCallback(get_trials_callback)
 
         self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate

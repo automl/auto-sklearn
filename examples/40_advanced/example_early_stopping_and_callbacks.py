@@ -13,7 +13,7 @@ a result, we can implement a simple yet effective early stopping mechanism!
 Do note however, this does not provide any access to the ensembles that autosklearn
 produces, only the individual models. You may wish to perform a more sophisticated
 early stopping mechanism such that there are enough good models for autosklearn to build
-and ensemble with. This is hear to provide a simple example.
+and ensemble with. This is here to provide a simple example.
 """
 from pprint import pprint
 

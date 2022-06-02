@@ -380,4 +380,4 @@ Other
 .. collapse:: <b>Early stopping and Callbacks</b>
 
    By using the parameter ``get_trials_callback``, we can get access to the results
-   of runs as they occur. See this example :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>`. for more!
+   of runs as they occur. See this example :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>` for more!
