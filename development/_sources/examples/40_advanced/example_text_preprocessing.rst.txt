@@ -165,18 +165,13 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight                type      cost  duration
     model_id                                                               
-    5            1             0.08                 mlp  0.053571  2.268753
-    9            2             0.02                 mlp  0.056122  2.875904
-    14           3             0.06                 mlp  0.066327  3.198076
-    10           4             0.22  passive_aggressive  0.068878  2.290653
-    15           5             0.04   gradient_boosting  0.076531  4.536799
-    12           6             0.20                 lda  0.089286  2.244740
-    4            7             0.10         extra_trees  0.091837  3.521353
-    2            8             0.02       random_forest  0.099490  4.630865
-    7            9             0.10       random_forest  0.130102  2.915893
-    3           10             0.02                 mlp  0.137755  3.227275
-    6           11             0.06                 qda  0.150510  2.212413
-    8           12             0.08          libsvm_svc  0.364796  2.328232
+    5            1             0.26                 mlp  0.040816  2.731449
+    10           2             0.24  passive_aggressive  0.073980  2.713648
+    4            3             0.20         extra_trees  0.086735  4.211187
+    12           4             0.12                 lda  0.089286  2.679256
+    2            5             0.10       random_forest  0.096939  5.585965
+    7            6             0.04       random_forest  0.132653  3.744624
+    8            7             0.04          libsvm_svc  0.369898  2.733974
 
 
 
@@ -232,7 +227,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.9569074778200254
+    Accuracy score: 0.9645120405576679
 
 
 
@@ -240,7 +235,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  5.589 seconds)
+   **Total running time of the script:** ( 1 minutes  6.884 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:
