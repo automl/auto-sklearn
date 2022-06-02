@@ -1,0 +1,9 @@
+version: 2
+
+updates:
+  # This will check for updates to github actions every day
+  # https://docs.github.com/en/enterprise-server@3.4/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
