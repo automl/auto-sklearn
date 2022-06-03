@@ -121,24 +121,29 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight               type      cost  duration
-    model_id                                                              
-    7            1             0.16        extra_trees  0.014184  1.835717
-    16           2             0.02  gradient_boosting  0.021277  1.312266
-    2            3             0.04      random_forest  0.028369  2.098900
-    3            4             0.06                mlp  0.028369  1.165599
-    19           5             0.06        extra_trees  0.028369  3.393643
-    22           6             0.04  gradient_boosting  0.028369  1.358695
-    31           7             0.08        extra_trees  0.028369  2.029447
-    5            8             0.02      random_forest  0.035461  2.354381
-    8            9             0.04      random_forest  0.035461  2.327075
-    12          10             0.02  gradient_boosting  0.035461  1.549506
-    18          11             0.02      random_forest  0.035461  2.412051
-    30          12             0.10      liblinear_svc  0.042553  1.170729
-    4           13             0.04                mlp  0.056738  1.580532
-    28          14             0.08                mlp  0.056738  1.188397
-    29          15             0.20        extra_trees  0.056738  2.136993
-    32          16             0.02        extra_trees  0.106383  3.626081
+              rank  ensemble_weight                type      cost  duration
+    model_id                                                               
+    7            1             0.10         extra_trees  0.014184  1.485585
+    16           2             0.04   gradient_boosting  0.021277  1.042301
+    2            7             0.02       random_forest  0.028369  1.602726
+    3            9             0.08                 mlp  0.028369  0.915313
+    6            8             0.02                 mlp  0.028369  1.053062
+    11          10             0.04       random_forest  0.028369  1.974580
+    14           6             0.04                 mlp  0.028369  1.465038
+    19           4             0.12         extra_trees  0.028369  2.931608
+    22           3             0.06   gradient_boosting  0.028369  1.077897
+    31           5             0.04         extra_trees  0.028369  1.534783
+    8           12             0.06       random_forest  0.035461  1.823213
+    12          11             0.02   gradient_boosting  0.035461  1.196829
+    17          13             0.02   gradient_boosting  0.035461  1.515136
+    18          14             0.02       random_forest  0.035461  1.844246
+    9           15             0.06         extra_trees  0.042553  1.726556
+    30          16             0.12       liblinear_svc  0.042553  0.933300
+    15          17             0.02                 mlp  0.049645  3.314231
+    28          18             0.04                 mlp  0.056738  0.950933
+    29          19             0.04         extra_trees  0.056738  1.597044
+    20          20             0.02  passive_aggressive  0.078014  0.735107
+    32          21             0.02         extra_trees  0.106383  2.958917
 
 
 
@@ -202,7 +207,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  3.745 seconds)
+   **Total running time of the script:** ( 1 minutes  57.363 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_classification.py:
