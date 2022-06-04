@@ -82,7 +82,7 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
         n_components = UniformIntegerHyperparameter(
             "n_components", 10, 2000, default_value=100
         )

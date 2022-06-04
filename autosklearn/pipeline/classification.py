@@ -70,6 +70,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
 
     def __init__(
         self,
+        feat_type,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties=None,
@@ -84,6 +85,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         if "target_type" not in dataset_properties:
             dataset_properties["target_type"] = "classification"
         super().__init__(
+            feat_type=feat_type,
             config=config,
             steps=steps,
             dataset_properties=dataset_properties,
@@ -166,7 +168,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 return y
 
     def _get_hyperparameter_search_space(
-        self, include=None, exclude=None, dataset_properties=None
+        self, feat_type, include=None, exclude=None, dataset_properties=None
     ):
         """Create the hyperparameter configuration space.
 
@@ -194,6 +196,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
 
         cs = self._get_base_search_space(
             cs=cs,
+            feat_type=feat_type,
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
@@ -344,7 +347,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         self.dataset_properties = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self, dataset_properties):
+    def _get_pipeline_steps(self, dataset_properties, feat_type):
         steps = []
 
         default_dataset_properties = {"target_type": "classification"}
@@ -356,6 +359,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 [
                     "data_preprocessor",
                     DataPreprocessorChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),
@@ -364,6 +368,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 [
                     "feature_preprocessor",
                     FeaturePreprocessorChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),
@@ -371,6 +376,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 [
                     "classifier",
                     ClassifierChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),

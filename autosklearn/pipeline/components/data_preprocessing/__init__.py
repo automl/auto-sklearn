@@ -105,6 +105,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
+        feat_type,
         dataset_properties: Optional[Dict] = None,
         default: str = None,
         include: Optional[Dict] = None,
@@ -136,6 +137,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name](
+                feat_type=feat_type,
                 dataset_properties=dataset_properties
             ).get_hyperparameter_search_space(dataset_properties)
             parent_hyperparameter = {"parent": preprocessor, "value": name}
@@ -150,7 +152,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         return self.choice.transform(X)
 
     def set_hyperparameters(
-        self, configuration: ConfigurationSpace, init_params: Optional[Dict] = None
+        self, feat_type, configuration: ConfigurationSpace, init_params: Optional[Dict] = None
     ) -> "DataPreprocessorChoice":
         config = {}
         params = configuration.get_dictionary()
@@ -162,7 +164,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
             config[param] = value
 
         new_params = {}
-        feat_type = None
+        # feat_type = None
         if init_params is not None:
             for param, value in init_params.items():
                 param = param.replace(choice, "").split(":", 1)[-1]

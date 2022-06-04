@@ -18,7 +18,7 @@ __all__ = ["get_configuration_space"]
 
 
 def get_configuration_space(
-    info: Dict[str, Any],
+    datamanager: Dict[str, Any],
     include: Optional[Dict[str, List[str]]] = None,
     exclude: Optional[Dict[str, List[str]]] = None,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -44,16 +44,16 @@ def get_configuration_space(
     ConfigurationSpace
         The configuration space for the pipeline
     """
-    if info["task"] in REGRESSION_TASKS:
-        return _get_regression_configuration_space(info, include, exclude, random_state)
+    if datamanager.info["task"] in REGRESSION_TASKS:
+        return _get_regression_configuration_space(datamanager, include, exclude, random_state)
     else:
         return _get_classification_configuration_space(
-            info, include, exclude, random_state
+            datamanager, include, exclude, random_state
         )
 
 
 def _get_regression_configuration_space(
-    info: Dict[str, Any],
+    datamanager: Dict[str, Any],
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -79,28 +79,29 @@ def _get_regression_configuration_space(
     ConfigurationSpace
         The configuration space for the regression pipeline
     """
-    task_type = info["task"]
+    task_type = datamanager.info["task"]
     sparse = False
     multioutput = False
     if task_type == MULTIOUTPUT_REGRESSION:
         multioutput = True
 
-    if info["is_sparse"] == 1:
+    if datamanager.info["is_sparse"] == 1:
         sparse = True
 
     dataset_properties = {"multioutput": multioutput, "sparse": sparse}
 
     configuration_space = SimpleRegressionPipeline(
+        feat_type=datamanager.feat_type,
         dataset_properties=dataset_properties,
         include=include,
         exclude=exclude,
         random_state=random_state,
-    ).get_hyperparameter_search_space()
+    ).get_hyperparameter_search_space(feat_type=datamanager.feat_type)
     return configuration_space
 
 
 def _get_classification_configuration_space(
-    info: Dict[str, Any],
+    datamanager: Dict[str, Any],
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -126,7 +127,7 @@ def _get_classification_configuration_space(
     ConfigurationSpace
         The configuration space for the classification pipeline
     """
-    task_type = info["task"]
+    task_type = datamanager.info["task"]
 
     multilabel = False
     multiclass = False
@@ -139,7 +140,7 @@ def _get_classification_configuration_space(
     if task_type == BINARY_CLASSIFICATION:
         pass
 
-    if info["is_sparse"] == 1:
+    if datamanager.info["is_sparse"] == 1:
         sparse = True
 
     dataset_properties = {
@@ -149,8 +150,9 @@ def _get_classification_configuration_space(
     }
 
     return SimpleClassificationPipeline(
+        feat_type=datamanager.feat_type,
         dataset_properties=dataset_properties,
         include=include,
         exclude=exclude,
         random_state=random_state,
-    ).get_hyperparameter_search_space()
+    ).get_hyperparameter_search_space(feat_type=datamanager.feat_type)

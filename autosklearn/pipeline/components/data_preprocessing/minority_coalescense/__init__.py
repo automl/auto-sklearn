@@ -38,6 +38,7 @@ class CoalescenseChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
+        feat_type,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default: Optional[str] = None,
         include: Optional[Dict[str, str]] = None,
@@ -86,7 +87,7 @@ class CoalescenseChoice(AutoSklearnChoice):
         return cs
 
     def set_hyperparameters(
-        self, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
+        self, feat_type, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
     ) -> "CoalescenseChoice":
         new_params = {}
 
@@ -111,6 +112,11 @@ class CoalescenseChoice(AutoSklearnChoice):
         new_params["random_state"] = self.random_state
 
         self.new_params = new_params
+        with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
+            f.write(f"minority_init self.get...:\n"
+                    f"new_params: {new_params}\n"
+                    f"choice: {self.get_components()[choice]}\n\n")
+        new_params["feat_type"] = feat_type
         self.choice = self.get_components()[choice](**new_params)
 
         return self

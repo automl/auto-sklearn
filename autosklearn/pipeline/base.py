@@ -34,6 +34,7 @@ class BasePipeline(Pipeline):
 
     def __init__(
         self,
+        feat_type,
         config=None,
         steps=None,
         dataset_properties=None,
@@ -50,15 +51,16 @@ class BasePipeline(Pipeline):
             dataset_properties if dataset_properties is not None else {}
         )
         self.random_state = random_state
+        self.feat_type = feat_type
 
         if steps is None:
-            self.steps = self._get_pipeline_steps(dataset_properties=dataset_properties)
+            self.steps = self._get_pipeline_steps(feat_type=feat_type, dataset_properties=dataset_properties)
         else:
             self.steps = steps
 
         self._validate_include_exclude_params()
 
-        self.config_space = self.get_hyperparameter_search_space()
+        self.config_space = self.get_hyperparameter_search_space(feat_type=feat_type)
 
         if config is None:
             self.config = self.config_space.get_default_configuration()
@@ -82,8 +84,10 @@ class BasePipeline(Pipeline):
                 )
             self.config = config
 
-        self.set_hyperparameters(self.config, init_params=init_params)
+        self.set_hyperparameters(self.config, feat_type=feat_type, init_params=init_params)
 
+        with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
+            f.write(f"base pip. self.steps: {self.steps}\n\n")
         super().__init__(steps=self.steps)
 
         self._additional_run_info = {}
@@ -202,13 +206,16 @@ class BasePipeline(Pipeline):
 
                 return y
 
-    def set_hyperparameters(self, configuration, init_params=None):
+    def set_hyperparameters(self, configuration, feat_type, init_params=None):
         self.config = configuration
 
         for node_idx, n_ in enumerate(self.steps):
             node_name, node = n_
 
+            with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
+                f.write(f"node base: {type(node)}\n\n")
             sub_configuration_space = node.get_hyperparameter_search_space(
+                feat_type=feat_type,
                 dataset_properties=self.dataset_properties
             )
             sub_config_dict = {}
@@ -235,8 +242,10 @@ class BasePipeline(Pipeline):
             if isinstance(
                 node, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)
             ):
+                with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
+                    f.write(f"node: {type(node)}\n\n")
                 node.set_hyperparameters(
-                    configuration=sub_configuration, init_params=sub_init_params_dict
+                    feat_type=feat_type, configuration=sub_configuration, init_params=sub_init_params_dict
                 )
             else:
                 raise NotImplementedError("Not supported yet!")
@@ -247,7 +256,7 @@ class BasePipeline(Pipeline):
 
         return self
 
-    def get_hyperparameter_search_space(self, dataset_properties=None):
+    def get_hyperparameter_search_space(self, feat_type, dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
         Returns
@@ -258,6 +267,7 @@ class BasePipeline(Pipeline):
         """
         if not hasattr(self, "config_space") or self.config_space is None:
             self.config_space = self._get_hyperparameter_search_space(
+                feat_type=feat_type,
                 include=self.include,
                 exclude=self.exclude,
                 dataset_properties=self.dataset_properties,
@@ -265,7 +275,7 @@ class BasePipeline(Pipeline):
         return self.config_space
 
     def _get_hyperparameter_search_space(
-        self, include=None, exclude=None, dataset_properties=None
+        self, feat_type, include=None, exclude=None, dataset_properties=None
     ):
         """Return the configuration space for the CASH problem.
 
@@ -307,7 +317,7 @@ class BasePipeline(Pipeline):
         raise NotImplementedError()
 
     def _get_base_search_space(
-        self, cs, dataset_properties, exclude, include, pipeline
+        self, feat_type, cs, dataset_properties, exclude, include, pipeline
     ):
         if include is None:
             if self.include is None:
@@ -343,7 +353,7 @@ class BasePipeline(Pipeline):
             dataset_properties["signed"] = False
 
         matches = autosklearn.pipeline.create_searchspace_util.get_match_array(
-            pipeline, dataset_properties, include=include, exclude=exclude
+            pipeline=pipeline, dataset_properties=dataset_properties, include=include, exclude=exclude
         )
 
         # Now we have only legal combinations at this step of the pipeline
@@ -385,8 +395,10 @@ class BasePipeline(Pipeline):
                         exclude.get(node_name),
                     )
                 )
+                with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
+                    f.write(f"node: {type(node)}\n\n")
                 sub_config_space = node.get_hyperparameter_search_space(
-                    dataset_properties, include=choices_list
+                    feat_type=feat_type, dataset_properties=dataset_properties, include=choices_list
                 )
                 cs.add_configuration_space(node_name, sub_config_space)
 
@@ -505,7 +517,7 @@ class BasePipeline(Pipeline):
 
         return rval
 
-    def _get_pipeline_steps(self, dataset_properties):
+    def _get_pipeline_steps(self, dataset_properties, feat_type):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

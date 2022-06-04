@@ -67,15 +67,18 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.force_sparse_output = force_sparse_output
 
         # load global feat_type
-        f = open(f'{os.path.dirname(os.path.realpath(__file__))}/../../../feat_type.json')
-        self.feat_type = json.load(f)
-        is_number = True
-        for key in self.feat_type.keys():
-            is_number *= key.isnumeric()
-        if is_number:
-            self.feat_type = {int(key): value for key, value in self.feat_type.items()}
+        # f = open(f'{os.path.dirname(os.path.realpath(__file__))}/../../../feat_type.json')
+        # self.feat_type = json.load(f)
+        # is_number = True
+        # for key in self.feat_type.keys():
+        #     is_number *= key.isnumeric()
+        # if is_number:
+        #     self.feat_type = {int(key): value for key, value in self.feat_type.items()}
 
         self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
+
+        if self.feat_type is None:
+            raise ValueError("feat_type init requires feat_type")
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
@@ -87,6 +90,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.categ_ppl = None
         if "categorical" in self.feat_type.values():
             self.categ_ppl = CategoricalPreprocessingPipeline(
+                feat_type=self.feat_type,
                 config=None,
                 steps=pipeline,
                 dataset_properties=dataset_properties,
@@ -106,6 +110,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.numer_ppl = None
         if "numerical" in self.feat_type.values():
             self.numer_ppl = NumericalPreprocessingPipeline(
+                feat_type=self.feat_type,
                 config=None,
                 steps=pipeline,
                 dataset_properties=dataset_properties,
@@ -126,6 +131,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.txt_ppl = None
         if "string" in self.feat_type.values():
             self.txt_ppl = TextPreprocessingPipeline(
+                feat_type=self.feat_type,
                 config=None,
                 steps=pipeline,
                 dataset_properties=dataset_properties,
@@ -137,7 +143,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             self._transformers.append(("text_transformer", self.txt_ppl))
 
         if self.config:
-            self.set_hyperparameters(self.config, init_params=init_params)
+            self.set_hyperparameters(feat_type=self.feat_type, configuration=self.config, init_params=init_params)
         self.column_transformer = column_transformer
 
     def fit(
@@ -247,7 +253,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         }
 
     def set_hyperparameters(
-        self, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
+        self, feat_type, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
     ) -> "FeatTypeSplit":
         if init_params is not None and "feat_type" in init_params.keys():
             self.feat_type = init_params["feat_type"]
@@ -256,7 +262,8 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
         for transf_name, transf_op in self._transformers:
             sub_configuration_space = transf_op.get_hyperparameter_search_space(
-                dataset_properties=self.dataset_properties
+                dataset_properties=self.dataset_properties,
+                feat_type=feat_type
             )
             sub_config_dict = {}
             for param in configuration:
@@ -282,7 +289,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 transf_op, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)
             ):
                 transf_op.set_hyperparameters(
-                    configuration=sub_configuration, init_params=sub_init_params_dict
+                    feat_type=feat_type, configuration=sub_configuration, init_params=sub_init_params_dict
                 )
             else:
                 raise NotImplementedError("Not supported yet!")
@@ -291,17 +298,22 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     def get_hyperparameter_search_space(
         self,
+        feat_type,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
         cs = FeatTypeSplit._get_hyperparameter_search_space_recursevely(
-            dataset_properties, cs, self._transformers
+            feat_type=feat_type,
+            dataset_properties=dataset_properties,
+            cs=cs,
+            transformer=self._transformers
         )
         return cs
 
     @staticmethod
     def _get_hyperparameter_search_space_recursevely(
+        feat_type,
         dataset_properties: DATASET_PROPERTIES_TYPE,
         cs: ConfigurationSpace,
         transformer: BaseEstimator,

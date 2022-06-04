@@ -54,7 +54,7 @@ class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
         # More than degree 3 is too expensive!
         degree = UniformIntegerHyperparameter("degree", 2, 3, 2)
         interaction_only = CategoricalHyperparameter(

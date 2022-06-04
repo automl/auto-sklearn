@@ -34,6 +34,7 @@ class TextPreprocessingPipeline(BasePipeline):
 
     def __init__(
         self,
+        feat_type,
         config: Optional[Configuration] = None,
         steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -44,13 +45,14 @@ class TextPreprocessingPipeline(BasePipeline):
     ) -> None:
         self._output_dtype = np.int32
         super().__init__(
-            config,
-            steps,
-            dataset_properties,
-            include,
-            exclude,
-            random_state,
-            init_params,
+            config=config,
+            steps=steps,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+            feat_type=feat_type
         )
 
     @staticmethod
@@ -79,6 +81,7 @@ class TextPreprocessingPipeline(BasePipeline):
 
     def _get_hyperparameter_search_space(
         self,
+        feat_type,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -104,12 +107,14 @@ class TextPreprocessingPipeline(BasePipeline):
             exclude=exclude,
             include=include,
             pipeline=self.steps,
+            feat_type=feat_type,
         )
 
         return cs
 
     def _get_pipeline_steps(
         self,
+        feat_type,
         dataset_properties: Optional[Dict[str, str]] = None,
     ) -> List[Tuple[str, BaseEstimator]]:
         steps = []
@@ -123,12 +128,15 @@ class TextPreprocessingPipeline(BasePipeline):
                 (
                     "text_encoding",
                     BagOfWordChoice(
-                        default_dataset_properties, random_state=self.random_state
+                        feat_type=feat_type,
+                        dataset_properties=default_dataset_properties,
+                        random_state=self.random_state
                     ),
                 ),
                 (
                     "text_feature_reduction",
-                    TextFeatureReduction(random_state=self.random_state),
+                    TextFeatureReduction(
+                        random_state=self.random_state),
                 ),
             ]
         )

@@ -15,6 +15,7 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(
         self,
+        feat_type,
         minimum_fraction: float = 0.01,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
@@ -59,6 +60,7 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
+        feat_type,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()

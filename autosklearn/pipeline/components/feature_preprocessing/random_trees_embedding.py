@@ -94,7 +94,7 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
         n_estimators = UniformIntegerHyperparameter(
             name="n_estimators", lower=10, upper=100, default_value=10
         )

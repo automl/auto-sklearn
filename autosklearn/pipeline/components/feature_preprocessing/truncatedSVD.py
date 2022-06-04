@@ -48,7 +48,7 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
         target_dim = UniformIntegerHyperparameter(
             "target_dim", 10, 256, default_value=128
         )

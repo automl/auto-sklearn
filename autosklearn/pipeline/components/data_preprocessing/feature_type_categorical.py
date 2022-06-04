@@ -46,6 +46,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def __init__(
         self,
+        feat_type,
         config: Optional[Configuration] = None,
         steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -56,13 +57,14 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     ) -> None:
         self._output_dtype = np.int32
         super().__init__(
-            config,
-            steps,
-            dataset_properties,
-            include,
-            exclude,
-            random_state,
-            init_params,
+            config=config,
+            steps=steps,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+            feat_type=feat_type
         )
 
     @staticmethod
@@ -92,6 +94,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def _get_hyperparameter_search_space(
         self,
+        feat_type,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -108,8 +111,11 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
 
+        with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
+            f.write(f"pipeline (self.steps): {self.steps}\n\n")
         cs = self._get_base_search_space(
             cs=cs,
+            feat_type=feat_type,
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
@@ -120,6 +126,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def _get_pipeline_steps(
         self,
+        feat_type,
         dataset_properties: Optional[Dict[str, str]] = None,
     ) -> List[Tuple[str, BaseEstimator]]:
         steps = []
@@ -135,6 +142,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             (
                 "category_coalescence",
                 CoalescenseChoice(
+                    feat_type=feat_type,
                     dataset_properties=default_dataset_properties,
                     random_state=self.random_state,
                 ),
@@ -142,6 +150,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             (
                 "categorical_encoding",
                 OHEChoice(
+                    feat_type=feat_type,
                     dataset_properties=default_dataset_properties,
                     random_state=self.random_state,
                 ),

@@ -38,6 +38,7 @@ class OHEChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
+        feat_type,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default: Optional[str] = None,
         include: Optional[Dict[str, str]] = None,
@@ -86,7 +87,7 @@ class OHEChoice(AutoSklearnChoice):
         return cs
 
     def set_hyperparameters(
-        self, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
+        self, feat_type, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
     ) -> "OHEChoice":
         new_params = {}
 

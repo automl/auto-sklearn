@@ -22,6 +22,8 @@ def get_match_array(pipeline, dataset_properties, include=None, exclude=None):
     node_i_choices = []
     node_i_choices_names = []
     all_nodes = []
+    with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
+        f.write(f"pipeline: {pipeline}\n\n")
     for node_name, node in pipeline:
         all_nodes.append(node)
         is_choice = hasattr(node, "get_available_components")

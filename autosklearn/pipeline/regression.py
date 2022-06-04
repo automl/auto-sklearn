@@ -67,6 +67,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     def __init__(
         self,
+        feat_type,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties=None,
@@ -81,6 +82,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         if "target_type" not in dataset_properties:
             dataset_properties["target_type"] = "regression"
         super().__init__(
+            feat_type=feat_type,
             config=config,
             steps=steps,
             dataset_properties=dataset_properties,
@@ -112,7 +114,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         return y
 
     def _get_hyperparameter_search_space(
-        self, include=None, exclude=None, dataset_properties=None
+        self, feat_type, include=None, exclude=None, dataset_properties=None
     ):
         """Return the configuration space for the CASH problem.
 
@@ -149,6 +151,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         cs = self._get_base_search_space(
             cs=cs,
+            feat_type=feat_type,
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
@@ -259,7 +262,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_estimator_components(self):
         return regression_components._regressors
 
-    def _get_pipeline_steps(self, dataset_properties, init_params=None):
+    def _get_pipeline_steps(self, feat_type, dataset_properties, init_params=None):
         steps = []
 
         default_dataset_properties = {"target_type": "regression"}
@@ -271,6 +274,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                 [
                     "data_preprocessor",
                     DataPreprocessorChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),
@@ -278,6 +282,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                 [
                     "feature_preprocessor",
                     feature_preprocessing_components.FeaturePreprocessorChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),
@@ -285,7 +290,9 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                 [
                     "regressor",
                     regression_components.RegressorChoice(
-                        default_dataset_properties, random_state=self.random_state
+                        feat_type=feat_type,
+                        dataset_properties=default_dataset_properties,
+                        random_state=self.random_state
                     ),
                 ],
             ]

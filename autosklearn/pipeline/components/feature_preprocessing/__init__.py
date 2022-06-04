@@ -101,7 +101,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
         return components_dict
 
     def get_hyperparameter_search_space(
-        self, dataset_properties=None, default=None, include=None, exclude=None
+        self, feat_type, dataset_properties=None, default=None, include=None, exclude=None
     ):
         cs = ConfigurationSpace()
 

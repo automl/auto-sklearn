@@ -79,7 +79,7 @@ class RegressorChoice(AutoSklearnChoice):
         return components_dict
 
     def get_hyperparameter_search_space(
-        self, dataset_properties=None, default=None, include=None, exclude=None
+        self, feat_type, dataset_properties=None, default=None, include=None, exclude=None
     ):
         if include is not None and exclude is not None:
             raise ValueError(

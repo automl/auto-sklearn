@@ -38,6 +38,7 @@ class Rescaling(object):
 
     @staticmethod
     def get_hyperparameter_search_space(
+        feat_type,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()

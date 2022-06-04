@@ -125,7 +125,7 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
         cs = ConfigurationSpace()
 
         n_estimators = Constant("n_estimators", 100)
