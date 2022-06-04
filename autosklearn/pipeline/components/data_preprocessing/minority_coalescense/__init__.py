@@ -112,10 +112,6 @@ class CoalescenseChoice(AutoSklearnChoice):
         new_params["random_state"] = self.random_state
 
         self.new_params = new_params
-        with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
-            f.write(f"minority_init self.get...:\n"
-                    f"new_params: {new_params}\n"
-                    f"choice: {self.get_components()[choice]}\n\n")
         new_params["feat_type"] = feat_type
         self.choice = self.get_components()[choice](**new_params)
 

@@ -86,8 +86,6 @@ class BasePipeline(Pipeline):
 
         self.set_hyperparameters(self.config, feat_type=feat_type, init_params=init_params)
 
-        with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
-            f.write(f"base pip. self.steps: {self.steps}\n\n")
         super().__init__(steps=self.steps)
 
         self._additional_run_info = {}
@@ -212,8 +210,6 @@ class BasePipeline(Pipeline):
         for node_idx, n_ in enumerate(self.steps):
             node_name, node = n_
 
-            with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
-                f.write(f"node base: {type(node)}\n\n")
             sub_configuration_space = node.get_hyperparameter_search_space(
                 feat_type=feat_type,
                 dataset_properties=self.dataset_properties
@@ -242,8 +238,6 @@ class BasePipeline(Pipeline):
             if isinstance(
                 node, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)
             ):
-                with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
-                    f.write(f"node: {type(node)}\n\n")
                 node.set_hyperparameters(
                     feat_type=feat_type, configuration=sub_configuration, init_params=sub_init_params_dict
                 )
@@ -395,8 +389,6 @@ class BasePipeline(Pipeline):
                         exclude.get(node_name),
                     )
                 )
-                with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
-                    f.write(f"node: {type(node)}\n\n")
                 sub_config_space = node.get_hyperparameter_search_space(
                     feat_type=feat_type, dataset_properties=dataset_properties, include=choices_list
                 )

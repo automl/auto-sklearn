@@ -748,10 +748,6 @@ class AutoML(BaseEstimator):
 
         self._log_fit_setup()
 
-        # save feat_type to file
-        with open(f'{os.path.dirname(os.path.realpath(__file__))}/feat_type.json', 'w') as f:
-            json.dump(self._feat_type, f, indent=4)
-
         # == Pickle the data manager to speed up loading
         with self._stopwatch.time("Save Datamanager"):
             datamanager = XYDataManager(

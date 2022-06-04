@@ -111,8 +111,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
 
-        with open("/home/lukas/PycharmProjects/AutoMLFork/log.txt", "a") as f:
-            f.write(f"pipeline (self.steps): {self.steps}\n\n")
         cs = self._get_base_search_space(
             cs=cs,
             feat_type=feat_type,
