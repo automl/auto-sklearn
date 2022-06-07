@@ -34,8 +34,12 @@ def callback(
     run_info: RunInfo,
     result: RunValue,
     time_left: float,
-) -> bool:
-    """Stop early if we get a very low cost value for a single run"""
+) -> bool | None:
+    """Stop early if we get a very low cost value for a single run
+
+    The return value indicates to SMAC whether to stop or not. False will
+    stop the search process while any other value will mean it continues.
+    """
     # You can find out the parameters in the SMAC documentation
     # https://automl.github.io/SMAC3/main/
     if result.cost <= 0.02:

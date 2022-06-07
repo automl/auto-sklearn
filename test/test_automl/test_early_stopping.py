@@ -25,7 +25,7 @@ def test_early_stopping(
         run_info: RunInfo,
         result: RunValue,
         time_left: float,
-    ) -> bool:
+    ) -> bool | None:
         if int(result.additional_info["num_run"]) >= 2:
             return False
 
