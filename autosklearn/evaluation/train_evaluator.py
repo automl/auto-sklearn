@@ -247,6 +247,7 @@ class TrainEvaluator(AbstractEvaluator):
             budget_type=budget_type,
         )
 
+        self.feat_type = self.backend.load_datamanager().feat_type
         self.resampling_strategy = resampling_strategy
         if resampling_strategy_args is None:
             self.resampling_strategy_args = {}
@@ -984,7 +985,7 @@ class TrainEvaluator(AbstractEvaluator):
         PIPELINE_DATA_DTYPE,  # test_pred
         TYPE_ADDITIONAL_INFO,
     ]:
-        model = self._get_model()
+        model = self._get_model(feat_type=self.feat_type)
 
         self.indices[fold] = (train_indices, test_indices)
 
