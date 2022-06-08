@@ -317,14 +317,12 @@ Other
     Optionally, you can measure the ability of this fitted model to generalize to unseen data by
     providing an optional testing pair (X_test/Y_test). For further details, please refer to the
     Example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
-    Supported formats for these training and testing pairs are: np.ndarray,
-    pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 
     Regarding the features, there are multiple things to consider:
 
     * Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
       can check the Example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
-    * You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
+    * You can provide a pandas DataFrame with properly formatted columns. If a column has numerical
       dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. *auto-sklearn*
       supports both categorical or string as column type. Please ensure that you are using the correct
       dtype for your task. By default *auto-sklearn* treats object and string columns as strings and
