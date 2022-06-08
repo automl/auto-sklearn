@@ -15,6 +15,8 @@ produces, only the individual models. You may wish to perform a more sophisticat
 early stopping mechanism such that there are enough good models for autosklearn to build
 and ensemble with. This is here to provide a simple example.
 """
+from __future__ import annotations
+
 from pprint import pprint
 
 import sklearn.datasets
