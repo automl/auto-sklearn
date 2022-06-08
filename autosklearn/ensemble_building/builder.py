@@ -169,6 +169,8 @@ class EnsembleBuilder:
         self.validation_performance_ = np.inf
 
         # Data we may need
+        # TODO: The test data is needlessly loaded but automl_common has no concept of
+        # these and is perhaps too rigid
         datamanager: XYDataManager = self.backend.load_datamanager()
         self._X_test: SUPPORTED_FEAT_TYPES | None = datamanager.data.get("X_test", None)
         self._y_test: np.ndarray | None = datamanager.data.get("Y_test", None)
@@ -442,6 +444,17 @@ class EnsembleBuilder:
             self.logger.debug("Found no runs")
             raise RuntimeError("Found no runs")
 
+        # We load in `X_data` if we need it
+        if any(m._needs_X for m in self.metrics):
+            ensemble_X_data = self.X_data("ensemble")
+
+            if ensemble_X_data is None:
+                msg = "No `X_data` for 'ensemble' which was required by metrics"
+                self.logger.debug(msg)
+                raise RuntimeError(msg)
+        else:
+            ensemble_X_data = None
+
         # Calculate the loss for those that require it
         requires_update = self.requires_loss_update(runs)
         if self.read_at_most is not None:
@@ -450,9 +463,7 @@ class EnsembleBuilder:
         for run in requires_update:
             run.record_modified_times()  # So we don't count as modified next time
             run.losses = {
-                metric.name: self.loss(
-                    run, metric=metric, X_data=self.X_data("ensemble")
-                )
+                metric.name: self.loss(run, metric=metric, X_data=ensemble_X_data)
                 for metric in self.metrics
             }
 
@@ -549,15 +560,14 @@ class EnsembleBuilder:
             return self.ensemble_history, self.ensemble_nbest
 
         targets = cast(np.ndarray, self.targets("ensemble"))  # Sure they exist
-        X_data = self.X_data("ensemble")
 
         ensemble = self.fit_ensemble(
             candidates=candidates,
-            X_data=X_data,
             targets=targets,
             runs=runs,
             ensemble_class=self.ensemble_class,
             ensemble_kwargs=self.ensemble_kwargs,
+            X_data=ensemble_X_data,
             task=self.task_type,
             metrics=self.metrics,
             precision=self.precision,
@@ -587,7 +597,15 @@ class EnsembleBuilder:
 
             run_preds = [r.predictions(kind, precision=self.precision) for r in models]
             pred = ensemble.predict(run_preds)
-            X_data = self.X_data(kind)
+
+            if any(m._needs_X for m in self.metrics):
+                X_data = self.X_data(kind)
+                if X_data is None:
+                    msg = f"No `X` data for '{kind}' which was required by metrics"
+                    self.logger.debug(msg)
+                    raise RuntimeError(msg)
+            else:
+                X_data = None
 
             scores = calculate_scores(
                 solution=pred_targets,
@@ -597,10 +615,11 @@ class EnsembleBuilder:
                 X_data=X_data,
                 scoring_functions=None,
             )
-            performance_stamp[f"ensemble_{score_name}_score"] = scores[
-                self.metrics[0].name
-            ]
-            self.ensemble_history.append(performance_stamp)
+
+            performance_stamp[f"ensemble_{score_name}_score"] = scores
+
+        # Add the performance stamp to the history
+        self.ensemble_history.append(performance_stamp)
 
         # Lastly, delete any runs that need to be deleted. We save this as the last step
         # so that we have an ensemble saved that is up to date. If we do not do so,
@@ -805,13 +824,13 @@ class EnsembleBuilder:
 
     def fit_ensemble(
         self,
-        candidates: list[Run],
-        X_data: SUPPORTED_FEAT_TYPES,
-        targets: np.ndarray,
+        candidates: Sequence[Run],
+        runs: Sequence[Run],
         *,
-        runs: list[Run],
+        targets: np.ndarray | None = None,
         ensemble_class: Type[AbstractEnsemble] = EnsembleSelection,
         ensemble_kwargs: Dict[str, Any] | None = None,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
         task: int | None = None,
         metrics: Sequence[Scorer] | None = None,
         precision: int | None = None,
@@ -825,23 +844,23 @@ class EnsembleBuilder:
 
         Parameters
         ----------
-        candidates: list[Run]
+        candidates: Sequence[Run]
             List of runs to build an ensemble from
 
-        X_data: SUPPORTED_FEAT_TYPES
-            The base level data.
-
-        targets: np.ndarray
-            The targets to build the ensemble with
-
-        runs: list[Run]
+        runs: Sequence[Run]
             List of all runs (also pruned ones and dummy runs)
+
+        targets: np.ndarray | None = None
+            The targets to build the ensemble with
 
         ensemble_class: AbstractEnsemble
             Implementation of the ensemble algorithm.
 
-        ensemble_kwargs: Dict[str, Any]
+        ensemble_kwargs: Dict[str, Any] | None
             Arguments passed to the constructor of the ensemble algorithm.
+
+        X_data: SUPPORTED_FEAT_TYPES | None = None
+            The base level data.
 
         task: int | None = None
             The kind of task performed
@@ -869,6 +888,27 @@ class EnsembleBuilder:
         ensemble_kwargs = ensemble_kwargs if ensemble_kwargs is not None else {}
         metrics = metrics if metrics is not None else self.metrics
         rs = random_state if random_state is not None else self.random_state
+
+        # Validate that kwargs doesn't have duplicates
+        params = {"task_type", "metrics", "random_state", "backend"}
+        duplicates = ensemble_kwargs.keys() & params
+        if any(duplicates):
+            raise ValueError(f"Can't provide {duplicates} in `ensemble_kwargs`")
+
+        # Validate we have targets if None specified
+        if targets is None:
+            targets = self.targets("ensemble")
+            if targets is None:
+                path = self.backend._get_targets_ensemble_filename()
+                raise ValueError(f"`fit_ensemble` could not find any targets at {path}")
+
+        # Validate when we have no X_data that we can load it if we need
+        if X_data is None and any(m._needs_X for m in metrics):
+            X_data = self.X_data("ensemble")
+            if X_data is None:
+                msg = "No `X_data` for `fit_ensemble` which was required by metrics"
+                self.logger.debug(msg)
+                raise RuntimeError(msg)
 
         ensemble = ensemble_class(
             task_type=task,
@@ -995,7 +1035,8 @@ class EnsembleBuilder:
         self,
         run: Run,
         metric: Scorer,
-        X_data: SUPPORTED_FEAT_TYPES,
+        *,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
         kind: str = "ensemble",
     ) -> float:
         """Calculate the loss for a run
@@ -1007,6 +1048,9 @@ class EnsembleBuilder:
 
         metric: Scorer
             The metric to calculate the loss of
+
+        X_data: SUPPORTED_FEAT_TYPES | None = None
+            Any X_data required to be passed to the metric
 
         kind: str = "ensemble"
             The kind of targets to use for the run

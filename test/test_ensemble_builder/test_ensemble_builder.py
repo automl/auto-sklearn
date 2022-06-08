@@ -10,7 +10,7 @@ import numpy as np
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.ensemble_building import EnsembleBuilder, Run
-from autosklearn.metrics import make_scorer
+from autosklearn.metrics import Scorer, accuracy, make_scorer
 from autosklearn.util.functional import bound, pairs
 
 import pytest
@@ -18,6 +18,7 @@ from pytest_cases import fixture, parametrize
 from unittest.mock import patch
 
 from test.conftest import DEFAULT_SEED
+from test.fixtures.metrics import acc_with_X_data
 
 
 @fixture
@@ -673,6 +674,49 @@ def test_delete_runs_does_not_delete_dummy(
     assert set(loaded.values()) == set(dummy_runs)
 
 
+@parametrize("key", ["task_type", "metrics", "random_state", "backend"])
+def test_fit_ensemble_with_duplicate_params_in_ensemble_kwargs(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+    key: str,
+) -> None:
+    """
+    Expects
+    -------
+    * Should raise an error if user has parameters in ensemble_kwargs that
+      are meant to be explicit params
+    """
+    kwargs = {key: None}
+    candidates = [make_run(backend=builder.backend) for _ in range(5)]
+    with pytest.raises(ValueError, match="Can't provide .*"):
+        builder.fit_ensemble(
+            candidates=candidates,
+            runs=candidates,
+            ensemble_kwargs=kwargs,
+        )
+
+
+def test_fit_ensemble_with_no_targets_raises(
+    builder: EnsembleBuilder,
+    make_run: Callable[..., Run],
+) -> None:
+    """
+    Expects
+    -------
+    * If no ensemble targets can be found then `fit_ensemble` should fail
+    """
+    # Delete the targets and then try fit ensemble
+    targets_path = Path(builder.backend._get_targets_ensemble_filename())
+    targets_path.unlink()
+
+    candidates = [make_run(backend=builder.backend) for _ in range(5)]
+    with pytest.raises(ValueError, match="`fit_ensemble` could not find any .*"):
+        builder.fit_ensemble(
+            candidates=candidates,
+            runs=candidates,
+        )
+
+
 def test_fit_ensemble_produces_ensemble(
     builder: EnsembleBuilder,
     make_run: Callable[..., Run],
@@ -682,16 +726,13 @@ def test_fit_ensemble_produces_ensemble(
     -------
     * Should produce an ensemble if all runs have predictions
     """
-    X_data = builder.X_data("ensemble")
     targets = builder.targets("ensemble")
     assert targets is not None
 
     predictions = targets
     runs = [make_run(predictions={"ensemble": predictions}) for _ in range(10)]
 
-    ensemble = builder.fit_ensemble(
-        candidates=runs, X_data=X_data, targets=targets, runs=runs
-    )
+    ensemble = builder.fit_ensemble(candidates=runs, runs=runs)
 
     assert ensemble is not None
 
@@ -823,3 +864,51 @@ def test_deletion_will_not_break_current_ensemble(
 
     for run in new_runs:
         assert run in available_runs
+
+
+@parametrize("metrics", [accuracy, acc_with_X_data, [accuracy, acc_with_X_data]])
+def test_will_build_ensemble_with_different_metrics(
+    make_ensemble_builder: Callable[..., EnsembleBuilder],
+    make_run: Callable[..., Run],
+    metrics: Scorer | list[Scorer],
+) -> None:
+    """
+    Expects
+    -------
+    * Should be able to build a valid ensemble with different combinations of metrics
+    * Should produce a validation score for both "ensemble" and "test" scores
+    """
+    if not isinstance(metrics, list):
+        metrics = [metrics]
+
+    builder = make_ensemble_builder(metrics=metrics)
+
+    # Make some runs and stick them in the same backend as the builder
+    # Dummy just has a terrible loss for all metrics
+    make_run(
+        dummy=True,
+        losses={m.name: 1000 for m in metrics},
+        backend=builder.backend,
+    )
+
+    # "Proper" runs will have the correct targets and so be better than dummy
+    run_predictions = {
+        "ensemble": builder.targets("ensemble"),
+        "test": builder.targets("test"),
+    }
+    for _ in range(5):
+        make_run(predictions=run_predictions, backend=builder.backend)
+
+    history, nbest = builder.main()
+
+    # Should only produce one step
+    assert len(history) == 1
+    hist = history[0]
+
+    # Each of these two keys should be present
+    for key in ["ensemble_optimization_score", "ensemble_test_score"]:
+        assert key in hist
+
+        # Each of these scores should contain all the metrics
+        for metric in metrics:
+            assert metric.name in hist[key]
