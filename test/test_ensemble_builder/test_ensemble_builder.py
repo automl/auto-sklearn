@@ -674,28 +674,6 @@ def test_delete_runs_does_not_delete_dummy(
     assert set(loaded.values()) == set(dummy_runs)
 
 
-@parametrize("key", ["task_type", "metrics", "random_state", "backend"])
-def test_fit_ensemble_with_duplicate_params_in_ensemble_kwargs(
-    builder: EnsembleBuilder,
-    make_run: Callable[..., Run],
-    key: str,
-) -> None:
-    """
-    Expects
-    -------
-    * Should raise an error if user has parameters in ensemble_kwargs that
-      are meant to be explicit params
-    """
-    kwargs = {key: None}
-    candidates = [make_run(backend=builder.backend) for _ in range(5)]
-    with pytest.raises(ValueError, match="Can't provide .*"):
-        builder.fit_ensemble(
-            candidates=candidates,
-            runs=candidates,
-            ensemble_kwargs=kwargs,
-        )
-
-
 def test_fit_ensemble_with_no_targets_raises(
     builder: EnsembleBuilder,
     make_run: Callable[..., Run],

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Sequence, Type, cast
+from typing import Any, Iterable, Mapping, Sequence, Type, cast
 
 import logging.handlers
 import multiprocessing
@@ -46,7 +46,7 @@ class EnsembleBuilder:
         task_type: int,
         metrics: Sequence[Scorer],
         ensemble_class: Type[AbstractEnsemble] = EnsembleSelection,
-        ensemble_kwargs: Dict[str, Any] | None = None,
+        ensemble_kwargs: Mapping[str, Any] | None = None,
         ensemble_nbest: int | float = 50,
         max_models_on_disc: int | float | None = 100,
         seed: int = 1,
@@ -71,9 +71,11 @@ class EnsembleBuilder:
         metrics: Sequence[Scorer]
             Metrics to optimize the ensemble for. These must be non-duplicated.
 
-        ensemble_class
+        ensemble_class: Type[AbstractEnsemble]
+            Implementation of the ensemble algorithm.
 
-        ensemble_kwargs
+        ensemble_kwargs: Mapping[str, Any] | None
+            Arguments passed to the constructor of the ensemble algorithm.
 
         ensemble_nbest: int | float = 50
 
@@ -829,7 +831,7 @@ class EnsembleBuilder:
         *,
         targets: np.ndarray | None = None,
         ensemble_class: Type[AbstractEnsemble] = EnsembleSelection,
-        ensemble_kwargs: Dict[str, Any] | None = None,
+        ensemble_kwargs: Mapping[str, Any] | None = None,
         X_data: SUPPORTED_FEAT_TYPES | None = None,
         task: int | None = None,
         metrics: Sequence[Scorer] | None = None,
@@ -853,10 +855,10 @@ class EnsembleBuilder:
         targets: np.ndarray | None = None
             The targets to build the ensemble with
 
-        ensemble_class: AbstractEnsemble
+        ensemble_class: Type[AbstractEnsemble]
             Implementation of the ensemble algorithm.
 
-        ensemble_kwargs: Dict[str, Any] | None
+        ensemble_kwargs: Mapping[str, Any] | None
             Arguments passed to the constructor of the ensemble algorithm.
 
         X_data: SUPPORTED_FEAT_TYPES | None = None
@@ -878,23 +880,6 @@ class EnsembleBuilder:
         -------
         AbstractEnsemble
         """
-        task = task if task is not None else self.task_type
-        ensemble_class = (
-            ensemble_class if ensemble_class is not None else self.ensemble_class
-        )
-        ensemble_kwargs = (
-            ensemble_kwargs if ensemble_kwargs is not None else self.ensemble_kwargs
-        )
-        ensemble_kwargs = ensemble_kwargs if ensemble_kwargs is not None else {}
-        metrics = metrics if metrics is not None else self.metrics
-        rs = random_state if random_state is not None else self.random_state
-
-        # Validate that kwargs doesn't have duplicates
-        params = {"task_type", "metrics", "random_state", "backend"}
-        duplicates = ensemble_kwargs.keys() & params
-        if any(duplicates):
-            raise ValueError(f"Can't provide {duplicates} in `ensemble_kwargs`")
-
         # Validate we have targets if None specified
         if targets is None:
             targets = self.targets("ensemble")
@@ -902,21 +887,35 @@ class EnsembleBuilder:
                 path = self.backend._get_targets_ensemble_filename()
                 raise ValueError(f"`fit_ensemble` could not find any targets at {path}")
 
-        # Validate when we have no X_data that we can load it if we need
-        if X_data is None and any(m._needs_X for m in metrics):
-            X_data = self.X_data("ensemble")
-            if X_data is None:
-                msg = "No `X_data` for `fit_ensemble` which was required by metrics"
-                self.logger.debug(msg)
-                raise RuntimeError(msg)
+        ensemble_class = (
+            ensemble_class if ensemble_class is not None else self.ensemble_class
+        )
 
-        ensemble = ensemble_class(
-            task_type=task,
-            metrics=metrics,
-            random_state=rs,
-            backend=self.backend,
-            **ensemble_kwargs,
-        )  # type: AbstractEnsemble
+        # Create the ensemble_kwargs, favouring in order:
+        # 1) function params, 2) function kwargs 3) init_kwargs 4) init_params
+
+        # Collect func params in dict if they're not None
+        params = {
+            k: v
+            for k, v in [
+                ("task_type", task),
+                ("metrics", metrics),
+                ("random_state", random_state),
+            ]
+            if v is not None
+        }
+
+        kwargs = {
+            "backend": self.backend,
+            "task_type": self.task_type,
+            "metrics": self.metrics,
+            "random_state": self.random_state,
+            **(self.ensemble_kwargs or {}),
+            **(ensemble_kwargs or {}),
+            **params,
+        }
+
+        ensemble = ensemble_class(**kwargs)  # type: AbstractEnsemble
 
         self.logger.debug(f"Fitting ensemble on {len(candidates)} models")
         start_time = time.time()
