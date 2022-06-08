@@ -892,7 +892,7 @@ class EnsembleBuilder:
         )
 
         # Create the ensemble_kwargs, favouring in order:
-        # 1) function params, 2) function kwargs 3) init_kwargs 4) init_params
+        # 1) function kwargs, 2) function params 3) init_kwargs 4) init_params
 
         # Collect func params in dict if they're not None
         params = {
@@ -911,8 +911,8 @@ class EnsembleBuilder:
             "metrics": self.metrics,
             "random_state": self.random_state,
             **(self.ensemble_kwargs or {}),
-            **(ensemble_kwargs or {}),
             **params,
+            **(ensemble_kwargs or {}),
         }
 
         ensemble = ensemble_class(**kwargs)  # type: AbstractEnsemble
