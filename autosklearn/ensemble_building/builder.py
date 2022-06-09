@@ -618,7 +618,15 @@ class EnsembleBuilder:
                 scoring_functions=None,
             )
 
-            performance_stamp[f"ensemble_{score_name}_score"] = scores
+            # TODO only one metric in history
+            #
+            #   We should probably return for all metrics but this makes
+            #   automl::performance_history a lot more complicated, will
+            #   tackle in a future PR
+            first_metric = self.metrics[0]
+            performance_stamp[f"ensemble_{score_name}_score"] = scores[
+                first_metric.name
+            ]
 
         # Add the performance stamp to the history
         self.ensemble_history.append(performance_stamp)
