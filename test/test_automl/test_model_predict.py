@@ -1,3 +1,4 @@
+"""Test the _model_predict helper function such that it shapes output correctly"""
 from typing import Callable, Dict, Tuple
 
 import warnings
@@ -19,7 +20,10 @@ from pytest_cases import parametrize
 
 
 class WarningModel:
+    """Simple model that returns incorrect shape and issues warning"""
+
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Shout a warning during prediction"""
         warnings.warn("shout")
         return X
 

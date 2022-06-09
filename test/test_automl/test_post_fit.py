@@ -1,4 +1,4 @@
-"""Check the state of the automl instances after it has been fitted"""
+"""Check the internal state of the automl instances after it has been fitted"""
 
 from pathlib import Path
 
@@ -82,6 +82,11 @@ def test_no_ensemble(automl: AutoML) -> None:
 
 @mark.todo
 def test_datamanager_stored_contents() -> None:
+    """
+    Expects
+    -------
+    * TODO
+    """
     ...
 
 

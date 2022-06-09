@@ -1,9 +1,4 @@
-"""Property based Tests
-
-These test are for checking properties of already fitted models. Any test that does
-tests using cases should not modify the state as these models are cached between tests
-to reduce training time.
-"""
+"""Test things related to only constructing an AutoML instance"""
 from typing import Any, Dict, Optional, Union
 
 from autosklearn.automl import AutoML

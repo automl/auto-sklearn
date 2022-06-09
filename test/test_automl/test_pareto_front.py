@@ -1,4 +1,4 @@
-"""Test the output of loading the pareto set"""
+"""Test the output of loading the pareto set from an automl instance"""
 from autosklearn.automl import AutoML
 
 from pytest_cases import parametrize_with_cases
