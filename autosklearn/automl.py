@@ -1533,6 +1533,7 @@ class AutoML(BaseEstimator):
         else:
             self._is_dask_client_internally_created = False
 
+        metrics = metrics if metrics is not None else self._metrics
         if not isinstance(metrics, Sequence):
             metrics = [metrics]
 
