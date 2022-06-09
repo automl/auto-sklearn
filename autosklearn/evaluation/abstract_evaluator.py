@@ -429,15 +429,15 @@ class AbstractEvaluator(object):
         if test_loss is not None:
             additional_run_info["test_loss"] = test_loss
 
-        rval_dict = {
+        return_value_dict = {
             "loss": loss,
             "additional_run_info": additional_run_info,
             "status": status,
         }
         if final_call:
-            rval_dict["final_queue_element"] = True
+            return_value_dict["final_queue_element"] = True
 
-        self.queue.put(rval_dict)
+        self.queue.put(return_value_dict)
         return self.duration, loss_, self.seed, additional_run_info_
 
     def calculate_auxiliary_losses(

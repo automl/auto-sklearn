@@ -1041,31 +1041,31 @@ class AutoSklearnEstimator(BaseEstimator):
             return rv.additional_info and key in rv.additional_info
 
         model_runs = {}
-        for rkey, rval in self.automl_.runhistory_.data.items():
-            if not additional_info_has_key(rval, "num_run"):
+        for run_key, run_val in self.automl_.runhistory_.data.items():
+            if not additional_info_has_key(run_val, "num_run"):
                 continue
             else:
-                model_key = rval.additional_info["num_run"]
+                model_key = run_val.additional_info["num_run"]
                 model_run = {
-                    "model_id": rval.additional_info["num_run"],
-                    "seed": rkey.seed,
-                    "budget": rkey.budget,
-                    "duration": rval.time,
-                    "config_id": rkey.config_id,
-                    "start_time": rval.starttime,
-                    "end_time": rval.endtime,
-                    "status": str(rval.status),
-                    "train_loss": rval.additional_info["train_loss"]
-                    if additional_info_has_key(rval, "train_loss")
+                    "model_id": run_val.additional_info["num_run"],
+                    "seed": run_key.seed,
+                    "budget": run_key.budget,
+                    "duration": run_val.time,
+                    "config_id": run_key.config_id,
+                    "start_time": run_val.starttime,
+                    "end_time": run_val.endtime,
+                    "status": str(run_val.status),
+                    "train_loss": run_val.additional_info["train_loss"]
+                    if additional_info_has_key(run_val, "train_loss")
                     else None,
-                    "config_origin": rval.additional_info["configuration_origin"]
-                    if additional_info_has_key(rval, "configuration_origin")
+                    "config_origin": run_val.additional_info["configuration_origin"]
+                    if additional_info_has_key(run_val, "configuration_origin")
                     else None,
                 }
                 if num_metrics == 1:
-                    model_run["cost"] = rval.cost
+                    model_run["cost"] = run_val.cost
                 else:
-                    for cost_idx, cost in enumerate(rval.cost):
+                    for cost_idx, cost in enumerate(run_val.cost):
                         model_run[f"cost_{cost_idx}"] = cost
                 model_runs[model_key] = model_run
 
