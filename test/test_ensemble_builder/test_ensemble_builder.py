@@ -890,3 +890,76 @@ def test_will_build_ensemble_with_different_metrics(
         # Each of these scores should contain all the metrics
         for metric in metrics:
             assert metric.name in hist[key]
+
+
+@parametrize("n_least_prioritized", [1, 2, 3, 4])
+@parametrize("metrics", [accuracy, acc_with_X_data, [accuracy, acc_with_X_data]])
+def test_fit_ensemble_kwargs_priorities(
+    make_ensemble_builder: Callable[..., EnsembleBuilder],
+    make_run: Callable[..., Run],
+    metrics: Scorer | list[Scorer],
+    n_least_prioritized: int,
+) -> None:
+    """
+    Expects
+    -------
+    * Should favour 1) function kwargs, 2) function params 3) init_kwargs 4) init_params
+    """
+    if not isinstance(metrics, list):
+        metrics = [metrics]
+
+    class FakeEnsembleClass:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+        def fit(*args, **kwargs) -> None:
+            pass
+
+    # We establish the priorty order and give each one of them a custom metric
+    priority = ["function_kwargs", "function_params", "init_kwargs", "init_params"]
+
+    # We reverse the priority and use the `n_least_prioritized` ones
+    # with `n_least_prioritized = 3`
+    #   reversed =  ["init_params", "init_kwargs", "function_params", "function_kwargs"]
+    #   used =      ["init_params", "init_kwargs", "function_params"]
+    #   highest =   "function_params"
+    reversed_priority = list(reversed(priority))
+    used = reversed_priority[:n_least_prioritized]
+    highest_priority = used[-1]
+
+    def S(name: str) -> Scorer:
+        return make_scorer(name, lambda: None)
+
+    # We now pass in all the places this arguments could be specified
+    # Naming them specifically to make it more clear in setup below
+    builder_metric = [S("init_params")] if "init_params" in used else None
+    fit_ensemble_metric = [S("function_params")] if "function_params" in used else None
+
+    builder_ensemble_kwargs = (
+        {"metrics": [S("init_kwargs")]} if "init_kwargs" in used else None
+    )
+    fit_ensemble_kwargs = (
+        {"metrics": [S("function_kwargs")]} if "function_kwargs" in used else None
+    )
+
+    builder = make_ensemble_builder(
+        metrics=builder_metric,
+        ensemble_kwargs=builder_ensemble_kwargs,
+    )
+
+    candidates = [make_run() for _ in range(5)]  # Just so something can be run
+
+    ensemble = builder.fit_ensemble(
+        metrics=fit_ensemble_metric,
+        ensemble_class=FakeEnsembleClass,
+        ensemble_kwargs=fit_ensemble_kwargs,
+        candidates=candidates,
+        runs=candidates,
+    )
+
+    # These are the final metrics passed to the ensemble builder when constructed
+    passed_metrics = ensemble.kwargs["metrics"]
+    metric = passed_metrics[0]
+
+    assert metric.name == highest_priority
