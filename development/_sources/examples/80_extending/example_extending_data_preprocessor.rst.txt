@@ -154,7 +154,7 @@ Fit the model without performing data preprocessing
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: 09ab3c55-e357-11ec-8803-8b1cc6e122a3
+      Dataset name: 8a120541-e7fb-11ec-885a-b78306dc4a84
       Metric: accuracy
       Best validation score: 0.957447
       Number of target algorithm runs: 5
@@ -201,7 +201,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.875 seconds)
+   **Total running time of the script:** ( 0 minutes  16.110 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:

@@ -146,26 +146,30 @@ ensemble of pipelines as described in the next section. This X_train/y_train dat
 to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 Optionally, you can measure the ability of this fitted model to generalize to unseen data by
 providing an optional testing pair (X_test/Y_test). For further details, please refer to the
-Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.
-Supported formats for these training and testing pairs are: np.ndarray,
-pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
-<p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your
-data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>
-for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a>
-for multidimensional data.</p>
-<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:</p>
+Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.</p>
+<p>Regarding the features, there are multiple things to consider:</p>
 <ul class="simple">
 <li><p>Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
 can check the Example <a class="reference internal" href="examples/40_advanced/example_feature_types.html#sphx-glr-examples-40-advanced-example-feature-types-py"><span class="std std-ref">Feature Types</span></a>.</p></li>
-<li><p>You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
-dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the
-column has a categorical/boolean class, it will be encoded. If the column is of any other type
-(Object or Timeseries), an error will be raised. For further details on how to properly encode
-your data, you can check the Pandas Example
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>).
-If you are working with time series, it is recommended that you follow this approach
+<li><p>You can provide a pandas DataFrame with properly formatted columns. If a column has numerical
+dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. <em>auto-sklearn</em>
+supports both categorical or string as column type. Please ensure that you are using the correct
+dtype for your task. By default <em>auto-sklearn</em> treats object and string columns as strings and
+encodes the data using <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">sklearn.feature_extraction.text.CountVectorizer</a></p></li>
+<li><p>If your data contains categorical values (in the features or targets), ensure that you explicitly label them as categorical.
+Data labeled as categorical is encoded by using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>
+for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprodcessing.OrdinalEncoder</a> for multidimensional data.</p></li>
+<li><p>For further details on how to properly encode your data, you can check the Pandas Example
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>). If you are working with time series, it is recommended that you follow this approach
 <a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p></li>
+<li><p>If you prefer not using the string option at all you can disable this option. In this case
+objects, strings and categorical columns are encoded as categorical.</p></li>
 </ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span><span class="n">allow_string_features</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be
 automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding
 is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able
