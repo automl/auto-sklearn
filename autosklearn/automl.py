@@ -646,324 +646,343 @@ class AutoML(BaseEstimator):
 
         # By default try to use the TCP logging port or get a new port
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-        self._logger = self._get_logger(dataset_name)
 
-        # The first thing we have to do is create the logger to update the backend
-        self._backend.setup_logger(self._logger_port)
+        # Once we start the logging server, it starts in a new process
+        # If an error occurs then we want to make sure that we exit cleanly
+        # and shut it down, else it might hang
+        # https://github.com/automl/auto-sklearn/issues/1480
+        try:
+            self._logger = self._get_logger(dataset_name)
 
-        if not only_return_configuration_space:
-            # If only querying the configuration space, we do not save the start time
-            # The start time internally checks for the fit() method to execute only once
-            # But this does not apply when only querying the configuration space
-            self._backend.save_start_time(self._seed)
+            # The first thing we have to do is create the logger to update the backend
+            self._backend.setup_logger(self._logger_port)
 
-        self._stopwatch = StopWatch()
+            if not only_return_configuration_space:
+                # If only querying the configuration space, we do not save the start
+                # time The start time internally checks for the fit() method to execute
+                # only once but this does not apply when only querying the configuration
+                # space
+                self._backend.save_start_time(self._seed)
 
-        # Make sure that input is valid
-        # Performs Ordinal one hot encoding to the target
-        # both for train and test data
-        self.InputValidator = InputValidator(
-            is_classification=is_classification,
-            feat_type=feat_type,
-            logger_port=self._logger_port,
-            allow_string_features=self.allow_string_features,
-        )
-        self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
-        X, y = self.InputValidator.transform(X, y)
+            self._stopwatch = StopWatch()
 
-        if X_test is not None and y_test is not None:
-            X_test, y_test = self.InputValidator.transform(X_test, y_test)
+            # Make sure that input is valid
+            # Performs Ordinal one hot encoding to the target
+            # both for train and test data
+            self.InputValidator = InputValidator(
+                is_classification=is_classification,
+                feat_type=feat_type,
+                logger_port=self._logger_port,
+                allow_string_features=self.allow_string_features,
+            )
+            self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
+            X, y = self.InputValidator.transform(X, y)
 
-        # We don't support size reduction on pandas type object yet
-        if (
-            self._dataset_compression is not None
-            and not isinstance(X, pd.DataFrame)
-            and not (isinstance(y, pd.Series) or isinstance(y, pd.DataFrame))
-        ):
-            methods = self._dataset_compression["methods"]
-            memory_allocation = self._dataset_compression["memory_allocation"]
+            if X_test is not None and y_test is not None:
+                X_test, y_test = self.InputValidator.transform(X_test, y_test)
 
-            # Remove precision reduction if we can't perform it
-            if "precision" in methods and X.dtype not in supported_precision_reductions:
-                methods = [method for method in methods if method != "precision"]
+            # We don't support size reduction on pandas type object yet
+            if (
+                self._dataset_compression is not None
+                and not isinstance(X, pd.DataFrame)
+                and not (isinstance(y, pd.Series) or isinstance(y, pd.DataFrame))
+            ):
+                methods = self._dataset_compression["methods"]
+                memory_allocation = self._dataset_compression["memory_allocation"]
 
-            with warnings_to(self._logger):
-                X, y = reduce_dataset_size_if_too_large(
+                # Remove precision reduction if we can't perform it
+                if (
+                    "precision" in methods
+                    and X.dtype not in supported_precision_reductions
+                ):
+                    methods = [method for method in methods if method != "precision"]
+
+                with warnings_to(self._logger):
+                    X, y = reduce_dataset_size_if_too_large(
+                        X=X,
+                        y=y,
+                        memory_limit=self._memory_limit,
+                        is_classification=is_classification,
+                        random_state=self._seed,
+                        operations=methods,
+                        memory_allocation=memory_allocation,
+                    )
+
+            # Check the re-sampling strategy
+            try:
+                self._check_resampling_strategy(
                     X=X,
                     y=y,
-                    memory_limit=self._memory_limit,
-                    is_classification=is_classification,
-                    random_state=self._seed,
-                    operations=methods,
-                    memory_allocation=memory_allocation,
-                )
-
-        # Check the re-sampling strategy
-        try:
-            self._check_resampling_strategy(
-                X=X,
-                y=y,
-                task=self._task,
-            )
-        except Exception as e:
-            self._fit_cleanup()
-            raise e
-
-        # Reset learnt stuff
-        self.models_ = None
-        self.cv_models_ = None
-        self.ensemble_ = None
-
-        # The metric must exist as of this point
-        # It can be provided in the constructor, or automatically
-        # defined in the estimator fit call
-        if isinstance(self._metrics, Sequence):
-            for entry in self._metrics:
-                if not isinstance(entry, Scorer):
-                    raise ValueError(
-                        "Metric {entry} must be instance of autosklearn.metrics.Scorer."
-                    )
-        else:
-            raise ValueError(
-                "Metric must be a sequence of instances of "
-                "autosklearn.metrics.Scorer."
-            )
-
-        # If no dask client was provided, we create one, so that we can
-        # start a ensemble process in parallel to smbo optimize
-        if self._dask_client is None and (
-            self._ensemble_class is not None
-            or self._n_jobs is not None
-            and self._n_jobs > 1
-        ):
-            self._create_dask_client()
-        else:
-            self._is_dask_client_internally_created = False
-
-        self._dataset_name = dataset_name
-        self._stopwatch.start(self._dataset_name)
-
-        # Take the feature types from the validator
-        self._feat_type = self.InputValidator.feature_validator.feat_type
-
-        self._log_fit_setup()
-
-        # == Pickle the data manager to speed up loading
-        with self._stopwatch.time("Save Datamanager"):
-            datamanager = XYDataManager(
-                X,
-                y,
-                X_test=X_test,
-                y_test=y_test,
-                task=self._task,
-                feat_type=self._feat_type,
-                dataset_name=dataset_name,
-            )
-
-            self._backend._make_internals_directory()
-            self._label_num = datamanager.info["label_num"]
-
-            self._backend.save_datamanager(datamanager)
-
-        # = Create a searchspace
-        # Do this before One Hot Encoding to make sure that it creates a
-        # search space for a dense classifier even if one hot encoding would
-        # make it sparse (tradeoff; if one hot encoding would make it sparse,
-        #  densifier and truncatedSVD would probably lead to a MemoryError,
-        # like this we can't use some of the preprocessing methods in case
-        # the data became sparse)
-        with self._stopwatch.time("Create Search space"):
-            self.configuration_space, configspace_path = self._create_search_space(
-                self._backend.temporary_directory,
-                self._backend,
-                datamanager,
-                include=self._include,
-                exclude=self._exclude,
-            )
-
-        if only_return_configuration_space:
-            self._fit_cleanup()
-            return self.configuration_space
-
-        # == Perform dummy predictions
-        with self._stopwatch.time("Dummy predictions"):
-            self.num_run += 1
-            self._do_dummy_prediction()
-
-        # == RUN ensemble builder
-        # Do this before calculating the meta-features to make sure that the
-        # dummy predictions are actually included in the ensemble even if
-        # calculating the meta-features takes very long
-        with self._stopwatch.time("Run Ensemble Builder"):
-
-            elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
-
-            time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
-            proc_ensemble = None
-            if time_left_for_ensembles <= 0:
-                # Fit only raises error when an ensemble class is given but
-                # time_left_for_ensembles is zero.
-                if self._ensemble_class is not None:
-                    raise ValueError(
-                        "Not starting ensemble builder because there "
-                        "is no time left. Try increasing the value "
-                        "of time_left_for_this_task."
-                    )
-            elif self._ensemble_class is None:
-                self._logger.info(
-                    "Not starting ensemble builder because no ensemble class is given."
-                )
-            else:
-                self._logger.info(
-                    "Start Ensemble with %5.2fsec time left" % time_left_for_ensembles
-                )
-
-                proc_ensemble = EnsembleBuilderManager(
-                    start_time=time.time(),
-                    time_left_for_ensembles=time_left_for_ensembles,
-                    backend=copy.deepcopy(self._backend),
-                    dataset_name=dataset_name,
                     task=self._task,
-                    metrics=self._metrics,
-                    ensemble_class=self._ensemble_class,
-                    ensemble_kwargs=self._ensemble_kwargs,
-                    ensemble_nbest=self._ensemble_nbest,
-                    max_models_on_disc=self._max_models_on_disc,
-                    seed=self._seed,
-                    precision=self.precision,
-                    max_iterations=self._max_ensemble_build_iterations,
-                    read_at_most=self._read_at_most,
-                    memory_limit=self._memory_limit,
-                    random_state=self._seed,
-                    logger_port=self._logger_port,
-                    pynisher_context=self._multiprocessing_context,
+                )
+            except Exception as e:
+                self._fit_cleanup()
+                raise e
+
+            # Reset learnt stuff
+            self.models_ = None
+            self.cv_models_ = None
+            self.ensemble_ = None
+
+            # The metric must exist as of this point
+            # It can be provided in the constructor, or automatically
+            # defined in the estimator fit call
+            if isinstance(self._metrics, Sequence):
+                for entry in self._metrics:
+                    if not isinstance(entry, Scorer):
+                        raise ValueError(
+                            f"Metric {entry} must be instance of"
+                            " autosklearn.metrics.Scorer."
+                        )
+            else:
+                raise ValueError(
+                    "Metric must be a sequence of instances of "
+                    "autosklearn.metrics.Scorer."
                 )
 
-        # kill the datamanager as it will be re-loaded anyways from sub processes
-        try:
-            del self._datamanager
-        except Exception:
-            pass
-
-        # => RUN SMAC
-        with self._stopwatch.time("Run SMAC"):
-            elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
-            time_left = self._time_for_task - elapsed_time
-
-            if self._logger:
-                self._logger.info("Start SMAC with %5.2fsec time left" % time_left)
-            if time_left <= 0:
-                self._logger.warning("Not starting SMAC because there is no time left.")
-                _proc_smac = None
-                self._budget_type = None
+            # If no dask client was provided, we create one, so that we can
+            # start a ensemble process in parallel to smbo optimize
+            if self._dask_client is None and (
+                self._ensemble_class is not None
+                or self._n_jobs is not None
+                and self._n_jobs > 1
+            ):
+                self._create_dask_client()
             else:
-                if (
-                    self._per_run_time_limit is None
-                    or self._per_run_time_limit > time_left
-                ):
-                    self._logger.warning(
-                        "Time limit for a single run is higher than total time "
-                        "limit. Capping the limit for a single run to the total "
-                        "time given to SMAC (%f)" % time_left
-                    )
-                    per_run_time_limit = time_left
-                else:
-                    per_run_time_limit = self._per_run_time_limit
+                self._is_dask_client_internally_created = False
 
-                # Make sure that at least 2 models are created for the ensemble process
-                num_models = time_left // per_run_time_limit
-                if num_models < 2:
-                    per_run_time_limit = time_left // 2
+            self._dataset_name = dataset_name
+            self._stopwatch.start(self._dataset_name)
+
+            # Take the feature types from the validator
+            self._feat_type = self.InputValidator.feature_validator.feat_type
+
+            self._log_fit_setup()
+
+            # == Pickle the data manager to speed up loading
+            with self._stopwatch.time("Save Datamanager"):
+                datamanager = XYDataManager(
+                    X,
+                    y,
+                    X_test=X_test,
+                    y_test=y_test,
+                    task=self._task,
+                    feat_type=self._feat_type,
+                    dataset_name=dataset_name,
+                )
+
+                self._backend._make_internals_directory()
+                self._label_num = datamanager.info["label_num"]
+
+                self._backend.save_datamanager(datamanager)
+
+            # = Create a searchspace
+            # Do this before One Hot Encoding to make sure that it creates a
+            # search space for a dense classifier even if one hot encoding would
+            # make it sparse (tradeoff; if one hot encoding would make it sparse,
+            #  densifier and truncatedSVD would probably lead to a MemoryError,
+            # like this we can't use some of the preprocessing methods in case
+            # the data became sparse)
+            with self._stopwatch.time("Create Search space"):
+                self.configuration_space, configspace_path = self._create_search_space(
+                    self._backend.temporary_directory,
+                    self._backend,
+                    datamanager,
+                    include=self._include,
+                    exclude=self._exclude,
+                )
+
+            if only_return_configuration_space:
+                self._fit_cleanup()
+                return self.configuration_space
+
+            # == Perform dummy predictions
+            with self._stopwatch.time("Dummy predictions"):
+                self.num_run += 1
+                self._do_dummy_prediction()
+
+            # == RUN ensemble builder
+            # Do this before calculating the meta-features to make sure that the
+            # dummy predictions are actually included in the ensemble even if
+            # calculating the meta-features takes very long
+            with self._stopwatch.time("Run Ensemble Builder"):
+
+                elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
+
+                time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
+                proc_ensemble = None
+                if time_left_for_ensembles <= 0:
+                    # Fit only raises error when an ensemble class is given but
+                    # time_left_for_ensembles is zero.
+                    if self._ensemble_class is not None:
+                        raise ValueError(
+                            "Not starting ensemble builder because there "
+                            "is no time left. Try increasing the value "
+                            "of time_left_for_this_task."
+                        )
+                elif self._ensemble_class is None:
+                    self._logger.info(
+                        "No ensemble buildin because no ensemble class was given."
+                    )
+                else:
+                    self._logger.info(
+                        "Start Ensemble with %5.2fsec time left"
+                        % time_left_for_ensembles
+                    )
+
+                    proc_ensemble = EnsembleBuilderManager(
+                        start_time=time.time(),
+                        time_left_for_ensembles=time_left_for_ensembles,
+                        backend=copy.deepcopy(self._backend),
+                        dataset_name=dataset_name,
+                        task=self._task,
+                        metrics=self._metrics,
+                        ensemble_class=self._ensemble_class,
+                        ensemble_kwargs=self._ensemble_kwargs,
+                        ensemble_nbest=self._ensemble_nbest,
+                        max_models_on_disc=self._max_models_on_disc,
+                        seed=self._seed,
+                        precision=self.precision,
+                        max_iterations=self._max_ensemble_build_iterations,
+                        read_at_most=self._read_at_most,
+                        memory_limit=self._memory_limit,
+                        random_state=self._seed,
+                        logger_port=self._logger_port,
+                        pynisher_context=self._multiprocessing_context,
+                    )
+
+            # kill the datamanager as it will be re-loaded anyways from sub processes
+            try:
+                del self._datamanager
+            except Exception:
+                pass
+
+            # => RUN SMAC
+            with self._stopwatch.time("Run SMAC"):
+                elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
+                time_left = self._time_for_task - elapsed_time
+
+                if self._logger:
+                    self._logger.info("Start SMAC with %5.2fsec time left" % time_left)
+                if time_left <= 0:
                     self._logger.warning(
-                        "Capping the per_run_time_limit to {} to have "
-                        "time for a least 2 models in each process.".format(
-                            per_run_time_limit
+                        "Not starting SMAC because there is no time left."
+                    )
+                    _proc_smac = None
+                    self._budget_type = None
+                else:
+                    if (
+                        self._per_run_time_limit is None
+                        or self._per_run_time_limit > time_left
+                    ):
+                        self._logger.warning(
+                            "Time limit for a single run is higher than total time "
+                            "limit. Capping the limit for a single run to the total "
+                            "time given to SMAC (%f)" % time_left
+                        )
+                        per_run_time_limit = time_left
+                    else:
+                        per_run_time_limit = self._per_run_time_limit
+
+                    # At least 2 models are created for the ensemble process
+                    num_models = time_left // per_run_time_limit
+                    if num_models < 2:
+                        per_run_time_limit = time_left // 2
+                        self._logger.warning(
+                            "Capping the per_run_time_limit to {} to have "
+                            "time for a least 2 models in each process.".format(
+                                per_run_time_limit
+                            )
+                        )
+
+                    n_meta_configs = self._initial_configurations_via_metalearning
+                    _proc_smac = AutoMLSMBO(
+                        config_space=self.configuration_space,
+                        dataset_name=self._dataset_name,
+                        backend=self._backend,
+                        total_walltime_limit=time_left,
+                        func_eval_time_limit=per_run_time_limit,
+                        memory_limit=self._memory_limit,
+                        data_memory_limit=self._data_memory_limit,
+                        stopwatch=self._stopwatch,
+                        n_jobs=self._n_jobs,
+                        dask_client=self._dask_client,
+                        start_num_run=self.num_run,
+                        num_metalearning_cfgs=n_meta_configs,
+                        config_file=configspace_path,
+                        seed=self._seed,
+                        metadata_directory=self._metadata_directory,
+                        metrics=self._metrics,
+                        resampling_strategy=self._resampling_strategy,
+                        resampling_strategy_args=self._resampling_strategy_arguments,
+                        include=self._include,
+                        exclude=self._exclude,
+                        disable_file_output=self._disable_evaluator_output,
+                        get_smac_object_callback=self._get_smac_object_callback,
+                        smac_scenario_args=self._smac_scenario_args,
+                        scoring_functions=self._scoring_functions,
+                        port=self._logger_port,
+                        pynisher_context=self._multiprocessing_context,
+                        ensemble_callback=proc_ensemble,
+                        trials_callback=self._get_trials_callback,
+                    )
+
+                    try:
+                        (
+                            self.runhistory_,
+                            self.trajectory_,
+                            self._budget_type,
+                        ) = _proc_smac.run_smbo()
+                        trajectory_filename = os.path.join(
+                            self._backend.get_smac_output_directory_for_run(self._seed),
+                            "trajectory.json",
+                        )
+                        saveable_trajectory = [
+                            list(entry[:2])
+                            + [entry[2].get_dictionary()]
+                            + list(entry[3:])
+                            for entry in self.trajectory_
+                        ]
+                        with open(trajectory_filename, "w") as fh:
+                            json.dump(saveable_trajectory, fh)
+                    except Exception as e:
+                        self._logger.exception(e)
+                        raise
+
+            self._logger.info("Starting shutdown...")
+            # Wait until the ensemble process is finished to avoid shutting down
+            # while the ensemble builder tries to access the data
+            if proc_ensemble is not None:
+                self.ensemble_performance_history = list(proc_ensemble.history)
+
+                if len(proc_ensemble.futures) > 0:
+                    # Now we wait for the future to return as it cannot be cancelled
+                    # while it is running: https://stackoverflow.com/a/49203129
+                    self._logger.info(
+                        "Ensemble script still running, waiting for it to finish."
+                    )
+                    result = proc_ensemble.futures.pop().result()
+                    if result:
+                        ensemble_history, _ = result
+                        self.ensemble_performance_history.extend(ensemble_history)
+                    self._logger.info("Ensemble script finished, continue shutdown.")
+
+                # save the ensemble performance history file
+                if len(self.ensemble_performance_history) > 0:
+                    pd.DataFrame(self.ensemble_performance_history).to_json(
+                        os.path.join(
+                            self._backend.internals_directory, "ensemble_history.json"
                         )
                     )
 
-                _proc_smac = AutoMLSMBO(
-                    config_space=self.configuration_space,
-                    dataset_name=self._dataset_name,
-                    backend=self._backend,
-                    total_walltime_limit=time_left,
-                    func_eval_time_limit=per_run_time_limit,
-                    memory_limit=self._memory_limit,
-                    data_memory_limit=self._data_memory_limit,
-                    stopwatch=self._stopwatch,
-                    n_jobs=self._n_jobs,
-                    dask_client=self._dask_client,
-                    start_num_run=self.num_run,
-                    num_metalearning_cfgs=self._initial_configurations_via_metalearning,
-                    config_file=configspace_path,
-                    seed=self._seed,
-                    metadata_directory=self._metadata_directory,
-                    metrics=self._metrics,
-                    resampling_strategy=self._resampling_strategy,
-                    resampling_strategy_args=self._resampling_strategy_arguments,
-                    include=self._include,
-                    exclude=self._exclude,
-                    disable_file_output=self._disable_evaluator_output,
-                    get_smac_object_callback=self._get_smac_object_callback,
-                    smac_scenario_args=self._smac_scenario_args,
-                    scoring_functions=self._scoring_functions,
-                    port=self._logger_port,
-                    pynisher_context=self._multiprocessing_context,
-                    ensemble_callback=proc_ensemble,
-                    trials_callback=self._get_trials_callback,
-                )
+            if load_models:
+                self._logger.info("Loading models...")
+                self._load_models()
+                self._logger.info("Finished loading models...")
 
-                try:
-                    (
-                        self.runhistory_,
-                        self.trajectory_,
-                        self._budget_type,
-                    ) = _proc_smac.run_smbo()
-                    trajectory_filename = os.path.join(
-                        self._backend.get_smac_output_directory_for_run(self._seed),
-                        "trajectory.json",
-                    )
-                    saveable_trajectory = [
-                        list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
-                        for entry in self.trajectory_
-                    ]
-                    with open(trajectory_filename, "w") as fh:
-                        json.dump(saveable_trajectory, fh)
-                except Exception as e:
-                    self._logger.exception(e)
-                    raise
+        finally:
+            self._fit_cleanup()
 
-        self._logger.info("Starting shutdown...")
-        # Wait until the ensemble process is finished to avoid shutting down
-        # while the ensemble builder tries to access the data
-        if proc_ensemble is not None:
-            self.ensemble_performance_history = list(proc_ensemble.history)
-
-            if len(proc_ensemble.futures) > 0:
-                # Now we need to wait for the future to return as it cannot be cancelled
-                # while it is running: https://stackoverflow.com/a/49203129
-                self._logger.info(
-                    "Ensemble script still running, waiting for it to finish."
-                )
-                result = proc_ensemble.futures.pop().result()
-                if result:
-                    ensemble_history, _ = result
-                    self.ensemble_performance_history.extend(ensemble_history)
-                self._logger.info("Ensemble script finished, continue shutdown.")
-
-            # save the ensemble performance history file
-            if len(self.ensemble_performance_history) > 0:
-                pd.DataFrame(self.ensemble_performance_history).to_json(
-                    os.path.join(
-                        self._backend.internals_directory, "ensemble_history.json"
-                    )
-                )
-
-        if load_models:
-            self._logger.info("Loading models...")
-            self._load_models()
-            self._logger.info("Finished loading models...")
-
-        self._fit_cleanup()
         self.fitted = True
 
         return self
