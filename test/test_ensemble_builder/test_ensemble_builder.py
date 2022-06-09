@@ -15,7 +15,7 @@ from autosklearn.util.functional import bound, pairs
 
 import pytest
 from pytest_cases import fixture, parametrize
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from test.conftest import DEFAULT_SEED
 from test.fixtures.metrics import acc_with_X_data
@@ -963,3 +963,38 @@ def test_fit_ensemble_kwargs_priorities(
     metric = passed_metrics[0]
 
     assert metric.name == highest_priority
+
+
+@parametrize("metric, should_be_loaded", [(accuracy, False), (acc_with_X_data, True)])
+def test_X_data_only_loaded_when_required(
+    make_ensemble_builder: Callable[..., EnsembleBuilder],
+    make_run: Callable[..., Run],
+    metric: Scorer,
+    should_be_loaded: bool,
+) -> None:
+    """
+    Expects
+    -------
+    * Should only load X_train if it's required
+    * TODO should only load X_test if it's required
+    """
+    metrics = [metric]
+    builder = make_ensemble_builder(metrics=metrics)
+
+    # Make a dummy which is required for the whole pipeline to run
+    make_run(dummy=True, losses={metric.name: 1000}, backend=builder.backend)
+
+    # Make a run that has no losses recorded, forcing us to use the metric
+    make_run(
+        dummy=False,
+        predictions={"ensemble": builder.targets("ensemble")},
+        losses=None,
+        backend=builder.backend,
+    )
+
+    ret_value = builder.X_data()
+    builder.X_data = Mock(return_value=ret_value)
+
+    builder.main()
+
+    assert builder.X_data.called == should_be_loaded
