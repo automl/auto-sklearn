@@ -317,20 +317,18 @@ Other
     Optionally, you can measure the ability of this fitted model to generalize to unseen data by
     providing an optional testing pair (X_test/Y_test). For further details, please refer to the
     Example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
-    Supported formats for these training and testing pairs are: np.ndarray,
-    pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 
     Regarding the features, there are multiple things to consider:
 
     * Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
       can check the Example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
-    * You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
+    * You can provide a pandas DataFrame with properly formatted columns. If a column has numerical
       dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. *auto-sklearn*
       supports both categorical or string as column type. Please ensure that you are using the correct
       dtype for your task. By default *auto-sklearn* treats object and string columns as strings and
       encodes the data using `sklearn.feature_extraction.text.CountVectorizer <https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html>`_
     * If your data contains categorical values (in the features or targets), ensure that you explicitly label them as categorical.
-      data labeled as categorical is encoded by using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
+      Data labeled as categorical is encoded by using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
       for unidimensional data and a `sklearn.preprodcessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
     * For further details on how to properly encode your data, you can check the Pandas Example
       `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach
