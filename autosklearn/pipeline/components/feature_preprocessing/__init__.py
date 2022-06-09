@@ -14,9 +14,9 @@ from ..base import (
     find_components,
 )
 
-classifier_directory = os.path.split(__file__)[0]
-_preprocessors = find_components(
-    __package__, classifier_directory, AutoSklearnPreprocessingAlgorithm
+feature_preprocessing_directory = os.path.split(__file__)[0]
+_feature_preprocessors = find_components(
+    __package__, feature_preprocessing_directory, AutoSklearnPreprocessingAlgorithm
 )
 additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 _addons["feature_preprocessing"] = additional_components
@@ -30,7 +30,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
     @classmethod
     def get_components(cls):
         components = OrderedDict()
-        components.update(_preprocessors)
+        components.update(_feature_preprocessors)
         components.update(additional_components.components)
         return components
 

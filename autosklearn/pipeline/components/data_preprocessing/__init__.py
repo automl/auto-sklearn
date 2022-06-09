@@ -12,14 +12,16 @@ from ..base import (
     AutoSklearnChoice,
     AutoSklearnPreprocessingAlgorithm,
     ThirdPartyComponents,
+    _addons,
     find_components,
 )
 
-classifier_directory = os.path.split(__file__)[0]
-_preprocessors = find_components(
-    __package__, classifier_directory, AutoSklearnPreprocessingAlgorithm
+data_preprocessing_directory = os.path.split(__file__)[0]
+_data_preprocessors = find_components(
+    __package__, data_preprocessing_directory, AutoSklearnPreprocessingAlgorithm
 )
-_addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+_addons["data_preprocessing"] = additional_components
 
 
 def add_preprocessor(preprocessor: Type[AutoSklearnPreprocessingAlgorithm]) -> None:
@@ -30,8 +32,8 @@ class DataPreprocessorChoice(AutoSklearnChoice):
     @classmethod
     def get_components(cls) -> OrderedDict:
         components: OrderedDict = OrderedDict()
-        components.update(_preprocessors)
-        components.update(_addons.components)
+        components.update(_data_preprocessors)
+        components.update(additional_components.components)
         return components
 
     def get_available_components(

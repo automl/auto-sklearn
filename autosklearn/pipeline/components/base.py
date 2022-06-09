@@ -1,4 +1,4 @@
-from typing import Dict
+from __future__ import annotations
 
 import importlib
 import inspect
@@ -10,7 +10,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 from autosklearn.pipeline.constants import SPARSE
 
-_addons = dict()  # type: Dict[str, 'ThirdPartyComponents']
+_addons: dict[str, ThirdPartyComponents] = {}
 
 
 def find_components(package, directory, base_class):
