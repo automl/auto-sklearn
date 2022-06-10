@@ -53,9 +53,13 @@ class TestMetadataGeneration(unittest.TestCase):
             self.working_directory,
         )
         rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
         )
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        self.assertEqual(rval.returncode, 0, msg=f"{cmd}\n{str(rval)}")
 
         # 4. run one of the commands to get some data
         commands_output_file = os.path.join(
@@ -100,7 +104,11 @@ class TestMetadataGeneration(unittest.TestCase):
             cmd = cmd.replace("-s 1", "-s 1 --unittest")
             print("COMMAND: %s" % cmd)
             rval = subprocess.run(
-                cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                cmd,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=30,
             )
             print("STDOUT: %s" % repr(rval.stdout), flush=True)
             print("STDERR: %s" % repr(rval.stderr), flush=True)
@@ -123,7 +131,9 @@ class TestMetadataGeneration(unittest.TestCase):
             )
             with open(smac_log) as fh:
                 smac_output = fh.read()
-            self.assertEqual(rval.returncode, 0, msg=str(rval) + "\n" + smac_output)
+            self.assertEqual(
+                rval.returncode, 0, msg=f"{cmd}\n{str(rval)}" + "\n" + smac_output
+            )
             expected_validation_output = os.path.join(
                 expected_output_directory, "..", "validation_trajectory_1.json"
             )
@@ -173,11 +183,15 @@ class TestMetadataGeneration(unittest.TestCase):
         )
         print("COMMAND: %s" % cmd)
         rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
         )
         print("STDOUT: %s" % repr(rval.stdout), flush=True)
         print("STDERR: %s" % repr(rval.stderr), flush=True)
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        self.assertEqual(rval.returncode, 0, msg=f"{cmd}\n{str(rval)}")
 
         for file in [
             "algorithm_runs.arff",
@@ -216,9 +230,13 @@ class TestMetadataGeneration(unittest.TestCase):
             self.working_directory,
         )
         rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
         )
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        self.assertEqual(rval.returncode, 0, msg=f"{cmd}\n{str(rval)}")
         for task_type in ("classification", "regression"):
             for file in [
                 "calculation_times.csv",
@@ -272,9 +290,13 @@ class TestMetadataGeneration(unittest.TestCase):
             self.working_directory,
         )
         rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
         )
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        self.assertEqual(rval.returncode, 0, msg=f"{cmd}\n{str(rval)}")
 
         for metric_, combination in (
             (metric, "%s_binary.classification_dense" % metric),
