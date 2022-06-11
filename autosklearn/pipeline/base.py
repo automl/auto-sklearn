@@ -282,6 +282,9 @@ class BasePipeline(Pipeline):
 
         Parameters
         ----------
+        feat_type: dict
+            python dictionary which maps the columns of the dataset to the data types
+
         estimator_name : str
             Name of the estimator hyperparameter which will be used in the
             configuration space. For a classification task, this would be
@@ -311,7 +314,7 @@ class BasePipeline(Pipeline):
         raise NotImplementedError()
 
     def _get_base_search_space(
-        self, feat_type, cs, dataset_properties, exclude, include, pipeline
+        self, cs, dataset_properties, exclude, include, pipeline, feat_type=None
     ):
         if include is None:
             if self.include is None:
