@@ -10,12 +10,13 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
 class NoCoalescence(AutoSklearnPreprocessingAlgorithm):
     def __init__(
-        self, random_state: Optional[Union[int, np.random.RandomState]] = None
+            self, random_state: Optional[Union[int, np.random.RandomState]] = None,
+            feat_type: Optional[Dict[Union[str, int], str]] = None
     ) -> None:
         pass
 
     def fit(
-        self, X: np.array, y: Optional[PIPELINE_DATA_DTYPE] = None
+            self, X: np.array, y: Optional[PIPELINE_DATA_DTYPE] = None
     ) -> PIPELINE_DATA_DTYPE:
         self.preprocessor = "passthrough"
         return self
@@ -25,7 +26,7 @@ class NoCoalescence(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {
             "shortname": "no coalescence",
@@ -43,8 +44,8 @@ class NoCoalescence(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+            feat_type: Optional[Dict[Union[str, int], str]] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
         return cs
