@@ -105,7 +105,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type,
+        feat_type=None,
         dataset_properties: Optional[Dict] = None,
         default: str = None,
         include: Optional[Dict] = None,
@@ -152,7 +152,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         return self.choice.transform(X)
 
     def set_hyperparameters(
-        self, feat_type, configuration: ConfigurationSpace, init_params: Optional[Dict] = None
+        self, configuration: ConfigurationSpace, init_params: Optional[Dict] = None, feat_type=None
     ) -> "DataPreprocessorChoice":
         config = {}
         params = configuration.get_dictionary()

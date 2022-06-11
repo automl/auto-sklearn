@@ -46,7 +46,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def __init__(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         config: Optional[Configuration] = None,
         steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -94,7 +94,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def _get_hyperparameter_search_space(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -124,7 +124,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def _get_pipeline_steps(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         dataset_properties: Optional[Dict[str, str]] = None,
     ) -> List[Tuple[str, BaseEstimator]]:
         steps = []

@@ -34,7 +34,7 @@ class BasePipeline(Pipeline):
 
     def __init__(
         self,
-        feat_type,
+        feat_type=None,
         config=None,
         steps=None,
         dataset_properties=None,
@@ -204,7 +204,7 @@ class BasePipeline(Pipeline):
 
                 return y
 
-    def set_hyperparameters(self, configuration, feat_type, init_params=None):
+    def set_hyperparameters(self, configuration, feat_type=None, init_params=None):
         self.config = configuration
 
         for node_idx, n_ in enumerate(self.steps):
@@ -250,7 +250,7 @@ class BasePipeline(Pipeline):
 
         return self
 
-    def get_hyperparameter_search_space(self, feat_type, dataset_properties=None):
+    def get_hyperparameter_search_space(self, feat_type=None, dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
         Returns
@@ -269,7 +269,7 @@ class BasePipeline(Pipeline):
         return self.config_space
 
     def _get_hyperparameter_search_space(
-        self, feat_type, include=None, exclude=None, dataset_properties=None
+        self, feat_type=None, include=None, exclude=None, dataset_properties=None
     ):
         """Return the configuration space for the CASH problem.
 
@@ -509,7 +509,7 @@ class BasePipeline(Pipeline):
 
         return rval
 
-    def _get_pipeline_steps(self, dataset_properties, feat_type):
+    def _get_pipeline_steps(self, dataset_properties, feat_type=None):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

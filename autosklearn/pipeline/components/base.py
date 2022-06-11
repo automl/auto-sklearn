@@ -136,7 +136,7 @@ class AutoSklearnComponent(BaseEstimator):
         for further information."""
         raise NotImplementedError()
 
-    def set_hyperparameters(self, configuration, feat_type, init_params=None):
+    def set_hyperparameters(self, configuration, feat_type=None, init_params=None):
         params = configuration.get_dictionary()
 
         for param, value in params.items():
@@ -339,7 +339,7 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
 
 class AutoSklearnChoice(object):
-    def __init__(self, dataset_properties, feat_type, random_state=None):
+    def __init__(self, dataset_properties, feat_type=None, random_state=None):
         """
         Parameters
         ----------
@@ -414,7 +414,7 @@ class AutoSklearnChoice(object):
 
         return components_dict
 
-    def set_hyperparameters(self, configuration, feat_type, init_params=None):
+    def set_hyperparameters(self, configuration, feat_type=None, init_params=None):
         new_params = {}
 
         params = configuration.get_dictionary()

@@ -116,7 +116,7 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1
         )

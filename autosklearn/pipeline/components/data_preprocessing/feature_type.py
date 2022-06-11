@@ -1,8 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import json
-import os
 import sklearn.compose
 from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -77,8 +75,8 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
         self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
 
-        if self.feat_type is None:
-            raise ValueError("feat_type init requires feat_type")
+        # if self.feat_type is None:
+        #     raise ValueError("feat_type init requires feat_type")
 
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
@@ -88,7 +86,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.categ_ppl = None
-        if "categorical" in self.feat_type.values():
+        if "categorical" in self.feat_type.values() or self.feat_type is None:
             self.categ_ppl = CategoricalPreprocessingPipeline(
                 feat_type=self.feat_type,
                 config=None,
@@ -108,7 +106,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.numer_ppl = None
-        if "numerical" in self.feat_type.values():
+        if "numerical" in self.feat_type.values() or self.feat_type is None:
             self.numer_ppl = NumericalPreprocessingPipeline(
                 feat_type=self.feat_type,
                 config=None,
@@ -129,7 +127,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.txt_ppl = None
-        if "string" in self.feat_type.values():
+        if "string" in self.feat_type.values() or self.feat_type is None:
             self.txt_ppl = TextPreprocessingPipeline(
                 feat_type=self.feat_type,
                 config=None,
@@ -298,7 +296,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
@@ -313,10 +311,10 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def _get_hyperparameter_search_space_recursevely(
-        feat_type,
         dataset_properties: DATASET_PROPERTIES_TYPE,
         cs: ConfigurationSpace,
         transformer: BaseEstimator,
+        feat_type: Optional[Dict[Union[str, int], str]] = None
     ) -> ConfigurationSpace:
         for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):

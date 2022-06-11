@@ -13,12 +13,13 @@ from autosklearn.constants import (
 )
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
+from autosklearn.data.xy_data_manager import XYDataManager
 
 __all__ = ["get_configuration_space"]
 
 
 def get_configuration_space(
-    datamanager: Dict[str, Any],
+    datamanager: XYDataManager,
     include: Optional[Dict[str, List[str]]] = None,
     exclude: Optional[Dict[str, List[str]]] = None,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -27,8 +28,8 @@ def get_configuration_space(
 
     Parameters
     ----------
-    info: Dict[str, Any]
-        Information about the dataset
+    datamanager: XYDataManager
+        XYDataManger object storing all important information about the dataset
 
     include: Optional[Dict[str, List[str]]] = None
         A dictionary of what components to include for each pipeline step
@@ -53,7 +54,7 @@ def get_configuration_space(
 
 
 def _get_regression_configuration_space(
-    datamanager: Dict[str, Any],
+    datamanager: XYDataManager,
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -62,8 +63,8 @@ def _get_regression_configuration_space(
 
     Parameters
     ----------
-    info: Dict[str, Any]
-        Information about the dataset
+    datamanager: XYDataManager
+        XYDataManger object storing all important information about the dataset
 
     include: Optional[Dict[str, List[str]]] = None
         A dictionary of what components to include for each pipeline step
@@ -101,7 +102,7 @@ def _get_regression_configuration_space(
 
 
 def _get_classification_configuration_space(
-    datamanager: Dict[str, Any],
+    datamanager: XYDataManager,
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -110,8 +111,8 @@ def _get_classification_configuration_space(
 
     Parameters
     ----------
-    info: Dict[str, Any]
-        Information about the dataset
+   datamanager: XYDataManager
+        XYDataManger object storing all important information about the dataset
 
     include: Optional[Dict[str, List[str]]] = None
         A dictionary of what components to include for each pipeline step

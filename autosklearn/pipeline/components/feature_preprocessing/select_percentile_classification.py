@@ -110,7 +110,7 @@ class SelectPercentileClassification(
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
         percentile = UniformFloatHyperparameter(
             name="percentile", lower=1, upper=99, default_value=50
         )

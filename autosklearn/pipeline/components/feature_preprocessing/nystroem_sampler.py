@@ -94,7 +94,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(feat_type, dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
         if dataset_properties is not None and (
             dataset_properties.get("sparse") is True
             or dataset_properties.get("signed") is False

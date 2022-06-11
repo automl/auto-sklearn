@@ -15,7 +15,7 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         minimum_fraction: float = 0.01,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:

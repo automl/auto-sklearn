@@ -55,7 +55,7 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
         keep_variance = UniformFloatHyperparameter(
             "keep_variance", 0.5, 0.9999, default_value=0.9999
         )

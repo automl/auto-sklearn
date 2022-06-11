@@ -70,7 +70,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
 
     def __init__(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties=None,
@@ -168,12 +168,14 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 return y
 
     def _get_hyperparameter_search_space(
-        self, feat_type, include=None, exclude=None, dataset_properties=None
+        self, feat_type=None, include=None, exclude=None, dataset_properties=None
     ):
         """Create the hyperparameter configuration space.
 
         Parameters
         ----------
+        feat_type : dict, maps columns to there datatypes
+
         include : dict (optional, default=None)
 
         Returns
@@ -347,7 +349,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         self.dataset_properties = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self, dataset_properties, feat_type):
+    def _get_pipeline_steps(self, dataset_properties, feat_type=None):
         steps = []
 
         default_dataset_properties = {"target_type": "classification"}

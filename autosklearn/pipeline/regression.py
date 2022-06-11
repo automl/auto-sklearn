@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 
 import copy
 from itertools import product
@@ -67,7 +67,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     def __init__(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties=None,
@@ -114,7 +114,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         return y
 
     def _get_hyperparameter_search_space(
-        self, feat_type, include=None, exclude=None, dataset_properties=None
+        self, feat_type=None, include=None, exclude=None, dataset_properties=None
     ):
         """Return the configuration space for the CASH problem.
 
@@ -262,7 +262,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_estimator_components(self):
         return regression_components._regressors
 
-    def _get_pipeline_steps(self, feat_type, dataset_properties, init_params=None):
+    def _get_pipeline_steps(self, dataset_properties, feat_type=None, init_params=None):
         steps = []
 
         default_dataset_properties = {"target_type": "regression"}
