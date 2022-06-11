@@ -155,7 +155,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 try:
                     # columns = [str(col) for col in columns]
                     pass
-                except:
+                except Exception as e:
                     raise ValueError(
                         f"Train data has columns={expected} yet the"
                         f" feat_types are feat={columns}"
