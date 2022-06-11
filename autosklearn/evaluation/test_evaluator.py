@@ -58,7 +58,7 @@ class TestEvaluator(AbstractEvaluator):
         self.X_test = self.datamanager.data.get("X_test")
         self.Y_test = self.datamanager.data.get("Y_test")
 
-        self.model = self._get_model()
+        self.model = self._get_model(self.feat_type)
 
     def fit_predict_and_loss(self) -> None:
         _fit_and_suppress_warnings(self.logger, self.model, self.X_train, self.Y_train)
