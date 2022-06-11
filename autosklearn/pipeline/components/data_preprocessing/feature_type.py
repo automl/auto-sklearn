@@ -158,7 +158,8 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 except Exception as e:
                     raise ValueError(
                         f"Train data has columns={expected} yet the"
-                        f" feat_types are feat={columns}"
+                        f" feat_types are feat={columns}\n"
+                        f"Exception: {e}"
                     )
             transformer_lst = []
 
