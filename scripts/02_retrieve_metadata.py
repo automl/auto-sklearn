@@ -178,6 +178,11 @@ def write_output(outputs, configurations, output_dir, configuration_space, metri
             fh.write("%s: %s\n" % (key, description[key]))
 
 
+class DummyDatamanager():
+    def __init__(self, info):
+        self.info = info
+        self.feat_type = {"A1": "numerical"}
+
 def main():
     parser = ArgumentParser()
 
@@ -220,7 +225,7 @@ def main():
             )
 
             configuration_space = pipeline.get_configuration_space(
-                {"is_sparse": sparse, "task": task}
+                DummyDatamanager({"is_sparse": sparse, "task": task})
             )
 
             outputs, configurations = retrieve_matadata(
