@@ -42,7 +42,9 @@ class MetaBase(object):
         self.configuration_space = configuration_space
         self.aslib_directory = aslib_directory
 
-        aslib_reader = aslib_simple.AlgorithmSelectionProblem(self.aslib_directory, self.configuration_space)
+        aslib_reader = aslib_simple.AlgorithmSelectionProblem(
+            self.aslib_directory, self.configuration_space
+        )
         self.metafeatures = aslib_reader.metafeatures
         self.algorithm_runs: OrderedDict[
             str, pd.DataFrame

@@ -75,7 +75,9 @@ class RescalingChoice(AutoSklearnChoice):
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[
                 name
-            ].get_hyperparameter_search_space(feat_type=feat_type, dataset_properties=dataset_properties)
+            ].get_hyperparameter_search_space(
+                feat_type=feat_type, dataset_properties=dataset_properties
+            )
             parent_hyperparameter = {"parent": preprocessor, "value": name}
             cs.add_configuration_space(
                 name,

@@ -438,7 +438,12 @@ class AutoSklearnChoice(object):
         return self
 
     def get_hyperparameter_search_space(
-        self, feat_type, dataset_properties=None, default=None, include=None, exclude=None
+        self,
+        feat_type,
+        dataset_properties=None,
+        default=None,
+        include=None,
+        exclude=None,
     ):
         raise NotImplementedError()
 

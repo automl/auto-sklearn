@@ -24,7 +24,9 @@ def test_dummy_pipeline(task_type: str) -> None:
         return
 
     X, y = data_maker(random_state=0)
-    estimator = estimator_class(feat_type={i: "numerical" for i in range(X.shape[0])}, config=1, random_state=0)
+    estimator = estimator_class(
+        feat_type={i: "numerical" for i in range(X.shape[0])}, config=1, random_state=0
+    )
     estimator.fit(X, y)
     check_is_fitted(estimator)
 

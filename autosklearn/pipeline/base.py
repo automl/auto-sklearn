@@ -54,7 +54,9 @@ class BasePipeline(Pipeline):
         self.feat_type = feat_type
 
         if steps is None:
-            self.steps = self._get_pipeline_steps(feat_type=feat_type, dataset_properties=dataset_properties)
+            self.steps = self._get_pipeline_steps(
+                feat_type=feat_type, dataset_properties=dataset_properties
+            )
         else:
             self.steps = steps
 
@@ -84,7 +86,9 @@ class BasePipeline(Pipeline):
                 )
             self.config = config
 
-        self.set_hyperparameters(self.config, feat_type=feat_type, init_params=init_params)
+        self.set_hyperparameters(
+            self.config, feat_type=feat_type, init_params=init_params
+        )
 
         super().__init__(steps=self.steps)
 
@@ -211,8 +215,7 @@ class BasePipeline(Pipeline):
             node_name, node = n_
 
             sub_configuration_space = node.get_hyperparameter_search_space(
-                feat_type=feat_type,
-                dataset_properties=self.dataset_properties
+                feat_type=feat_type, dataset_properties=self.dataset_properties
             )
             sub_config_dict = {}
             for param in configuration:
@@ -239,7 +242,9 @@ class BasePipeline(Pipeline):
                 node, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)
             ):
                 node.set_hyperparameters(
-                    feat_type=feat_type, configuration=sub_configuration, init_params=sub_init_params_dict
+                    feat_type=feat_type,
+                    configuration=sub_configuration,
+                    init_params=sub_init_params_dict,
                 )
             else:
                 raise NotImplementedError("Not supported yet!")
@@ -350,7 +355,10 @@ class BasePipeline(Pipeline):
             dataset_properties["signed"] = False
 
         matches = autosklearn.pipeline.create_searchspace_util.get_match_array(
-            pipeline=pipeline, dataset_properties=dataset_properties, include=include, exclude=exclude
+            pipeline=pipeline,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
         )
 
         # Now we have only legal combinations at this step of the pipeline
@@ -393,7 +401,9 @@ class BasePipeline(Pipeline):
                     )
                 )
                 sub_config_space = node.get_hyperparameter_search_space(
-                    feat_type=feat_type, dataset_properties=dataset_properties, include=choices_list
+                    feat_type=feat_type,
+                    dataset_properties=dataset_properties,
+                    include=choices_list,
                 )
                 cs.add_configuration_space(node_name, sub_config_space)
 

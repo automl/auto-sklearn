@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict
+from typing import Dict, Optional, Union
 
 import copy
 from itertools import product
@@ -292,7 +292,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                     regression_components.RegressorChoice(
                         feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
-                        random_state=self.random_state
+                        random_state=self.random_state,
                     ),
                 ],
             ]

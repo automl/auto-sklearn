@@ -38,12 +38,12 @@ class BagOfWordChoice(AutoSklearnChoice):
         return components
 
     def get_hyperparameter_search_space(
-            self,
-            feat_type: Optional[Dict[Union[str, int], str]] = None,
-            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-            default: Optional[str] = None,
-            include: Optional[Dict[str, str]] = None,
-            exclude: Optional[Dict[str, str]] = None,
+        self,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        default: Optional[str] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
 
@@ -76,7 +76,9 @@ class BagOfWordChoice(AutoSklearnChoice):
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[
                 name
-            ].get_hyperparameter_search_space(feat_type=feat_type, dataset_properties=dataset_properties)
+            ].get_hyperparameter_search_space(
+                feat_type=feat_type, dataset_properties=dataset_properties
+            )
             parent_hyperparameter = {"parent": preprocessor, "value": name}
             cs.add_configuration_space(
                 name,
@@ -89,9 +91,10 @@ class BagOfWordChoice(AutoSklearnChoice):
         return cs
 
     def set_hyperparameters(
-            self, configuration: Configuration,
-            init_params: Optional[Dict[str, Any]] = None,
-            feat_type: Optional[Dict[Union[str, int], str]] = None
+        self,
+        configuration: Configuration,
+        init_params: Optional[Dict[str, Any]] = None,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
     ) -> "BagOfWordChoice":
         new_params = {}
 

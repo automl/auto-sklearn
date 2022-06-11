@@ -36,15 +36,21 @@ def make_voting_classifier() -> Callable[..., VotingClassifier]:
     """
 
     def _make(
-            X: Optional[SUPPORTED_FEAT_TYPES] = None,
-            y: Optional[SUPPORTED_TARGET_TYPES] = None,
-            models: Optional[Collection[AutoSklearnClassificationAlgorithm]] = None,
-            seed: Union[int, None, np.random.RandomState] = DEFAULT_SEED,
+        X: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y: Optional[SUPPORTED_TARGET_TYPES] = None,
+        models: Optional[Collection[AutoSklearnClassificationAlgorithm]] = None,
+        seed: Union[int, None, np.random.RandomState] = DEFAULT_SEED,
     ) -> VotingClassifier:
         assert not (X is None) ^ (y is None)
         if not models:
-            models = [MyDummyClassifier(feat_type={i: "numerical" for i in range(4)}, config=1, random_state=seed) for _
-                      in range(5)]
+            models = [
+                MyDummyClassifier(
+                    feat_type={i: "numerical" for i in range(4)},
+                    config=1,
+                    random_state=seed,
+                )
+                for _ in range(5)
+            ]
 
         if X is not None:
             for model in models:
@@ -73,16 +79,22 @@ def make_voting_regressor() -> Callable[..., VotingRegressor]:
     """
 
     def _make(
-            X: Optional[SUPPORTED_FEAT_TYPES] = None,
-            y: Optional[SUPPORTED_TARGET_TYPES] = None,
-            models: Optional[Collection[AutoSklearnRegressionAlgorithm]] = None,
-            seed: Union[int, None, np.random.RandomState] = DEFAULT_SEED,
+        X: Optional[SUPPORTED_FEAT_TYPES] = None,
+        y: Optional[SUPPORTED_TARGET_TYPES] = None,
+        models: Optional[Collection[AutoSklearnRegressionAlgorithm]] = None,
+        seed: Union[int, None, np.random.RandomState] = DEFAULT_SEED,
     ) -> VotingRegressor:
         assert not (X is None) ^ (y is None)
 
         if not models:
-            models = [MyDummyRegressor(feat_type={i: "numerical" for i in range(4)}, config=1, random_state=seed) for _
-                      in range(5)]
+            models = [
+                MyDummyRegressor(
+                    feat_type={i: "numerical" for i in range(4)},
+                    config=1,
+                    random_state=seed,
+                )
+                for _ in range(5)
+            ]
 
         if X is not None:
             for model in models:

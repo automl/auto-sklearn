@@ -64,7 +64,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             exclude=exclude,
             random_state=random_state,
             init_params=init_params,
-            feat_type=feat_type
+            feat_type=feat_type,
         )
 
     @staticmethod

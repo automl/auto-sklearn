@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict
+from typing import Dict, Optional, Union
 
 import copy
 from itertools import product

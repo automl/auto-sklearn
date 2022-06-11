@@ -52,7 +52,7 @@ class TextPreprocessingPipeline(BasePipeline):
             exclude=exclude,
             random_state=random_state,
             init_params=init_params,
-            feat_type=feat_type
+            feat_type=feat_type,
         )
 
     @staticmethod
@@ -130,13 +130,12 @@ class TextPreprocessingPipeline(BasePipeline):
                     BagOfWordChoice(
                         feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
-                        random_state=self.random_state
+                        random_state=self.random_state,
                     ),
                 ),
                 (
                     "text_feature_reduction",
-                    TextFeatureReduction(
-                        random_state=self.random_state),
+                    TextFeatureReduction(random_state=self.random_state),
                 ),
             ]
         )

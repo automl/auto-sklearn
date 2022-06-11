@@ -2940,16 +2940,24 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(len(train_samples), 6)
         self.assertEqual(len(test_samples), 3)
 
-class DummyDatamanager():
+
+class DummyDatamanager:
     def __init__(self):
         self.info = {"task": MULTICLASS_CLASSIFICATION, "is_sparse": False}
-        self.feat_type = {0: 'numerical', 1: 'Numerical', 2: 'numerical', 3: 'numerical'}
+        self.feat_type = {
+            0: "numerical",
+            1: "Numerical",
+            2: "numerical",
+            3: "numerical",
+        }
 
 
 class FunctionsTest(unittest.TestCase):
     def setUp(self):
         self.queue = multiprocessing.Queue()
-        self.configuration = get_configuration_space(DummyDatamanager()).get_default_configuration()
+        self.configuration = get_configuration_space(
+            DummyDatamanager()
+        ).get_default_configuration()
         self.data = get_multiclass_classification_datamanager()
         self.tmp_dir = os.path.join(
             os.path.dirname(__file__), ".test_holdout_functions"

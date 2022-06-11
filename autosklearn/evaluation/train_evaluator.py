@@ -321,7 +321,9 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred = [None] * self.num_cv_folds
                 train_splits = [None] * self.num_cv_folds
 
-                self.models = [self._get_model(self.feat_type) for i in range(self.num_cv_folds)]
+                self.models = [
+                    self._get_model(self.feat_type) for i in range(self.num_cv_folds)
+                ]
                 iterations = [1] * self.num_cv_folds
                 total_n_iterations = [0] * self.num_cv_folds
                 # model.estimator_supports_iterative_fit -> true

@@ -87,7 +87,10 @@ class OHEChoice(AutoSklearnChoice):
         return cs
 
     def set_hyperparameters(
-        self, feat_type, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
+        self,
+        feat_type,
+        configuration: Configuration,
+        init_params: Optional[Dict[str, Any]] = None,
     ) -> "OHEChoice":
         new_params = {}
 
