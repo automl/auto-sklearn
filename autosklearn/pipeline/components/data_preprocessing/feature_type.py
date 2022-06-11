@@ -64,20 +64,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         self.feat_type = feat_type
         self.force_sparse_output = force_sparse_output
 
-        # load global feat_type
-        # f = open(f'{os.path.dirname(os.path.realpath(__file__))}/../../../feat_type.json')
-        # self.feat_type = json.load(f)
-        # is_number = True
-        # for key in self.feat_type.keys():
-        #     is_number *= key.isnumeric()
-        # if is_number:
-        #     self.feat_type = {int(key): value for key, value in self.feat_type.items()}
-
-        self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
-
-        # if self.feat_type is None:
-        #     raise ValueError("feat_type init requires feat_type")
-
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -85,19 +71,16 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.categ_ppl = None
-        if "categorical" in self.feat_type.values() or self.feat_type is None:
-            self.categ_ppl = CategoricalPreprocessingPipeline(
-                feat_type=self.feat_type,
-                config=None,
-                steps=pipeline,
-                dataset_properties=dataset_properties,
-                include=include,
-                exclude=exclude,
-                random_state=random_state,
-                init_params=init_params,
-            )
-            self._transformers.append(("categorical_transformer", self.categ_ppl))
+        self.categ_ppl = CategoricalPreprocessingPipeline(
+            feat_type=self.feat_type,
+            config=None,
+            steps=pipeline,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+        )
         # The pipeline that will be applied to the numerical features (i.e. columns)
         # of the dataset
         # Configuration of the data-preprocessor is different from the configuration of
@@ -105,19 +88,16 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.numer_ppl = None
-        if "numerical" in self.feat_type.values() or self.feat_type is None:
-            self.numer_ppl = NumericalPreprocessingPipeline(
-                feat_type=self.feat_type,
-                config=None,
-                steps=pipeline,
-                dataset_properties=dataset_properties,
-                include=include,
-                exclude=exclude,
-                random_state=random_state,
-                init_params=init_params,
-            )
-            self._transformers.append(("numerical_transformer", self.numer_ppl))
+        self.numer_ppl = NumericalPreprocessingPipeline(
+            feat_type=self.feat_type,
+            config=None,
+            steps=pipeline,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+        )
 
         # The pipeline that will be applied to the text features (i.e. columns)
         # of the dataset
@@ -126,22 +106,31 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # It is actually the call to set_hyperparameter who properly sets this argument
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
-        self.txt_ppl = None
-        if "string" in self.feat_type.values() or self.feat_type is None:
-            self.txt_ppl = TextPreprocessingPipeline(
-                feat_type=self.feat_type,
-                config=None,
-                steps=pipeline,
-                dataset_properties=dataset_properties,
-                include=include,
-                exclude=exclude,
-                random_state=random_state,
-                init_params=init_params,
-            )
-            self._transformers.append(("text_transformer", self.txt_ppl))
+        self.txt_ppl = TextPreprocessingPipeline(
+            feat_type=self.feat_type,
+            config=None,
+            steps=pipeline,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+        )
 
-        if self.config:
-            self.set_hyperparameters(feat_type=self.feat_type, configuration=self.config, init_params=init_params)
+        if self.feat_type is None:
+            self._transformers: List[Tuple[str, AutoSklearnComponent]] = [("categorical_transformer", self.categ_ppl),
+                                                                          ("numerical_transformer", self.numer_ppl),
+                                                                          ("text_transformer", self.txt_ppl)]
+        else:
+            self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
+            if "categorical" in self.feat_type.values():
+                self._transformers.append(("categorical_transformer", self.categ_ppl))
+            if "numerical" in self.feat_type.values():
+                self._transformers.append(("numerical_transformer", self.numer_ppl))
+            if "string" in self.feat_type.values():
+                self._transformers.append(("text_transformer", self.txt_ppl))
+            if self.config:
+                self.set_hyperparameters(feat_type=self.feat_type, configuration=self.config, init_params=init_params)
         self.column_transformer = column_transformer
 
     def fit(
