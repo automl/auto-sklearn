@@ -150,20 +150,20 @@ Fit a classifier using ROAR
 
     ################################################################################
     Results for ROAR.
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2126: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
     auto-sklearn results:
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.978723
-      Number of target algorithm runs: 28
-      Number of successful target algorithm runs: 25
+      Number of target algorithm runs: 23
+      Number of successful target algorithm runs: 19
       Number of crashed target algorithm runs: 3
-      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.951048951048951
+    Accuracy score 0.958041958041958
 
 
 
@@ -244,15 +244,15 @@ Fit a classifier using Random Search
 
     ################################################################################
     Results for random search.
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2126: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
     auto-sklearn results:
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.978723
-      Number of target algorithm runs: 29
-      Number of successful target algorithm runs: 25
+      Number of target algorithm runs: 24
+      Number of successful target algorithm runs: 20
       Number of crashed target algorithm runs: 3
       Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
@@ -265,7 +265,7 @@ Fit a classifier using Random Search
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  49.822 seconds)
+   **Total running time of the script:** ( 1 minutes  56.893 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_random_search.py:

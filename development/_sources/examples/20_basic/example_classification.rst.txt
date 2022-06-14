@@ -121,29 +121,29 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight                type      cost  duration
-    model_id                                                               
-    7            1             0.10         extra_trees  0.014184  1.512359
-    16           2             0.04   gradient_boosting  0.021277  1.077883
-    2            7             0.02       random_forest  0.028369  1.650848
-    3            9             0.08                 mlp  0.028369  0.941389
-    6            8             0.02                 mlp  0.028369  1.092995
-    11          10             0.04       random_forest  0.028369  2.022025
-    14           6             0.04                 mlp  0.028369  1.494851
-    19           4             0.12         extra_trees  0.028369  2.771019
-    22           3             0.06   gradient_boosting  0.028369  1.124899
-    31           5             0.04         extra_trees  0.028369  1.655802
-    8           12             0.06       random_forest  0.035461  1.897231
-    12          11             0.02   gradient_boosting  0.035461  1.269511
-    17          13             0.02   gradient_boosting  0.035461  1.580935
-    18          14             0.02       random_forest  0.035461  1.919877
-    9           15             0.06         extra_trees  0.042553  1.785843
-    30          16             0.12       liblinear_svc  0.042553  0.961230
-    15          17             0.02                 mlp  0.049645  3.307275
-    28          18             0.04                 mlp  0.056738  0.963452
-    29          19             0.04         extra_trees  0.056738  1.732564
-    20          20             0.02  passive_aggressive  0.078014  0.762197
-    32          21             0.02         extra_trees  0.106383  2.971949
+              rank  ensemble_weight                 type      cost  duration
+    model_id                                                                
+    7            1             0.10          extra_trees  0.014184  1.836073
+    31           2             0.04          extra_trees  0.014184  2.180439
+    16           4             0.04    gradient_boosting  0.021277  1.376396
+    21           3             0.02          extra_trees  0.021277  1.795568
+    2            5             0.04        random_forest  0.028369  2.028645
+    3            6             0.10                  mlp  0.028369  1.248554
+    6            8             0.02                  mlp  0.028369  1.383725
+    14          10             0.10                  mlp  0.028369  2.604736
+    19           9             0.06          extra_trees  0.028369  3.229408
+    26           7             0.02          extra_trees  0.028369  2.629982
+    5           13             0.02        random_forest  0.035461  2.408276
+    17          12             0.04    gradient_boosting  0.035461  2.029645
+    18          11             0.02        random_forest  0.035461  2.466285
+    32          14             0.10  k_nearest_neighbors  0.035461  1.098980
+    9           15             0.02          extra_trees  0.042553  2.251426
+    15          17             0.02                  mlp  0.049645  5.269227
+    28          16             0.06          extra_trees  0.049645  2.323722
+    4           18             0.04                  mlp  0.056738  2.048599
+    24          19             0.06        random_forest  0.070922  2.033193
+    29          20             0.06        decision_tree  0.070922  1.279367
+    20          21             0.02   passive_aggressive  0.078014  0.906578
 
 
 
@@ -170,7 +170,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2126: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
 
@@ -199,7 +199,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.951048951048951
+    Accuracy score: 0.958041958041958
 
 
 
@@ -207,7 +207,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  2.152 seconds)
+   **Total running time of the script:** ( 1 minutes  57.232 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_classification.py:

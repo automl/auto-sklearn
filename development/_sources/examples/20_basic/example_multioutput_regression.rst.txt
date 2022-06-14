@@ -123,9 +123,10 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight              type      cost  duration
-    model_id                                                             
-    19           1              1.0  gaussian_process  0.000002  8.400226
+              rank  ensemble_weight           type      cost  duration
+    model_id                                                          
+    2            1             0.98  random_forest  0.127097  2.545825
+    8            2             0.02  decision_tree  0.432871  0.761044
 
 
 
@@ -152,7 +153,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2126: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
 
@@ -182,7 +183,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999962479203006
+    R2 score: 0.8769299040879482
 
 
 
@@ -435,7 +436,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.157 seconds)
+   **Total running time of the script:** ( 2 minutes  1.051 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

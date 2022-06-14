@@ -122,12 +122,14 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight            type      cost  duration
-    model_id                                                           
-    31           1             0.48  ard_regression  0.428169  0.802864
-    25           2             0.26             sgd  0.436679  0.700787
-    33           3             0.20   liblinear_svr  0.472547  0.812340
-    29           4             0.06  ard_regression  0.493390  0.689648
+              rank  ensemble_weight               type      cost   duration
+    model_id                                                               
+    25           1             0.38                sgd  0.436679   0.854986
+    6            2             0.40     ard_regression  0.455042   0.858350
+    27           3             0.02     ard_regression  0.462249   0.855578
+    29           4             0.16     ard_regression  0.493390   0.840696
+    11           5             0.02      random_forest  0.507400  10.746581
+    7            6             0.02  gradient_boosting  0.518673   1.600443
 
 
 
@@ -154,7 +156,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2127: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2126: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
 
@@ -190,8 +192,8 @@ predicting the data mean has an R2 score of 0.
 
  .. code-block:: none
 
-    Train R2 score: 0.5922043282790412
-    Test R2 score: 0.4073119977311549
+    Train R2 score: 0.5845958689841146
+    Test R2 score: 0.3969087782855073
 
 
 
@@ -236,7 +238,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  1.546 seconds)
+   **Total running time of the script:** ( 2 minutes  2.193 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:
