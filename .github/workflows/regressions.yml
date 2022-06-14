@@ -307,7 +307,7 @@ jobs:
           #   compared_means: path to the results of regression test vs baseline
 
       - name: Upload all results together as an artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}
           path: |
