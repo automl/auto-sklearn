@@ -104,7 +104,7 @@ class TestMetadataGeneration(unittest.TestCase):
             # for training. In production, it would use twice as much!
             cmd = cmd.replace("-s 1", "-s 1 --unittest")
             print("COMMAND: %s" % cmd)
-            
+
             return_value = subprocess.run(
                 cmd,
                 shell=True,
@@ -134,7 +134,9 @@ class TestMetadataGeneration(unittest.TestCase):
             with open(smac_log) as fh:
                 smac_output = fh.read()
             self.assertEqual(
-                return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}" + "\n" + smac_output
+                return_value.returncode,
+                0,
+                msg=f"{cmd}\n{str(return_value)}" + "\n" + smac_output,
             )
             expected_validation_output = os.path.join(
                 expected_output_directory, "..", "validation_trajectory_1.json"
@@ -184,7 +186,7 @@ class TestMetadataGeneration(unittest.TestCase):
             self.working_directory,
         )
         print("COMMAND: %s" % cmd)
-        
+
         return_value = subprocess.run(
             cmd,
             shell=True,
