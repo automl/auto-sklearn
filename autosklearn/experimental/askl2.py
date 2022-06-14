@@ -110,8 +110,9 @@ class SmacObjectCallback:
         initial_configurations = []
         for member in self.portfolio.values():
             try:
+                _member = {key: member[key] for key in member if key in scenario.cs.get_hyperparameter_names()}
                 initial_configurations.append(
-                    Configuration(configuration_space=scenario.cs, values=member)
+                    Configuration(configuration_space=scenario.cs, values=_member)
                 )
             except ValueError:
                 pass
@@ -162,8 +163,9 @@ class SHObjectCallback:
         initial_configurations = []
         for member in self.portfolio.values():
             try:
+                _member = {key: member[key] for key in member if key in scenario.cs.get_hyperparameter_names()}
                 initial_configurations.append(
-                    Configuration(configuration_space=scenario.cs, values=member)
+                    Configuration(configuration_space=scenario.cs, values=_member)
                 )
             except ValueError:
                 pass
