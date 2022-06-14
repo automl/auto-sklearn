@@ -122,12 +122,12 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight               type      cost  duration
-    model_id                                                              
-    31           1             0.54     ard_regression  0.428169  0.895079
-    25           2             0.24                sgd  0.436679  0.804954
-    29           3             0.18     ard_regression  0.493390  0.778826
-    7            4             0.04  gradient_boosting  0.518673  1.380414
+              rank  ensemble_weight            type      cost  duration
+    model_id                                                           
+    31           1             0.48  ard_regression  0.428169  0.762867
+    25           2             0.26             sgd  0.436679  0.676045
+    33           3             0.20   liblinear_svr  0.472547  0.774536
+    29           4             0.06  ard_regression  0.493390  0.660402
 
 
 
@@ -190,8 +190,8 @@ predicting the data mean has an R2 score of 0.
 
  .. code-block:: none
 
-    Train R2 score: 0.5891379293923084
-    Test R2 score: 0.3966515401967873
+    Train R2 score: 0.5922043282790412
+    Test R2 score: 0.4073119977311549
 
 
 
@@ -236,7 +236,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.920 seconds)
+   **Total running time of the script:** ( 1 minutes  54.434 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

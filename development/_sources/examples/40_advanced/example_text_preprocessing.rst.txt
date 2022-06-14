@@ -163,17 +163,21 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight                type      cost  duration
-    model_id                                                               
-    9            1             0.12                 mlp  0.056122  3.291989
-    10           2             0.42  passive_aggressive  0.066327  2.703330
-    5            3             0.04                 mlp  0.068878  2.538757
-    12           4             0.14                 lda  0.089286  2.578177
-    4            5             0.10         extra_trees  0.094388  4.022855
-    13           6             0.02                 mlp  0.119898  3.889604
-    7            7             0.02       random_forest  0.127551  3.688994
-    6            8             0.02                 qda  0.155612  2.599501
-    8            9             0.12          libsvm_svc  0.278061  2.692853
+              rank  ensemble_weight                 type      cost  duration
+    model_id                                                                
+    5            1             0.22                  mlp  0.038265  2.267784
+    14           2             0.08                  mlp  0.056122  3.151146
+    9            3             0.04                  mlp  0.058673  2.711904
+    10           4             0.12   passive_aggressive  0.076531  2.094802
+    15           5             0.04    gradient_boosting  0.079082  4.431430
+    4            6             0.10          extra_trees  0.086735  3.427861
+    12           7             0.10                  lda  0.091837  2.063932
+    2            8             0.04        random_forest  0.107143  4.601485
+    7            9             0.04        random_forest  0.125000  2.972627
+    3           10             0.02                  mlp  0.137755  3.133647
+    6           11             0.10                  qda  0.153061  2.082947
+    11          12             0.02  k_nearest_neighbors  0.188776  2.101488
+    8           13             0.08           libsvm_svc  0.265306  2.182102
 
 
 
@@ -229,7 +233,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.9683143219264893
+    Accuracy score: 0.9645120405576679
 
 
 
@@ -237,7 +241,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  6.714 seconds)
+   **Total running time of the script:** ( 1 minutes  5.332 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:
