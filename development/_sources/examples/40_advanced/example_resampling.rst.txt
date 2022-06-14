@@ -134,7 +134,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.958041958041958
+    Accuracy score holdout:  0.951048951048951
 
 
 
@@ -268,10 +268,10 @@ to the use case at hand.
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.964789
-      Number of target algorithm runs: 25
+      Number of target algorithm runs: 26
       Number of successful target algorithm runs: 25
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
 
@@ -341,7 +341,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  48.514 seconds)
+   **Total running time of the script:** ( 6 minutes  32.932 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:

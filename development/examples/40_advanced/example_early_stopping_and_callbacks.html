@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Early stopping and Callbacks &#8212; AutoSklearn 0.14.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.6</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../index.html">Start</a></li>
+                <li><a href="../../releases.html">Releases</a></li>
+                <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
+                <li><a href="../index.html">Examples</a></li>
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../extending.html">Extending</a></li>
+                <li><a href="../../faq.html">FAQ</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Early stopping and Callbacks</a><ul>
+<li><a class="reference internal" href="#build-and-fit-a-classifier">Build and fit a classifier</a></li>
+<li><a class="reference internal" href="#view-the-models-found-by-auto-sklearn">View the models found by auto-sklearn</a></li>
+<li><a class="reference internal" href="#print-the-final-ensemble-constructed-by-auto-sklearn">Print the final ensemble constructed by auto-sklearn</a></li>
+<li><a class="reference internal" href="#get-the-score-of-the-final-ensemble">Get the Score of the final ensemble</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-40-advanced-example-early-stopping-and-callbacks-py"><span class="std std-ref">here</span></a>
+to download the full example code or to run this example in your browser via Binder</p>
+</div>
+<div class="sphx-glr-example-title section" id="early-stopping-and-callbacks">
+<span id="sphx-glr-examples-40-advanced-example-early-stopping-and-callbacks-py"></span><h1>Early stopping and Callbacks<a class="headerlink" href="#early-stopping-and-callbacks" title="Permalink to this headline">¶</a></h1>
+<p>The example below shows how we can use the <code class="docutils literal notranslate"><span class="pre">get_trials_callback</span></code> parameter of
+auto-sklearn to implement an early-stopping mechanism through a callback.</p>
+<p>These callbacks give access to the result of each model + hyperparameter configuration
+optimized by SMAC, the underlying optimizer for autosklearn. By checking the cost of
+a result, we can implement a simple yet effective early stopping mechanism!</p>
+<p>Do note however, this does not provide any access to the ensembles that autosklearn
+produces, only the individual models. You may wish to perform a more sophisticated
+early stopping mechanism such that there are enough good models for autosklearn to build
+and ensemble with. This is here to provide a simple example.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+
+<span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+
+<span class="kn">from</span> <span class="nn">smac.optimizer.smbo</span> <span class="kn">import</span> <span class="n">SMBO</span>
+<span class="kn">from</span> <span class="nn">smac.runhistory.runhistory</span> <span class="kn">import</span> <span class="n">RunInfo</span><span class="p">,</span> <span class="n">RunValue</span>
+</pre></div>
+</div>
+<div class="section" id="build-and-fit-a-classifier">
+<h2>Build and fit a classifier<a class="headerlink" href="#build-and-fit-a-classifier" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">callback</span><span class="p">(</span>
+    <span class="n">smbo</span><span class="p">:</span> <span class="n">SMBO</span><span class="p">,</span>
+    <span class="n">run_info</span><span class="p">:</span> <span class="n">RunInfo</span><span class="p">,</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">RunValue</span><span class="p">,</span>
+    <span class="n">time_left</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Stop early if we get a very low cost value for a single run</span>
+
+<span class="sd">    The return value indicates to SMAC whether to stop or not. False will</span>
+<span class="sd">    stop the search process while any other value will mean it continues.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># You can find out the parameters in the SMAC documentation</span>
+    <span class="c1"># https://automl.github.io/SMAC3/main/</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">cost</span> <span class="o">&lt;=</span> <span class="mf">0.02</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stopping!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">run_info</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">get_trials_callback</span><span class="o">=</span><span class="n">callback</span>
+<span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;breast_cancer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Stopping!
+RunInfo(config=Configuration(values={
+  &#39;balancing:strategy&#39;: &#39;none&#39;,
+  &#39;classifier:__choice__&#39;: &#39;extra_trees&#39;,
+  &#39;classifier:extra_trees:bootstrap&#39;: &#39;False&#39;,
+  &#39;classifier:extra_trees:criterion&#39;: &#39;gini&#39;,
+  &#39;classifier:extra_trees:max_depth&#39;: &#39;None&#39;,
+  &#39;classifier:extra_trees:max_features&#39;: 0.5707983257382487,
+  &#39;classifier:extra_trees:max_leaf_nodes&#39;: &#39;None&#39;,
+  &#39;classifier:extra_trees:min_impurity_decrease&#39;: 0.0,
+  &#39;classifier:extra_trees:min_samples_leaf&#39;: 3,
+  &#39;classifier:extra_trees:min_samples_split&#39;: 11,
+  &#39;classifier:extra_trees:min_weight_fraction_leaf&#39;: 0.0,
+  &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;,
+  &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;,
+  &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;,
+  &#39;data_preprocessor:feature_type:text_transformer:text_encoding:__choice__&#39;: &#39;bag_of_word_encoding&#39;,
+  &#39;data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute&#39;: 1,
+  &#39;data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice&#39;: &#39;min_df_absolute&#39;,
+  &#39;data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound&#39;: 1,
+  &#39;data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components&#39;: 100,
+  &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;,
+  &#39;feature_preprocessor:polynomial:degree&#39;: 2,
+  &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;False&#39;,
+  &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;,
+})
+, instance=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, instance_specific=&#39;0&#39;, seed=0, cutoff=30.0, capped=False, budget=0.0, source_id=0)
+RunValue(cost=0.014184397163120588, time=1.8838818073272705, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1655211380.0936048, endtime=1655211382.0036814, additional_info={&#39;duration&#39;: 1.7746353149414062, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+
+AutoSklearnClassifier(get_trials_callback=&lt;function callback at 0x7fa6e229e1f0&gt;,
+                      per_run_time_limit=30, time_left_for_this_task=120)
+</pre></div>
+</div>
+</div>
+<div class="section" id="view-the-models-found-by-auto-sklearn">
+<h2>View the models found by auto-sklearn<a class="headerlink" href="#view-the-models-found-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">leaderboard</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type      cost  duration
+model_id
+7            1             0.68    extra_trees  0.014184  1.883882
+2            2             0.10  random_forest  0.028369  2.057091
+3            3             0.22            mlp  0.028369  1.135216
+</pre></div>
+</div>
+</div>
+<div class="section" id="print-the-final-ensemble-constructed-by-auto-sklearn">
+<h2>Print the final ensemble constructed by auto-sklearn<a class="headerlink" href="#print-the-final-ensemble-constructed-by-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2136: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+  warnings.warn(
+{}
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-the-score-of-the-final-ensemble">
+<h2>Get the Score of the final ensemble<a class="headerlink" href="#get-the-score-of-the-final-ensemble" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score:&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.9440559440559441
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.466 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-early-stopping-and-callbacks-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_early_stopping_and_callbacks.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/85e312e37bec1e3b6dbf533327dd1df4/example_early_stopping_and_callbacks.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_early_stopping_and_callbacks.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4df0a1c6952b42c8fc69ab21398f41d8/example_early_stopping_and_callbacks.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_early_stopping_and_callbacks.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/examples/40_advanced/example_early_stopping_and_callbacks.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

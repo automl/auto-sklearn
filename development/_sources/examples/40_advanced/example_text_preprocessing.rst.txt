@@ -165,17 +165,17 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight                 type      cost  duration
     model_id                                                                
-    5            1             0.12                  mlp  0.045918  2.715117
-    9            2             0.02                  mlp  0.061224  4.116808
-    10           3             0.20   passive_aggressive  0.066327  2.630877
-    12           4             0.26                  lda  0.091837  2.526274
-    2            5             0.06        random_forest  0.094388  5.084874
-    4            6             0.02          extra_trees  0.094388  3.986798
-    13           7             0.06                  mlp  0.107143  4.173735
-    7            8             0.04        random_forest  0.130102  3.765760
-    11           9             0.04  k_nearest_neighbors  0.150510  2.645649
-    6           10             0.04                  qda  0.155612  2.547977
-    8           11             0.14           libsvm_svc  0.367347  2.669561
+    9            1             0.18                  mlp  0.045918  3.265179
+    5            2             0.10                  mlp  0.051020  2.574080
+    10           3             0.10   passive_aggressive  0.073980  2.582607
+    4            4             0.20          extra_trees  0.086735  4.297138
+    12           5             0.04                  lda  0.094388  2.755446
+    2            6             0.08        random_forest  0.104592  5.679693
+    7            7             0.04        random_forest  0.130102  3.838493
+    3            8             0.02                  mlp  0.137755  3.980619
+    6            9             0.10                  qda  0.155612  2.649073
+    11          10             0.04  k_nearest_neighbors  0.158163  2.572964
+    8           11             0.10           libsvm_svc  0.369898  2.828381
 
 
 
@@ -202,7 +202,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2126: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2136: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
 
@@ -231,7 +231,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.9581749049429658
+    Accuracy score: 0.9695817490494296
 
 
 
@@ -239,7 +239,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  6.975 seconds)
+   **Total running time of the script:** ( 1 minutes  9.269 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:

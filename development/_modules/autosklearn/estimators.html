@@ -151,6 +151,7 @@
 <span class="kn">from</span> <span class="nn">autosklearn.ensembles.ensemble_selection</span> <span class="kn">import</span> <span class="n">EnsembleSelection</span>
 <span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.base</span> <span class="kn">import</span> <span class="n">BasePipeline</span>
+<span class="kn">from</span> <span class="nn">autosklearn.util.smac_wrap</span> <span class="kn">import</span> <span class="n">SMACCallback</span>
 
 
 <span class="k">class</span> <span class="nc">AutoSklearnEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
@@ -182,7 +183,7 @@
         <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">get_trials_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">get_trials_callback</span><span class="p">:</span> <span class="n">SMACCallback</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset_compression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">allow_string_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
@@ -414,10 +415,19 @@
 <span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
 
 <span class="sd">        get_trials_callback: callable</span>
-<span class="sd">            Callback function to create an object of subclass defined in module</span>
-<span class="sd">            `smac.callbacks &lt;https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html&gt;`_.</span>
-<span class="sd">            This is an advanced feature. Use only if you are familiar with</span>
-<span class="sd">            `SMAC &lt;https://automl.github.io/SMAC3/master/index.html&gt;`_.</span>
+<span class="sd">            A callable with the following definition.</span>
+
+<span class="sd">            * (smac.SMBO, smac.RunInfo, smac.RunValue, time_left: float) -&gt; bool | None</span>
+
+<span class="sd">            This will be called after SMAC, the underlying optimizer for autosklearn,</span>
+<span class="sd">            finishes training each run.</span>
+
+<span class="sd">            You can use this to record your own information about the optimization</span>
+<span class="sd">            process. You can also use this to enable a early stopping based on some</span>
+<span class="sd">            critera.</span>
+
+<span class="sd">            See the example:</span>
+<span class="sd">            :ref:`Early Stopping And Callbacks &lt;sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py&gt;`.</span>
 
 <span class="sd">        dataset_compression: Union[bool, Mapping[str, Any]] = True</span>
 <span class="sd">            We compress datasets so that they fit into some predefined amount of memory.</span>

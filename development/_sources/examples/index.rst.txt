@@ -179,6 +179,27 @@ procedure.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="The example below shows how we can use the get_trials_callback parameter of auto-sklearn to imp...">
+
+.. only:: html
+
+ .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_early_stopping_and_callbacks_thumb.png
+     :alt: Early stopping and Callbacks
+
+     :ref:`sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/40_advanced/example_early_stopping_and_callbacks
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="In *Auto-sklearn*, model is optimized over a metric, either built-in or custom metric. Moreover...">
 
 .. only:: html
