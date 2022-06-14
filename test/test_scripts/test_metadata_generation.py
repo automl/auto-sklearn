@@ -110,7 +110,7 @@ class TestMetadataGeneration(unittest.TestCase):
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                timeout=30,
+                timeout=180,
             )
             print("STDOUT: %s" % repr(return_value.stdout), flush=True)
             print("STDERR: %s" % repr(return_value.stderr), flush=True)
