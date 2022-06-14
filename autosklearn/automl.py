@@ -980,6 +980,10 @@ class AutoML(BaseEstimator):
                 self._load_models()
                 self._logger.info("Finished loading models...")
 
+        # The whole logic above from where we begin the logging server is capture
+        # in a try: finally: so that if something goes wrong, we at least close
+        # down the logging server, preventing it from hanging and not closing
+        # until ctrl+c is pressed
         finally:
             self._fit_cleanup()
 
