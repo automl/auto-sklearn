@@ -123,11 +123,9 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight           type      cost  duration
-    model_id                                                          
-    2            1             0.56  random_forest  0.131630  2.744472
-    4            2             0.36    extra_trees  0.146580  1.398363
-    14           3             0.08  random_forest  0.202179  2.237705
+              rank  ensemble_weight              type          cost  duration
+    model_id                                                                 
+    13           1              1.0  gaussian_process  5.308625e-08     8.189
 
 
 
@@ -184,7 +182,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.8704726449051847
+    R2 score: 0.9999999681987113
 
 
 
@@ -437,7 +435,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.553 seconds)
+   **Total running time of the script:** ( 1 minutes  54.406 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:

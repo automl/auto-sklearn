@@ -207,13 +207,13 @@ Build and fit a classifier
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 22
-      Number of successful target algorithm runs: 21
+      Number of target algorithm runs: 19
+      Number of successful target algorithm runs: 19
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.951048951048951
+    Accuracy score 0.958041958041958
 
 
 
@@ -281,10 +281,10 @@ We can also use cross-validation with successive halving
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.971831
-      Number of target algorithm runs: 9
+      Number of target algorithm runs: 8
       Number of successful target algorithm runs: 8
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 1
+      Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
     Accuracy score 0.965034965034965
@@ -354,14 +354,14 @@ Use an iterative fit cross-validation with successive halving
     auto-sklearn results:
       Dataset name: breast_cancer
       Metric: accuracy
-      Best validation score: 0.971831
-      Number of target algorithm runs: 6
-      Number of successful target algorithm runs: 6
+      Best validation score: 0.964789
+      Number of target algorithm runs: 5
+      Number of successful target algorithm runs: 5
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.965034965034965
+    Accuracy score 0.958041958041958
 
 
 
@@ -422,13 +422,13 @@ Next, we see the use of subsampling as a budget in Auto-sklearn
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.978723
-      Number of target algorithm runs: 12
-      Number of successful target algorithm runs: 12
+      Number of target algorithm runs: 11
+      Number of successful target algorithm runs: 11
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
-    Accuracy score 0.9440559440559441
+    Accuracy score 0.951048951048951
 
 
 
@@ -493,8 +493,8 @@ subsamples otherwise
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 19
-      Number of successful target algorithm runs: 19
+      Number of target algorithm runs: 16
+      Number of successful target algorithm runs: 16
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
@@ -507,7 +507,7 @@ subsamples otherwise
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  0.702 seconds)
+   **Total running time of the script:** ( 3 minutes  18.539 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_successive_halving.py:

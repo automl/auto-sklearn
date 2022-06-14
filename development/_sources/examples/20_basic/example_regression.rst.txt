@@ -124,12 +124,12 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight               type      cost   duration
     model_id                                                               
-    25           1             0.38                sgd  0.436679   0.865892
-    6            2             0.40     ard_regression  0.455042   0.812696
-    27           3             0.02     ard_regression  0.462249   0.843631
-    29           4             0.16     ard_regression  0.493390   0.794422
-    11           5             0.02      random_forest  0.507400  11.379989
-    7            6             0.02  gradient_boosting  0.518673   1.428825
+    25           1             0.38                sgd  0.436679   0.947376
+    6            2             0.40     ard_regression  0.455042   0.952034
+    27           3             0.02     ard_regression  0.462249   0.966818
+    29           4             0.16     ard_regression  0.493390   0.952872
+    11           5             0.02      random_forest  0.507400  10.838073
+    7            6             0.02  gradient_boosting  0.518673   1.737257
 
 
 
@@ -238,7 +238,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.229 seconds)
+   **Total running time of the script:** ( 2 minutes  1.235 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:
