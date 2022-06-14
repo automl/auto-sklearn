@@ -2147,10 +2147,10 @@ class AutoML(BaseEstimator):
             return rv.additional_info and key in rv.additional_info
 
         table_dict = {}
-        for rkey, rval in self.runhistory_.data.items():
-            if has_key(rval, "num_run"):
-                model_id = rval.additional_info["num_run"]
-                table_dict[model_id] = {"model_id": model_id, "cost": rval.cost}
+        for run_key, run_val in self.runhistory_.data.items():
+            if has_key(run_val, "num_run"):
+                model_id = run_val.additional_info["num_run"]
+                table_dict[model_id] = {"model_id": model_id, "cost": run_val.cost}
 
         # Checking if the dictionary is empty
         if not table_dict:
