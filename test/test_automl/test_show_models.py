@@ -1,3 +1,4 @@
+"""Test the show models functinality of an automl instance"""
 from autosklearn.automl import AutoML
 
 from pytest_cases import parametrize_with_cases

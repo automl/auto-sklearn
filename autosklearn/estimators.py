@@ -601,6 +601,7 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_kwargs: Optional[Dict[str, Any]] = None,
         ensemble_nbest: Optional[int] = None,
         ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
+        metrics: Scorer | Sequence[Scorer] | None = None,
     ):
         """Fit an ensemble to models trained during an optimization process.
 
@@ -650,12 +651,13 @@ class AutoSklearnEstimator(BaseEstimator):
             to obtain only use the single best model instead of an
             ensemble.
 
+        metrics: Scorer | Sequence[Scorer] | None = None
+            A metric or list of metrics to score the ensemble with
+
         Returns
         -------
         self
-
         """
-
         # User specified `ensemble_size` explicitly, warn them about deprecation
         if ensemble_size is not None:
             # Keep consistent behaviour
@@ -708,6 +710,7 @@ class AutoSklearnEstimator(BaseEstimator):
             ensemble_nbest=ensemble_nbest,
             ensemble_class=ensemble_class,
             ensemble_kwargs=ensemble_kwargs,
+            metrics=metrics,
         )
         return self
 

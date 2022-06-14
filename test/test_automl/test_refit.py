@@ -1,3 +1,4 @@
+"""Test the refitting functionality of an automl instance"""
 from typing import Callable, Union
 
 from itertools import repeat

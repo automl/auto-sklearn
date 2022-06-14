@@ -1,11 +1,20 @@
-import numpy as np
-from sklearn.ensemble import VotingClassifier, VotingRegressor
+"""Check the internal state of the automl instances after it has been fitted"""
+
+from pathlib import Path
 
 from autosklearn.automl import AutoML
+from autosklearn.ensemble_building.builder import CANDIDATES_FILENAME
 
+from pytest import mark
 from pytest_cases import parametrize_with_cases
+from pytest_cases.filters import has_tag
 
 import test.test_automl.cases as cases
+from test.conftest import DEFAULT_SEED
+
+# Some filters
+has_ensemble = has_tag("fitted") & ~has_tag("no_ensemble")
+no_ensemble = has_tag("fitted") & has_tag("no_ensemble")
 
 
 @parametrize_with_cases("automl", cases=cases, has_tag=["fitted", "holdout"])
@@ -52,7 +61,7 @@ def test_cv_loaded_models(automl: AutoML) -> None:
     assert set(automl.cv_models_.keys()) == set(ensemble_identifiers)
 
 
-@parametrize_with_cases("automl", cases=cases, has_tag=["fitted", "no_ensemble"])
+@parametrize_with_cases("automl", cases=cases, has_tag=no_ensemble)
 def test_no_ensemble(automl: AutoML) -> None:
     """
     Parameters
@@ -71,36 +80,99 @@ def test_no_ensemble(automl: AutoML) -> None:
     assert len(automl.cv_models_) == 0
 
 
-@parametrize_with_cases("automl", cases, has_tag=["multiobjective"])
-def test__load_pareto_front(automl: AutoML) -> None:
+@mark.todo
+def test_datamanager_stored_contents() -> None:
     """
-    Parameters
-    ----------
-    automl : AutoML
-        An AutoML object fitted with multiple objective metrics
-
     Expects
     -------
-    * Auto-sklearn can predict and has a model
-    * _load_pareto_front returns one scikit-learn ensemble
+    * TODO
     """
-    # Check that the predict function works
-    X = np.array([[1.0, 1.0, 1.0, 1.0]])
+    ...
 
-    assert automl.predict_proba(X).shape == (1, 3)
-    assert automl.predict(X).shape == (1,)
 
-    pareto_front = automl._load_pareto_set()
-    assert len(pareto_front) == 1
-    for ensemble in pareto_front:
-        assert isinstance(ensemble, (VotingClassifier, VotingRegressor))
-        y_pred = ensemble.predict_proba(X)
-        assert y_pred.shape == (1, 3)
-        y_pred = ensemble.predict(X)
-        assert y_pred in ["setosa", "versicolor", "virginica"]
+@parametrize_with_cases("automl", cases=cases, filter=has_ensemble)
+def test_paths_created(automl: AutoML) -> None:
+    """
+    Expects
+    -------
+    * The given paths should exist after the automl has been run and fitted
+    """
+    assert automl._backend is not None
 
-    statistics = automl.sprint_statistics()
-    assert "Metrics" in statistics
-    assert ("Best validation score: 0.9" in statistics) or (
-        "Best validation score: 1.0" in statistics
-    ), statistics
+    partial = Path(automl._backend.internals_directory)
+    expected = [
+        partial / fixture
+        for fixture in (
+            "true_targets_ensemble.npy",
+            f"start_time_{DEFAULT_SEED}",
+            "datamanager.pkl",
+            "runs",
+        )
+    ]
+
+    for path in expected:
+        assert path.exists()
+
+
+@parametrize_with_cases("automl", cases=cases, filter=has_ensemble)
+def test_paths_created_with_ensemble(automl: AutoML) -> None:
+    """
+    Expects
+    -------
+    * The given paths for an automl with an ensemble should include paths
+    specific to ensemble building
+    """
+    assert automl._backend is not None
+
+    partial = Path(automl._backend.internals_directory)
+    expected = [
+        partial / fixture
+        for fixture in (
+            "ensembles",
+            "ensemble_history.json",
+            CANDIDATES_FILENAME,
+        )
+    ]
+
+    for path in expected:
+        assert path.exists()
+
+
+@parametrize_with_cases("automl", cases=cases, filter=has_ensemble)
+def test_at_least_one_model_and_predictions(automl: AutoML) -> None:
+    """
+    Expects
+    -------
+    * There should be at least one models saved
+    * Each model saved should have predictions for the ensemble
+    """
+    assert automl._backend is not None
+    runs_dir = Path(automl._backend.get_runs_directory())
+
+    runs = list(runs_dir.iterdir())
+    assert len(runs) > 0
+
+    at_least_one = False
+    for run in runs:
+        prediction_files = run.glob("predictions_ensemble*.npy")
+        model_files = run.glob("*.*.model")
+
+        if any(prediction_files):
+            at_least_one = True
+            assert any(model_files), "Run produced prediction but no model"
+
+    assert at_least_one, "No runs produced predictions"
+
+
+@parametrize_with_cases("automl", cases=cases, filter=has_ensemble)
+def test_at_least_one_ensemble(automl: AutoML) -> None:
+    """
+    Expects
+    -------
+    * There should be at least one ensemble generated
+    """
+    assert automl._backend is not None
+    ens_dir = Path(automl._backend.get_ensemble_dir())
+
+    # TODO make more generic
+    assert len(list(ens_dir.glob("*.ensemble"))) > 0
