@@ -709,15 +709,11 @@ class AutoML(BaseEstimator):
                     )
 
             # Check the re-sampling strategy
-            try:
-                self._check_resampling_strategy(
-                    X=X,
-                    y=y,
-                    task=self._task,
-                )
-            except Exception as e:
-                self._fit_cleanup()
-                raise e
+            self._check_resampling_strategy(
+                X=X,
+                y=y,
+                task=self._task,
+            )
 
             # Reset learnt stuff
             self.models_ = None
@@ -793,7 +789,6 @@ class AutoML(BaseEstimator):
                 )
 
             if only_return_configuration_space:
-                self._fit_cleanup()
                 return self.configuration_space
 
             # == Perform dummy predictions
@@ -927,27 +922,21 @@ class AutoML(BaseEstimator):
                         trials_callback=self._get_trials_callback,
                     )
 
-                    try:
-                        (
-                            self.runhistory_,
-                            self.trajectory_,
-                            self._budget_type,
-                        ) = _proc_smac.run_smbo()
-                        trajectory_filename = os.path.join(
-                            self._backend.get_smac_output_directory_for_run(self._seed),
-                            "trajectory.json",
-                        )
-                        saveable_trajectory = [
-                            list(entry[:2])
-                            + [entry[2].get_dictionary()]
-                            + list(entry[3:])
-                            for entry in self.trajectory_
-                        ]
-                        with open(trajectory_filename, "w") as fh:
-                            json.dump(saveable_trajectory, fh)
-                    except Exception as e:
-                        self._logger.exception(e)
-                        raise
+                    (
+                        self.runhistory_,
+                        self.trajectory_,
+                        self._budget_type,
+                    ) = _proc_smac.run_smbo()
+                    trajectory_filename = os.path.join(
+                        self._backend.get_smac_output_directory_for_run(self._seed),
+                        "trajectory.json",
+                    )
+                    saveable_trajectory = [
+                        list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
+                        for entry in self.trajectory_
+                    ]
+                    with open(trajectory_filename, "w") as fh:
+                        json.dump(saveable_trajectory, fh)
 
             self._logger.info("Starting shutdown...")
             # Wait until the ensemble process is finished to avoid shutting down
@@ -984,6 +973,10 @@ class AutoML(BaseEstimator):
         # in a try: finally: so that if something goes wrong, we at least close
         # down the logging server, preventing it from hanging and not closing
         # until ctrl+c is pressed
+        except Exception as e:
+            # This will be called before the _fit_cleanup
+            self._logger.exception(e)
+            raise e
         finally:
             self._fit_cleanup()
 
