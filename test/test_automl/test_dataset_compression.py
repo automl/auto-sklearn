@@ -1,3 +1,4 @@
+"""Test things related to how AutoML compresses the dataset size"""
 from typing import Any, Callable, Dict
 
 import numpy as np

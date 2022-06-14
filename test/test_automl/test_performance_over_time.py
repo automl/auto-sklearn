@@ -1,3 +1,4 @@
+"""Test the performance over time functionality of automl instances"""
 from autosklearn.automl import AutoML
 
 from pytest_cases import parametrize_with_cases
