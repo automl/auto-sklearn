@@ -120,6 +120,7 @@ from autosklearn.util.logging_ import (
 )
 from autosklearn.util.parallel import preload_modules
 from autosklearn.util.single_thread_client import SingleThreadedClient
+from autosklearn.util.smac_wrap import SMACCallback, SmacRunCallback
 from autosklearn.util.stopwatch import StopWatch
 
 import unittest.mock
@@ -235,7 +236,7 @@ class AutoML(BaseEstimator):
         logging_config: Optional[Mapping] = None,
         metrics: Sequence[Scorer] | None = None,
         scoring_functions: Optional[list[Scorer]] = None,
-        get_trials_callback: Optional[IncorporateRunResultCallback] = None,
+        get_trials_callback: SMACCallback | None = None,
         dataset_compression: bool | Mapping[str, Any] = True,
         allow_string_features: bool = True,
     ):
@@ -263,6 +264,15 @@ class AutoML(BaseEstimator):
                 dataset_compression,
                 memory_limit=memory_limit,
             )
+
+        # If we got something callable for `get_trials_callback`, wrap it so SMAC
+        # will accept it.
+        if (
+            get_trials_callback is not None
+            and callable(get_trials_callback)
+            and not isinstance(get_trials_callback, IncorporateRunResultCallback)
+        ):
+            get_trials_callback = SmacRunCallback(get_trials_callback)
 
         self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self._time_for_task = time_left_for_this_task
@@ -1502,6 +1512,7 @@ class AutoML(BaseEstimator):
         ensemble_nbest: Optional[int] = None,
         ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
         ensemble_kwargs: Optional[Dict[str, Any]] = None,
+        metrics: Scorer | Sequence[Scorer] | None = None,
     ):
         check_is_fitted(self)
 
@@ -1532,6 +1543,10 @@ class AutoML(BaseEstimator):
         else:
             self._is_dask_client_internally_created = False
 
+        metrics = metrics if metrics is not None else self._metrics
+        if not isinstance(metrics, Sequence):
+            metrics = [metrics]
+
         # Use the current thread to start the ensemble builder process
         # The function ensemble_builder_process will internally create a ensemble
         # builder in the provide dask client
@@ -1541,7 +1556,7 @@ class AutoML(BaseEstimator):
             backend=copy.deepcopy(self._backend),
             dataset_name=dataset_name if dataset_name else self._dataset_name,
             task=task if task else self._task,
-            metrics=self._metrics,
+            metrics=metrics if metrics is not None else self._metrics,
             ensemble_class=(
                 ensemble_class if ensemble_class is not None else self._ensemble_class
             ),
@@ -1652,9 +1667,6 @@ class AutoML(BaseEstimator):
         return ensemble
 
     def _load_pareto_set(self) -> Sequence[VotingClassifier | VotingRegressor]:
-        if len(self._metrics) <= 1:
-            raise ValueError("Pareto set is only available for two or more metrics.")
-
         if self._ensemble_class is not None:
             self.ensemble_ = self._backend.load_ensemble(self._seed)
         else:
@@ -1662,10 +1674,7 @@ class AutoML(BaseEstimator):
 
         # If no ensemble is loaded we cannot do anything
         if not self.ensemble_:
-
-            raise ValueError(
-                "Pareto set can only be accessed if an ensemble is available."
-            )
+            raise ValueError("Pareto set only available if ensemble can be loaded.")
 
         if isinstance(self.ensemble_, AbstractMultiObjectiveEnsemble):
             pareto_set = self.ensemble_.get_pareto_set()
@@ -2138,10 +2147,10 @@ class AutoML(BaseEstimator):
             return rv.additional_info and key in rv.additional_info
 
         table_dict = {}
-        for rkey, rval in self.runhistory_.data.items():
-            if has_key(rval, "num_run"):
-                model_id = rval.additional_info["num_run"]
-                table_dict[model_id] = {"model_id": model_id, "cost": rval.cost}
+        for run_key, run_val in self.runhistory_.data.items():
+            if has_key(run_val, "num_run"):
+                model_id = run_val.additional_info["num_run"]
+                table_dict[model_id] = {"model_id": model_id, "cost": run_val.cost}
 
         # Checking if the dictionary is empty
         if not table_dict:

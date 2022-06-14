@@ -164,6 +164,10 @@ def make_ensemble_builder(
                 backend.save_additional_data(
                     datamanager.data["Y_train"], what="targets_ensemble"
                 )
+            if "X_train" in datamanager.data:
+                backend.save_additional_data(
+                    datamanager.data["X_train"], what="input_ensemble"
+                )
 
         builder = EnsembleBuilder(
             backend=backend,
