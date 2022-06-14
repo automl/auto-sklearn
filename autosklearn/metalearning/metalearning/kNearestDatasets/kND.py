@@ -122,7 +122,7 @@ class KNearestDatasets(object):
 
         assert k == neighbor_indices.shape[1]
 
-        rval = [
+        return_value = [
             self.metafeatures.index[i]
             # Neighbor indices is 2d, each row is the indices for one
             # dataset in x.
@@ -130,9 +130,9 @@ class KNearestDatasets(object):
         ]
 
         if return_distance is False:
-            return rval
+            return return_value
         else:
-            return rval, distances[0]
+            return return_value, distances[0]
 
     def kBestSuggestions(self, x, k=1, exclude_double_configurations=True):
         assert type(x) == pd.Series

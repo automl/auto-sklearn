@@ -150,10 +150,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.fit_predict_and_loss()
 
-        rval = read_queue(evaluator.queue)
-        self.assertEqual(len(rval), 1)
-        result = rval[0]["loss"]
-        self.assertEqual(len(rval[0]), 3)
+        return_value = read_queue(evaluator.queue)
+        self.assertEqual(len(return_value), 1)
+        result = return_value[0]["loss"]
+        self.assertEqual(len(return_value[0]), 3)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
@@ -294,15 +294,15 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 9)
 
         for i in range(1, 10):
-            rval = evaluator.queue.get(timeout=1)
-            result = rval["loss"]
+            return_value = evaluator.queue.get(timeout=1)
+            result = return_value["loss"]
             self.assertAlmostEqual(result, 1.0 - (0.1 * (i - 1)))
             if i < 9:
-                self.assertEqual(rval["status"], StatusType.DONOTADVANCE)
-                self.assertEqual(len(rval), 3)
+                self.assertEqual(return_value["status"], StatusType.DONOTADVANCE)
+                self.assertEqual(len(return_value), 3)
             else:
-                self.assertEqual(rval["status"], StatusType.SUCCESS)
-                self.assertEqual(len(rval), 4)
+                self.assertEqual(return_value["status"], StatusType.SUCCESS)
+                self.assertEqual(len(return_value), 4)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 9)
@@ -438,8 +438,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 2)
 
         for i in range(1, 3):
-            rval = evaluator.queue.get(timeout=1)
-            self.assertAlmostEqual(rval["loss"], 1.0 - (0.2 * i))
+            return_value = evaluator.queue.get(timeout=1)
+            self.assertAlmostEqual(return_value["loss"], 1.0 - (0.2 * i))
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 2)
@@ -499,8 +499,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.fit_predict_and_loss(iterative=True)
         self.assertEqual(evaluator.file_output.call_count, 1)
 
-        rval = evaluator.queue.get(timeout=1)
-        self.assertAlmostEqual(rval["loss"], 0.47826086956521741)
+        return_value = evaluator.queue.get(timeout=1)
+        self.assertAlmostEqual(return_value["loss"], 0.47826086956521741)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 0)
@@ -554,10 +554,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.fit_predict_and_loss()
 
-        rval = read_queue(evaluator.queue)
-        self.assertEqual(len(rval), 1)
-        result = rval[0]["loss"]
-        self.assertEqual(len(rval[0]), 3)
+        return_value = read_queue(evaluator.queue)
+        self.assertEqual(len(return_value), 1)
+        result = return_value[0]["loss"]
+        self.assertEqual(len(return_value[0]), 3)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
@@ -623,11 +623,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.partial_fit_predict_and_loss(fold=1)
 
-        rval = evaluator.queue.get(timeout=1)
+        return_value = evaluator.queue.get(timeout=1)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 0)
-        self.assertEqual(rval["loss"], 0.5)
+        self.assertEqual(return_value["loss"], 0.5)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         self.assertEqual(pipeline_mock.predict_proba.call_count, 4)
         # The model prior to fitting is saved, this cannot be directly tested
@@ -760,12 +760,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 0)
 
         for i in range(1, 10):
-            rval = evaluator.queue.get(timeout=1)
-            self.assertAlmostEqual(rval["loss"], 1.0 - (0.1 * (i - 1)))
+            return_value = evaluator.queue.get(timeout=1)
+            self.assertAlmostEqual(return_value["loss"], 1.0 - (0.1 * (i - 1)))
             if i < 9:
-                self.assertEqual(rval["status"], StatusType.DONOTADVANCE)
+                self.assertEqual(return_value["status"], StatusType.DONOTADVANCE)
             else:
-                self.assertEqual(rval["status"], StatusType.SUCCESS)
+                self.assertEqual(return_value["status"], StatusType.SUCCESS)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 9)
@@ -809,13 +809,13 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.backend_mock.get_model_dir.return_value = True
         evaluator.model = "model"
         evaluator.Y_optimization = D.data["Y_train"]
-        rval = evaluator.file_output(
+        return_value = evaluator.file_output(
             D.data["Y_train"],
             D.data["Y_valid"],
             D.data["Y_test"],
         )
 
-        self.assertEqual(rval, (None, {}))
+        self.assertEqual(return_value, (None, {}))
         self.assertEqual(self.backend_mock.save_additional_data.call_count, 2)
         self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 1)
         self.assertEqual(
@@ -839,12 +839,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         )
 
         evaluator.models = ["model2", "model2"]
-        rval = evaluator.file_output(
+        return_value = evaluator.file_output(
             D.data["Y_train"],
             D.data["Y_valid"],
             D.data["Y_test"],
         )
-        self.assertEqual(rval, (None, {}))
+        self.assertEqual(return_value, (None, {}))
         self.assertEqual(self.backend_mock.save_additional_data.call_count, 4)
         self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 2)
         self.assertEqual(
@@ -870,26 +870,26 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # Check for not containing NaNs - that the models don't predict nonsense
         # for unseen data
         D.data["Y_valid"][0] = np.NaN
-        rval = evaluator.file_output(
+        return_value = evaluator.file_output(
             D.data["Y_train"],
             D.data["Y_valid"],
             D.data["Y_test"],
         )
         self.assertEqual(
-            rval,
+            return_value,
             (
                 1.0,
                 {"error": "Model predictions for validation set contains NaNs."},
             ),
         )
         D.data["Y_train"][0] = np.NaN
-        rval = evaluator.file_output(
+        return_value = evaluator.file_output(
             D.data["Y_train"],
             D.data["Y_valid"],
             D.data["Y_test"],
         )
         self.assertEqual(
-            rval,
+            return_value,
             (
                 1.0,
                 {"error": "Model predictions for optimization set contains NaNs."},
@@ -1112,8 +1112,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.X_targets[0] = np.array([1, 0] * 23)
         evaluator.Y_targets[0] = np.array([1] * 23)
         evaluator.Y_train_targets = np.array([1] * 69)
-        rval = evaluator.fit_predict_and_loss(iterative=False)
-        self.assertIsNone(rval)
+        return_value = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(return_value)
         element = queue_.get()
         self.assertEqual(element["status"], StatusType.SUCCESS)
         self.assertEqual(element["additional_run_info"]["a"], 5)
@@ -1219,8 +1219,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.file_output.return_value = (None, {})
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
-        rval = evaluator.fit_predict_and_loss(iterative=True)
-        self.assertIsNone(rval)
+        return_value = evaluator.fit_predict_and_loss(iterative=True)
+        self.assertIsNone(return_value)
         self.assertEqual(finish_up_mock.call_count, 1)
         self.assertEqual(finish_up_mock.call_args[1]["additional_run_info"], 14678)
 
@@ -1265,8 +1265,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
-        rval = evaluator.fit_predict_and_loss(iterative=True)
-        self.assertIsNone(rval)
+        return_value = evaluator.fit_predict_and_loss(iterative=True)
+        self.assertIsNone(return_value)
         self.assertEqual(finish_up_mock.call_count, 1)
         self.assertEqual(finish_up_mock.call_args[1]["additional_run_info"], 14678)
 
@@ -1326,8 +1326,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
-        rval = evaluator.fit_predict_and_loss(iterative=False)
-        self.assertIsNone(rval)
+        return_value = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(return_value)
         self.assertEqual(finish_up_mock.call_count, 1)
         self.assertEqual(
             finish_up_mock.call_args[1]["additional_run_info"], {"val": 14678}
@@ -1373,8 +1373,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
-        rval = evaluator.fit_predict_and_loss(iterative=False)
-        self.assertIsNone(rval)
+        return_value = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(return_value)
         self.assertEqual(finish_up_mock.call_count, 1)
         self.assertEqual(
             finish_up_mock.call_args[1]["additional_run_info"], {"val": 14678}
@@ -1422,8 +1422,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 )
 
                 evaluator.fit_predict_and_loss()
-                rval = evaluator.queue.get(timeout=1)
-                self.assertTrue(np.isfinite(rval["loss"]))
+                return_value = evaluator.queue.get(timeout=1)
+                self.assertTrue(np.isfinite(return_value["loss"]))
 
     ############################################################################
     # Test obtaining a splitter object from scikit-learn
@@ -3053,8 +3053,8 @@ class FunctionsTest(unittest.TestCase):
             metrics=[accuracy],
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 1)
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 1)
 
         fixture = {
             "accuracy": 0.030303030303030276,
@@ -3075,7 +3075,7 @@ class FunctionsTest(unittest.TestCase):
             "train_loss": 0.0,
         }
 
-        additional_run_info = rval[0]["additional_run_info"]
+        additional_run_info = return_value[0]["additional_run_info"]
         for key, value in fixture.items():
             self.assertAlmostEqual(additional_run_info[key], fixture[key], msg=key)
         self.assertIn("duration", additional_run_info)
@@ -3085,8 +3085,8 @@ class FunctionsTest(unittest.TestCase):
             msg=sorted(additional_run_info.items()),
         )
 
-        self.assertAlmostEqual(rval[0]["loss"], 0.030303030303030276, places=3)
-        self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
+        self.assertAlmostEqual(return_value[0]["loss"], 0.030303030303030276, places=3)
+        self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)
 
     def test_eval_holdout_iterative_fit_no_timeout(self):
         eval_iterative_holdout(
@@ -3107,11 +3107,11 @@ class FunctionsTest(unittest.TestCase):
             metrics=[accuracy],
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 9)
-        self.assertAlmostEqual(rval[-1]["loss"], 0.030303030303030276)
-        self.assertEqual(rval[0]["status"], StatusType.DONOTADVANCE)
-        self.assertEqual(rval[-1]["status"], StatusType.SUCCESS)
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 9)
+        self.assertAlmostEqual(return_value[-1]["loss"], 0.030303030303030276)
+        self.assertEqual(return_value[0]["status"], StatusType.DONOTADVANCE)
+        self.assertEqual(return_value[-1]["status"], StatusType.SUCCESS)
 
     def test_eval_holdout_iterative_fit_no_timeout_multi_objective(self):
         metrics = {
@@ -3136,12 +3136,12 @@ class FunctionsTest(unittest.TestCase):
             metrics=list(metrics.keys()),
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 9)
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 9)
         for metric, loss in metrics.items():
-            self.assertAlmostEqual(rval[-1]["loss"][metric.name], loss)
-        self.assertEqual(rval[0]["status"], StatusType.DONOTADVANCE)
-        self.assertEqual(rval[-1]["status"], StatusType.SUCCESS)
+            self.assertAlmostEqual(return_value[-1]["loss"][metric.name], loss)
+        self.assertEqual(return_value[0]["status"], StatusType.DONOTADVANCE)
+        self.assertEqual(return_value[-1]["status"], StatusType.SUCCESS)
 
     def test_eval_holdout_budget_iterations(self):
         eval_holdout(
@@ -3405,11 +3405,11 @@ class FunctionsTest(unittest.TestCase):
             metrics=[accuracy],
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]["loss"], 0.04999999999999997)
-        self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
-        self.assertNotIn("bac_metric", rval[0]["additional_run_info"])
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 1)
+        self.assertAlmostEqual(return_value[0]["loss"], 0.04999999999999997)
+        self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)
+        self.assertNotIn("bac_metric", return_value[0]["additional_run_info"])
 
     def test_eval_cv_all_loss_functions(self):
         eval_cv(
@@ -3430,8 +3430,8 @@ class FunctionsTest(unittest.TestCase):
             metrics=[accuracy],
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 1)
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 1)
 
         fixture = {
             "accuracy": 0.04999999999999997,
@@ -3452,7 +3452,7 @@ class FunctionsTest(unittest.TestCase):
             "train_loss": 0.0,
         }
 
-        additional_run_info = rval[0]["additional_run_info"]
+        additional_run_info = return_value[0]["additional_run_info"]
         for key, value in fixture.items():
             self.assertAlmostEqual(additional_run_info[key], fixture[key], msg=key)
         self.assertIn("duration", additional_run_info)
@@ -3462,8 +3462,8 @@ class FunctionsTest(unittest.TestCase):
             msg=sorted(additional_run_info.items()),
         )
 
-        self.assertAlmostEqual(rval[0]["loss"], 0.04999999999999997)
-        self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
+        self.assertAlmostEqual(return_value[0]["loss"], 0.04999999999999997)
+        self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)
 
     # def test_eval_cv_on_subset(self):
     #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
@@ -3504,10 +3504,10 @@ class FunctionsTest(unittest.TestCase):
                 metrics=[accuracy],
                 additional_components=dict(),
             )
-            rval = read_queue(self.queue)
-            self.assertEqual(len(rval), 1)
-            self.assertAlmostEqual(rval[0]["loss"], results[fold])
-            self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
+            return_value = read_queue(self.queue)
+            self.assertEqual(len(return_value), 1)
+            self.assertAlmostEqual(return_value[0]["loss"], results[fold])
+            self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)
 
     def test_eval_partial_cv_multi_objective(self):
         metrics = {
@@ -3547,8 +3547,8 @@ class FunctionsTest(unittest.TestCase):
                 metrics=list(metrics.keys()),
                 additional_components=dict(),
             )
-            rval = read_queue(self.queue)
-            self.assertEqual(len(rval), 1)
+            return_value = read_queue(self.queue)
+            self.assertEqual(len(return_value), 1)
             for metric, loss in metrics.items():
-                self.assertAlmostEqual(rval[0]["loss"][metric.name], loss[fold])
-            self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
+                self.assertAlmostEqual(return_value[0]["loss"][metric.name], loss[fold])
+            self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)
