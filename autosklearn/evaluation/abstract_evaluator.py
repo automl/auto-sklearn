@@ -391,6 +391,7 @@ class AbstractEvaluator(object):
             file_out_loss = None
             additional_run_info_ = {}
 
+        # TODO, not just to make the PR
         validation_loss, test_loss = self.calculate_auxiliary_losses(
             valid_pred,
             test_pred,
