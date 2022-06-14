@@ -236,7 +236,7 @@ be directly used for plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  55.715 seconds)
+   **Total running time of the script:** ( 2 minutes  18.990 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
