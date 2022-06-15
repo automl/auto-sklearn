@@ -54,11 +54,11 @@ class MLPComponentTest(BaseRegressionComponentTest):
     res["default_boston_sparse_places"] = 5
     res["default_boston_iterative_sparse"] = res["default_boston_sparse"]
     res["default_boston_iterative_sparse_places"] = res["default_boston_sparse_places"]
-    res["default_diabetes"] = 0.35917389841850555
+    res["default_diabetes"] = 0.3591732128755144
     res["diabetes_n_calls"] = 9
     res["diabetes_iterative_n_iter"] = 435
     res["default_diabetes_iterative"] = res["default_diabetes"]
-    res["default_diabetes_sparse"] = 0.25573903970369427
+    res["default_diabetes_sparse"] = 0.2557398469606085
     res["default_diabetes_iterative_sparse"] = res["default_diabetes_sparse"]
 
     sk_mod = sklearn.neural_network.MLPRegressor
