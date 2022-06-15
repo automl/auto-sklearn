@@ -165,7 +165,15 @@ def _test_classifier(
         ("y_train", Y_train_before, Y_train),
     ]
     for name, before, after in pairs:
+
+        # Simple solution for sparse matrices is just to convert to dense
+        # and then compare
+        if isinstance(before, scipy.sparse.spmatrix):
+            before = before.todense()
+            after = after.todense()
+
         np.testing.assert_array_equal(before, after, err_msg=name)
+
     return predictions, Y_test, n_calls
 
 
@@ -326,6 +334,13 @@ def _test_regressor(Regressor, dataset="diabetes", sparse=False):
         ("y_train", Y_train_before, Y_train),
     ]
     for name, before, after in pairs:
+
+        # Simple solution for sparse matrices is just to convert to dense
+        # and then compare
+        if isinstance(before, scipy.sparse.spmatrix):
+            before = before.todense()
+            after = after.todense()
+
         np.testing.assert_array_equal(before, after, err_msg=name)
 
     return predictions, Y_test, n_calls
