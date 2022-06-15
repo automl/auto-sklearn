@@ -165,8 +165,17 @@ class SGD(
     def predict(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        Y_pred = self.estimator.predict(X)
-        return self.scaler.inverse_transform(Y_pred)
+        y_pred = self.estimator.predict(X)
+
+        if y_pred.ndim == 1:
+            y_pred = y_pred.reshape(-1, 1)
+
+        inverse = self.scaler.inverse_transform(y_pred)
+
+        if inverse.ndim == 2 and inverse.shape[1] == 1:
+            inverse = inverse.flatten()
+
+        return inverse
 
     @staticmethod
     def get_properties(dataset_properties=None):
