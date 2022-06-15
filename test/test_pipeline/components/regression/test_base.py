@@ -348,19 +348,7 @@ class BaseRegressionComponentTest(unittest.TestCase):
 def test_fit_and_predict_with_1d_targets_as_1d(
     regressor: Type[RegressorChoice], X: np.ndarray, y: np.ndarray
 ) -> None:
-    """Test that all pipelines work with 1d target types
-
-    Parameters
-    ----------
-    regressor: RegressorChoice
-        The regressor to test
-
-    X: np.ndarray
-        The features
-
-    y: np.ndarray
-        The 1d targets
-
+    """
     Expects
     -------
     * Should be able to fit with 1d targets
@@ -389,19 +377,7 @@ def test_fit_and_predict_with_1d_targets_as_1d(
 def test_fit_and_predict_with_1d_targets_as_2d(
     regressor: Type[RegressorChoice], X: np.ndarray, y: np.ndarray
 ) -> None:
-    """Test that all pipelines work with 1d target types when they are wrapped as 2d
-
-    Parameters
-    ----------
-    regressor: RegressorChoice
-        The regressor to test
-
-    X: np.ndarray
-        The features
-
-    y: np.ndarray
-        The 1d targets wrapped as 2d
-
+    """
     Expects
     -------
     * Should be able to fit with 1d targets wrapped in 2d
