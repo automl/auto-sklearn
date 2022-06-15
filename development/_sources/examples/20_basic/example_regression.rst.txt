@@ -124,10 +124,10 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight            type      cost  duration
     model_id                                                           
-    31           1             0.48  ard_regression  0.428169  0.762867
-    25           2             0.26             sgd  0.436679  0.676045
-    33           3             0.20   liblinear_svr  0.472547  0.774536
-    29           4             0.06  ard_regression  0.493390  0.660402
+    31           1             0.48  ard_regression  0.428169  0.728216
+    25           2             0.26             sgd  0.436679  0.674747
+    33           3             0.20   liblinear_svr  0.472547  0.783565
+    29           4             0.06  ard_regression  0.493390  0.658636
 
 
 
@@ -154,7 +154,7 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2136: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2152: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
 
@@ -236,7 +236,7 @@ the true value).
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  54.434 seconds)
+   **Total running time of the script:** ( 2 minutes  1.947 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_regression.py:

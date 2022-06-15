@@ -150,7 +150,7 @@ Fit a classifier using ROAR
 
     ################################################################################
     Results for ROAR.
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2136: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2152: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
     auto-sklearn results:
@@ -244,7 +244,7 @@ Fit a classifier using Random Search
 
     ################################################################################
     Results for random search.
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2136: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2152: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
     auto-sklearn results:
@@ -265,7 +265,7 @@ Fit a classifier using Random Search
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  53.538 seconds)
+   **Total running time of the script:** ( 1 minutes  56.262 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_random_search.py:

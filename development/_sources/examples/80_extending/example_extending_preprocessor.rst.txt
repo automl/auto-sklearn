@@ -256,8 +256,8 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.958041958041958
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2136: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
+    accuracy:  0.951048951048951
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2152: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
 
@@ -267,7 +267,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.301 seconds)
+   **Total running time of the script:** ( 0 minutes  19.536 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:
