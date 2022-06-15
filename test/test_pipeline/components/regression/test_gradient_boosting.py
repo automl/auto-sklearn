@@ -16,8 +16,8 @@ class GradientBoostingComponentTest(BaseRegressionComponentTest):
     res["default_boston_iterative"] = 0.7491382574462079
     res["default_boston_sparse"] = None
     res["boston_n_calls"] = 9
-    res["default_diabetes"] = 0.2872735632261877
-    res["default_diabetes_iterative"] = 0.2872735632261877
+    res["default_diabetes"] = 0.28702549095881336
+    res["default_diabetes_iterative"] = 0.28702549095881336
     res["default_diabetes_sparse"] = None
     res["diabetes_n_call"] = 11
 
