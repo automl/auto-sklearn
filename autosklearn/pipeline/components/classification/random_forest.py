@@ -75,7 +75,7 @@ class RandomForest(
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
 
-            if self.max_features not in ("sqrt", "log2", "auto"):
+            if self.max_features not in ("sqrt", "log2"):
                 max_features = int(X.shape[1] ** float(self.max_features))
             else:
                 max_features = self.max_features
@@ -151,6 +151,9 @@ class RandomForest(
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
+
+        # TODO: Maybe we include "log_loss"?
+        # https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn.ensemble.RandomForestClassifier
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini"
         )

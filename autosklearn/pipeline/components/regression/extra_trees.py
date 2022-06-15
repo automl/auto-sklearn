@@ -13,6 +13,8 @@ from autosklearn.pipeline.components.base import (
 from autosklearn.pipeline.constants import DENSE, PREDICTIONS, SPARSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool, check_none
 
+_criterion_choices = ("squared_error", "friedman_mse")
+
 
 class ExtraTreesRegressor(
     IterativeComponent,
@@ -66,11 +68,8 @@ class ExtraTreesRegressor(
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.criterion not in ("mse", "friedman_mse", "mae"):
-                raise ValueError(
-                    "'criterion' is not in ('mse', 'friedman_mse', "
-                    "'mae): %s" % self.criterion
-                )
+            if self.criterion not in _criterion_choices:
+                raise ValueError(f"'criterion' is not in {_criterion_choices}")
 
             if check_none(self.max_depth):
                 self.max_depth = None
@@ -151,9 +150,7 @@ class ExtraTreesRegressor(
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "friedman_mse", "mae"]
-        )
+        criterion = CategoricalHyperparameter("criterion", _criterion_choices)
         max_features = UniformFloatHyperparameter(
             "max_features", 0.1, 1.0, default_value=1
         )

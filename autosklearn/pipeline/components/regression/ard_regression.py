@@ -56,7 +56,6 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
             compute_score=False,
             threshold_lambda=self.threshold_lambda,
             fit_intercept=True,
-            normalize=False,
             copy_X=True,
             verbose=False,
         )

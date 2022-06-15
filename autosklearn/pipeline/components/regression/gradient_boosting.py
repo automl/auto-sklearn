@@ -168,8 +168,10 @@ class GradientBoosting(
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
+
+        # TODO: What about loss 'absolute_error' and 'poisson'
         loss = CategoricalHyperparameter(
-            "loss", ["least_squares"], default_value="least_squares"
+            "loss", ["squared_error"], default_value="squared_error"
         )
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True

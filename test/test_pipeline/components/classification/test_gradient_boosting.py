@@ -22,7 +22,7 @@ class GradientBoostingComponentTest(BaseClassificationComponentTest):
     res["default_digits_multilabel"] = -1
     res["default_digits_multilabel_proba"] = -1
 
-    sk_mod = sklearn.ensemble.ExtraTreesClassifier
+    sk_mod = sklearn.ensemble.HistGradientBoostingClassifier
     module = GradientBoostingClassifier
     step_hyperparameter = {
         "name": "max_iter",

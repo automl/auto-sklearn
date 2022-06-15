@@ -109,6 +109,7 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
+        # TODO: log_loss?
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini"
         )

@@ -137,8 +137,10 @@ class RandomForest(
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
+
+        # TODO: possion?
         criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "friedman_mse", "mae"]
+            "criterion", ["squared_error", "absolute_error"]
         )
 
         # In contrast to the random forest classifier we want to use more max_features

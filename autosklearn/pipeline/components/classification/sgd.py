@@ -172,10 +172,12 @@ class SGD(
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
+        # TODO: "squared_error", "huber", "epsilon_insensitive",
+        # "squared_epsilon_insensitive"
         loss = CategoricalHyperparameter(
             "loss",
-            ["hinge", "log", "modified_huber", "squared_hinge", "perceptron"],
-            default_value="log",
+            ["hinge", "log_loss", "modified_huber", "squared_hinge", "perceptron"],
+            default_value="log_loss",
         )
         penalty = CategoricalHyperparameter(
             "penalty", ["l1", "l2", "elasticnet"], default_value="l2"

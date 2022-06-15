@@ -49,7 +49,7 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
             self.preprocessor.fit(X)
         # Raise an informative error message, equation is based ~line 249 in
         # kernel_pca.py in scikit-learn
-        if len(self.preprocessor.alphas_ / self.preprocessor.lambdas_) == 0:
+        if len(self.preprocessor.eigenvalues_ / self.preprocessor.eigenvectors_) == 0:
             raise ValueError("KernelPCA removed all features!")
         return self
 

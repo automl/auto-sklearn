@@ -12,6 +12,8 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool, check_none
 
+_criterion_choices = ("squared_error", "absolute_error")
+
 
 class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
     def __init__(
@@ -30,14 +32,11 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         random_state=None,
         verbose=0,
     ):
-
         self.n_estimators = n_estimators
         self.estimator_increment = 10
-        if criterion not in ("mse", "friedman_mse", "mae"):
-            raise ValueError(
-                "'criterion' is not in ('mse', 'friedman_mse', "
-                "'mae'): %s" % criterion
-            )
+        if criterion not in _criterion_choices:
+            raise ValueError(f"'criterion' is not in {_criterion_choices}")
+
         self.criterion = criterion
         self.min_samples_leaf = min_samples_leaf
         self.min_samples_split = min_samples_split
@@ -129,9 +128,7 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
 
         n_estimators = Constant("n_estimators", 100)
-        criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "friedman_mse", "mae"]
-        )
+        criterion = CategoricalHyperparameter("criterion", _criterion_choices)
         max_features = UniformFloatHyperparameter(
             "max_features", 0.1, 1.0, default_value=1.0
         )
