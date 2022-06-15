@@ -10,7 +10,7 @@ class ARDRegressionComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = 0.7033160711079323
+    res["default_boston"] = 0.6942007530563828
     res["default_boston_iterative"] = None
     res["default_boston_sparse"] = None
     res["default_boston_iterative_sparse"] = None
