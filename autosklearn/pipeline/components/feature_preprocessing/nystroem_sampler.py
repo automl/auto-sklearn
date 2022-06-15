@@ -51,10 +51,11 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         if self.kernel == "chi2":
             if scipy.sparse.issparse(X):
                 X.data[X.data < 0] = 0.0
+                X = X.todense()
             else:
                 X[X < 0] = 0.0
 
-        self.preprocessor.fit(X.astype(np.float64))
+        self.preprocessor.fit(X)
         return self
 
     def transform(self, X):
@@ -65,6 +66,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         if self.kernel == "chi2":
             if scipy.sparse.issparse(X):
                 X.data[X.data < 0] = 0.0
+                X = X.todense()
             else:
                 X[X < 0] = 0.0
 
