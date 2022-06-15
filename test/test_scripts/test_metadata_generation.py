@@ -16,7 +16,7 @@ import unittest
 
 class TestMetadataGeneration(unittest.TestCase):
     def setUp(self):
-        host = (socket.gethostname(),)
+        host = socket.gethostname()
         pid = os.getpid()
         rint = random.randint(0, 1000000)
 
