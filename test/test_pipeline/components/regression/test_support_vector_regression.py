@@ -13,9 +13,9 @@ class SupportVectorComponentTest(BaseRegressionComponentTest):
     res["default_boston_iterative"] = None
     res["default_boston_sparse"] = -0.062749211736050192
     res["default_boston_iterative_sparse"] = None
-    res["default_diabetes"] = 0.12849591861430087
+    res["default_diabetes"] = 0.1284951797452738
     res["default_diabetes_iterative"] = None
-    res["default_diabetes_sparse"] = 0.0098877566961463881
+    res["default_diabetes_sparse"] = 0.009887486280726332
     res["default_diabetes_iterative_sparse"] = None
 
     sk_mod = sklearn.svm.SVR
