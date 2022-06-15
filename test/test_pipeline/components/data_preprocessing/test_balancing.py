@@ -174,7 +174,7 @@ class BalancingComponentTest(unittest.TestCase):
                 "extra_trees_preproc_for_classification",
                 ExtraTreesPreprocessorClassification,
                 0.810,
-                0.590,
+                0.5806,
             ),
             ("liblinear_svc_preprocessor", LibLinear_Preprocessor, 0.837, 0.562),
         ]:
