@@ -34,7 +34,7 @@ class FastICAComponentTest(PreprocessingTestCase):
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(accuracy, 0.32614416980439365)
+            self.assertAlmostEqual(accuracy, 0.3261439533164554)
 
     @unittest.skip("Always returns float64")
     def test_preprocessing_dtype(self):
