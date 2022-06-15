@@ -133,6 +133,10 @@ def _test_classifier(
 
     classifier = classifier(random_state=0, **default_config)
 
+    X_train_before = X_train.copy()
+    X_test_before = X_test.copy()
+    Y_train_before = Y_train.copy()
+
     if hasattr(classifier, "iterative_fit"):
 
         class counter(object):
@@ -154,6 +158,14 @@ def _test_classifier(
         n_calls = None
 
     predictions = predictor.predict(X_test)
+
+    pairs = [
+        ("X_train", X_train_before, X_train),
+        ("X_test", X_test_before, X_test),
+        ("y_train", Y_train_before, Y_train),
+    ]
+    for name, before, after in pairs:
+        np.testing.assert_array_equal(before, after, err_msg=name)
     return predictions, Y_test, n_calls
 
 
@@ -282,7 +294,6 @@ def _test_regressor(Regressor, dataset="diabetes", sparse=False):
 
     regressor = Regressor(random_state=0, **default_config)
 
-    # Dumb incomplete hacky test to check that we do not alter the data
     X_train_before = X_train.copy()
     X_test_before = X_test.copy()
     Y_train_before = Y_train.copy()
