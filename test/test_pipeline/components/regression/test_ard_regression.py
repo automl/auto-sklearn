@@ -14,7 +14,7 @@ class ARDRegressionComponentTest(BaseRegressionComponentTest):
     res["default_boston_iterative"] = None
     res["default_boston_sparse"] = None
     res["default_boston_iterative_sparse"] = None
-    res["default_diabetes"] = 0.4172008418124077
+    res["default_diabetes"] = 0.4177773819718591
     res["default_diabetes_iterative"] = None
     res["default_diabetes_sparse"] = None
     res["default_diabetes_iterative_sparse"] = None
