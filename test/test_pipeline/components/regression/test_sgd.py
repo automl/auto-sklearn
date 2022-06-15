@@ -16,10 +16,10 @@ class SGDComponentTest(BaseRegressionComponentTest):
     res["default_boston_iterative"] = res["default_boston"]
     res["default_boston_sparse"] = -1.1518512489347601e28
     res["default_boston_iterative_sparse"] = res["default_boston_sparse"]
-    res["default_diabetes"] = 0.27420813549185374
+    res["default_diabetes"] = 0.27420777555212816
     res["diabetes_n_calls"] = 10
     res["default_diabetes_iterative"] = res["default_diabetes"]
-    res["default_diabetes_sparse"] = 0.034801785011824404
+    res["default_diabetes_sparse"] = 0.034801546048664256
     res["default_diabetes_iterative_sparse"] = res["default_diabetes_sparse"]
 
     sk_mod = sklearn.linear_model.SGDRegressor
