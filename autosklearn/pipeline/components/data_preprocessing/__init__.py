@@ -170,7 +170,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
             for param, value in init_params.items():
                 param = param.replace(choice, "").split(":", 1)[-1]
                 if "feat_type" in param:
-                    continue
+                    feat_type = value
                 else:
                     new_params[param] = value
         self.choice = self.get_components()[choice](
