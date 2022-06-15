@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import os
 from collections import OrderedDict
@@ -38,7 +38,7 @@ class OHEChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type=None,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default: Optional[str] = None,
         include: Optional[Dict[str, str]] = None,
@@ -88,7 +88,7 @@ class OHEChoice(AutoSklearnChoice):
 
     def set_hyperparameters(
         self,
-        feat_type,
+        feat_type: Optional[Dict[Union[str, int], str]],
         configuration: Configuration,
         init_params: Optional[Dict[str, Any]] = None,
     ) -> "OHEChoice":
