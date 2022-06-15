@@ -283,9 +283,9 @@ def _test_regressor(Regressor, dataset="diabetes", sparse=False):
     regressor = Regressor(random_state=0, **default_config)
 
     # Dumb incomplete hacky test to check that we do not alter the data
-    X_train_hash = hash(str(X_train))
-    X_test_hash = hash(str(X_test))
-    Y_train_hash = hash(str(Y_train))
+    X_train_before = X_train.copy()
+    X_test_before = X_test.copy()
+    Y_train_before = Y_train.copy()
 
     if hasattr(regressor, "iterative_fit"):
 
@@ -308,12 +308,15 @@ def _test_regressor(Regressor, dataset="diabetes", sparse=False):
         n_calls = None
 
     predictions = predictor.predict(X_test)
-    if (
-        X_train_hash != hash(str(X_train))
-        or X_test_hash != hash(str(X_test))
-        or Y_train_hash != hash(str(Y_train))
-    ):
-        raise ValueError("Model modified data")
+
+    pairs = [
+        ("X_train", X_train_before, X_train),
+        ("X_test", X_test_before, X_test),
+        ("y_train", Y_train_before, Y_train),
+    ]
+    for name, before, after in pairs:
+        np.testing.assert_array_equal(before, after, err_msg=name)
+
     return predictions, Y_test, n_calls
 
 
