@@ -131,12 +131,14 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 self._transformers.append(("numerical_transformer", self.numer_ppl))
             if "string" in self.feat_type.values():
                 self._transformers.append(("text_transformer", self.txt_ppl))
-            if self.config:
-                self.set_hyperparameters(
-                    feat_type=self.feat_type,
-                    configuration=self.config,
-                    init_params=init_params,
-                )
+
+        if self.config:
+            self.set_hyperparameters(
+                feat_type=self.feat_type,
+                configuration=self.config,
+                init_params=init_params,
+            )
+
         self.column_transformer = column_transformer
 
     def fit(
