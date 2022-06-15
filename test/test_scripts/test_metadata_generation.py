@@ -4,6 +4,7 @@ import random
 import shutil
 import socket
 import subprocess
+import tempfile
 
 import arff
 import numpy as np
@@ -15,10 +16,12 @@ import unittest
 
 class TestMetadataGeneration(unittest.TestCase):
     def setUp(self):
-        self.working_directory = "/tmp/autosklearn-unittest-tmp-dir-%s-%d-%d" % (
-            socket.gethostname(),
-            os.getpid(),
-            random.randint(0, 1000000),
+        host = (socket.gethostname(),)
+        pid = os.getpid()
+        rint = random.randint(0, 1000000)
+
+        self.working_directory = os.path.join(
+            tempfile.gettempdir(), f"autosklearn-unittest-tmp-dir-{host}-{pid}-{rint}"
         )
 
     def print_files(self):
@@ -27,7 +30,6 @@ class TestMetadataGeneration(unittest.TestCase):
             print(dirpath, dirnames, filenames)
 
     def test_metadata_generation(self):
-
         regression_task_id = 360029
         regression_dataset_name = "SWD".lower()
         classification_task_id = 245
@@ -187,12 +189,15 @@ class TestMetadataGeneration(unittest.TestCase):
         )
         print("COMMAND: %s" % cmd)
 
+        # With a timeout of 30seconds, it seems to not complete here on the github
+        # action servers. It's stochastic and
+        #
         return_value = subprocess.run(
             cmd,
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=30,
+            timeout=60,
         )
         print("STDOUT: %s" % repr(return_value.stdout), flush=True)
         print("STDERR: %s" % repr(return_value.stderr), flush=True)
@@ -239,7 +244,7 @@ class TestMetadataGeneration(unittest.TestCase):
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=30,
+            timeout=45,
         )
         self.assertEqual(return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}")
         for task_type in ("classification", "regression"):
@@ -300,7 +305,7 @@ class TestMetadataGeneration(unittest.TestCase):
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=30,
+            timeout=45,
         )
         self.assertEqual(return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}")
 
