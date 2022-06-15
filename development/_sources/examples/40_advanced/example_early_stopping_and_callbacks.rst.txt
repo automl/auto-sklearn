@@ -136,9 +136,9 @@ Build and fit a classifier
       'feature_preprocessor:polynomial:interaction_only': 'False',
     })
     , instance='{"task_id": "breast_cancer"}', instance_specific='0', seed=0, cutoff=30.0, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.014184397163120588, time=1.560791015625, status=<StatusType.SUCCESS: 1>, starttime=1655274472.1032858, endtime=1655274473.682053, additional_info={'duration': 1.4833316802978516, 'num_run': 7, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.014184397163120588, time=1.7800071239471436, status=<StatusType.SUCCESS: 1>, starttime=1655310482.9909241, endtime=1655310484.7930403, additional_info={'duration': 1.683647871017456, 'num_run': 7, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
 
-    AutoSklearnClassifier(get_trials_callback=<function callback at 0x7f0bd36c4040>,
+    AutoSklearnClassifier(get_trials_callback=<function callback at 0x7f38f30bf310>,
                           per_run_time_limit=30, time_left_for_this_task=120)
 
 
@@ -167,9 +167,9 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    7            1             0.68    extra_trees  0.014184  1.560791
-    2            2             0.10  random_forest  0.028369  1.650856
-    3            3             0.22            mlp  0.028369  0.940310
+    7            1             0.68    extra_trees  0.014184  1.780007
+    2            2             0.10  random_forest  0.028369  1.984662
+    3            3             0.22            mlp  0.028369  1.128463
 
 
 
@@ -233,7 +233,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.546 seconds)
+   **Total running time of the script:** ( 0 minutes  22.042 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_early_stopping_and_callbacks.py:

@@ -165,17 +165,16 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight                 type      cost  duration
     model_id                                                                
-    14           1             0.28                  mlp  0.035714  3.449002
-    10           2             0.18   passive_aggressive  0.058673  2.148572
-    2            3             0.06        random_forest  0.089286  4.636817
-    12           4             0.10                  lda  0.091837  2.089736
-    4            5             0.10          extra_trees  0.096939  3.444188
-    13           6             0.02                  mlp  0.114796  3.300151
-    7            7             0.04        random_forest  0.125000  3.001420
-    3            8             0.04                  mlp  0.137755  3.176670
-    6            9             0.04                  qda  0.153061  2.066208
-    11          10             0.02  k_nearest_neighbors  0.178571  2.148827
-    8           11             0.12           libsvm_svc  0.301020  2.168295
+    5            1             0.10                  mlp  0.048469  2.589698
+    9            2             0.04                  mlp  0.066327  3.374487
+    10           3             0.30   passive_aggressive  0.079082  2.629335
+    12           4             0.12                  lda  0.084184  2.558461
+    4            5             0.04          extra_trees  0.086735  4.090888
+    2            6             0.04        random_forest  0.107143  5.396954
+    13           7             0.02                  mlp  0.125000  4.081114
+    6            8             0.04                  qda  0.153061  2.583766
+    11           9             0.02  k_nearest_neighbors  0.168367  2.638441
+    8           10             0.28           libsvm_svc  0.280612  2.736154
 
 
 
@@ -231,7 +230,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.9505703422053232
+    Accuracy score: 0.9619771863117871
 
 
 
@@ -239,7 +238,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  9.180 seconds)
+   **Total running time of the script:** ( 1 minutes  17.234 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:
