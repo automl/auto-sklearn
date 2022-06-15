@@ -1,3 +1,4 @@
+# Not currently in use
 name: Regression Tests
 
 on:
@@ -33,7 +34,7 @@ jobs:
       )
     steps:
       - name: Create comment
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
@@ -81,7 +82,7 @@ jobs:
         #   branch: the branch name
 
       - name: Checkout Automlbenchmark
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ env.AUTOMLBENCHMARK_REPO }}
           ref: ${{ env.AUTOMLBENCHMARK_REF }}
@@ -141,7 +142,7 @@ jobs:
           #   value: The python version used by the installed system
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ steps.python-version.outputs.value }}
 
@@ -184,7 +185,7 @@ jobs:
           #   filename: name of the results file
 
       - name: Upload ${{matrix.task_type}} results as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.benchmark.outputs.filename }}
           path: |
@@ -205,7 +206,7 @@ jobs:
           #   value: The python version used by the installed system
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ steps.python-version.outputs.value }}
 
@@ -249,7 +250,7 @@ jobs:
         #   - baseline_regression_x_x_x.csv
 
       - name: Download workflow artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           path: artifacts
 
@@ -306,7 +307,7 @@ jobs:
           #   compared_means: path to the results of regression test vs baseline
 
       - name: Upload all results together as an artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}
           path: |

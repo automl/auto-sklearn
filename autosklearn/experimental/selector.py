@@ -297,17 +297,17 @@ class OneVSOneSelector(AbstractSelector):
             wins = wins / np.sum(wins)
             predictions[X.index[x_idx]] = wins
 
-        rval = {
+        return_value = {
             task_id: {
                 strategy: predictions[task_id][strategy_idx]
                 for strategy_idx, strategy in enumerate(self.strategies_)
             }
             for task_id in X.index
         }
-        rval = pd.DataFrame(rval).transpose().astype(float)
-        rval = rval[self.strategies_]
-        rval = rval.fillna(0.0)
-        return rval
+        return_value = pd.DataFrame(return_value).transpose().astype(float)
+        return_value = return_value[self.strategies_]
+        return_value = return_value.fillna(0.0)
+        return return_value
 
     def fit_pairwise_model(self, X, y, weights, rng, configuration):
         raise NotImplementedError()
@@ -346,14 +346,14 @@ class FallbackWrapper(AbstractSelector):
     ) -> None:
         self.X_ = X
         self.strategies_ = y.columns
-        self.rval_ = np.array(
+        self.return_value_ = np.array(
             [
                 (len(self.strategies_) - self.default_strategies.index(strategy) - 1)
                 / (len(self.strategies_) - 1)
                 for strategy in self.strategies_
             ]
         )
-        self.rval_ = self.rval_ / np.sum(self.rval_)
+        self.return_value_ = self.return_value_ / np.sum(self.return_value_)
         self.selector.fit(X, y, minima, maxima)
 
     def _predict(
@@ -377,7 +377,7 @@ class FallbackWrapper(AbstractSelector):
                 prediction.loc[task_id] = pd.Series(
                     {
                         strategy: value
-                        for strategy, value in zip(self.strategies_, self.rval_)
+                        for strategy, value in zip(self.strategies_, self.return_value_)
                     }
                 )
 

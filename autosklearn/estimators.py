@@ -38,6 +38,7 @@ from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.util.smac_wrap import SMACCallback
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -69,7 +70,7 @@ class AutoSklearnEstimator(BaseEstimator):
         metric: Scorer | Sequence[Scorer] | None = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        get_trials_callback=None,
+        get_trials_callback: SMACCallback | None = None,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
         allow_string_features: bool = True,
     ):
@@ -301,10 +302,19 @@ class AutoSklearnEstimator(BaseEstimator):
             Whether to load the models after fitting Auto-sklearn.
 
         get_trials_callback: callable
-            Callback function to create an object of subclass defined in module
-            `smac.callbacks <https://automl.github.io/SMAC3/master/apidoc/smac.callbacks.html>`_.
-            This is an advanced feature. Use only if you are familiar with
-            `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
+            A callable with the following definition.
+
+            * (smac.SMBO, smac.RunInfo, smac.RunValue, time_left: float) -> bool | None
+
+            This will be called after SMAC, the underlying optimizer for autosklearn,
+            finishes training each run.
+
+            You can use this to record your own information about the optimization
+            process. You can also use this to enable a early stopping based on some
+            critera.
+
+            See the example:
+            :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>`.
 
         dataset_compression: Union[bool, Mapping[str, Any]] = True
             We compress datasets so that they fit into some predefined amount of memory.
@@ -601,6 +611,7 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_kwargs: Optional[Dict[str, Any]] = None,
         ensemble_nbest: Optional[int] = None,
         ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
+        metrics: Scorer | Sequence[Scorer] | None = None,
     ):
         """Fit an ensemble to models trained during an optimization process.
 
@@ -650,12 +661,13 @@ class AutoSklearnEstimator(BaseEstimator):
             to obtain only use the single best model instead of an
             ensemble.
 
+        metrics: Scorer | Sequence[Scorer] | None = None
+            A metric or list of metrics to score the ensemble with
+
         Returns
         -------
         self
-
         """
-
         # User specified `ensemble_size` explicitly, warn them about deprecation
         if ensemble_size is not None:
             # Keep consistent behaviour
@@ -708,6 +720,7 @@ class AutoSklearnEstimator(BaseEstimator):
             ensemble_nbest=ensemble_nbest,
             ensemble_class=ensemble_class,
             ensemble_kwargs=ensemble_kwargs,
+            metrics=metrics,
         )
         return self
 
@@ -1041,31 +1054,31 @@ class AutoSklearnEstimator(BaseEstimator):
             return rv.additional_info and key in rv.additional_info
 
         model_runs = {}
-        for rkey, rval in self.automl_.runhistory_.data.items():
-            if not additional_info_has_key(rval, "num_run"):
+        for run_key, run_val in self.automl_.runhistory_.data.items():
+            if not additional_info_has_key(run_val, "num_run"):
                 continue
             else:
-                model_key = rval.additional_info["num_run"]
+                model_key = run_val.additional_info["num_run"]
                 model_run = {
-                    "model_id": rval.additional_info["num_run"],
-                    "seed": rkey.seed,
-                    "budget": rkey.budget,
-                    "duration": rval.time,
-                    "config_id": rkey.config_id,
-                    "start_time": rval.starttime,
-                    "end_time": rval.endtime,
-                    "status": str(rval.status),
-                    "train_loss": rval.additional_info["train_loss"]
-                    if additional_info_has_key(rval, "train_loss")
+                    "model_id": run_val.additional_info["num_run"],
+                    "seed": run_key.seed,
+                    "budget": run_key.budget,
+                    "duration": run_val.time,
+                    "config_id": run_key.config_id,
+                    "start_time": run_val.starttime,
+                    "end_time": run_val.endtime,
+                    "status": str(run_val.status),
+                    "train_loss": run_val.additional_info["train_loss"]
+                    if additional_info_has_key(run_val, "train_loss")
                     else None,
-                    "config_origin": rval.additional_info["configuration_origin"]
-                    if additional_info_has_key(rval, "configuration_origin")
+                    "config_origin": run_val.additional_info["configuration_origin"]
+                    if additional_info_has_key(run_val, "configuration_origin")
                     else None,
                 }
                 if num_metrics == 1:
-                    model_run["cost"] = rval.cost
+                    model_run["cost"] = run_val.cost
                 else:
-                    for cost_idx, cost in enumerate(rval.cost):
+                    for cost_idx, cost in enumerate(run_val.cost):
                         model_run[f"cost_{cost_idx}"] = cost
                 model_runs[model_key] = model_run
 

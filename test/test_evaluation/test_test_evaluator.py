@@ -80,10 +80,10 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 )
 
                 evaluator.fit_predict_and_loss()
-                rval = read_queue(evaluator.queue)
-                self.assertEqual(len(rval), 1)
-                self.assertEqual(len(rval[0]), 3)
-                self.assertTrue(np.isfinite(rval[0]["loss"]))
+                return_value = read_queue(evaluator.queue)
+                self.assertEqual(len(return_value), 1)
+                self.assertEqual(len(return_value[0]), 3)
+                self.assertTrue(np.isfinite(return_value[0]["loss"]))
 
 
 class DummyDatamanager:
@@ -135,11 +135,11 @@ class FunctionsTest(unittest.TestCase):
             port=self.port,
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]["loss"], 0.07999999999999996)
-        self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
-        self.assertNotIn("bac_metric", rval[0]["additional_run_info"])
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 1)
+        self.assertAlmostEqual(return_value[0]["loss"], 0.07999999999999996)
+        self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)
+        self.assertNotIn("bac_metric", return_value[0]["additional_run_info"])
 
     def test_eval_test_multi_objective(self):
         metrics = {
@@ -162,12 +162,12 @@ class FunctionsTest(unittest.TestCase):
             port=self.port,
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 1)
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 1)
         for metric, loss in metrics.items():
-            self.assertAlmostEqual(rval[0]["loss"][metric.name], loss)
-        self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
-        self.assertNotIn("bac_metric", rval[0]["additional_run_info"])
+            self.assertAlmostEqual(return_value[0]["loss"][metric.name], loss)
+        self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)
+        self.assertNotIn("bac_metric", return_value[0]["additional_run_info"])
 
     def test_eval_test_all_loss_functions(self):
         eval_t(
@@ -186,8 +186,8 @@ class FunctionsTest(unittest.TestCase):
             port=self.port,
             additional_components=dict(),
         )
-        rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 1)
+        return_value = read_queue(self.queue)
+        self.assertEqual(len(return_value), 1)
 
         # Note: All metric here should be minimized
         fixture = {
@@ -206,7 +206,7 @@ class FunctionsTest(unittest.TestCase):
             "num_run": -1,
         }
 
-        additional_run_info = rval[0]["additional_run_info"]
+        additional_run_info = return_value[0]["additional_run_info"]
         for key, value in fixture.items():
             self.assertAlmostEqual(additional_run_info[key], fixture[key], msg=key)
         self.assertEqual(
@@ -215,5 +215,5 @@ class FunctionsTest(unittest.TestCase):
             msg=sorted(additional_run_info.items()),
         )
         self.assertIn("duration", additional_run_info)
-        self.assertAlmostEqual(rval[0]["loss"], 0.040000000000000036)
-        self.assertEqual(rval[0]["status"], StatusType.SUCCESS)
+        self.assertAlmostEqual(return_value[0]["loss"], 0.040000000000000036)
+        self.assertEqual(return_value[0]["status"], StatusType.SUCCESS)

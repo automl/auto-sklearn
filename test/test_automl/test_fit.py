@@ -1,3 +1,4 @@
+"""Test specific ways of calling `fit` of AutoML"""
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 import numpy as np

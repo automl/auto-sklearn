@@ -512,15 +512,15 @@ class BasePipeline(Pipeline):
             dataset_properties_string.append("}")
             dataset_properties_string = "".join(dataset_properties_string)
 
-            rval = "%s(%s,\n%s)" % (
+            return_value = "%s(%s,\n%s)" % (
                 class_name,
                 configuration,
                 dataset_properties_string,
             )
         else:
-            rval = "%s(%s)" % (class_name, configuration_string)
+            return_value = "%s(%s)" % (class_name, configuration_string)
 
-        return rval
+        return return_value
 
     def _get_pipeline_steps(self, dataset_properties, feat_type=None):
         raise NotImplementedError()

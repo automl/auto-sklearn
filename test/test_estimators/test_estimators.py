@@ -1352,29 +1352,89 @@ def test_check_estimator_signature(class_):
     ],
 )
 def test_selector_file_askl2_can_be_created(selector_path):
+
     with unittest.mock.patch("os.environ.get") as mock_foo:
         mock_foo.return_value = selector_path
         if selector_path is not None and not os.access(selector_path, os.W_OK):
             with pytest.raises(PermissionError):
                 importlib.reload(autosklearn.experimental.askl2)
+                automl = AutoSklearn2Classifier(
+                    time_left_for_this_task=60, delete_tmp_folder_after_terminate=False
+                )
+
         else:
             importlib.reload(autosklearn.experimental.askl2)
-            for metric in autosklearn.experimental.askl2.metrics:
-                assert os.path.exists(
-                    autosklearn.experimental.askl2.selector_files[metric.name]
-                )
+            automl = AutoSklearn2Classifier(
+                time_left_for_this_task=60, delete_tmp_folder_after_terminate=False
+            )
+            for metric in automl.selector_metrics:
+                assert os.path.exists(automl.selector_files[metric.name])
                 if selector_path is None or not os.access(selector_path, os.W_OK):
                     # We default to home in worst case
                     assert os.path.expanduser("~") in str(
-                        autosklearn.experimental.askl2.selector_files[metric.name]
+                        automl.selector_files[metric.name]
                     )
                 else:
                     # a dir provided via XDG_CACHE_HOME
-                    assert selector_path in str(
-                        autosklearn.experimental.askl2.selector_files[metric.name]
-                    )
+                    assert selector_path in str(automl.selector_files[metric.name])
     # Re import it at the end so we do not affect other test
     importlib.reload(autosklearn.experimental.askl2)
+
+
+@pytest.mark.parametrize(
+    "metric",
+    [metric for metric in autosklearn.experimental.askl2.selector_metrics],
+)
+def test_askl2_fits_selector_for_given_metrics_at_init(tmp_path, metric):
+
+    assert tmp_path.is_dir()
+    assert len(list(tmp_path.iterdir())) == 0
+    temp_dir = str(tmp_path)
+
+    with unittest.mock.patch("os.environ.get") as mock_foo:
+        mock_foo.return_value = temp_dir
+        automl = AutoSklearn2Classifier(
+            time_left_for_this_task=60,
+            delete_tmp_folder_after_terminate=False,
+            metric=metric,
+        )
+        assert (
+            len(automl.selector_files) == 1
+        )  # only one selector file should have been created
+        assert os.path.exists(
+            str(automl.selector_files[metric.name])
+        )  # check if the path exists
+
+        # check if selector is retrained when
+        # another object with the same metric is created
+        automl_1 = AutoSklearn2Classifier(
+            time_left_for_this_task=60,
+            delete_tmp_folder_after_terminate=False,
+            metric=metric,
+        )
+        assert (
+            len(automl_1.selector_files) == 1
+        )  # only one selector file should have been created
+        assert os.path.exists(
+            str(automl_1.selector_files[metric.name])
+        )  # check if the path exists
+        assert not automl_1.required_training
+
+
+def test_askl2_fit_when_no_metric_specified(tmp_path):
+
+    assert tmp_path.is_dir()
+    assert len(list(tmp_path.iterdir())) == 0
+    temp_dir = str(tmp_path)
+
+    with unittest.mock.patch("os.environ.get") as mock_foo:
+        mock_foo.return_value = temp_dir
+        automl = AutoSklearn2Classifier(
+            time_left_for_this_task=60, delete_tmp_folder_after_terminate=False
+        )
+        assert len(automl.selector_files) == 3
+        for metric in automl.selector_metrics:
+            assert os.path.exists(str(automl.selector_files[metric.name]))
 
 
 def test_check_askl2_same_arguments_as_askl() -> None:
