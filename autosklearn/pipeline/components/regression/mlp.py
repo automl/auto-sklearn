@@ -201,6 +201,9 @@ class MLPRegressor(IterativeComponent, AutoSklearnRegressionAlgorithm):
 
         y_pred = self.estimator.predict(X)
 
+        if y_pred.ndim == 1:
+            y_pred = y_pred.reshape(-1, 1)
+
         inverse = self.scaler.inverse_transform(y_pred)
 
         # Flatten: [[0], [0], [0]] -> [0, 0, 0]
