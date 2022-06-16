@@ -71,7 +71,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
         ae.Y_optimization = rs.rand(33, 3)
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
-        predictions_valid = rs.rand(25, 3)
 
         # NaNs in prediction ensemble
         predictions_ensemble[5, 2] = np.NaN
@@ -79,7 +78,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
             loss=0.1,
             train_loss=0.1,
             opt_pred=predictions_ensemble,
-            valid_pred=predictions_valid,
             test_pred=predictions_test,
             additional_run_info=None,
             final_call=True,
@@ -90,46 +88,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
         self.assertEqual(
             additional_run_info,
             {"error": "Model predictions for optimization set " "contains NaNs."},
-        )
-
-        # NaNs in prediction validation
-        predictions_ensemble[5, 2] = 0.5
-        predictions_valid[5, 2] = np.NaN
-        _, loss, _, additional_run_info = ae.finish_up(
-            loss=0.1,
-            train_loss=0.1,
-            opt_pred=predictions_ensemble,
-            valid_pred=predictions_valid,
-            test_pred=predictions_test,
-            additional_run_info=None,
-            final_call=True,
-            file_output=True,
-            status=StatusType.SUCCESS,
-        )
-        self.assertEqual(loss, 1.0)
-        self.assertEqual(
-            additional_run_info,
-            {"error": "Model predictions for validation set " "contains NaNs."},
-        )
-
-        # NaNs in prediction test
-        predictions_valid[5, 2] = 0.5
-        predictions_test[5, 2] = np.NaN
-        _, loss, _, additional_run_info = ae.finish_up(
-            loss=0.1,
-            train_loss=0.1,
-            opt_pred=predictions_ensemble,
-            valid_pred=predictions_valid,
-            test_pred=predictions_test,
-            additional_run_info=None,
-            final_call=True,
-            file_output=True,
-            status=StatusType.SUCCESS,
-        )
-        self.assertEqual(loss, 1.0)
-        self.assertEqual(
-            additional_run_info,
-            {"error": "Model predictions for test set contains " "NaNs."},
         )
 
         self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 0)
@@ -150,11 +108,9 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
-        predictions_valid = rs.rand(25, 3)
 
         loss_, additional_run_info_ = ae.file_output(
             predictions_ensemble,
-            predictions_valid,
             predictions_test,
         )
 
@@ -179,7 +135,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
             loss_, additional_run_info_ = ae.file_output(
                 predictions_ensemble,
-                predictions_valid,
                 predictions_test,
             )
 
@@ -213,11 +168,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
             )
             self.assertIsNotNone(
                 self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                    "valid_predictions"
-                ]
-            )
-            self.assertIsNotNone(
-                self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
                     "test_predictions"
                 ]
             )
@@ -237,7 +187,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         loss_, additional_run_info_ = ae.file_output(
             predictions_ensemble,
-            predictions_valid,
             predictions_test,
         )
 
@@ -247,11 +196,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
         self.assertIsNone(
             self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
                 "ensemble_predictions"
-            ]
-        )
-        self.assertIsNotNone(
-            self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                "valid_predictions"
             ]
         )
         self.assertIsNotNone(
@@ -296,11 +240,9 @@ class AbstractEvaluatorTest(unittest.TestCase):
             ae.Y_optimization = rs.rand(33, 3)
             predictions_ensemble = rs.rand(33, 3)
             predictions_test = rs.rand(25, 3)
-            predictions_valid = rs.rand(25, 3)
 
             ae.file_output(
                 Y_optimization_pred=predictions_ensemble,
-                Y_valid_pred=predictions_valid,
                 Y_test_pred=predictions_test,
             )
 

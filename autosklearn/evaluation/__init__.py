@@ -230,14 +230,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.memory_limit = memory_limit
 
         dm = self.backend.load_datamanager()
-        if "X_valid" in dm.data and "Y_valid" in dm.data:
-            self._get_validation_loss = True
-        else:
-            self._get_validation_loss = False
-        if "X_test" in dm.data and "Y_test" in dm.data:
-            self._get_test_loss = True
-        else:
-            self._get_test_loss = False
+        self._get_test_loss = "X_test" in dm.data and "Y_test" in dm.data
 
         self.port = port
         self.pynisher_context = pynisher_context
@@ -532,21 +525,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             if len(train_learning_curve) > 1:
                 additional_run_info["train_learning_curve"] = train_learning_curve
                 additional_run_info["learning_curve_runtime"] = learning_curve_runtime
-
-            if self._get_validation_loss:
-                validation_learning_curve = (
-                    autosklearn.evaluation.util.extract_learning_curve(
-                        info,
-                        "validation_loss",
-                    )
-                )
-                if len(validation_learning_curve) > 1:
-                    additional_run_info[
-                        "validation_learning_curve"
-                    ] = validation_learning_curve
-                    additional_run_info[
-                        "learning_curve_runtime"
-                    ] = learning_curve_runtime
 
             if self._get_test_loss:
                 test_learning_curve = (
