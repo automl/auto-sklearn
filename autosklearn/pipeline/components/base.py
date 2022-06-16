@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional, Union, Any
 
 import importlib
 import inspect
@@ -6,9 +6,12 @@ import pkgutil
 import sys
 from collections import OrderedDict
 
+from ConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from autosklearn.pipeline.constants import SPARSE
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 _addons = dict()  # type: Dict[str, 'ThirdPartyComponents']
 
@@ -98,7 +101,10 @@ class AutoSklearnComponent(BaseEstimator):
         raise NotImplementedError()
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+            feat_type: Optional[Dict[Union[str, int], str]] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+    ):
         """Return the configuration space of this classification algorithm.
 
         Parameters
@@ -136,7 +142,10 @@ class AutoSklearnComponent(BaseEstimator):
         for further information."""
         raise NotImplementedError()
 
-    def set_hyperparameters(self, configuration, feat_type=None, init_params=None):
+    def set_hyperparameters(self,
+                            configuration: Configuration,
+                            feat_type: Optional[Dict[Union[str, int], str]] = None,
+                            init_params: Optional[Dict[str, Any]] = None):
         params = configuration.get_dictionary()
 
         for param, value in params.items():
@@ -439,11 +448,11 @@ class AutoSklearnChoice(object):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type,
-        dataset_properties=None,
+        feat_type: Dict[Union[str, int], str],
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
-        include=None,
-        exclude=None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
     ):
         raise NotImplementedError()
 

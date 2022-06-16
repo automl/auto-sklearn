@@ -987,7 +987,7 @@ class TrainEvaluator(AbstractEvaluator):
         PIPELINE_DATA_DTYPE,  # test_pred
         TYPE_ADDITIONAL_INFO,
     ]:
-        model = self._get_model(feat_type=self.feat_type)
+        model = self._get_model(self.feat_type)
 
         self.indices[fold] = (train_indices, test_indices)
 

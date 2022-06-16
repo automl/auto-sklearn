@@ -256,7 +256,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     def set_hyperparameters(
         self,
-        feat_type,
+        feat_type: Dict[Union[str, int], str],
         configuration: Configuration,
         init_params: Optional[Dict[str, Any]] = None,
     ) -> "FeatTypeSplit":
@@ -328,7 +328,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             if hasattr(st_operation, "get_hyperparameter_search_space"):
                 cs.add_configuration_space(
                     st_name,
-                    st_operation.get_hyperparameter_search_space(dataset_properties),
+                    st_operation.get_hyperparameter_search_space(dataset_properties=dataset_properties),
                 )
             else:
                 return FeatTypeSplit._get_hyperparameter_search_space_recursevely(

@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Dict, Optional, Union, Type
 
 import os
 from collections import OrderedDict
@@ -21,6 +21,7 @@ _preprocessors = find_components(
 additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 _addons["feature_preprocessing"] = additional_components
 
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 def add_preprocessor(preprocessor: Type[AutoSklearnPreprocessingAlgorithm]) -> None:
     additional_components.add_component(preprocessor)
@@ -102,11 +103,11 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type=None,
-        dataset_properties=None,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
-        include=None,
-        exclude=None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
     ):
         cs = ConfigurationSpace()
 
@@ -135,7 +136,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[
                 name
-            ].get_hyperparameter_search_space(dataset_properties)
+            ].get_hyperparameter_search_space(dataset_properties=dataset_properties)
             parent_hyperparameter = {"parent": preprocessor, "value": name}
             cs.add_configuration_space(
                 name,

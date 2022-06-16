@@ -1,6 +1,6 @@
 __author__ = "feurerm"
 
-from typing import Type
+from typing import Type, Dict, Union, Optional
 
 import os
 from collections import OrderedDict
@@ -22,6 +22,8 @@ _classifiers = find_components(
 )
 additional_components = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
 _addons["classification"] = additional_components
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 def add_classifier(classifier: Type[AutoSklearnClassificationAlgorithm]) -> None:
@@ -87,11 +89,11 @@ class ClassifierChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type=None,
-        dataset_properties=None,
+        feat_type: Dict[Union[str, int], str],
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
-        include=None,
-        exclude=None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
     ):
         if dataset_properties is None:
             dataset_properties = {}
@@ -131,7 +133,7 @@ class ClassifierChoice(AutoSklearnChoice):
         for estimator_name in available_estimators.keys():
             estimator_configuration_space = available_estimators[
                 estimator_name
-            ].get_hyperparameter_search_space(dataset_properties)
+            ].get_hyperparameter_search_space(dataset_properties=dataset_properties)
             parent_hyperparameter = {"parent": estimator, "value": estimator_name}
             cs.add_configuration_space(
                 estimator_name,

@@ -1,6 +1,7 @@
 import csv
 import logging
 import os
+from ConfigSpace.configuration_space import ConfigurationSpace
 from collections import OrderedDict, defaultdict
 
 import arff
@@ -8,7 +9,9 @@ import pandas as pd
 
 
 class AlgorithmSelectionProblem(object):
-    def __init__(self, directory, cs):
+    def __init__(self,
+                 directory: str,
+                 cs: ConfigurationSpace):
         self.logger = logging.getLogger(__name__)
 
         # Create data structures

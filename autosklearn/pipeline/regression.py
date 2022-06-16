@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Any
 
 import copy
 from itertools import product
@@ -15,6 +15,8 @@ from autosklearn.pipeline.components import (
 from autosklearn.pipeline.components import regression as regression_components
 from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
 from autosklearn.pipeline.constants import SPARSE
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
@@ -70,11 +72,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         config: Optional[Configuration] = None,
         steps=None,
-        dataset_properties=None,
-        include=None,
-        exclude=None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params=None,
+        init_params: Optional[Dict[str, Any]] = None,
     ):
         self._output_dtype = np.float32
         if dataset_properties is None:
@@ -114,7 +116,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         return y
 
     def _get_hyperparameter_search_space(
-        self, feat_type=None, include=None, exclude=None, dataset_properties=None
+        self,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
     ):
         """Return the configuration space for the CASH problem.
 
@@ -262,7 +268,10 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_estimator_components(self):
         return regression_components._regressors
 
-    def _get_pipeline_steps(self, dataset_properties, feat_type=None, init_params=None):
+    def _get_pipeline_steps(self,
+                            dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
+                            feat_type: Optional[Dict[Union[str, int], str]] = None,
+                            init_params: Optional[Dict[str, Any]] = None):
         steps = []
 
         default_dataset_properties = {"target_type": "regression"}

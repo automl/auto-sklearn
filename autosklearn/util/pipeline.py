@@ -111,24 +111,24 @@ def _get_classification_configuration_space(
 ) -> ConfigurationSpace:
     """Get the configuration of a classification pipeline given some dataset info
 
-     Parameters
-     ----------
+    Parameters
+    ----------
     datamanager: XYDataManager
          XYDataManger object storing all important information about the dataset
 
-     include: Optional[Dict[str, List[str]]] = None
-         A dictionary of what components to include for each pipeline step
+    include: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to include for each pipeline step
 
-     exclude: Optional[Dict[str, List[str]]] = None
-         A dictionary of what components to exclude for each pipeline step
+    exclude: Optional[Dict[str, List[str]]] = None
+        A dictionary of what components to exclude for each pipeline step
 
-     random_state: Optional[Union[int, np.random.Randomstate]] = None
-         The random state to use for seeding the ConfigSpace
+    random_state: Optional[Union[int, np.random.Randomstate]] = None
+        The random state to use for seeding the ConfigSpace
 
-     Returns
-     -------
-     ConfigurationSpace
-         The configuration space for the classification pipeline
+    Returns
+    -------
+    ConfigurationSpace
+        The configuration space for the classification pipeline
     """
     task_type = datamanager.info["task"]
 

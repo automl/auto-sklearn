@@ -1,3 +1,4 @@
+from typing import Dict, Union, Optional
 from functools import partial
 
 from ConfigSpace import NotEqualsCondition
@@ -9,6 +10,8 @@ from ConfigSpace.hyperparameters import (
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):

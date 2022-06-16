@@ -1,9 +1,9 @@
 from abc import ABCMeta
-from typing import Dict, Union
+from typing import Dict, Union, Optional, Any
 
 import numpy as np
 import scipy.sparse
-from ConfigSpace import Configuration
+from ConfigSpace import Configuration, ConfigurationSpace
 from sklearn.pipeline import Pipeline
 
 import autosklearn.pipeline.create_searchspace_util
@@ -34,14 +34,14 @@ class BasePipeline(Pipeline):
 
     def __init__(
         self,
-        feat_type=None,
-        config=None,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        config: Optional[Configuration] = None,
         steps=None,
-        dataset_properties=None,
-        include=None,
-        exclude=None,
-        random_state=None,
-        init_params=None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        init_params: Optional[Dict[str, Any]] = None,
     ):
 
         self.init_params = init_params if init_params is not None else {}
@@ -208,7 +208,10 @@ class BasePipeline(Pipeline):
 
                 return y
 
-    def set_hyperparameters(self, configuration, feat_type=None, init_params=None):
+    def set_hyperparameters(self,
+                            configuration: Configuration,
+                            feat_type: Optional[Dict[Union[str, int], str]] = None,
+                            init_params: Optional[Dict[str, Any]] = None):
         self.config = configuration
 
         for node_idx, n_ in enumerate(self.steps):
@@ -255,7 +258,9 @@ class BasePipeline(Pipeline):
 
         return self
 
-    def get_hyperparameter_search_space(self, feat_type=None, dataset_properties=None):
+    def get_hyperparameter_search_space(self,
+                                        feat_type: Optional[Dict[Union[str, int], str]] = None,
+                                        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None):
         """Return the configuration space for the CASH problem.
 
         Returns
@@ -274,7 +279,11 @@ class BasePipeline(Pipeline):
         return self.config_space
 
     def _get_hyperparameter_search_space(
-        self, feat_type=None, include=None, exclude=None, dataset_properties=None
+        self,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
     ):
         """Return the configuration space for the CASH problem.
 
@@ -319,7 +328,13 @@ class BasePipeline(Pipeline):
         raise NotImplementedError()
 
     def _get_base_search_space(
-        self, cs, dataset_properties, exclude, include, pipeline, feat_type=None
+        self,
+        cs: ConfigurationSpace,
+        dataset_properties: DATASET_PROPERTIES_TYPE,
+        include: Dict[str, str],
+        exclude: Dict[str, str],
+        pipeline,
+        feat_type: Optional[Dict[Union[str, int], str]] = None
     ):
         if include is None:
             if self.include is None:
@@ -385,7 +400,8 @@ class BasePipeline(Pipeline):
             if not is_choice:
                 cs.add_configuration_space(
                     node_name,
-                    node.get_hyperparameter_search_space(dataset_properties),
+                    node.get_hyperparameter_search_space(dataset_properties=dataset_properties,
+                                                         feat_type=feat_type),
                 )
             # If the node is a choice, we have to figure out which of its
             #  choices are actually legal choices

@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Dict, Union, Optional
 
 import os
 from collections import OrderedDict
@@ -20,6 +20,8 @@ _regressors = find_components(
 )
 additional_components = ThirdPartyComponents(AutoSklearnRegressionAlgorithm)
 _addons["regression"] = additional_components
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 def add_regressor(regressor: Type[AutoSklearnRegressionAlgorithm]) -> None:
@@ -80,11 +82,11 @@ class RegressorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type,
-        dataset_properties=None,
+        feat_type: Dict[Union[str, int], str],
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
-        include=None,
-        exclude=None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
     ):
         if include is not None and exclude is not None:
             raise ValueError(
@@ -121,7 +123,7 @@ class RegressorChoice(AutoSklearnChoice):
         for estimator_name in available_estimators.keys():
             estimator_configuration_space = available_estimators[
                 estimator_name
-            ].get_hyperparameter_search_space(dataset_properties)
+            ].get_hyperparameter_search_space(dataset_properties=dataset_properties)
             parent_hyperparameter = {"parent": estimator, "value": estimator_name}
             cs.add_configuration_space(
                 estimator_name,

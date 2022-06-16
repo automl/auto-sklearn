@@ -19,6 +19,8 @@ from autosklearn.pipeline.components.feature_preprocessing import (
 )
 from autosklearn.pipeline.constants import SPARSE
 
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
+
 
 class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
     """This class implements the classification task.
@@ -168,7 +170,11 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 return y
 
     def _get_hyperparameter_search_space(
-        self, feat_type=None, include=None, exclude=None, dataset_properties=None
+        self,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        include: Optional[Dict[str, str]] = None,
+        exclude: Optional[Dict[str, str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
     ):
         """Create the hyperparameter configuration space.
 
@@ -349,7 +355,9 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         self.dataset_properties = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self, dataset_properties, feat_type=None):
+    def _get_pipeline_steps(self,
+                            dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
+                            feat_type: Optional[Dict[Union[str, int], str]] = None):
         steps = []
 
         default_dataset_properties = {"target_type": "classification"}

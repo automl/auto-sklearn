@@ -1,3 +1,4 @@
+from typing import Dict, Union, Optional
 import warnings
 
 import numpy as np
@@ -11,6 +12,8 @@ from ConfigSpace.hyperparameters import (
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class KernelPCA(AutoSklearnPreprocessingAlgorithm):
@@ -82,7 +85,10 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
+    def get_hyperparameter_search_space(
+            feat_type: Optional[Dict[Union[str, int], str]] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+    ):
         n_components = UniformIntegerHyperparameter(
             "n_components", 10, 2000, default_value=100
         )

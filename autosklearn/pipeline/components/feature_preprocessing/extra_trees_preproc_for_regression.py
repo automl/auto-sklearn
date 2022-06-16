@@ -1,3 +1,4 @@
+from typing import Dict, Union, Optional
 import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
@@ -11,6 +12,8 @@ from ConfigSpace.hyperparameters import (
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool, check_none
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
@@ -125,7 +128,10 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
+    def get_hyperparameter_search_space(
+            feat_type: Optional[Dict[Union[str, int], str]] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+    ):
         cs = ConfigurationSpace()
 
         n_estimators = Constant("n_estimators", 100)
