@@ -113,7 +113,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
             )
             _init_params.update(self.init_params)
             self.set_hyperparameters(
-                configuration=self.config, init_params=_init_params
+                feat_type=self.feat_type, configuration=self.config, init_params=_init_params
             )
 
             if _fit_params is not None:
