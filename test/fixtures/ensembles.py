@@ -45,7 +45,7 @@ def make_voting_classifier() -> Callable[..., VotingClassifier]:
         if not models:
             models = [
                 MyDummyClassifier(
-                    feat_type={i: "numerical" for i in range(4)},
+                    feat_type={i: "numerical" for i in range(X.shape[1])},
                     config=1,
                     random_state=seed,
                 )
@@ -89,7 +89,7 @@ def make_voting_regressor() -> Callable[..., VotingRegressor]:
         if not models:
             models = [
                 MyDummyRegressor(
-                    feat_type={i: "numerical" for i in range(4)},
+                    feat_type={i: "numerical" for i in range(X.shape[1])},
                     config=1,
                     random_state=seed,
                 )

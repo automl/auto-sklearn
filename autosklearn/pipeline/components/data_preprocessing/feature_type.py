@@ -155,8 +155,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 columns = set(range(n_feats))
             if expected != columns:
                 try:
-                    # columns = [str(col) for col in columns]
-                    pass
+                    columns = [str(col) for col in columns]
                 except Exception as e:
                     raise ValueError(
                         f"Train data has columns={expected} yet the"

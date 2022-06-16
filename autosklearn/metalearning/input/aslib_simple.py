@@ -145,6 +145,7 @@ class AlgorithmSelectionProblem(object):
             csv_reader = csv.DictReader(fh)
 
             configurations = dict()
+            hp_names = self.cs.get_hyperparameter_names()
             for line in csv_reader:
                 configuration = dict()
                 algorithm_id = line["idx"]
@@ -152,7 +153,7 @@ class AlgorithmSelectionProblem(object):
                     # Todo adapt to search space
                     if not value or hp_name == "idx":
                         continue
-                    if hp_name not in self.cs.get_hyperparameter_names():
+                    if hp_name not in hp_names:
                         continue
                     try:
                         value = int(value)
