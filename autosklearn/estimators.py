@@ -1,18 +1,6 @@
-# -*- encoding: utf-8 -*-
 from __future__ import annotations
 
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Iterable, Mapping, Sequence
 
 import warnings
 
@@ -26,7 +14,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.ensemble import VotingClassifier, VotingRegressor
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
 from autosklearn.data.validation import (
@@ -40,99 +28,124 @@ from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.util.smac_wrap import SMACCallback
 
+if TYPE_CHECKING:
+    from sklearn.model_selection._split import (
+        BaseCrossValidator,
+        BaseShuffleSplit,
+        _RepeatedSplits,
+    )
+
+    ResampleOptions: TypeAlias = Literal[
+        "holdout",
+        "cv",
+        "holdout-iterative-fit",
+        "cv-iterative-fit",
+        "partial-cv",
+    ]
+    DisableEvaluatorOptions: TypeAlias = Literal["y_optimization", "model"]
+
 
 class AutoSklearnEstimator(BaseEstimator):
     def __init__(
         self,
-        time_left_for_this_task=3600,
-        per_run_time_limit=None,
-        initial_configurations_via_metalearning=25,
+        time_left_for_this_task: int = 3600,
+        per_run_time_limit: int | None = None,  # TODO: allow percentage
+        initial_configurations_via_metalearning: int = 25,  # TODO validate
         ensemble_size: int | None = None,
-        ensemble_class: Type[AbstractEnsemble] | None = EnsembleSelection,
-        ensemble_kwargs: Dict[str, Any] | None = None,
-        ensemble_nbest=50,
-        max_models_on_disc=50,
-        seed=1,
-        memory_limit=3072,
-        include: Optional[Dict[str, List[str]]] = None,
-        exclude: Optional[Dict[str, List[str]]] = None,
-        resampling_strategy="holdout",
-        resampling_strategy_arguments=None,
-        tmp_folder=None,
-        delete_tmp_folder_after_terminate=True,
-        n_jobs: Optional[int] = None,
-        dask_client: Optional[dask.distributed.Client] = None,
-        disable_evaluator_output=False,
-        get_smac_object_callback=None,
-        smac_scenario_args=None,
-        logging_config=None,
-        metadata_directory=None,
+        ensemble_class: type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_kwargs: Mapping[str, Any] | None = None,
+        ensemble_nbest: int = 50,
+        max_models_on_disc: int = 50,
+        seed: int = 1,
+        memory_limit: int | None = 3072,
+        include: Mapping[str, Sequence[str]] | None = None,
+        exclude: Mapping[str, Sequence[str]] | None = None,
+        resampling_strategy: ResampleOptions
+        | BaseCrossValidator
+        | _RepeatedSplits
+        | BaseShuffleSplit = "holdout",
+        resampling_strategy_arguments: Mapping[str, Any] | None = None,
+        tmp_folder: str | None = None,  # TODO support path
+        delete_tmp_folder_after_terminate: bool = True,
+        n_jobs: int = 1,
+        dask_client: dask.distributed.Client | None = None,
+        disable_evaluator_output: bool
+        | Sequence[DisableEvaluatorOptions] = False,  # TODO fill in
+        get_smac_object_callback: SMACCallback | None = None,
+        smac_scenario_args: Mapping[str, Any] | None = None,
+        logging_config: Mapping[str, Any] | None = None,
+        metadata_directory: str | None = None,  # TODO Update for path
         metric: Scorer | Sequence[Scorer] | None = None,
-        scoring_functions: Optional[List[Scorer]] = None,
+        scoring_functions: Sequence[Scorer] | None = None,
         load_models: bool = True,
         get_trials_callback: SMACCallback | None = None,
-        dataset_compression: Union[bool, Mapping[str, Any]] = True,
+        dataset_compression: bool | Mapping[str, Any] = True,
         allow_string_features: bool = True,
     ):
         """
         Parameters
         ----------
-        time_left_for_this_task : int, optional (default=3600)
-            Time limit in seconds for the search of appropriate
-            models. By increasing this value, *auto-sklearn* has a higher
-            chance of finding better models.
+        time_left_for_this_task : int = 3600
+            Time limit in seconds for the search of appropriate models.
+            By increasing this value, *auto-sklearn* has a higher chance of finding better
+            models.
 
-        per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)
-            Time limit for a single call to the machine learning model.
-            Model fitting will be terminated if the machine learning
-            algorithm runs over the time limit. Set this value high enough so
-            that typical machine learning algorithms can be fit on the
-            training data.
+        per_run_time_limit : int | None = None
+            Time limit in seconds for a single call to the machine learning model.
+            Model fitting will be terminated if the machine learning algorithm runs over
+            the time limit.
 
-        initial_configurations_via_metalearning : int, optional (default=25)
+            If left as None, will default to 1/10th of the total `time_left_for_this_task`
+
+            Set this value high enough so that typical machine learning
+            algorithms can be fit on the training data.
+
+        initial_configurations_via_metalearning : int = 25
             Initialize the hyperparameter optimization algorithm with this
             many configurations which worked well on previously seen
             datasets. Disable if the hyperparameter optimization algorithm
             should start from scratch.
 
-        ensemble_size : int, optional
+        ensemble_size : int | None = None
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
             replacement. If set to ``0`` no ensemble is fit.
 
-            Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+            **Deprecated** - will be removed in Auto-sklearn 0.16. Please pass
             this argument via ``ensemble_kwargs={"ensemble_size": int}``
             if you want to change the ensemble size for ensemble selection.
 
-        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
-            Class implementing the post-hoc ensemble algorithm. Set to
-            ``None`` to disable ensemble building or use ``SingleBest``
-            to obtain only use the single best model instead of an
-            ensemble.
+        ensemble_class : type[AbstractEnsemble] | None = EnsembleSelection
+            Class implementing the post-hoc ensemble algorithm.
 
-        ensemble_kwargs : Dict, optional
+            Set to ``None`` to disable ensemble building, ``EnsembleSelection``
+            for the default ensemble autosklearn builds or use ``SingleBest``
+            to obtain only use the single best model instead of an ensemble.
+
+        ensemble_kwargs : Mapping[str, Any] | None = None
             Keyword arguments that are passed to the ensemble class upon
             initialization.
 
-        ensemble_nbest : int, optional (default=50)
+        ensemble_nbest : int = 50
             Only consider the ``ensemble_nbest`` models when building an
             ensemble. This is inspired by a concept called library pruning
             introduced in `Getting Most out of Ensemble Selection`. This
             is independent of the ``ensemble_class`` argument and this
             pruning step is done prior to constructing an ensemble.
 
-        max_models_on_disc: int, optional (default=50),
+        max_models_on_disc: int | None = 50
             Defines the maximum number of models that are kept in the disc.
             The additional number of models are permanently deleted. Due to the
             nature of this variable, it sets the upper limit on how many models
             can be used for an ensemble.
-            It must be an integer greater or equal than 1.
-            If set to None, all models are kept on the disc.
 
-        seed : int, optional (default=1)
+            * If int, must be >= 1
+            * If None, all models are kept on the disc.
+
+        seed : int = 1
             Used to seed SMAC. Will determine the output file names.
 
-        memory_limit : int, optional (3072)
+        memory_limit : int | None = 3072
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than ``memory_limit`` MB.
@@ -144,7 +157,7 @@ class AutoSklearnEstimator(BaseEstimator):
               ``n_jobs x memory_limit``.
             * The memory limit also applies to the ensemble creation process.
 
-        include : Optional[Dict[str, List[str]]] = None
+        include : Mapping[str, Sequence[str]] = None
             If None, all possible algorithms are used.
 
             Otherwise, specifies a step and the components that are included in search.
@@ -169,7 +182,7 @@ class AutoSklearnEstimator(BaseEstimator):
                     'feature_preprocessor': ["no_preprocessing"]
                 }
 
-        exclude : Optional[Dict[str, List[str]]] = None
+        exclude : Mapping[str, Sequence[str]]] = None
             If None, all possible algorithms are used.
 
             Otherwise, specifies a step and the components that are excluded from search.
@@ -194,7 +207,7 @@ class AutoSklearnEstimator(BaseEstimator):
                     'feature_preprocessor': ["no_preprocessing"]
                 }
 
-        resampling_strategy : str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = "holdout"
+        resampling_strategy : "holdout" | "holdout-iterative-fit" | "cv" | "cv-iterative-fit" | "partial-cv" | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = "holdout"
             How to to handle overfitting, might need to use ``resampling_strategy_arguments``
             if using ``"cv"`` based method or a Splitter object.
 
@@ -213,7 +226,7 @@ class AutoSklearnEstimator(BaseEstimator):
             and ensure that ``"subsample"`` is not included in the applied compression
             ``"methods"`` or disable it entirely with ``False``.
 
-        resampling_strategy_arguments : Optional[Dict] = None
+        resampling_strategy_arguments : Mapping[str, Any] | None = None
             Additional arguments for ``resampling_strategy``, this is required if
             using a ``cv`` based strategy. The default arguments if left as ``None``
             are:
@@ -230,34 +243,34 @@ class AutoSklearnEstimator(BaseEstimator):
             `PredefinedSplit <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold>`_,
             the value of ``"folds"`` will be used.
 
-        tmp_folder : string, optional (None)
+        tmp_folder : str | None = None
             folder to store configuration output and log files, if ``None``
             automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
 
-        delete_tmp_folder_after_terminate: bool, optional (True)
+        delete_tmp_folder_after_terminate: bool = True
             remove tmp_folder, when finished. If tmp_folder is None
             tmp_dir will always be deleted
 
-        n_jobs : int, optional, experimental
+        n_jobs : int = 1
             The number of jobs to run in parallel for ``fit()``. ``-1`` means
             using all processors.
 
             **Important notes**:
 
             * By default, Auto-sklearn uses one core.
-            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number
-              of models in the ensemble.
+                * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number
+                  of models in the ensemble.
             * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)
             * If ``dask_client`` is ``None``, a new dask client is created.
 
-        dask_client : dask.distributed.Client, optional
+        dask_client : dask.distributed.Client | None = None
             User-created dask client, can be used to start a dask cluster and then
             attach auto-sklearn to it.
 
-        disable_evaluator_output: bool or list, optional (False)
-            If True, disable model and prediction output. Cannot be used
+        disable_evaluator_output: bool | Sequence["y_optimization" | "model"] = False
+            If ``True``, disable model and prediction output. Cannot be used
             together with ensemble building. ``predict()`` cannot be used when
-            setting this True. Can also be used as a list to pass more
+            setting this ``True``. Can also be used as a list to pass more
             fine-grained information on what to save. Allowed elements in the
             list are:
 
@@ -266,12 +279,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
             * ``model`` : do not save any model files
 
-        smac_scenario_args : dict, optional (None)
-            Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation <https://automl.github.io/SMAC3/master/pages/details/scenario.html>`_
-            for a list of available arguments.
-
-        get_smac_object_callback : callable
+        get_smac_object_callback : Callable | None = None
             Callback function to create an object of class
             `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/master/apidoc/smac.optimizer.smbo.html>`_.
             The function must accept the arguments ``scenario_dict``,
@@ -279,29 +287,35 @@ class AutoSklearnEstimator(BaseEstimator):
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
 
-        logging_config : dict, optional (None)
-            dictionary object specifying the logger configuration. If None,
-            the default logging.yaml file is used, which can be found in
+        smac_scenario_args : Mapping[str, Any] | None = None
+            Additional arguments inserted into the scenario of SMAC. See the
+            `SMAC documentation <https://automl.github.io/SMAC3/master/pages/details/scenario.html>`_
+            for a list of available arguments.
+
+        logging_config : Mapping[str, Any] | None = None
+            Mapping object specifying the logger configuration.
+            If None, the default **logging.yaml** file is used, which can be found in
             the directory ``util/logging.yaml`` relative to the installation.
 
-        metadata_directory : str, optional (None)
+        metadata_directory : str | None = None
             path to the metadata directory. If None, the default directory
             (autosklearn.metalearning.files) is used.
 
-        metric : Scorer, optional (None)
+        metric : Scorer | Sequence[Scorer] | None = None
             An instance of :class:`autosklearn.metrics.Scorer` as created by
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
+            If multiple are passed, will evaluate models with respect to all metrics.
             If None is provided, a default metric is selected depending on the task.
 
-        scoring_functions : List[Scorer], optional (None)
+        scoring_functions : Sequnce[Scorer] | None = None
             List of scorers which will be calculated for each pipeline and results will be
             available via ``cv_results``
 
-        load_models : bool, optional (True)
+        load_models : bool = True
             Whether to load the models after fitting Auto-sklearn.
 
-        get_trials_callback: callable
+        get_trials_callback: Callable
             A callable with the following definition.
 
             * (smac.SMBO, smac.RunInfo, smac.RunValue, time_left: float) -> bool | None
@@ -316,7 +330,7 @@ class AutoSklearnEstimator(BaseEstimator):
             See the example:
             :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>`.
 
-        dataset_compression: Union[bool, Mapping[str, Any]] = True
+        dataset_compression: bool | Mapping[str, Any] = True
             We compress datasets so that they fit into some predefined amount of memory.
             Currently this does not apply to dataframes or sparse arrays, only to raw
             numpy arrays.
@@ -464,16 +478,15 @@ class AutoSklearnEstimator(BaseEstimator):
         self.dataset_compression = dataset_compression
         self.allow_string_features = allow_string_features
 
-        self.automl_ = None  # type: Optional[AutoML]
+        self.automl_: AutoML | None = None
 
         # Handle the number of jobs and the time for them
+        # Made private by `_n_jobs` to keep with sklearn compliance
         self._n_jobs = None
-        if self.n_jobs is None or self.n_jobs == 1:
-            self._n_jobs = 1
-        elif self.n_jobs == -1:
+        if n_jobs == -1:
             self._n_jobs = joblib.cpu_count()
         else:
-            self._n_jobs = self.n_jobs
+            self._n_jobs = n_jobs
 
         super().__init__()
 
@@ -532,15 +545,15 @@ class AutoSklearnEstimator(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
-        config: Union[Configuration, Dict[str, Union[str, float, int]]],
-        dataset_name: Optional[str] = None,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[str]] = None,
+        y: SUPPORTED_TARGET_TYPES | spmatrix,
+        config: Configuration | dict[str, str | float | int],
+        dataset_name: str | None = None,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        feat_type: list[str] | None = None,
         *args,
-        **kwargs: Dict,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+        **kwargs: dict,
+    ) -> tuple[BasePipeline | None, RunInfo, RunValue]:
         """Fits and individual pipeline configuration and returns
         the result to the user.
 
@@ -606,11 +619,11 @@ class AutoSklearnEstimator(BaseEstimator):
         y,
         task: int = None,
         precision: Literal[16, 21, 64] = 32,
-        dataset_name: Optional[str] = None,
+        dataset_name: str | None = None,
         ensemble_size: int | None = None,
-        ensemble_kwargs: Optional[Dict[str, Any]] = None,
-        ensemble_nbest: Optional[int] = None,
-        ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
+        ensemble_kwargs: dict[str, Any] | None = None,
+        ensemble_nbest: int | None = None,
+        ensemble_class: AbstractEnsemble | None = EnsembleSelection,
         metrics: Scorer | Sequence[Scorer] | None = None,
     ):
         """Fit an ensemble to models trained during an optimization process.
@@ -893,10 +906,10 @@ class AutoSklearnEstimator(BaseEstimator):
         self,
         detailed: bool = False,
         ensemble_only: bool = True,
-        top_k: Union[int, Literal["all"]] = "all",
+        top_k: int | Literal["all"] = "all",
         sort_by: str = "cost",
         sort_order: Literal["auto", "ascending", "descending"] = "auto",
-        include: Optional[Union[str, Iterable[str]]] = None,
+        include: str | Iterable[str] | None = None,
     ) -> pd.DataFrame:
         """Returns a pandas table of results for all evaluated models.
 
@@ -1254,7 +1267,7 @@ class AutoSklearnEstimator(BaseEstimator):
     @staticmethod
     def _leaderboard_columns(
         num_metrics: int,
-    ) -> Dict[Literal["all", "simple", "detailed"], List[str]]:
+    ) -> dict[Literal["all", "simple", "detailed"], list[str]]:
         if num_metrics == 1:
             cost_list = ["cost"]
         else:
@@ -1294,11 +1307,11 @@ class AutoSklearnEstimator(BaseEstimator):
     def get_configuration_space(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        dataset_name: Optional[str] = None,
-        feat_type: Optional[List[str]] = None,
+        y: SUPPORTED_TARGET_TYPES | spmatrix,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        dataset_name: str | None = None,
+        feat_type: list[str] | None = None,
     ) -> ConfigurationSpace:
         """
         Returns the Configuration Space object, from which Auto-Sklearn
