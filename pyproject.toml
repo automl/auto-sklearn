@@ -3,7 +3,7 @@
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
-minversion = "3.7"
+minversion = "3.8"
 addopts = "--forked"
 
 [tool.coverage.run]
@@ -21,10 +21,10 @@ exclude_lines = [
 ]
 
 [tool.black]
-target-version = ['py37']
+target-version = ['py38']
 
 [tool.isort]
-py_version = "37"
+py_version = "38"
 profile = "black" # Play nicely with black
 src_paths = ["autosklearn", "test"]
 known_types = ["typing", "abc"] # We put these in their own section TYPES
@@ -66,7 +66,7 @@ add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
 ]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 
 show_error_codes = true
 
@@ -76,12 +76,16 @@ follow_imports = "normal" # Type check top level api code we use from imports
 ignore_missing_imports = false # prefer explicit ignores
 
 disallow_untyped_defs = true # All functions must have types
-disallow_untyped_decorators = true # ... even decorators
 disallow_incomplete_defs = true # ...all types
+disallow_untyped_decorators = true # ... even decorators
+check_untyped_defs = true  # Check untyped functions too incase it can glean type info
+
+no_implicit_optional = false  # `int = None` should be `int | None = None`
 
 # This is a problem with the tests of `automl_common` being distributed as a submodule
 # probably indicative that is should be a package.
 exclude = "autosklearn/automl_common/test"
+
 
 # This is handled by automl_common itself in its own CI
 [[tool.mypy.overrides]]
@@ -91,8 +95,6 @@ ignore_errors = true
 # Submodules that need to be updated with mypy
 [[tool.mypy.overrides]]
 module = [
-    "autosklearn", #__init__
-    "autosklearn.estimators",
     "autosklearn.automl",
     "autosklearn.smbo",
     "autosklearn.experimental.askl2",
