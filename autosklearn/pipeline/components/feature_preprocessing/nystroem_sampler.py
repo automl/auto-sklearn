@@ -1,3 +1,4 @@
+from typing import Dict, Union, Optional
 from ConfigSpace.conditions import EqualsCondition, InCondition
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
@@ -14,6 +15,8 @@ from autosklearn.pipeline.constants import (
     SPARSE,
     UNSIGNED_DATA,
 )
+
+DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class Nystroem(AutoSklearnPreprocessingAlgorithm):
@@ -65,7 +68,6 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         if self.kernel == "chi2":
             if scipy.sparse.issparse(X):
                 X.data[X.data < 0] = 0.0
-                X = X.todense()
             else:
                 X[X < 0] = 0.0
 
@@ -95,7 +97,10 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
+    def get_hyperparameter_search_space(
+            feat_type: Optional[Dict[Union[str, int], str]] = None,
+            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+    ):
         if dataset_properties is not None and (
             dataset_properties.get("sparse") is True
             or dataset_properties.get("signed") is False
