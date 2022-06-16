@@ -41,7 +41,7 @@ class BaseTest(unittest.TestCase):
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
-            pipeline=pipeline
+            pipeline=pipeline,
         )
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 13)
@@ -59,7 +59,7 @@ class BaseTest(unittest.TestCase):
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
-            pipeline=pipeline
+            pipeline=pipeline,
         )
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 13)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices), 10)
@@ -78,7 +78,7 @@ class BaseTest(unittest.TestCase):
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
-            pipeline=pipeline
+            pipeline=pipeline,
         )
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 13)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices), 15)
@@ -94,7 +94,7 @@ class BaseTest(unittest.TestCase):
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
-            pipeline=pipeline
+            pipeline=pipeline,
         )
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 12)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices), 15)
@@ -113,7 +113,7 @@ class BaseTest(unittest.TestCase):
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
-            pipeline=pipeline
+            pipeline=pipeline,
         )
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 12)
