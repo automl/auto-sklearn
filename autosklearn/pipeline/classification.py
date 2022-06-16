@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import copy
 from itertools import product
@@ -75,11 +75,11 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         config: Optional[Configuration] = None,
         steps=None,
-        dataset_properties=None,
-        include=None,
-        exclude=None,
+        dataset_properties: Dict[str, bool] = None,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params=None,
+        init_params: Optional[Dict[str, Any]] = None,
     ):
         self._output_dtype = np.int32
         if dataset_properties is None:
@@ -174,7 +174,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Create the hyperparameter configuration space.
 
@@ -355,9 +355,11 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         self.dataset_properties = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self,
-                            dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
-                            feat_type: Optional[Dict[Union[str, int], str]] = None):
+    def _get_pipeline_steps(
+        self,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+    ):
         steps = []
 
         default_dataset_properties = {"target_type": "classification"}

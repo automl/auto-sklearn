@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, Any
+from typing import Any, Dict, Optional, Union
 
 import importlib
 import inspect
@@ -102,8 +102,8 @@ class AutoSklearnComponent(BaseEstimator):
 
     @staticmethod
     def get_hyperparameter_search_space(
-            feat_type: Optional[Dict[Union[str, int], str]] = None,
-            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space of this classification algorithm.
 
@@ -142,10 +142,12 @@ class AutoSklearnComponent(BaseEstimator):
         for further information."""
         raise NotImplementedError()
 
-    def set_hyperparameters(self,
-                            configuration: Configuration,
-                            feat_type: Optional[Dict[Union[str, int], str]] = None,
-                            init_params: Optional[Dict[str, Any]] = None):
+    def set_hyperparameters(
+        self,
+        configuration: Configuration,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        init_params: Optional[Dict[str, Any]] = None,
+    ):
         params = configuration.get_dictionary()
 
         for param, value in params.items():

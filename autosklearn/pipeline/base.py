@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from typing import Dict, Union, Optional, Any
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import scipy.sparse
@@ -208,10 +208,12 @@ class BasePipeline(Pipeline):
 
                 return y
 
-    def set_hyperparameters(self,
-                            configuration: Configuration,
-                            feat_type: Optional[Dict[Union[str, int], str]] = None,
-                            init_params: Optional[Dict[str, Any]] = None):
+    def set_hyperparameters(
+        self,
+        configuration: Configuration,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        init_params: Optional[Dict[str, Any]] = None,
+    ):
         self.config = configuration
 
         for node_idx, n_ in enumerate(self.steps):
@@ -258,9 +260,11 @@ class BasePipeline(Pipeline):
 
         return self
 
-    def get_hyperparameter_search_space(self,
-                                        feat_type: Optional[Dict[Union[str, int], str]] = None,
-                                        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None):
+    def get_hyperparameter_search_space(
+        self,
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+    ):
         """Return the configuration space for the CASH problem.
 
         Returns
@@ -283,7 +287,7 @@ class BasePipeline(Pipeline):
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space for the CASH problem.
 
@@ -334,7 +338,7 @@ class BasePipeline(Pipeline):
         include: Dict[str, str],
         exclude: Dict[str, str],
         pipeline,
-        feat_type: Optional[Dict[Union[str, int], str]] = None
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
     ):
         if include is None:
             if self.include is None:
@@ -400,8 +404,9 @@ class BasePipeline(Pipeline):
             if not is_choice:
                 cs.add_configuration_space(
                     node_name,
-                    node.get_hyperparameter_search_space(dataset_properties=dataset_properties,
-                                                         feat_type=feat_type),
+                    node.get_hyperparameter_search_space(
+                        dataset_properties=dataset_properties, feat_type=feat_type
+                    ),
                 )
             # If the node is a choice, we have to figure out which of its
             #  choices are actually legal choices

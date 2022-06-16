@@ -303,7 +303,9 @@ class AbstractEvaluator(object):
         # Please mypy to prevent not defined attr
         self.model = self._get_model(feat_type=self.feat_type)
 
-    def _get_model(self, feat_type: Optional[Dict[Union[str, int], str]]) -> BaseEstimator:
+    def _get_model(
+        self, feat_type: Optional[Dict[Union[str, int], str]]
+    ) -> BaseEstimator:
         if not isinstance(self.configuration, Configuration):
             model = self.model_class(
                 feat_type=feat_type,

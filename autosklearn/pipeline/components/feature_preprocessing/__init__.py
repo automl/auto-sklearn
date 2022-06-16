@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, Type
+from typing import Dict, Optional, Type, Union
 
 import os
 from collections import OrderedDict
@@ -22,6 +22,7 @@ additional_components = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 _addons["feature_preprocessing"] = additional_components
 
 DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
+
 
 def add_preprocessor(preprocessor: Type[AutoSklearnPreprocessingAlgorithm]) -> None:
     additional_components.add_component(preprocessor)

@@ -1,4 +1,5 @@
-from typing import Dict, Union, Optional
+from typing import Dict, Union
+
 from functools import partial
 
 from ConfigSpace import NotEqualsCondition

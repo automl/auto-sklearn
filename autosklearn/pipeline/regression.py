@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Union
 
 import copy
 from itertools import product
@@ -72,9 +72,9 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         config: Optional[Configuration] = None,
         steps=None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        dataset_properties: Dict[str, bool] = None,
+        include: Optional[Dict[str, List[str]]] = None,
+        exclude: Optional[Dict[str, List[str]]] = None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
         init_params: Optional[Dict[str, Any]] = None,
     ):
@@ -120,7 +120,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         feat_type: Optional[Dict[Union[str, int], str]] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space for the CASH problem.
 
@@ -268,10 +268,12 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_estimator_components(self):
         return regression_components._regressors
 
-    def _get_pipeline_steps(self,
-                            dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
-                            feat_type: Optional[Dict[Union[str, int], str]] = None,
-                            init_params: Optional[Dict[str, Any]] = None):
+    def _get_pipeline_steps(
+        self,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        init_params: Optional[Dict[str, Any]] = None,
+    ):
         steps = []
 
         default_dataset_properties = {"target_type": "regression"}

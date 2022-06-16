@@ -1,4 +1,4 @@
-from typing import Type, Dict, Union, Optional
+from typing import Dict, Optional, Type, Union
 
 import os
 from collections import OrderedDict

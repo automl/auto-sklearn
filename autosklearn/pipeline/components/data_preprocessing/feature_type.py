@@ -117,20 +117,20 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             init_params=init_params,
         )
 
-        if self.feat_type is None:
-            self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
-                ("categorical_transformer", self.categ_ppl),
-                ("numerical_transformer", self.numer_ppl),
-                ("text_transformer", self.txt_ppl),
-            ]
-        else:
-            self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
-            if "categorical" in self.feat_type.values():
-                self._transformers.append(("categorical_transformer", self.categ_ppl))
-            if "numerical" in self.feat_type.values():
-                self._transformers.append(("numerical_transformer", self.numer_ppl))
-            if "string" in self.feat_type.values():
-                self._transformers.append(("text_transformer", self.txt_ppl))
+        # if self.feat_type is None:
+        #     self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
+        #         ("categorical_transformer", self.categ_ppl),
+        #         ("numerical_transformer", self.numer_ppl),
+        #         ("text_transformer", self.txt_ppl),
+        #     ]
+        # else:
+        self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
+        if "categorical" in self.feat_type.values():
+            self._transformers.append(("categorical_transformer", self.categ_ppl))
+        if "numerical" in self.feat_type.values():
+            self._transformers.append(("numerical_transformer", self.numer_ppl))
+        if "string" in self.feat_type.values():
+            self._transformers.append(("text_transformer", self.txt_ppl))
 
         if self.config:
             self.set_hyperparameters(
@@ -328,7 +328,9 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             if hasattr(st_operation, "get_hyperparameter_search_space"):
                 cs.add_configuration_space(
                     st_name,
-                    st_operation.get_hyperparameter_search_space(dataset_properties=dataset_properties),
+                    st_operation.get_hyperparameter_search_space(
+                        dataset_properties=dataset_properties
+                    ),
                 )
             else:
                 return FeatTypeSplit._get_hyperparameter_search_space_recursevely(

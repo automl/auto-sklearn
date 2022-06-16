@@ -1,4 +1,5 @@
-from typing import Dict, Union, Optional
+from typing import Dict, Optional, Union
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
     CategoricalHyperparameter,
@@ -98,8 +99,8 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-            feat_type: Optional[Dict[Union[str, int], str]] = None,
-            dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
+        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         n_estimators = UniformIntegerHyperparameter(
             name="n_estimators", lower=10, upper=100, default_value=10
