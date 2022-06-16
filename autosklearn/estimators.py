@@ -262,8 +262,8 @@ class AutoSklearnEstimator(BaseEstimator):
             list are:
 
             * ``'y_optimization'`` : do not save the predictions for the
-              optimization/validation set, which would later on be used to build
-              an ensemble.
+              optimization set, which would later on be used to build an ensemble.
+
             * ``model`` : do not save any model files
 
         smac_scenario_args : dict, optional (None)

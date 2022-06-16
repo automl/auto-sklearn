@@ -699,8 +699,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             [cal[1]["n_iter"] for cal in pipeline_mock.iterative_fit.call_args_list],
             [2, 2, 4, 8, 16, 32, 64, 128, 256],
         )
-        # fifteen calls because of the holdout, the validation and the test set
-        # and a total of five calls because of five iterations of fitting
         self.assertTrue(hasattr(evaluator, "model"))
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 9)
         self.assertEqual(pipeline_mock.predict_proba.call_count, 27)
