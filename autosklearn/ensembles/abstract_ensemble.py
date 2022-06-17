@@ -79,7 +79,7 @@ class AbstractEnsemble(ABC):
 
         Returns
         -------
-        array : [n_data_points]
+        np.ndarray
         """
         pass
 
@@ -97,7 +97,7 @@ class AbstractEnsemble(ABC):
 
         Returns
         -------
-        array : [(weight_1, model_1), ..., (weight_n, model_n)]
+        List[Tuple[float, BasePipeline]]
         """
 
     @abstractmethod
@@ -115,7 +115,7 @@ class AbstractEnsemble(ABC):
 
         Returns
         -------
-        array : [(identifier_1, weight_1), ..., (identifier_n, weight_n)]
+        List[Tuple[Tuple[int, int, float], float]
         """
 
     @abstractmethod
@@ -141,4 +141,4 @@ class AbstractEnsemble(ABC):
 
 class AbstractMultiObjectiveEnsemble(AbstractEnsemble):
     def get_pareto_set(self) -> Sequence[AbstractEnsemble]:
-        pass
+        raise NotImplementedError()
