@@ -408,7 +408,7 @@ class AutoSklearnEstimator(BaseEstimator):
         if ensemble_class == "default":
             ensemble_class = (
                 EnsembleSelection
-                if isinstance(metric, Scorer) or len(metric) == 1
+                if metric is None or isinstance(metric, Scorer) or len(metric) == 1
                 else MultiObjectiveDummyEnsemble
             )
         self.ensemble_class = ensemble_class
@@ -692,7 +692,7 @@ class AutoSklearnEstimator(BaseEstimator):
         if ensemble_class == "default":
             ensemble_class = (
                 EnsembleSelection
-                if isinstance(metric, Scorer) or len(metric) == 1
+                if metric is None or isinstance(metric, Scorer) or len(metric) == 1
                 else MultiObjectiveDummyEnsemble
             )
 
