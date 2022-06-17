@@ -189,9 +189,6 @@ class TestMetadataGeneration(unittest.TestCase):
         )
         print("COMMAND: %s" % cmd)
 
-        # With a timeout of 30seconds, it seems to not complete here on the github
-        # action servers. It's stochastic and
-        #
         return_value = subprocess.run(
             cmd,
             shell=True,
