@@ -264,8 +264,7 @@ def case_classifier_fitted_no_ensemble(
     make_automl_classifier: Callable[..., AutoMLClassifier],
     make_sklearn_dataset: Callable[..., Tuple[np.ndarray, ...]],
 ) -> AutoMLClassifier:
-    """Case of a fitted classifier but ensemble was disabled by
-    not writing models to disk"""
+    """Case of a fitted classifier but ensemble was disabled"""
     key = f"case_classifier_fitted_no_ensemble_{dataset}"
 
     # This locks the cache for this item while we check, required for pytest-xdist
@@ -276,7 +275,6 @@ def case_classifier_fitted_no_ensemble(
                 temporary_directory=cache.path("backend"),
                 delete_tmp_folder_after_terminate=False,
                 ensemble_class=None,
-                disable_evaluator_output=True,
             )
 
             X, y, Xt, yt = make_sklearn_dataset(name=dataset)
