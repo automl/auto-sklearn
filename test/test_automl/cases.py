@@ -28,7 +28,10 @@ import sklearn.model_selection
 import autosklearn.metrics
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.automl_common.common.utils.backend import Backend
-from autosklearn.evaluation.abstract_evaluator import MyDummyClassifier
+from autosklearn.evaluation.abstract_evaluator import (
+    MyDummyClassifier,
+    MyDummyRegressor,
+)
 
 from pytest_cases import case, parametrize
 
@@ -318,6 +321,48 @@ def case_classifier_fitted_only_dummy(
             # We now validate that indeed, the only model is the Dummy
             members = list(model.models_.values())
             if len(members) != 1 and not isinstance(members[0], MyDummyClassifier):
+                raise ValueError("Should only have one model, dummy\n", members)
+
+            cache.save(model, "model")
+
+    model = cache.load("model")
+    model._backend = copy_backend(old=model._backend, new=make_backend())
+
+    return model
+
+
+@case(tags=["regressor", "fitted"])
+def case_regressor_fitted_only_dummy(
+    make_cache: Callable[[str], Cache],
+    make_backend: Callable[..., Backend],
+    make_automl_regressor: Callable[..., AutoMLRegressor],
+) -> AutoMLRegressor:
+    """Case of a fitted classifier but only dummy was found"""
+    key = "case_regressor_fitted_only_dummy"
+
+    # This locks the cache for this item while we check, required for pytest-xdist
+
+    with make_cache(key) as cache:
+        if "model" not in cache:
+            model = make_automl_regressor(
+                temporary_directory=cache.path("backend"),
+                delete_tmp_folder_after_terminate=False,
+                include={"classifier": ["k_nearest_neighbors"]},  # Just a meh model
+                get_trials_callback=stop_at_first,
+            )
+
+            rand = np.random.RandomState(2)
+            _X = rand.random((100, 50))
+            _y = rand.random((100,))
+
+            X, Xt, y, yt = sklearn.model_selection.train_test_split(
+                _X, _y, random_state=1  # Required to ensure dummy is best
+            )
+            model.fit(X, y, dataset_name="random")
+
+            # We now validate that indeed, the only model is the Dummy
+            members = list(model.models_.values())
+            if len(members) != 1 and not isinstance(members[0], MyDummyRegressor):
                 raise ValueError("Should only have one model, dummy\n", members)
 
             cache.save(model, "model")
