@@ -48,6 +48,7 @@ from sklearn.model_selection._split import (
     BaseShuffleSplit,
     _RepeatedSplits,
 )
+from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 from smac.callbacks import IncorporateRunResultCallback
@@ -1473,6 +1474,7 @@ class AutoML(BaseEstimator):
         # Each process computes predictions in chunks of batch_size rows.
         try:
             for i, tmp_model in enumerate(self.models_.values()):
+                # TODO, modify this
                 if isinstance(tmp_model, (DummyRegressor, DummyClassifier)):
                     check_is_fitted(tmp_model)
                 else:
@@ -1683,10 +1685,8 @@ class AutoML(BaseEstimator):
         return ensemble
 
     def _load_pareto_set(self) -> Sequence[VotingClassifier | VotingRegressor]:
-        if self._ensemble_class is not None:
+        if self.ensemble_ is None:
             self.ensemble_ = self._backend.load_ensemble(self._seed)
-        else:
-            self.ensemble_ = None
 
         # If no ensemble is loaded we cannot do anything
         if not self.ensemble_:
@@ -1716,8 +1716,10 @@ class AutoML(BaseEstimator):
                     estimators=None,
                     voting="soft",
                 )
+                kind = "classifier"
             else:
                 voter = VotingRegressor(estimators=None)
+                kind = "regeressor"
 
             if self._resampling_strategy in ("cv", "cv-iterative-fit"):
                 models = self._backend.load_cv_models_by_identifiers(identifiers)
@@ -1730,8 +1732,32 @@ class AutoML(BaseEstimator):
             weight_vector = []
             estimators = []
             for identifier in identifiers:
-                weight_vector.append(weights[identifier])
-                estimators.append(models[identifier])
+                estimator = models[identifier]
+                weight = weights[identifier]
+
+                # Kind of hacky, really the dummy models should
+                # act like everything else does. Doing this is
+                # required so that the VotingClassifier/Regressor
+                # can use it as intended
+                if not isinstance(estimator, Pipeline):
+                    if kind == "classifier":
+                        steps = [
+                            ("data_preprocessor", None),
+                            ("balancing", None),
+                            ("feature_preprocessor", None),
+                            (kind, estimator),
+                        ]
+                    else:
+                        steps = [
+                            ("data_preprocessor", None),
+                            ("feature_preprocessor", None),
+                            (kind, estimator),
+                        ]
+
+                    estimator = Pipeline(steps=steps)
+
+                weight_vector.append(weight)
+                estimators.append(estimator)
 
             voter.estimators = estimators
             voter.estimators_ = estimators
@@ -2148,7 +2174,7 @@ class AutoML(BaseEstimator):
 
         ensemble_dict = {}
 
-        if self._ensemble_class is not None:
+        if self._ensemble_class is None:
             warnings.warn(
                 "No models in the ensemble. Kindly provide an ensemble class."
             )
