@@ -133,27 +133,14 @@ def get_multiclass_classification_datamanager():
     np.random.shuffle(indices)
     X_train = X_train[indices]
     Y_train = Y_train[indices]
-
-    X_valid = X_test[
-        :25,
-    ]
-    Y_valid = Y_test[
-        :25,
-    ]
-    X_test = X_test[
-        25:,
-    ]
-    Y_test = Y_test[
-        25:,
-    ]
+    X_test = X_test[25:]
+    Y_test = Y_test[25:]
 
     D = Dummy()
     D.info = {"task": MULTICLASS_CLASSIFICATION, "is_sparse": False, "label_num": 3}
     D.data = {
         "X_train": X_train,
         "Y_train": Y_train,
-        "X_valid": X_valid,
-        "Y_valid": Y_valid,
         "X_test": X_test,
         "Y_test": Y_test,
     }
@@ -196,34 +183,16 @@ def get_multilabel_classification_datamanager():
     Y_train = Y_train[indices]
 
     Y_train = np.array(convert_to_bin(Y_train, 3))
-    # for i in range(Y_train_.shape[0]):
-    #    Y_train_[:, Y_train[i]] = 1
-    # Y_train = Y_train_
     Y_test = np.array(convert_to_bin(Y_test, 3))
-    # for i in range(Y_test_.shape[0]):
-    #    Y_test_[:, Y_test[i]] = 1
-    # Y_test = Y_test_
 
-    X_valid = X_test[
-        :25,
-    ]
-    Y_valid = Y_test[
-        :25,
-    ]
-    X_test = X_test[
-        25:,
-    ]
-    Y_test = Y_test[
-        25:,
-    ]
+    X_test = X_test[25:]
+    Y_test = Y_test[25:]
 
     D = Dummy()
     D.info = {"task": MULTILABEL_CLASSIFICATION, "is_sparse": False, "label_num": 3}
     D.data = {
         "X_train": X_train,
         "Y_train": Y_train,
-        "X_valid": X_valid,
-        "Y_valid": Y_valid,
         "X_test": X_test,
         "Y_test": Y_test,
     }
@@ -247,26 +216,14 @@ def get_binary_classification_datamanager():
     X_test = X_test[eliminate_class_two]
     Y_test = Y_test[eliminate_class_two]
 
-    X_valid = X_test[
-        :25,
-    ]
-    Y_valid = Y_test[
-        :25,
-    ]
-    X_test = X_test[
-        25:,
-    ]
-    Y_test = Y_test[
-        25:,
-    ]
+    X_test = X_test[25:]
+    Y_test = Y_test[25:]
 
     D = Dummy()
     D.info = {"task": BINARY_CLASSIFICATION, "is_sparse": False, "label_num": 2}
     D.data = {
         "X_train": X_train,
         "Y_train": Y_train.reshape((-1, 1)),
-        "X_valid": X_valid,
-        "Y_valid": Y_valid.reshape((-1, 1)),
         "X_test": X_test,
         "Y_test": Y_test.reshape((-1, 1)),
     }
@@ -282,26 +239,14 @@ def get_regression_datamanager():
     X_train = X_train[indices]
     Y_train = Y_train[indices]
 
-    X_valid = X_test[
-        :200,
-    ]
-    Y_valid = Y_test[
-        :200,
-    ]
-    X_test = X_test[
-        200:,
-    ]
-    Y_test = Y_test[
-        200:,
-    ]
+    X_test = X_test[200:]
+    Y_test = Y_test[200:]
 
     D = Dummy()
     D.info = {"task": REGRESSION, "is_sparse": False, "label_num": 1}
     D.data = {
         "X_train": X_train,
         "Y_train": Y_train.reshape((-1, 1)),
-        "X_valid": X_valid,
-        "Y_valid": Y_valid.reshape((-1, 1)),
         "X_test": X_test,
         "Y_test": Y_test.reshape((-1, 1)),
     }
@@ -334,8 +279,6 @@ def get_500_classes_datamanager():
     D.data = {
         "X_train": X[:700],
         "Y_train": Y[:700],
-        "X_valid": X[700:710],
-        "Y_valid": Y[700:710],
         "X_test": X[710:],
         "Y_test": Y[710:],
     }

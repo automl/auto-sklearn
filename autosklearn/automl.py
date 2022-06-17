@@ -244,7 +244,7 @@ class AutoML(BaseEstimator):
 
         if isinstance(disable_evaluator_output, Iterable):
             disable_evaluator_output = list(disable_evaluator_output)  # Incase iterator
-            allowed = set(["model", "cv_model", "y_optimization", "y_test", "y_valid"])
+            allowed = set(["model", "cv_model", "y_optimization", "y_test"])
             unknown = allowed - set(disable_evaluator_output)
             if any(unknown):
                 raise ValueError(

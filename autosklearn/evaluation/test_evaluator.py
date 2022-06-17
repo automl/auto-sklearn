@@ -67,7 +67,6 @@ class TestEvaluator(AbstractEvaluator):
             loss=loss,
             train_loss=None,
             opt_pred=Y_pred,
-            valid_pred=None,
             test_pred=None,
             file_output=False,
             final_call=True,
@@ -78,7 +77,6 @@ class TestEvaluator(AbstractEvaluator):
     def predict_and_loss(
         self, train: bool = False
     ) -> Tuple[Union[Dict[str, float], float], np.array, Any, Any]:
-
         if train:
             Y_pred = self.predict_function(
                 self.X_train, self.model, self.task_type, self.Y_train
