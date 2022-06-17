@@ -316,7 +316,6 @@ class TrainEvaluator(AbstractEvaluator):
 
                 Y_train_pred = [None] * self.num_cv_folds
                 Y_optimization_pred = [None] * self.num_cv_folds
-                Y_valid_pred = [None] * self.num_cv_folds
                 Y_test_pred = [None] * self.num_cv_folds
                 train_splits = [None] * self.num_cv_folds
 
@@ -417,7 +416,7 @@ class TrainEvaluator(AbstractEvaluator):
                             **fit_params_array[i],
                         )
 
-                        (train_pred, opt_pred, valid_pred, test_pred) = self._predict(
+                        (train_pred, opt_pred, test_pred) = self._predict(
                             model,
                             train_indices=train_indices,
                             test_indices=test_indices,
@@ -425,7 +424,6 @@ class TrainEvaluator(AbstractEvaluator):
 
                         Y_train_pred[i] = train_pred
                         Y_optimization_pred[i] = opt_pred
-                        Y_valid_pred[i] = valid_pred
                         Y_test_pred[i] = test_pred
                         train_splits[i] = train_indices
 
@@ -499,20 +497,6 @@ class TrainEvaluator(AbstractEvaluator):
                     X_targets = concat_data(X_targets, num_cv_folds=self.num_cv_folds)
                     Y_targets = concat_data(Y_targets, num_cv_folds=self.num_cv_folds)
 
-                    if self.X_valid is not None:
-                        Y_valid_preds = np.array(
-                            [
-                                Y_valid_pred[i]
-                                for i in range(self.num_cv_folds)
-                                if Y_valid_pred[i] is not None
-                            ]
-                        )
-                        # Average the predictions of several models
-                        if len(Y_valid_preds.shape) == 3:
-                            Y_valid_preds = np.nanmean(Y_valid_preds, axis=0)
-                    else:
-                        Y_valid_preds = None
-
                     if self.X_test is not None:
                         Y_test_preds = np.array(
                             [
@@ -544,7 +528,6 @@ class TrainEvaluator(AbstractEvaluator):
                         loss=opt_loss,
                         train_loss=train_loss,
                         opt_pred=Y_optimization_pred_concat,
-                        valid_pred=Y_valid_preds,
                         test_pred=Y_test_preds,
                         additional_run_info=additional_run_info,
                         file_output=True,
@@ -558,7 +541,6 @@ class TrainEvaluator(AbstractEvaluator):
 
             Y_train_pred = [None] * self.num_cv_folds
             Y_optimization_pred = [None] * self.num_cv_folds
-            Y_valid_pred = [None] * self.num_cv_folds
             Y_test_pred = [None] * self.num_cv_folds
             train_splits = [None] * self.num_cv_folds
 
@@ -586,7 +568,6 @@ class TrainEvaluator(AbstractEvaluator):
                     (
                         train_pred,
                         opt_pred,
-                        valid_pred,
                         test_pred,
                         additional_run_info,
                     ) = self._partial_fit_and_predict_standard(
@@ -599,7 +580,6 @@ class TrainEvaluator(AbstractEvaluator):
                     (
                         train_pred,
                         opt_pred,
-                        valid_pred,
                         test_pred,
                         additional_run_info,
                     ) = self._partial_fit_and_predict_budget(
@@ -622,7 +602,6 @@ class TrainEvaluator(AbstractEvaluator):
 
                 Y_train_pred[i] = train_pred
                 Y_optimization_pred[i] = opt_pred
-                Y_valid_pred[i] = valid_pred
                 Y_test_pred[i] = test_pred
                 train_splits[i] = train_split
 
@@ -683,18 +662,6 @@ class TrainEvaluator(AbstractEvaluator):
             X_targets = concat_data(X_targets, num_cv_folds=self.num_cv_folds)
             Y_targets = concat_data(Y_targets, num_cv_folds=self.num_cv_folds)
 
-            if self.X_valid is not None:
-                Y_valid_pred = np.array(
-                    [
-                        Y_valid_pred[i]
-                        for i in range(self.num_cv_folds)
-                        if Y_valid_pred[i] is not None
-                    ]
-                )
-                # Average the predictions of several models
-                if len(np.shape(Y_valid_pred)) == 3:
-                    Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
-
             if self.X_test is not None:
                 Y_test_pred = np.array(
                     [
@@ -746,7 +713,6 @@ class TrainEvaluator(AbstractEvaluator):
                 loss=opt_loss,
                 train_loss=train_loss,
                 opt_pred=Y_optimization_pred,
-                valid_pred=Y_valid_pred if self.X_valid is not None else None,
                 test_pred=Y_test_pred if self.X_test is not None else None,
                 additional_run_info=additional_run_info,
                 file_output=True,
@@ -793,7 +759,6 @@ class TrainEvaluator(AbstractEvaluator):
             (
                 train_pred,
                 opt_pred,
-                valid_pred,
                 test_pred,
                 additional_run_info,
             ) = self._partial_fit_and_predict_standard(
@@ -819,7 +784,6 @@ class TrainEvaluator(AbstractEvaluator):
                 loss=loss,
                 train_loss=train_loss,
                 opt_pred=opt_pred,
-                valid_pred=valid_pred,
                 test_pred=test_pred,
                 file_output=False,
                 final_call=True,
@@ -883,12 +847,7 @@ class TrainEvaluator(AbstractEvaluator):
                     n_iter=n_iter,
                     **fit_params,
                 )
-                (
-                    Y_train_pred,
-                    Y_optimization_pred,
-                    Y_valid_pred,
-                    Y_test_pred,
-                ) = self._predict(
+                (Y_train_pred, Y_optimization_pred, Y_test_pred,) = self._predict(
                     model,
                     train_indices=train_indices,
                     test_indices=test_indices,
@@ -921,7 +880,6 @@ class TrainEvaluator(AbstractEvaluator):
                     loss=loss,
                     train_loss=train_loss,
                     opt_pred=Y_optimization_pred,
-                    valid_pred=Y_valid_pred,
                     test_pred=Y_test_pred,
                     additional_run_info=additional_run_info,
                     file_output=file_output,
@@ -936,7 +894,6 @@ class TrainEvaluator(AbstractEvaluator):
             (
                 Y_train_pred,
                 Y_optimization_pred,
-                Y_valid_pred,
                 Y_test_pred,
                 additional_run_info,
             ) = self._partial_fit_and_predict_standard(
@@ -962,7 +919,6 @@ class TrainEvaluator(AbstractEvaluator):
                 loss=loss,
                 train_loss=train_loss,
                 opt_pred=Y_optimization_pred,
-                valid_pred=Y_valid_pred,
                 test_pred=Y_test_pred,
                 additional_run_info=additional_run_info,
                 file_output=file_output,
@@ -980,7 +936,6 @@ class TrainEvaluator(AbstractEvaluator):
     ) -> Tuple[
         PIPELINE_DATA_DTYPE,  # train_pred
         PIPELINE_DATA_DTYPE,  # opt_pred
-        PIPELINE_DATA_DTYPE,  # valid_pred
         PIPELINE_DATA_DTYPE,  # test_pred
         TYPE_ADDITIONAL_INFO,
     ]:
@@ -1020,7 +975,7 @@ class TrainEvaluator(AbstractEvaluator):
             else self.Y_train[train_indices]
         )
 
-        train_pred, opt_pred, valid_pred, test_pred = self._predict(
+        train_pred, opt_pred, test_pred = self._predict(
             model=model,
             train_indices=train_indices,
             test_indices=test_indices,
@@ -1029,7 +984,6 @@ class TrainEvaluator(AbstractEvaluator):
         return (
             train_pred,
             opt_pred,
-            valid_pred,
             test_pred,
             additional_run_info,
         )
@@ -1043,7 +997,6 @@ class TrainEvaluator(AbstractEvaluator):
     ) -> Tuple[
         PIPELINE_DATA_DTYPE,  # train_pred
         PIPELINE_DATA_DTYPE,  # opt_pred
-        PIPELINE_DATA_DTYPE,  # valid_pred
         PIPELINE_DATA_DTYPE,  # test_pred
         TYPE_ADDITIONAL_INFO,
     ]:
@@ -1073,7 +1026,7 @@ class TrainEvaluator(AbstractEvaluator):
             task_type=self.task_type,
         )
 
-        train_pred, opt_pred, valid_pred, test_pred = self._predict(
+        train_pred, opt_pred, test_pred = self._predict(
             model,
             train_indices=train_indices,
             test_indices=test_indices,
@@ -1088,19 +1041,13 @@ class TrainEvaluator(AbstractEvaluator):
         return (
             train_pred,
             opt_pred,
-            valid_pred,
             test_pred,
             additional_run_info,
         )
 
     def _predict(
         self, model: BaseEstimator, test_indices: List[int], train_indices: List[int]
-    ) -> Tuple[
-        PIPELINE_DATA_DTYPE,
-        PIPELINE_DATA_DTYPE,
-        PIPELINE_DATA_DTYPE,
-        PIPELINE_DATA_DTYPE,
-    ]:
+    ) -> Tuple[PIPELINE_DATA_DTYPE, PIPELINE_DATA_DTYPE, PIPELINE_DATA_DTYPE]:
         train_pred = self.predict_function(
             self.X_train.iloc[train_indices]
             if hasattr(self.X_train, "iloc")
@@ -1123,14 +1070,6 @@ class TrainEvaluator(AbstractEvaluator):
             else self.Y_train[train_indices],
         )
 
-        if self.X_valid is not None:
-            X_valid = self.X_valid.copy()
-            valid_pred = self.predict_function(
-                X_valid, model, self.task_type, self.Y_train[train_indices]
-            )
-        else:
-            valid_pred = None
-
         if self.X_test is not None:
             X_test = self.X_test.copy()
             test_pred = self.predict_function(
@@ -1144,7 +1083,7 @@ class TrainEvaluator(AbstractEvaluator):
         else:
             test_pred = None
 
-        return train_pred, opt_pred, valid_pred, test_pred
+        return train_pred, opt_pred, test_pred
 
     def get_splitter(
         self, D: AbstractDataManager
