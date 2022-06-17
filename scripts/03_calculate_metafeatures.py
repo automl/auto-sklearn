@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import unittest.mock
+import tempfile
 
 import arff
 import joblib
@@ -82,10 +83,7 @@ if __name__ == "__main__":
 
     for task_type in ("classification", "regression"):
         output_directory = os.path.join(working_directory, "metafeatures", task_type)
-        try:
-            os.makedirs(output_directory)
-        except:
-            pass
+        os.makedirs(output_directory, exist_ok=True)
 
         all_metafeatures = {}
 
@@ -100,13 +98,10 @@ if __name__ == "__main__":
         tasks = copy.deepcopy(tasks)
         np.random.shuffle(tasks)
 
-        def producer():
-            for task_id in tasks:
-                yield task_id
-
-        memory = joblib.Memory(location="/tmp/joblib", verbose=10)
+        tmpdir = os.path.join(tempfile.gettempdir(), "joblib")
+        memory = joblib.Memory(location=tmpdir, verbose=10)
         cached_calculate_metafeatures = memory.cache(calculate_metafeatures)
-        mfs = [cached_calculate_metafeatures(task_id) for task_id in producer()]
+        mfs = [cached_calculate_metafeatures(task_id) for task_id in tasks]
 
         for mf in mfs:
             if mf is not None:
