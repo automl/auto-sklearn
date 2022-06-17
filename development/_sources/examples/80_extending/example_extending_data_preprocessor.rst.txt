@@ -154,9 +154,9 @@ Fit the model without performing data preprocessing
  .. code-block:: none
 
     auto-sklearn results:
-      Dataset name: 655d5c7c-ee3f-11ec-87f8-bd77db06b4a1
+      Dataset name: fcee6239-ee47-11ec-87ca-495084c38962
       Metric: accuracy
-      Best validation score: 0.950355
+      Best validation score: 0.943262
       Number of target algorithm runs: 5
       Number of successful target algorithm runs: 5
       Number of crashed target algorithm runs: 0
@@ -190,7 +190,7 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.9230769230769231
+    accuracy:  0.951048951048951
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2152: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
       warnings.warn(
     {}
@@ -201,7 +201,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.775 seconds)
+   **Total running time of the script:** ( 0 minutes  19.044 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_data_preprocessor.py:
