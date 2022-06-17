@@ -79,7 +79,7 @@ from autosklearn.ensembles.abstract_ensemble import (
     AbstractMultiObjectiveEnsemble,
 )
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.ensembles.singlebest_ensemble import SingleBest
+from autosklearn.ensembles.singlebest_ensemble import SingleBestFromRunhistory
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
@@ -1666,7 +1666,7 @@ class AutoML(BaseEstimator):
             return None
 
         # SingleBest contains the best model found by AutoML
-        ensemble = SingleBest(
+        ensemble = SingleBestFromRunhistory(
             metrics=self._metrics,
             task_type=self._task,
             seed=self._seed,
