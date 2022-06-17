@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Sequence
 
 import warnings
 
@@ -60,10 +60,10 @@ class SingleModelEnsemble(AbstractEnsemble):
 
     def fit(
         self,
-        base_models_predictions: np.ndarray | List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
+        base_models_predictions: np.ndarray | list[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
-        model_identifiers: List[Tuple[int, int, float]],
+        model_identifiers: list[tuple[int, int, float]],
         runs: Sequence[Run],
     ) -> SingleModelEnsemble:
         """Dummy implementation of the ``fit`` method.
@@ -108,7 +108,7 @@ class SingleModelEnsemble(AbstractEnsemble):
         self.best_model_score_ = loss[self.metrics[0].name]
         return self
 
-    def predict(self, predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
+    def predict(self, predictions: np.ndarray | list[np.ndarray]) -> np.ndarray:
         """Select the predictions of the selected model.
 
         Parameters
@@ -137,8 +137,8 @@ class SingleModelEnsemble(AbstractEnsemble):
         )
 
     def get_models_with_weights(
-        self, models: Dict[Tuple[int, int, float], BasePipeline]
-    ) -> List[Tuple[float, BasePipeline]]:
+        self, models: dict[tuple[int, int, float], BasePipeline]
+    ) -> list[tuple[float, BasePipeline]]:
         """Return a list of (weight, model) pairs for the model selected by this ensemble.
 
         Parameters
@@ -149,7 +149,7 @@ class SingleModelEnsemble(AbstractEnsemble):
 
         Returns
         -------
-        List[Tuple[float, BasePipeline]]
+        list[tuple[float, BasePipeline]]
         """
         output = []
         for i, weight in enumerate(self.weights_):
@@ -164,7 +164,7 @@ class SingleModelEnsemble(AbstractEnsemble):
 
     def get_identifiers_with_weights(
         self,
-    ) -> List[Tuple[Tuple[int, int, float], float]]:
+    ) -> list[tuple[tuple[int, int, float], float]]:
         """Return a (identifier, weight)-pairs for the model selected by this ensemble.
 
         Parameters
@@ -175,11 +175,11 @@ class SingleModelEnsemble(AbstractEnsemble):
 
         Returns
         -------
-        List[Tuple[Tuple[int, int, float], float]
+        list[tuple[tuple[int, int, float], float]
         """
         return list(zip(self.identifiers_, self.weights_))
 
-    def get_selected_model_identifiers(self) -> List[Tuple[int, int, float]]:
+    def get_selected_model_identifiers(self) -> list[tuple[int, int, float]]:
         """Return identifier of models in the ensemble.
 
         This includes models which have a weight of zero!
@@ -214,7 +214,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: Optional[Union[int, np.random.RandomState]],
+        random_state: int | np.random.RandomState | None,
         backend: Backend,
     ) -> None:
         """A dummy implementation of a multi-objective ensemble.
@@ -248,7 +248,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         self.random_state = random_state
         self.backend = backend
 
-    def __getstate__(self) -> Dict[str, Any]:
+    def __getstate__(self) -> dict[str, Any]:
         # Cannot serialize a metric if
         # it is user defined.
         # That is, if doing pickle dump
@@ -260,10 +260,10 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
 
     def fit(
         self,
-        base_models_predictions: List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
+        base_models_predictions: list[np.ndarray],
+        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
-        model_identifiers: List[Tuple[int, int, float]],
+        model_identifiers: list[tuple[int, int, float]],
         runs: Sequence[Run],
     ) -> MultiObjectiveDummyEnsemble:
         """Select dummy ensembles given predictions of base models and targets.
@@ -361,7 +361,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         return self
 
     def predict(
-        self, base_models_predictions: Union[np.ndarray, List[np.ndarray]]
+        self, base_models_predictions: np.ndarray | list[np.ndarray]
     ) -> np.ndarray:
         """Predict using the ensemble which is best for the 1st metric.
 
@@ -383,8 +383,8 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         )
 
     def get_models_with_weights(
-        self, models: Dict[Tuple[int, int, float], BasePipeline]
-    ) -> List[Tuple[float, BasePipeline]]:
+        self, models: dict[tuple[int, int, float], BasePipeline]
+    ) -> list[tuple[float, BasePipeline]]:
         """Return a list of (weight, model) pairs for the ensemble that is
         best for the 1st metric.
 
@@ -396,7 +396,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
 
         Returns
         -------
-        List[Tuple[float, BasePipeline]]
+        list[tuple[float, BasePipeline]]
         """
         output = []
         for i, weight in enumerate(self.pareto_set_[0].weights_):
@@ -411,7 +411,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
 
     def get_identifiers_with_weights(
         self,
-    ) -> List[Tuple[Tuple[int, int, float], float]]:
+    ) -> list[tuple[tuple[int, int, float], float]]:
         """Return a (identifier, weight)-pairs for all models that were passed to the
         ensemble builder based on the ensemble that is best for the 1st metric.
 
@@ -423,11 +423,11 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
 
         Returns
         -------
-        List[Tuple[Tuple[int, int, float], float]
+        list[tuple[tuple[int, int, float], float]
         """
         return list(zip(self.pareto_set_[0].identifiers_, self.pareto_set_[0].weights_))
 
-    def get_selected_model_identifiers(self) -> List[Tuple[int, int, float]]:
+    def get_selected_model_identifiers(self) -> list[tuple[int, int, float]]:
         """Return identifiers of models in the ensemble that is best for the 1st metric.
 
         This includes models which have a weight of zero!

@@ -2148,7 +2148,7 @@ class AutoML(BaseEstimator):
 
         ensemble_dict = {}
 
-        if self._ensemble_class is not None:
+        if self._ensemble_class is None:
             warnings.warn(
                 "No models in the ensemble. Kindly provide an ensemble class."
             )

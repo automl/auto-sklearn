@@ -105,7 +105,7 @@ class EnsembleSelection(AbstractEnsemble):
     def fit(
         self,
         base_models_predictions: List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
+        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
         runs: Sequence[Run],
