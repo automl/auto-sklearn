@@ -87,9 +87,26 @@ class AbstractEvaluatorTest(unittest.TestCase):
         self.assertEqual(loss, 1.0)
         self.assertEqual(
             additional_run_info,
-            {"error": "Model predictions for optimization set " "contains NaNs."},
+            {"error": "Model predictions for optimization set contains NaNs."},
         )
 
+        predictions_ensemble = rs.rand(33, 3)
+        predictions_test[5, 2] = np.NaN
+        _, loss, _, additional_run_info = ae.finish_up(
+            loss=0.1,
+            train_loss=0.1,
+            opt_pred=predictions_ensemble,
+            test_pred=predictions_test,
+            additional_run_info=None,
+            final_call=True,
+            file_output=True,
+            status=StatusType.SUCCESS,
+        )
+        self.assertEqual(loss, 1.0)
+        self.assertEqual(
+            additional_run_info,
+            {"error": "Model predictions for test set contains NaNs."},
+        )
         self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 0)
 
     def test_disable_file_output(self):
