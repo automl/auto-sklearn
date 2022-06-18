@@ -1,5 +1,6 @@
 from .abstract_ensemble import AbstractEnsemble, AbstractMultiObjectiveEnsemble
 from .ensemble_selection import EnsembleSelection
+from .multiobjective_dummy_ensemble import MultiObjectiveDummyEnsemble
 from .singlebest_ensemble import (
     SingleBest,
     SingleBestFromRunhistory,
@@ -13,4 +14,5 @@ __all__ = [
     "SingleBestFromRunhistory",
     "SingleBest",
     "SingleModelEnsemble",
+    "MultiObjectiveDummyEnsemble",
 ]

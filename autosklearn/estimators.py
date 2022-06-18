@@ -109,12 +109,12 @@ class AutoSklearnEstimator(BaseEstimator):
 
         ensemble_class : Type[AbstractEnsemble] | "default", optional (default="default")
             Class implementing the post-hoc ensemble algorithm. Set to
-            ``None`` to disable ensemble building or use ``SingleBest``
+            ``None`` to disable ensemble building or use :class:`SingleBest`
             to obtain only use the single best model instead of an
             ensemble.
 
-            If set to "default" it will use :cls:`EnsembleSelection` for
-            single-objective problems and :cls:`MultiObjectiveDummyEnsemble`
+            If set to "default" it will use :class:`EnsembleSelection` for
+            single-objective problems and :class:`MultiObjectiveDummyEnsemble`
             for multi-objective problems.
 
         ensemble_kwargs : Dict, optional
@@ -672,12 +672,12 @@ class AutoSklearnEstimator(BaseEstimator):
 
         ensemble_class : Type[AbstractEnsemble] | "default", optional (default="default")
             Class implementing the post-hoc ensemble algorithm. Set to
-            ``None`` to disable ensemble building or use ``SingleBest``
+            ``None`` to disable ensemble building or use class:`SingleBest`
             to obtain only use the single best model instead of an
             ensemble.
 
-            If set to "default" it will use :cls:`EnsembleSelection` for
-            single-objective problems and :cls:`MultiObjectiveDummyEnsemble`
+            If set to "default" it will use :class:`EnsembleSelection` for
+            single-objective problems and :class:`MultiObjectiveDummyEnsemble`
             for multi-objective problems.
 
         metric: Scorer | Sequence[Scorer] | None = None

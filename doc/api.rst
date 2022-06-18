@@ -128,3 +128,6 @@ Ensembles
 
 .. autoclass:: autosklearn.ensembles.SingleBest
     :members:
+
+.. autoclass:: autosklearn.ensembles.MultiObjectiveDummyEnsemble
+    :members:

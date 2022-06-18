@@ -115,12 +115,10 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
 
             Parameters
             ----------
-
             costs: np.ndarray
 
             Returns
             -------
-
             np.ndarray
             """
 
@@ -258,8 +256,8 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
     def get_validation_performance(self) -> float:
         """Return validation performance of the ensemble that is best for the 1st metric.
 
-        Return
-        ------
+        Returns
+        -------
         float
         """
         return self.pareto_set_[0].get_validation_performance()
