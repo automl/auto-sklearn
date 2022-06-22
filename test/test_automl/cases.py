@@ -347,7 +347,7 @@ def case_regressor_fitted_only_dummy(
             model = make_automl_regressor(
                 temporary_directory=cache.path("backend"),
                 delete_tmp_folder_after_terminate=False,
-                include={"classifier": ["k_nearest_neighbors"]},  # Just a meh model
+                include={"regressor": ["k_nearest_neighbors"]},  # Just a meh model
                 get_trials_callback=stop_at_first,
             )
 
