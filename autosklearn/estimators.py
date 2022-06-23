@@ -13,7 +13,6 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.ensemble import VotingClassifier, VotingRegressor
-from sklearn.exceptions import NotFittedError
 from sklearn.model_selection._split import (
     BaseCrossValidator,
     BaseShuffleSplit,
@@ -40,7 +39,7 @@ T_AutoML = TypeVar("T_AutoML", bound=type[AutoML])
 
 # Used to return self and give correct type information from subclasses,
 # see `fit(self: Self) -> Self`
-Self = TypeVar("Self", bound=AutoSklearnEstimator)
+Self = TypeVar("Self", bound="AutoSklearnEstimator")
 
 ResampleOptions: TypeAlias = Literal[
     "holdout",
@@ -52,7 +51,7 @@ ResampleOptions: TypeAlias = Literal[
 DisableEvaluatorOptions: TypeAlias = Literal["y_optimization", "model"]
 
 
-class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
+class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
     def __init__(
         self,
         time_left_for_this_task: int = 3600,
@@ -566,8 +565,8 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
         X_test: SUPPORTED_FEAT_TYPES | None = None,
         y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
         feat_type: list[str] | None = None,
-        *args,
-        **kwargs: dict,
+        *args: Any,
+        **kwargs: Any,
     ) -> tuple[BasePipeline | None, RunInfo, RunValue]:
         """Fits and individual pipeline configuration and returns
         the result to the user.
@@ -630,17 +629,17 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
         )
 
     def fit_ensemble(
-        self,
-        y,
-        task: int = None,
-        precision: Literal[16, 21, 64] = 32,
+        self: Self,
+        y: SUPPORTED_TARGET_TYPES,
+        task: int | None = None,
+        precision: Literal[16, 32, 64] = 32,
         dataset_name: str | None = None,
         ensemble_size: int | None = None,
         ensemble_kwargs: dict[str, Any] | None = None,
         ensemble_nbest: int | None = None,
-        ensemble_class: AbstractEnsemble | None = EnsembleSelection,
+        ensemble_class: type[AbstractEnsemble] | None = EnsembleSelection,
         metrics: Scorer | Sequence[Scorer] | None = None,
-    ):
+    ) -> Self:
         """Fit an ensemble to models trained during an optimization process.
 
         All parameters are ``None`` by default. If no other value is given,
@@ -651,19 +650,18 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
         y : array-like
             Target values.
 
-        task : int
+        task : int | None = NOne
             A constant from the module ``autosklearn.constants``. Determines
             the task type (binary classification, multiclass classification,
             multilabel classification or regression).
 
-        precision : int
-            Numeric precision used when loading ensemble data. Can be either
-            ``16``, ``32`` or ``64``.
+        precision : 16 | 32 | 64 = 32
+            Numeric precision used when loading ensemble data.
 
-        dataset_name : str
+        dataset_name : str | None = None
             Name of the current data set.
 
-        ensemble_size : int, optional
+        ensemble_size : int | None = None
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
             replacement. If set to ``0`` no ensemble is fit.
@@ -672,18 +670,18 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
             this argument via ``ensemble_kwargs={"ensemble_size": int}``
             if you want to change the ensemble size for ensemble selection.
 
-        ensemble_kwargs : Dict, optional
+        ensemble_kwargs : dict[str, Any] | None = None
             Keyword arguments that are passed to the ensemble class upon
             initialization.
 
-        ensemble_nbest : int
+        ensemble_nbest : int | None = None
             Only consider the ``ensemble_nbest`` models when building an
             ensemble. This is inspired by a concept called library pruning
             introduced in `Getting Most out of Ensemble Selection`. This
             is independent of the ``ensemble_class`` argument and this
             pruning step is done prior to constructing an ensemble.
 
-        ensemble_class : type[AbstractEnsemble], optional (default=EnsembleSelection)
+        ensemble_class : type[AbstractEnsemble] | None = EnsembleSelection
             Class implementing the post-hoc ensemble algorithm. Set to
             ``None`` to disable ensemble building or use ``SingleBest``
             to obtain only use the single best model instead of an
@@ -700,11 +698,11 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
         if ensemble_size is not None:
             # Keep consistent behaviour
             message = (
-                "`ensemble_size` has been deprecated, please use `ensemble_kwargs = "
-                "{'ensemble_size': %d}`. Inserting `ensemble_size` into "
-                "`ensemble_kwargs` for now. `ensemble_size` will be removed in "
-                "auto-sklearn 0.16."
-            ) % ensemble_size
+                "`ensemble_size` has been deprecated, please use `ensemble_kwargs ="
+                f" {{'ensemble_size': {ensemble_size}}}`. Inserting `ensemble_size`"
+                " into `ensemble_kwargs` for now. `ensemble_size` will be removed in"
+                " auto-sklearn 0.16."
+            )
             if ensemble_class == EnsembleSelection:
                 if ensemble_kwargs is None:
                     ensemble_kwargs = {"ensemble_size": ensemble_size}
@@ -752,7 +750,7 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
         )
         return self
 
-    def refit(self, X, y):
+    def refit(self: Self, X: SUPPORTED_FEAT_TYPES, y: SUPPORTED_TARGET_TYPES) -> Self:
         """Refit all models found with fit to new data.
 
         Necessary when using cross-validation. During training, auto-sklearn
@@ -773,21 +771,27 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
         Returns
         -------
         self
-
         """
         self.automl_.refit(X, y)
         return self
 
-    def predict(self, X, batch_size=None, n_jobs=1):
+    def predict(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        batch_size: int | None = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
         return self.automl_.predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
-    def predict_proba(self, X, batch_size=None, n_jobs=1):
+    def predict_proba(
+        self, X: SUPPORTED_FEAT_TYPES, batch_size: int | None = None, n_jobs: int = 1
+    ) -> np.ndarray:
         return self.automl_.predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
 
-    def score(self, X, y):
+    def score(self, X: SUPPORTED_FEAT_TYPES, y: SUPPORTED_TARGET_TYPES) -> float:
         return self.automl_.score(X, y)
 
-    def show_models(self):
+    def show_models(self) -> dict:
         """Returns a dictionary containing dictionaries of ensemble models.
 
         Each model in the ensemble can be accessed by giving its ``model_id`` as key.
@@ -871,7 +875,7 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
 
         return self.automl_.show_models()
 
-    def get_models_with_weights(self):
+    def get_models_with_weights(self) -> list[tuple[float, BasePipeline]]:
         """Return a list of the final ensemble found by auto-sklearn.
 
         Returns
@@ -882,18 +886,18 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
         return self.automl_.get_models_with_weights()
 
     @property
-    def performance_over_time_(self):
+    def performance_over_time_(self) -> pd.DataFrame:
         return self.automl_.performance_over_time_
 
     @property
-    def cv_results_(self):
+    def cv_results_(self) -> dict[str, Any]:
         return self.automl_.cv_results_
 
     @property
-    def trajectory_(self):
+    def trajectory_(self) -> np.ndarray:
         return self.automl_.trajectory_
 
-    def sprint_statistics(self):
+    def sprint_statistics(self) -> str:
         """Return the following statistics of the training result:
 
         - dataset name
@@ -1314,15 +1318,15 @@ class AutoSklearnEstimator(ABC, BaseEstimator, Generic[T_AutoML]):
 
     @classmethod
     @abstractmethod
-    def _get_automl_class(cls) -> type[AutoML]:
+    def _get_automl_class(cls) -> type[T_AutoML]:
         ...
 
     def get_configuration_space(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES | spmatrix,
+        y: SUPPORTED_TARGET_TYPES,
         X_test: SUPPORTED_FEAT_TYPES | None = None,
-        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | None = None,
         dataset_name: str | None = None,
         feat_type: list[str] | None = None,
     ) -> ConfigurationSpace:
@@ -1373,12 +1377,12 @@ class AutoSklearnClassifier(AutoSklearnEstimator[AutoMLClassifier], ClassifierMi
 
     def fit(
         self: Self,
-        X,
-        y,
-        X_test=None,
-        y_test=None,
-        feat_type=None,
-        dataset_name=None,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | None = None,
+        feat_type: list[str] | None = None,
+        dataset_name: str | None = None,
     ) -> Self:
         """Fit *auto-sklearn* to given training set (X, y).
 
@@ -1456,7 +1460,12 @@ class AutoSklearnClassifier(AutoSklearnEstimator[AutoMLClassifier], ClassifierMi
 
         return self
 
-    def predict(self, X, batch_size=None, n_jobs=1):
+    def predict(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        batch_size: int | None = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
         """Predict classes for X.
 
         Parameters
@@ -1470,7 +1479,12 @@ class AutoSklearnClassifier(AutoSklearnEstimator[AutoMLClassifier], ClassifierMi
         """
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
-    def predict_proba(self, X, batch_size=None, n_jobs=1):
+    def predict_proba(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        batch_size: int | None = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
         """Predict probabilities of classes for all samples X.
 
         Parameters
@@ -1503,7 +1517,8 @@ class AutoSklearnClassifier(AutoSklearnEstimator[AutoMLClassifier], ClassifierMi
 
         return pred_proba
 
-    def _get_automl_class(self):
+    @classmethod
+    def _get_automl_class(cls) -> type[AutoMLClassifier]:
         return AutoMLClassifier
 
 
@@ -1515,12 +1530,12 @@ class AutoSklearnRegressor(AutoSklearnEstimator[AutoMLRegressor], RegressorMixin
 
     def fit(
         self: Self,
-        X,
-        y,
-        X_test=None,
-        y_test=None,
-        feat_type=None,
-        dataset_name=None,
+        X: SUPPORTED_FEAT_TYPES,
+        y: SUPPORTED_TARGET_TYPES,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | None = None,
+        feat_type: list[str] | None = None,
+        dataset_name: str | None = None,
     ) -> Self:
         """Fit *Auto-sklearn* to given training set (X, y).
 
@@ -1597,7 +1612,12 @@ class AutoSklearnRegressor(AutoSklearnEstimator[AutoMLRegressor], RegressorMixin
 
         return self
 
-    def predict(self, X, batch_size=None, n_jobs=1):
+    def predict(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        batch_size: int | None = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
         """Predict regression target for X.
 
         Parameters

@@ -2294,9 +2294,9 @@ class AutoMLClassifier(AutoML):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES | spmatrix,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
+        y: SUPPORTED_TARGET_TYPES,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | None = None,
         feat_type: Optional[list[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
