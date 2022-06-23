@@ -29,7 +29,7 @@ class MLPComponentTest(BaseRegressionComponentTest):
     #
     # Seems there is a consistently different values for boston so:
     # * include two valuess for n_iter in 'boston_iterative_n_iter'
-    #   known-values = [236, 331]
+    #   known-values = [236, 331, 327]
     #
     # * decreased places from 6 -> 5 in 'default_boston_{sparse,_iterative_sparse}'
     #   to check for for iterations and expanded the default places for checking
@@ -47,7 +47,7 @@ class MLPComponentTest(BaseRegressionComponentTest):
     res["default_boston"] = 0.2750079862455884
     res["default_boston_places"] = 1
     res["boston_n_calls"] = [8, 9]
-    res["boston_iterative_n_iter"] = [236, 331]
+    res["boston_iterative_n_iter"] = [236, 331, 327]
     res["default_boston_iterative"] = res["default_boston"]
     res["default_boston_iterative_places"] = 1
     res["default_boston_sparse"] = -0.10972947168054104
