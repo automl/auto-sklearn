@@ -76,7 +76,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             self.assertIn(AutoSklearnRegressionAlgorithm, regressors[key].__bases__)
 
     def test_find_preprocessors(self):
-        preprocessors = preprocessing_components._preprocessors
+        preprocessors = preprocessing_components._feature_preprocessors
         self.assertGreaterEqual(len(preprocessors), 1)
         for key in preprocessors:
             if hasattr(preprocessors[key], "get_components"):
