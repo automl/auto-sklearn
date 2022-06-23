@@ -211,9 +211,9 @@ RunInfo(config=Configuration(values={
   &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;,
 })
 , instance=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, instance_specific=&#39;0&#39;, seed=0, cutoff=30.0, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.014184397163120588, time=1.7228319644927979, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1655473108.7372174, endtime=1655473110.4805675, additional_info={&#39;duration&#39;: 1.6329398155212402, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.014184397163120588, time=1.5320239067077637, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1655988154.709301, endtime=1655988156.2596915, additional_info={&#39;duration&#39;: 1.4526171684265137, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 
-AutoSklearnClassifier(get_trials_callback=&lt;function callback at 0x7f5ace8d53a0&gt;,
+AutoSklearnClassifier(get_trials_callback=&lt;function callback at 0x7fbe6340c040&gt;,
                       per_run_time_limit=30, time_left_for_this_task=120)
 </pre></div>
 </div>
@@ -226,9 +226,9 @@ AutoSklearnClassifier(get_trials_callback=&lt;function callback at 0x7f5ace8d53a
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type      cost  duration
 model_id
-7            1             0.68    extra_trees  0.014184  1.722832
-2            2             0.10  random_forest  0.028369  1.919118
-3            3             0.22            mlp  0.028369  1.097058
+7            1             0.68    extra_trees  0.014184  1.532024
+2            2             0.10  random_forest  0.028369  1.671362
+3            3             0.22            mlp  0.028369  0.917915
 </pre></div>
 </div>
 </div>
@@ -238,9 +238,40 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/automl.py:2152: UserWarning: No models in the ensemble. Kindly provide an ensemble class.
-  warnings.warn(
-{}
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbe501ad7f0&gt;,
+           &#39;cost&#39;: 0.028368794326241176,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbe4de95790&gt;,
+           &#39;ensemble_weight&#39;: 0.1,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbe501adfa0&gt;,
+           &#39;model_id&#39;: 2,
+           &#39;rank&#39;: 1,
+           &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
+                       random_state=1, warm_start=True)},
+    3: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbe4fe3fe50&gt;,
+           &#39;cost&#39;: 0.028368794326241176,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbe4a153730&gt;,
+           &#39;ensemble_weight&#39;: 0.22,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbe4a9064c0&gt;,
+           &#39;model_id&#39;: 3,
+           &#39;rank&#39;: 2,
+           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=0.0001363185819149026, beta_1=0.999,
+              beta_2=0.9, early_stopping=True,
+              hidden_layer_sizes=(115, 115, 115),
+              learning_rate_init=0.00018009776276177523, max_iter=32,
+              n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+    7: {   &#39;balancing&#39;: Balancing(random_state=1),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fbe4a87e700&gt;,
+           &#39;cost&#39;: 0.014184397163120588,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbe4aa9ff10&gt;,
+           &#39;ensemble_weight&#39;: 0.68,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbe4a87e220&gt;,
+           &#39;model_id&#39;: 7,
+           &#39;rank&#39;: 3,
+           &#39;sklearn_classifier&#39;: ExtraTreesClassifier(max_features=34, min_samples_leaf=3, min_samples_split=11,
+                     n_estimators=512, n_jobs=1, random_state=1,
+                     warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -254,7 +285,7 @@ model_id
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.9440559440559441
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  17.085 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  20.799 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-early-stopping-and-callbacks-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_early_stopping_and_callbacks.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
