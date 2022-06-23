@@ -1,6 +1,6 @@
 import warnings
 
-from ConfigSpace.conditions import EqualsCondition
+from ConfigSpace.conditions import InCondition
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
     CategoricalHyperparameter,
@@ -89,6 +89,8 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         fun = CategoricalHyperparameter("fun", ["logcosh", "exp", "cube"], "logcosh")
         cs.add_hyperparameters([n_components, algorithm, whiten, fun])
 
-        cs.add_condition(EqualsCondition(n_components, whiten, "True"))
+        cs.add_condition(
+            InCondition(n_components, whiten, ["arbitrary-variance", "unit-variance"])
+        )
 
         return cs
