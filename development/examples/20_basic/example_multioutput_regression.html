@@ -170,16 +170,10 @@ to download the full example code or to run this example in your browser via Bin
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight                 type      cost   duration
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight                 type      cost  duration
 model_id
-18           1             0.74     gaussian_process  0.074587   2.560028
-2            2             0.06        random_forest  0.143340   2.270703
-19           3             0.02        random_forest  0.193081   1.668876
-4            4             0.02          extra_trees  0.272649   1.086047
-10           5             0.08        decision_tree  0.287538   0.488245
-23           6             0.04          extra_trees  0.386024  14.196754
-13           7             0.02  k_nearest_neighbors  0.402076   0.477249
-11           8             0.02  k_nearest_neighbors  0.445704   0.578057
+2            1             0.76        random_forest  0.134125  3.024305
+9            2             0.24  k_nearest_neighbors  0.170695  1.067823
 </pre></div>
 </div>
 </div>
@@ -189,81 +183,23 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;cost&#39;: 0.1433397183147025,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df8f73b50&gt;,
-           &#39;ensemble_weight&#39;: 0.06,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df90a9700&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;cost&#39;: 0.1341253668827065,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef0791f1c0&gt;,
+           &#39;ensemble_weight&#39;: 0.76,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef053607c0&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df39ca7f0&gt;,
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fef05360760&gt;,
            &#39;sklearn_regressor&#39;: RandomForestRegressor(max_features=1.0, n_estimators=512, n_jobs=1,
                       random_state=1, warm_start=True)},
-    4: {   &#39;cost&#39;: 0.272649085716099,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df33dda00&gt;,
-           &#39;ensemble_weight&#39;: 0.02,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df6dc75e0&gt;,
-           &#39;model_id&#39;: 4,
+    9: {   &#39;cost&#39;: 0.1706953938194865,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef0791f850&gt;,
+           &#39;ensemble_weight&#39;: 0.24,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef0764fb50&gt;,
+           &#39;model_id&#39;: 9,
            &#39;rank&#39;: 2,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df6dc7b80&gt;,
-           &#39;sklearn_regressor&#39;: ExtraTreesRegressor(criterion=&#39;friedman_mse&#39;, max_features=0.5144630032500372,
-                    min_samples_leaf=2, min_samples_split=12, n_estimators=512,
-                    n_jobs=1, random_state=1, warm_start=True)},
-    10: {   &#39;cost&#39;: 0.2875377751366157,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df9241640&gt;,
-            &#39;ensemble_weight&#39;: 0.08,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df4696970&gt;,
-            &#39;model_id&#39;: 10,
-            &#39;rank&#39;: 3,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df46963d0&gt;,
-            &#39;sklearn_regressor&#39;: DecisionTreeRegressor(criterion=&#39;friedman_mse&#39;, max_depth=65,
-                      min_samples_leaf=13, min_samples_split=5, random_state=1)},
-    11: {   &#39;cost&#39;: 0.4457038470176755,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df8f73340&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df30fa850&gt;,
-            &#39;model_id&#39;: 11,
-            &#39;rank&#39;: 4,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df30fa580&gt;,
-            &#39;sklearn_regressor&#39;: KNeighborsRegressor(n_neighbors=1, p=1)},
-    13: {   &#39;cost&#39;: 0.40207569685895683,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df46ac310&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df38da970&gt;,
-            &#39;model_id&#39;: 13,
-            &#39;rank&#39;: 5,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df38da190&gt;,
-            &#39;sklearn_regressor&#39;: KNeighborsRegressor(n_neighbors=1, weights=&#39;distance&#39;)},
-    18: {   &#39;cost&#39;: 0.07458725526965715,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df5088070&gt;,
-            &#39;ensemble_weight&#39;: 0.74,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df43a5730&gt;,
-            &#39;model_id&#39;: 18,
-            &#39;rank&#39;: 6,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df43a5d60&gt;,
-            &#39;sklearn_regressor&#39;: GaussianProcessRegressor(alpha=4.472780670840208e-11,
-                         kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
-                         n_restarts_optimizer=10, normalize_y=True,
-                         random_state=1)},
-    19: {   &#39;cost&#39;: 0.19308057275847956,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df6e0c490&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df8ddb3a0&gt;,
-            &#39;model_id&#39;: 19,
-            &#39;rank&#39;: 7,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df4f34610&gt;,
-            &#39;sklearn_regressor&#39;: RandomForestRegressor(bootstrap=False, max_features=0.9700603657014197,
-                      min_samples_leaf=4, n_estimators=512, n_jobs=1,
-                      random_state=1, warm_start=True)},
-    23: {   &#39;cost&#39;: 0.38602414835028154,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7df50b81f0&gt;,
-            &#39;ensemble_weight&#39;: 0.04,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7df90c91f0&gt;,
-            &#39;model_id&#39;: 23,
-            &#39;rank&#39;: 8,
-            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7df90c9460&gt;,
-            &#39;sklearn_regressor&#39;: ExtraTreesRegressor(criterion=&#39;mae&#39;, max_features=0.9574780663890835,
-                    min_samples_leaf=2, min_samples_split=17, n_estimators=512,
-                    n_jobs=1, random_state=1, warm_start=True)}}
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fef076aa400&gt;,
+           &#39;sklearn_regressor&#39;: KNeighborsRegressor(n_neighbors=17, p=1)}}
 </pre></div>
 </div>
 </div>
@@ -274,7 +210,7 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.9288059150193577
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8618704838494055
 </pre></div>
 </div>
 </div>
@@ -505,7 +441,7 @@ model_id
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  55.450 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  58.319 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
