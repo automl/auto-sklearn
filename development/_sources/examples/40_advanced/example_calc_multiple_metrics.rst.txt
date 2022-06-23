@@ -193,8 +193,9 @@ Get the Score of the final ensemble
                    28                         lda         0.936170                  0.913462          0.908163       1.000000   0.951872             0.063830
                    38                         qda         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
                     2                         sgd         0.978723                  0.979149          0.988636       0.977528   0.983051             0.021277
-                   40                bernoulli_nb         0.390071                  0.516854          1.000000       0.033708   0.065217             0.609929
+                   41                bernoulli_nb         0.390071                  0.516854          1.000000       0.033708   0.065217             0.609929
                    35          passive_aggressive         0.886525                  0.846154          0.847619       1.000000   0.917526             0.113475
+                   38                 extra_trees         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
 
 
 
@@ -202,7 +203,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  12.230 seconds)
+   **Total running time of the script:** ( 1 minutes  59.415 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
