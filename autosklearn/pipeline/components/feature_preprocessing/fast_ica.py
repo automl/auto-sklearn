@@ -9,7 +9,7 @@ from ConfigSpace.hyperparameters import (
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, UNSIGNED_DATA
-from autosklearn.util.common import check_for_bool, check_none
+from autosklearn.util.common import check_none
 
 
 class FastICA(AutoSklearnPreprocessingAlgorithm):
@@ -24,7 +24,12 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
     def fit(self, X, Y=None):
         import sklearn.decomposition
 
-        self.whiten = check_for_bool(self.whiten)
+        # Can be False or method name
+        if self.whiten in ["false", "False", 0]:
+            self.whiten = False
+        else:
+            self.whiten = self.whiten
+
         if check_none(self.n_components):
             self.n_components = None
         else:
