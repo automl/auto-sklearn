@@ -13,6 +13,17 @@ from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
 
 import unittest
 
+# Abstracted to here to make changing them easier
+# seems to be quite fidely with github actions
+# Recommended to set a minimum of 60
+timeouts = {
+    1: 60,  # create commands
+    2: 180,  # generate metadata
+    3: 60,  # get performance of configurations
+    4: 90,  # Calculate metafeatures
+    5: 60,  # Create aslib files
+}
+
 
 class TestMetadataGeneration(unittest.TestCase):
     def setUp(self):
