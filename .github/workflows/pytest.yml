@@ -46,7 +46,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.8', '3.9', '3.10']
         kind: ['conda', 'source', 'dist']
 
         exclude:
@@ -60,15 +60,15 @@ jobs:
           - os: macos-latest
 
         include:
-          # Add the tag code-cov to ubuntu-3.7-source
+          # Add the tag code-cov to ubuntu-3.8-source
           - os: ubuntu-latest
-            python-version: 3.7
+            python-version: 3.8
             kind: 'source'
             code-cov: true
 
-           # Include one config with dist, ubuntu-3.7-dist
+           # Include one config with dist, ubuntu-3.8-dist
           - os: ubuntu-latest
-            python-version: 3.7
+            python-version: 3.8
             kind: 'dist'
 
     steps:

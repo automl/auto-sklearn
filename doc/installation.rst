@@ -12,7 +12,7 @@ System requirements
 auto-sklearn has the following system requirements:
 
 * Linux operating system (for example Ubuntu) (`get Linux here <https://www.wikihow.com/Install-Linux>`_)
-* Python (>=3.7) (`get Python here <https://www.python.org/downloads/>`_),
+* Python (>=3.8) (`get Python here <https://www.python.org/downloads/>`_),
 * C++ compiler (with C++11 supports) (`get GCC here <https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux>`_).
 
 In case you try to install Auto-sklearn on a system where no wheel files for the pyrfr package
