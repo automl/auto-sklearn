@@ -12,19 +12,19 @@ def read_queue(
     stack = []
     while True:
         try:
-            rval = queue_.get(timeout=1)
+            return_value = queue_.get(timeout=1)
         except queue.Empty:
             break
 
         # Check if there is a special placeholder value which tells us that
         # we don't have to wait until the queue times out in order to
         # retrieve the final value!
-        if "final_queue_element" in rval:
-            del rval["final_queue_element"]
+        if "final_queue_element" in return_value:
+            del return_value["final_queue_element"]
             do_break = True
         else:
             do_break = False
-        stack.append(rval)
+        stack.append(return_value)
         if do_break:
             break
 

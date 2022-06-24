@@ -220,8 +220,6 @@ class AbstractEvaluator(object):
         self.include = include
         self.exclude = exclude
 
-        self.X_valid = self.datamanager.data.get("X_valid")
-        self.y_valid = self.datamanager.data.get("Y_valid")
         self.X_test = self.datamanager.data.get("X_test")
         self.y_test = self.datamanager.data.get("Y_test")
 
@@ -359,7 +357,6 @@ class AbstractEvaluator(object):
         loss: Union[Dict[str, float], float],
         train_loss: Optional[Dict[str, float]],
         opt_pred: np.ndarray,
-        valid_pred: np.ndarray,
         test_pred: np.ndarray,
         additional_run_info: Optional[TYPE_ADDITIONAL_INFO],
         file_output: bool,
@@ -382,19 +379,12 @@ class AbstractEvaluator(object):
         self.duration = time.time() - self.starttime
 
         if file_output:
-            file_out_loss, additional_run_info_ = self.file_output(
-                opt_pred,
-                valid_pred,
-                test_pred,
-            )
+            file_out_loss, additional_run_info_ = self.file_output(opt_pred, test_pred)
         else:
             file_out_loss = None
             additional_run_info_ = {}
 
-        validation_loss, test_loss = self.calculate_auxiliary_losses(
-            valid_pred,
-            test_pred,
-        )
+        test_loss = self.calculate_auxiliary_losses(test_pred)
 
         if file_out_loss is not None:
             return self.duration, file_out_loss, self.seed, additional_run_info_
@@ -424,59 +414,38 @@ class AbstractEvaluator(object):
                 additional_run_info["train_loss"] = [
                     train_loss[metric.name] for metric in self.metrics
                 ]
-        if validation_loss is not None:
-            additional_run_info["validation_loss"] = validation_loss
         if test_loss is not None:
             additional_run_info["test_loss"] = test_loss
 
-        rval_dict = {
+        return_value_dict = {
             "loss": loss,
             "additional_run_info": additional_run_info,
             "status": status,
         }
         if final_call:
-            rval_dict["final_queue_element"] = True
+            return_value_dict["final_queue_element"] = True
 
-        self.queue.put(rval_dict)
+        self.queue.put(return_value_dict)
         return self.duration, loss_, self.seed, additional_run_info_
 
     def calculate_auxiliary_losses(
         self,
-        Y_valid_pred: np.ndarray,
-        Y_test_pred: np.ndarray,
-    ) -> Tuple[Optional[float | Sequence[float]], Optional[float | Sequence[float]]]:
-        if Y_valid_pred is not None:
-            if self.y_valid is not None:
-                validation_loss: Optional[Union[float, Dict[str, float]]] = self._loss(
-                    self.y_valid, Y_valid_pred
-                )
-                if len(self.metrics) == 1:
-                    validation_loss = validation_loss[self.metrics[0].name]
-            else:
-                validation_loss = None
-        else:
-            validation_loss = None
+        Y_test_pred: np.ndarray | None,
+    ) -> float | dict[str, float] | None:
+        if Y_test_pred is None or self.y_test is None:
+            return None
 
-        if Y_test_pred is not None:
-            if self.y_test is not None:
-                test_loss: Optional[Union[float, Dict[str, float]]] = self._loss(
-                    self.y_test, Y_test_pred
-                )
-                if len(self.metrics) == 1:
-                    test_loss = test_loss[self.metrics[0].name]
-            else:
-                test_loss = None
-        else:
-            test_loss = None
+        test_loss = self._loss(self.y_test, Y_test_pred)
+        if len(self.metrics) == 1:
+            test_loss = test_loss[self.metrics[0].name]
 
-        return validation_loss, test_loss
+        return test_loss
 
     def file_output(
         self,
         Y_optimization_pred: np.ndarray,
-        Y_valid_pred: np.ndarray,
         Y_test_pred: np.ndarray,
-    ) -> Tuple[Optional[float], Dict[str, Union[str, int, float, List, Dict, Tuple]]]:
+    ) -> tuple[float | None, dict[str, Any]]:
         # Abort if self.Y_optimization is None
         # self.Y_optimization can be None if we use partial-cv, then,
         # obviously no output should be saved.
@@ -496,12 +465,7 @@ class AbstractEvaluator(object):
             )
 
         # Abort if predictions contain NaNs
-        for y, s in [
-            # Y_train_pred deleted here. Fix unittest accordingly.
-            [Y_optimization_pred, "optimization"],
-            [Y_valid_pred, "validation"],
-            [Y_test_pred, "test"],
-        ]:
+        for y, s in [(Y_optimization_pred, "optimization"), (Y_test_pred, "test")]:
             if y is not None and not np.all(np.isfinite(y)):
                 return (
                     1.0,
@@ -553,13 +517,12 @@ class AbstractEvaluator(object):
             budget=self.budget,
             model=self.model if "model" not in self.disable_file_output else None,
             cv_model=models if "cv_model" not in self.disable_file_output else None,
+            # TODO: below line needs to be deleted once backend is updated
+            valid_predictions=None,
             ensemble_predictions=(
                 Y_optimization_pred
                 if "y_optimization" not in self.disable_file_output
                 else None
-            ),
-            valid_predictions=(
-                Y_valid_pred if "y_valid" not in self.disable_file_output else None
             ),
             test_predictions=(
                 Y_test_pred if "y_test" not in self.disable_file_output else None

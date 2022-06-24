@@ -1,3 +1,7 @@
+"""Test the dummy predictor of AutoML
+
+Dummy models can serve as an early warning of issues with parameters during fit
+"""
 from __future__ import annotations
 
 from typing import Callable, Sequence, Tuple
@@ -183,6 +187,11 @@ def test_crash_due_to_memory_exception(
 
 
 def test_raises_if_no_metric_set(make_automl: Callable[..., AutoML]) -> None:
+    """
+    Expects
+    -------
+    * raise if there was no metric set when calling `_do_dummy_prediction()`
+    """
     automl = make_automl()
     with pytest.raises(ValueError, match="Metric/Metrics was/were not set"):
         automl._do_dummy_prediction()
@@ -193,10 +202,17 @@ def test_raises_invalid_metric(
     make_automl: Callable[..., AutoML],
     make_sklearn_dataset: Callable[..., XYDataManager],
 ) -> None:
+    """
+    Expects
+    -------
+    * Should raise an error if the given metric is not applicable to a given task type
+    """
+    # `precision` is not applicable to MULTICLASS_CLASSIFICATION
     dataset = "iris"
     task = MULTICLASS_CLASSIFICATION
+    metrics = [accuracy, precision]
 
-    automl = make_automl(metrics=[accuracy, precision])
+    automl = make_automl(metrics=metrics)
     automl._logger = mock_logger
 
     datamanager = make_sklearn_dataset(

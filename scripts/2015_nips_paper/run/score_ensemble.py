@@ -227,14 +227,14 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
 
     ensemble_time = time.time() - start
 
-    rval = {
+    return_value = {
         "ensemble_time": ensemble_time,
         "time_function_evaluation": time_function_evaluation,
         "ensemble_error": ensemble_error,
         "ensemble_test_error": ensemble_test_error,
     }
 
-    return rval
+    return return_value
 
 
 if __name__ == "__main__":

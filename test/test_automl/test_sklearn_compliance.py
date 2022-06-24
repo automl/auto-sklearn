@@ -1,7 +1,9 @@
-"""
+"""Test that autosklearn is sklearn compliant
+
 Note
 ----
-This is far from complete at the moment
+* This is far from complete at the moment
+* This should probably be tested on AutoSklearnEstimators not AutoML
 """
 from typing import List, Union
 

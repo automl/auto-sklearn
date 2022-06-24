@@ -38,6 +38,9 @@ htmlcov
 .coverage
 .tox
 
+# Pytest cache
+.pytest_cache
+
 # pycharm
 .idea
 

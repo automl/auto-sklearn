@@ -71,7 +71,7 @@ def fit_predict_try_except_decorator(
         #     File "auto-sklearn/autosklearn/evaluation/train_evaluator.py", line 616, in fit_predict_and_loss,  # noqa E501
         #     status=status
         #     File "auto-sklearn/autosklearn/evaluation/abstract_evaluator.py", line 320, in finish_up  # noqa E501
-        #     self.queue.put(rval_dict)
+        #     self.queue.put(return_value_dict)
         #     File "miniconda/3-4.5.4/envs/autosklearn/lib/python3.7/multiprocessing/queues.py", line 87, in put  # noqa E501
         #     self._start_thread()
         #     File "miniconda/3-4.5.4/envs/autosklearn/lib/python3.7/multiprocessing/queues.py", line 170, in _start_thread  # noqa E501
@@ -230,14 +230,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.memory_limit = memory_limit
 
         dm = self.backend.load_datamanager()
-        if "X_valid" in dm.data and "Y_valid" in dm.data:
-            self._get_validation_loss = True
-        else:
-            self._get_validation_loss = False
-        if "X_test" in dm.data and "Y_test" in dm.data:
-            self._get_test_loss = True
-        else:
-            self._get_test_loss = False
+        self._get_test_loss = "X_test" in dm.data and "Y_test" in dm.data
 
         self.port = port
         self.pynisher_context = pynisher_context
@@ -532,21 +525,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             if len(train_learning_curve) > 1:
                 additional_run_info["train_learning_curve"] = train_learning_curve
                 additional_run_info["learning_curve_runtime"] = learning_curve_runtime
-
-            if self._get_validation_loss:
-                validation_learning_curve = (
-                    autosklearn.evaluation.util.extract_learning_curve(
-                        info,
-                        "validation_loss",
-                    )
-                )
-                if len(validation_learning_curve) > 1:
-                    additional_run_info[
-                        "validation_learning_curve"
-                    ] = validation_learning_curve
-                    additional_run_info[
-                        "learning_curve_runtime"
-                    ] = learning_curve_runtime
 
             if self._get_test_loss:
                 test_learning_curve = (

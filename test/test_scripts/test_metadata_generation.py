@@ -4,6 +4,7 @@ import random
 import shutil
 import socket
 import subprocess
+import tempfile
 
 import arff
 import numpy as np
@@ -12,13 +13,26 @@ from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
 
 import unittest
 
+# Abstracted to here to make changing them easier
+# seems to be quite fidely with github actions
+# Recommended to set a minimum of 60
+timeouts = {
+    1: 60,  # create commands
+    2: 180,  # generate metadata
+    3: 60,  # get performance of configurations
+    4: 90,  # Calculate metafeatures
+    5: 60,  # Create aslib files
+}
+
 
 class TestMetadataGeneration(unittest.TestCase):
     def setUp(self):
-        self.working_directory = "/tmp/autosklearn-unittest-tmp-dir-%s-%d-%d" % (
-            socket.gethostname(),
-            os.getpid(),
-            random.randint(0, 1000000),
+        host = socket.gethostname()
+        pid = os.getpid()
+        rint = random.randint(0, 1000000)
+
+        self.working_directory = os.path.join(
+            tempfile.gettempdir(), f"autosklearn-unittest-tmp-dir-{host}-{pid}-{rint}"
         )
 
     def print_files(self):
@@ -27,7 +41,6 @@ class TestMetadataGeneration(unittest.TestCase):
             print(dirpath, dirnames, filenames)
 
     def test_metadata_generation(self):
-
         regression_task_id = 360029
         regression_dataset_name = "SWD".lower()
         classification_task_id = 245
@@ -52,10 +65,15 @@ class TestMetadataGeneration(unittest.TestCase):
             script_filename,
             self.working_directory,
         )
-        rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+
+        return_value = subprocess.run(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
         )
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        self.assertEqual(return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}")
 
         # 4. run one of the commands to get some data
         commands_output_file = os.path.join(
@@ -99,11 +117,16 @@ class TestMetadataGeneration(unittest.TestCase):
             # for training. In production, it would use twice as much!
             cmd = cmd.replace("-s 1", "-s 1 --unittest")
             print("COMMAND: %s" % cmd)
-            rval = subprocess.run(
-                cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+
+            return_value = subprocess.run(
+                cmd,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=180,
             )
-            print("STDOUT: %s" % repr(rval.stdout), flush=True)
-            print("STDERR: %s" % repr(rval.stderr), flush=True)
+            print("STDOUT: %s" % repr(return_value.stdout), flush=True)
+            print("STDERR: %s" % repr(return_value.stderr), flush=True)
 
             self.print_files()
 
@@ -123,7 +146,11 @@ class TestMetadataGeneration(unittest.TestCase):
             )
             with open(smac_log) as fh:
                 smac_output = fh.read()
-            self.assertEqual(rval.returncode, 0, msg=str(rval) + "\n" + smac_output)
+            self.assertEqual(
+                return_value.returncode,
+                0,
+                msg=f"{cmd}\n{str(return_value)}" + "\n" + smac_output,
+            )
             expected_validation_output = os.path.join(
                 expected_output_directory, "..", "validation_trajectory_1.json"
             )
@@ -172,12 +199,17 @@ class TestMetadataGeneration(unittest.TestCase):
             self.working_directory,
         )
         print("COMMAND: %s" % cmd)
-        rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+
+        return_value = subprocess.run(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=60,
         )
-        print("STDOUT: %s" % repr(rval.stdout), flush=True)
-        print("STDERR: %s" % repr(rval.stderr), flush=True)
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        print("STDOUT: %s" % repr(return_value.stdout), flush=True)
+        print("STDERR: %s" % repr(return_value.stderr), flush=True)
+        self.assertEqual(return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}")
 
         for file in [
             "algorithm_runs.arff",
@@ -215,10 +247,14 @@ class TestMetadataGeneration(unittest.TestCase):
             script_filename,
             self.working_directory,
         )
-        rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        return_value = subprocess.run(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=90,
         )
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        self.assertEqual(return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}")
         for task_type in ("classification", "regression"):
             for file in [
                 "calculation_times.csv",
@@ -271,10 +307,15 @@ class TestMetadataGeneration(unittest.TestCase):
             script_filename,
             self.working_directory,
         )
-        rval = subprocess.run(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+
+        return_value = subprocess.run(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=45,
         )
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        self.assertEqual(return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}")
 
         for metric_, combination in (
             (metric, "%s_binary.classification_dense" % metric),
