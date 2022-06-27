@@ -9,6 +9,15 @@
 Releases
 ========
 
+Version 0.14.8
+==============
+
+* HOTFIX #1533: Upperbounds `distributed` to `<2022.05` as it raises a `CancelledError` as seen in `#1532 <https://github.com/automl/auto-sklearn/issues/1532>`_.
+
+Contributors v0.14.7
+********************
+* Eddie Bergman
+
 
 Version 0.14.7
 ==============
