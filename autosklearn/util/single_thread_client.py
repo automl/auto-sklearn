@@ -4,6 +4,7 @@ from typing import Any
 from pathlib import Path
 
 import dask.distributed
+from dask.distributed.util import no_default
 
 
 class DummyFuture(dask.distributed.Future):
@@ -18,7 +19,7 @@ class DummyFuture(dask.distributed.Future):
     def result(self, timeout: typing.Optional[int] = None) -> typing.Any:
         return self._result
 
-    def cancel(self) -> None:
+    def cancel(self, **kwargs) -> None:
         pass
 
     def done(self) -> bool:
@@ -88,7 +89,7 @@ class SingleThreadedClient(dask.distributed.Client):
         """
         return DummyFuture(func(*args, **kwargs))
 
-    def close(self) -> None:
+    def close(self, timeout=no_default) -> None:
         pass
 
     def shutdown(self) -> None:
@@ -104,7 +105,7 @@ class SingleThreadedClient(dask.distributed.Client):
             "type": "Scheduler",
         }
 
-    def nthreads(self) -> typing.Dict:
+    def nthreads(self, workers=None, **kwargs) -> typing.Dict:
         return {
             "127.0.0.1": 1,
         }
