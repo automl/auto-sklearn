@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Tuple, Union
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
+from autosklearn.askl_typing import PIPELINE_DATA_DTYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling import (  # noqa: E501
     Rescaling,

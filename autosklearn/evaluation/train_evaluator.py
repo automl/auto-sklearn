@@ -24,6 +24,7 @@ from sklearn.model_selection import (
 from sklearn.model_selection._split import BaseShuffleSplit, _RepeatedSplits
 from smac.tae import StatusType, TAEAbortException
 
+from autosklearn.askl_typing import PIPELINE_DATA_DTYPE
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
@@ -43,7 +44,6 @@ from autosklearn.evaluation.splitter import (
     CustomStratifiedShuffleSplit,
 )
 from autosklearn.metrics import Scorer
-from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import (
     IterativeComponent,
     ThirdPartyComponents,
