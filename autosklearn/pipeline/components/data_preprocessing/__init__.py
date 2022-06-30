@@ -1,4 +1,5 @@
-from typing import Dict, Optional, Type, Union
+from autosklearn.askl_typing import *
+from typing import Type
 
 import os
 from collections import OrderedDict
@@ -105,7 +106,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[Dict] = None,
         default: str = None,
         include: Optional[Dict] = None,
@@ -154,7 +155,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         self,
         configuration: ConfigurationSpace,
         init_params: Optional[Dict] = None,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ) -> "DataPreprocessorChoice":
         config = {}
         params = configuration.get_dictionary()

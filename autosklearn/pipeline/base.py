@@ -1,26 +1,13 @@
 from abc import ABCMeta
-from typing import Any, Dict, Optional, Union
+from autosklearn.askl_typing import *
 
 import numpy as np
-import scipy.sparse
 from ConfigSpace import Configuration, ConfigurationSpace
 from sklearn.pipeline import Pipeline
 
 import autosklearn.pipeline.create_searchspace_util
 
 from .components.base import AutoSklearnChoice, AutoSklearnComponent
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
-PIPELINE_DATA_DTYPE = Union[
-    np.ndarray,
-    scipy.sparse.bsr_matrix,
-    scipy.sparse.coo_matrix,
-    scipy.sparse.csc_matrix,
-    scipy.sparse.csr_matrix,
-    scipy.sparse.dia_matrix,
-    scipy.sparse.dok_matrix,
-    scipy.sparse.lil_matrix,
-]
 
 
 class BasePipeline(Pipeline):
@@ -34,14 +21,14 @@ class BasePipeline(Pipeline):
 
     def __init__(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
     ):
 
         self.init_params = init_params if init_params is not None else {}
@@ -211,8 +198,8 @@ class BasePipeline(Pipeline):
     def set_hyperparameters(
         self,
         configuration: Configuration,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
     ):
         self.config = configuration
 
@@ -262,7 +249,7 @@ class BasePipeline(Pipeline):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space for the CASH problem.
@@ -284,9 +271,9 @@ class BasePipeline(Pipeline):
 
     def _get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space for the CASH problem.
@@ -335,10 +322,10 @@ class BasePipeline(Pipeline):
         self,
         cs: ConfigurationSpace,
         dataset_properties: DATASET_PROPERTIES_TYPE,
-        include: Dict[str, str],
-        exclude: Dict[str, str],
+        include: INCLUDE_BASE_TYPE,
+        exclude: EXCLUDE_BASE_TYPE,
         pipeline,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ):
         if include is None:
             if self.include is None:
