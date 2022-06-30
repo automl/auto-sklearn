@@ -1,13 +1,19 @@
 __author__ = "feurerm"
 
-from autosklearn.askl_typing import *
-from typing import Type
+from typing import Optional, Type
 
 import os
 from collections import OrderedDict
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
+
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+)
 
 from ..base import (
     AutoSklearnChoice,

@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from functools import partial
 
@@ -9,6 +9,11 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
 )
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    FEAT_TYPE_TYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import (
     DENSE,
@@ -18,11 +23,15 @@ from autosklearn.pipeline.constants import (
     UNSIGNED_DATA,
 )
 
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
-
 
 class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, alpha, mode="fpr", score_func="chi2", random_state=None):
+    def __init__(
+        self,
+        alpha,
+        mode="fpr",
+        score_func="chi2",
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
+    ):
         import sklearn.feature_selection
 
         self.random_state = random_state  # We don't use this
@@ -98,7 +107,7 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
         return Xt
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None):
         data_type = UNSIGNED_DATA
 
         if dataset_properties is not None:
@@ -121,7 +130,7 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         alpha = UniformFloatHyperparameter(

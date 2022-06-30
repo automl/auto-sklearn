@@ -1,5 +1,4 @@
 from typing import Optional
-from autosklearn.askl_typing import *
 
 import copy
 from itertools import product
@@ -9,6 +8,16 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenAndConjunction, ForbiddenEqualsClause
 from sklearn.base import ClassifierMixin
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    EXCLUDE_CLASSIFICATION_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+    INCLUDE_CLASSIFICATION_TYPE,
+    INIT_PARAMS_TYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice

@@ -1,11 +1,19 @@
 from abc import ABCMeta
-from autosklearn.askl_typing import *
+from typing import Optional
 
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from sklearn.pipeline import Pipeline
 
 import autosklearn.pipeline.create_searchspace_util
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+    INIT_PARAMS_TYPE,
+    RANDOM_STATE_TYPE,
+)
 
 from .components.base import AutoSklearnChoice, AutoSklearnComponent
 

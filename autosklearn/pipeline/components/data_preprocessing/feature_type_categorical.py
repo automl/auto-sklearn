@@ -1,9 +1,16 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from sklearn.base import BaseEstimator
 
+from autosklearn.askl_typing import (
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+    INIT_PARAMS_TYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, BasePipeline
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (  # noqa: E501
     OHEChoice,
@@ -46,14 +53,14 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def __init__(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
         steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
     ) -> None:
         self._output_dtype = np.int32
         super().__init__(
@@ -94,9 +101,9 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def _get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         """Create the hyperparameter configuration space.
@@ -124,8 +131,8 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def _get_pipeline_steps(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        dataset_properties: Optional[Dict[str, str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> List[Tuple[str, BaseEstimator]]:
         steps = []
 

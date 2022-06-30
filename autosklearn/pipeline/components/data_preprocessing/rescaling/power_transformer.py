@@ -1,8 +1,6 @@
 from typing import Dict, Optional, Tuple, Union
 
-import numpy as np
-
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
+from autosklearn.askl_typing import DATASET_PROPERTIES_TYPE, RANDOM_STATE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling import (  # noqa: E501
     Rescaling,
@@ -13,7 +11,7 @@ from autosklearn.pipeline.constants import DENSE, INPUT, UNSIGNED_DATA
 class PowerTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
     ) -> None:
         from sklearn.preprocessing import PowerTransformer
 

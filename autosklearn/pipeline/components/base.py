@@ -1,4 +1,4 @@
-from autosklearn.askl_typing import *
+from typing import Dict, Optional, Union
 
 import importlib
 import inspect
@@ -9,6 +9,13 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+    INIT_PARAMS_TYPE,
+)
 from autosklearn.pipeline.constants import SPARSE
 
 _addons = dict()  # type: Dict[str, 'ThirdPartyComponents']
@@ -348,10 +355,12 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
 
 class AutoSklearnChoice(object):
-    def __init__(self,
-                 dataset_properties: DATASET_PROPERTIES_TYPE,
-                 feat_type: Optional[FEAT_TYPE_TYPE]=None,
-                 random_state=None):
+    def __init__(
+        self,
+        dataset_properties: DATASET_PROPERTIES_TYPE,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        random_state=None,
+    ):
         """
         Parameters
         ----------
@@ -426,10 +435,12 @@ class AutoSklearnChoice(object):
 
         return components_dict
 
-    def set_hyperparameters(self,
-                            configuration: Configuration,
-                            feat_type: Optional[FEAT_TYPE_TYPE] = None,
-                            init_params: Optional[INIT_PARAMS_TYPE] = None):
+    def set_hyperparameters(
+        self,
+        configuration: Configuration,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
+    ):
         new_params = {}
 
         params = configuration.get_dictionary()

@@ -1,10 +1,17 @@
-from typing import Dict, Optional, Type, Union
+from typing import Optional, Type
 
 import os
 from collections import OrderedDict
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
+
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+)
 
 from ..base import (
     AutoSklearnChoice,
@@ -21,8 +28,6 @@ _regressors = find_components(
 additional_components = ThirdPartyComponents(AutoSklearnRegressionAlgorithm)
 _addons["regression"] = additional_components
 
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
-
 
 def add_regressor(regressor: Type[AutoSklearnRegressionAlgorithm]) -> None:
     additional_components.add_component(regressor)
@@ -38,7 +43,10 @@ class RegressorChoice(AutoSklearnChoice):
 
     @classmethod
     def get_available_components(
-        cls, dataset_properties=None, include=None, exclude=None
+        cls,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
     ):
         available_comp = cls.get_components()
         components_dict = OrderedDict()
@@ -82,11 +90,11 @@ class RegressorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Dict[Union[str, int], str],
+        feat_type: FEAT_TYPE_TYPE,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
     ):
         if include is not None and exclude is not None:
             raise ValueError(

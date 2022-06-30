@@ -1,6 +1,7 @@
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
 import scipy.sparse
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 # General TYPE definitions for numpy
 TYPE_ADDITIONAL_INFO = Dict[str, Union[int, float, str, Dict, List, Tuple]]
@@ -18,6 +19,12 @@ EXCLUDE_BASE_TYPE = Dict[str, str]
 
 INCLUDE_CLASSIFICATION_TYPE = Dict[str, List[str]]
 EXCLUDE_CLASSIFICATION_TYPE = Dict[str, List[str]]
+
+INCLUDE_REGRESSION_TYPE = Dict[str, List[str]]
+EXCLUDE_REGRESSION_TYPE = Dict[str, List[str]]
+
+INCLUDE_PIPELINE_TYPE = Dict[str, List[str]]
+EXCLUDE_PIPELINE_TYPE = Dict[str, List[str]]
 
 FIT_PARAMS_TYPE = Dict[str, Any]
 SAMPLE_WEIGHT_TYPE = Union[np.ndarray, List]

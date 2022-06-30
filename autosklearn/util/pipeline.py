@@ -4,6 +4,11 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 
+from autosklearn.askl_typing import (
+    EXCLUDE_PIPELINE_TYPE,
+    INCLUDE_PIPELINE_TYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.constants import (
     BINARY_CLASSIFICATION,
     MULTICLASS_CLASSIFICATION,
@@ -20,9 +25,9 @@ __all__ = ["get_configuration_space"]
 
 def get_configuration_space(
     datamanager: XYDataManager,
-    include: Optional[Dict[str, List[str]]] = None,
-    exclude: Optional[Dict[str, List[str]]] = None,
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    include: Optional[INCLUDE_PIPELINE_TYPE] = None,
+    exclude: Optional[EXCLUDE_PIPELINE_TYPE] = None,
+    random_state: Optional[RANDOM_STATE_TYPE] = None,
 ) -> ConfigurationSpace:
     """Get the configuration of a pipeline given some dataset info
 
@@ -57,9 +62,9 @@ def get_configuration_space(
 
 def _get_regression_configuration_space(
     datamanager: XYDataManager,
-    include: Optional[Dict[str, List[str]]],
-    exclude: Optional[Dict[str, List[str]]],
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    include: Optional[INCLUDE_PIPELINE_TYPE],
+    exclude: Optional[EXCLUDE_PIPELINE_TYPE],
+    random_state: Optional[RANDOM_STATE_TYPE] = None,
 ) -> ConfigurationSpace:
     """Get the configuration of a regression pipeline given some dataset info
 

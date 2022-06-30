@@ -1,5 +1,4 @@
-from autosklearn.askl_typing import *
-from typing import Type
+from typing import Dict, Optional, Type
 
 import os
 from collections import OrderedDict
@@ -7,7 +6,7 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
+from autosklearn.askl_typing import FEAT_TYPE_TYPE, PIPELINE_DATA_DTYPE
 
 from ..base import (
     AutoSklearnChoice,

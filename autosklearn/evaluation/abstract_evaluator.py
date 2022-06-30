@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import Sequence, TextIO, Type, cast
-from autosklearn.askl_typing import *
+from typing import Any, Dict, List, Optional, Sequence, TextIO, Tuple, Type, Union, cast
 
 import logging
 import multiprocessing
@@ -18,6 +17,17 @@ from threadpoolctl import threadpool_limits
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_TYPE,
+    FEAT_TYPE_TYPE,
+    FIT_PARAMS_TYPE,
+    INCLUDE_TYPE,
+    INIT_PARAMS_TYPE,
+    RANDOM_STATE_TYPE,
+    SAMPLE_WEIGHT_TYPE,
+    TYPE_ADDITIONAL_INFO,
+)
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
@@ -301,9 +311,7 @@ class AbstractEvaluator(object):
         # Please mypy to prevent not defined attr
         self.model = self._get_model(feat_type=self.feat_type)
 
-    def _get_model(
-        self, feat_type: FEAT_TYPE_TYPE
-    ) -> BaseEstimator:
+    def _get_model(self, feat_type: FEAT_TYPE_TYPE) -> BaseEstimator:
         if not isinstance(self.configuration, Configuration):
             model = self.model_class(
                 feat_type=feat_type,
