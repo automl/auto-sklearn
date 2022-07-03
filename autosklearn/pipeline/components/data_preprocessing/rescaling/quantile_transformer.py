@@ -1,12 +1,12 @@
 from typing import Dict, Optional, Tuple, Union
 
-import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
     CategoricalHyperparameter,
     UniformIntegerHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE, RANDOM_STATE_TYPE
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling import (  # noqa: E501
@@ -26,7 +26,7 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
         self,
         n_quantiles: int,
         output_distribution: str,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
     ) -> None:
         from sklearn.preprocessing import QuantileTransformer
 
@@ -62,7 +62,7 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()

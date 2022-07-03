@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Type
 
 import os
 from collections import OrderedDict
@@ -6,7 +6,7 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
+from autosklearn.askl_typing import FEAT_TYPE_TYPE, PIPELINE_DATA_DTYPE
 
 from ..base import (
     AutoSklearnChoice,
@@ -105,7 +105,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[Dict] = None,
         default: str = None,
         include: Optional[Dict] = None,
@@ -154,7 +154,7 @@ class DataPreprocessorChoice(AutoSklearnChoice):
         self,
         configuration: ConfigurationSpace,
         init_params: Optional[Dict] = None,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ) -> "DataPreprocessorChoice":
         config = {}
         params = configuration.get_dictionary()

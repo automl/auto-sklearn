@@ -1,15 +1,18 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    FEAT_TYPE_TYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
-
 
 class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
+    def __init__(self, random_state: RANDOM_STATE_TYPE):
         """This preprocessors does not change the data"""
 
     def fit(self, X, Y=None):
@@ -23,7 +26,7 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
         return X
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None):
         return {
             "shortname": "no",
             "name": "NoPreprocessing",
@@ -39,7 +42,7 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         cs = ConfigurationSpace()

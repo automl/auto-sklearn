@@ -1,11 +1,15 @@
 from typing import Dict, Optional, Tuple, Union
 
 import ConfigSpace.hyperparameters as CSH
-import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from sklearn.decomposition import TruncatedSVD
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    FEAT_TYPE_TYPE,
+    PIPELINE_DATA_DTYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
@@ -18,7 +22,7 @@ class TextFeatureReduction(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
         n_components: Optional[int] = None,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
     ) -> None:
         self.n_components = n_components
         self.random_state = random_state
@@ -74,7 +78,7 @@ class TextFeatureReduction(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()

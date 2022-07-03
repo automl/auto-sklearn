@@ -7,12 +7,17 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from scipy import sparse
 from sklearn.base import BaseEstimator
 
-from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
-from autosklearn.pipeline.base import (
+from autosklearn.askl_typing import (
     DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+    INIT_PARAMS_TYPE,
     PIPELINE_DATA_DTYPE,
-    BasePipeline,
+    RANDOM_STATE_TYPE,
 )
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
+from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.base import (
     AutoSklearnChoice,
     AutoSklearnComponent,
@@ -42,11 +47,11 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         config: Optional[Configuration] = None,
         pipeline: Optional[BasePipeline] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         force_sparse_output: bool = False,
         column_transformer: Optional[sklearn.compose.ColumnTransformer] = None,
     ):
@@ -255,9 +260,9 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     def set_hyperparameters(
         self,
-        feat_type: Dict[Union[str, int], str],
+        feat_type: FEAT_TYPE_TYPE,
         configuration: Configuration,
-        init_params: Optional[Dict[str, Any]] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
     ) -> "FeatTypeSplit":
         if init_params is not None and "feat_type" in init_params.keys():
             self.feat_type = init_params["feat_type"]
@@ -303,7 +308,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
@@ -321,7 +326,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: DATASET_PROPERTIES_TYPE,
         cs: ConfigurationSpace,
         transformer: BaseEstimator,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ) -> ConfigurationSpace:
         for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):

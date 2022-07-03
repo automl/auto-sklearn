@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from functools import partial
 
@@ -8,19 +8,27 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
 )
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    FEAT_TYPE_TYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.components.feature_preprocessing.select_percentile import (
     SelectPercentileBase,
 )
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
-
 
 class SelectPercentileRegression(
     SelectPercentileBase, AutoSklearnPreprocessingAlgorithm
 ):
-    def __init__(self, percentile, score_func="f_regression", random_state=None):
+    def __init__(
+        self,
+        percentile,
+        score_func="f_regression",
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
+    ):
         """Parameters:
         random state : ignored
 
@@ -42,7 +50,7 @@ class SelectPercentileRegression(
             raise ValueError("Don't know this scoring function: %s" % score_func)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[RANDOM_STATE_TYPE] = None):
         return {
             "shortname": "SPR",
             "name": "Select Percentile Regression",
@@ -58,7 +66,7 @@ class SelectPercentileRegression(
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         percentile = UniformFloatHyperparameter(

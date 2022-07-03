@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Optional
 
 from functools import partial
 
@@ -9,15 +9,22 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
 )
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    FEAT_TYPE_TYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
     def __init__(
-        self, alpha, mode="percentile", score_func="f_regression", random_state=None
+        self,
+        alpha,
+        mode="percentile",
+        score_func="f_regression",
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
     ):
         import sklearn.feature_selection
 
@@ -73,7 +80,7 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         return Xt
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None):
         return {
             "shortname": "SR",
             "name": "Univariate Feature Selection based on rates",
@@ -88,7 +95,10 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+    ):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1
         )

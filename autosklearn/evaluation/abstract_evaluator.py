@@ -17,6 +17,17 @@ from threadpoolctl import threadpool_limits
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_TYPE,
+    FEAT_TYPE_TYPE,
+    FIT_PARAMS_TYPE,
+    INCLUDE_TYPE,
+    INIT_PARAMS_TYPE,
+    RANDOM_STATE_TYPE,
+    SAMPLE_WEIGHT_TYPE,
+    TYPE_ADDITIONAL_INFO,
+)
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
@@ -36,20 +47,17 @@ from autosklearn.pipeline.implementations.util import (
 )
 from autosklearn.util.logging_ import PicklableClientLogger, get_named_client_logger
 
-# General TYPE definitions for numpy
-TYPE_ADDITIONAL_INFO = Dict[str, Union[int, float, str, Dict, List, Tuple]]
-
 
 class MyDummyClassifier(DummyClassifier):
     def __init__(
         self,
         config: Configuration,
-        random_state: Optional[Union[int, np.random.RandomState]],
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
-        dataset_properties: Dict[str, Any] = {},
-        include: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
+        random_state: RANDOM_STATE_TYPE,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = {},
+        include: Optional[INCLUDE_TYPE] = None,
+        exclude: Optional[EXCLUDE_TYPE] = None,
     ):
         self.config = config
         if config == 1:
@@ -68,7 +76,7 @@ class MyDummyClassifier(DummyClassifier):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        fit_params: Optional[Dict[str, Any]] = None,
+        fit_params: Optional[FIT_PARAMS_TYPE] = None,
     ) -> Tuple[np.ndarray, Dict[str, Any]]:
         if fit_params is None:
             fit_params = {}
@@ -78,7 +86,7 @@ class MyDummyClassifier(DummyClassifier):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        sample_weight: Optional[Union[np.ndarray, List]] = None,
+        sample_weight: Optional[SAMPLE_WEIGHT_TYPE] = None,
     ) -> DummyClassifier:
         return super(MyDummyClassifier, self).fit(
             np.ones((X.shape[0], 1)), y, sample_weight=sample_weight
@@ -88,7 +96,7 @@ class MyDummyClassifier(DummyClassifier):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        fit_params: Optional[Dict[str, Any]] = None,
+        fit_params: Optional[FIT_PARAMS_TYPE] = None,
     ) -> DummyClassifier:
         return self.fit(X, y)
 
@@ -109,12 +117,12 @@ class MyDummyRegressor(DummyRegressor):
     def __init__(
         self,
         config: Configuration,
-        random_state: Optional[Union[int, np.random.RandomState]],
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
-        dataset_properties: Dict[str, Any] = {},
-        include: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
+        random_state: RANDOM_STATE_TYPE,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = {},
+        include: Optional[INCLUDE_TYPE] = None,
+        exclude: Optional[EXCLUDE_TYPE] = None,
     ):
         self.config = config
         if config == 1:
@@ -132,7 +140,7 @@ class MyDummyRegressor(DummyRegressor):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        fit_params: Optional[Dict[str, Any]] = None,
+        fit_params: Optional[FIT_PARAMS_TYPE] = None,
     ) -> Tuple[np.ndarray, Dict[str, Any]]:
         if fit_params is None:
             fit_params = {}
@@ -142,7 +150,7 @@ class MyDummyRegressor(DummyRegressor):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        sample_weight: Optional[Union[np.ndarray, List]] = None,
+        sample_weight: Optional[SAMPLE_WEIGHT_TYPE] = None,
     ) -> DummyRegressor:
         return super().fit(np.ones((X.shape[0], 1)), y, sample_weight=sample_weight)
 
@@ -150,7 +158,7 @@ class MyDummyRegressor(DummyRegressor):
         self,
         X: np.ndarray,
         y: np.ndarray,
-        fit_params: Optional[Dict[str, Any]] = None,
+        fit_params: Optional[FIT_PARAMS_TYPE] = None,
     ) -> DummyRegressor:
         return self.fit(X, y)
 
@@ -202,10 +210,10 @@ class AbstractEvaluator(object):
         seed: int = 1,
         output_y_hat_optimization: bool = True,
         num_run: Optional[int] = None,
-        include: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
+        include: Optional[INCLUDE_TYPE] = None,
+        exclude: Optional[EXCLUDE_TYPE] = None,
         disable_file_output: Union[bool, List[str]] = False,
-        init_params: Optional[Dict[str, Any]] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
         budget: Optional[float] = None,
         budget_type: Optional[str] = None,
     ):
@@ -303,9 +311,7 @@ class AbstractEvaluator(object):
         # Please mypy to prevent not defined attr
         self.model = self._get_model(feat_type=self.feat_type)
 
-    def _get_model(
-        self, feat_type: Optional[Dict[Union[str, int], str]]
-    ) -> BaseEstimator:
+    def _get_model(self, feat_type: FEAT_TYPE_TYPE) -> BaseEstimator:
         if not isinstance(self.configuration, Configuration):
             model = self.model_class(
                 feat_type=feat_type,

@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
@@ -9,11 +9,14 @@ from ConfigSpace.hyperparameters import (
     UnParametrizedHyperparameter,
 )
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    FEAT_TYPE_TYPE,
+    SAMPLE_WEIGHT_TYPE,
+)
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool, check_none
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
@@ -59,7 +62,7 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
         self.class_weight = class_weight
         self.preprocessor = None
 
-    def fit(self, X, Y, sample_weight=None):
+    def fit(self, X, Y, sample_weight: Optional[SAMPLE_WEIGHT_TYPE] = None):
         from sklearn.ensemble import ExtraTreesClassifier
         from sklearn.feature_selection import SelectFromModel
 
@@ -112,7 +115,7 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
         return self.preprocessor.transform(X)
 
     @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None):
         return {
             "shortname": "ETC",
             "name": "Extra Trees Classifier Preprocessing",
@@ -128,7 +131,7 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         cs = ConfigurationSpace()

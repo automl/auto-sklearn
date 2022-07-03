@@ -1,12 +1,19 @@
 __author__ = "feurerm"
 
-from typing import Dict, Optional, Type, Union
+from typing import Optional, Type
 
 import os
 from collections import OrderedDict
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
+
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+)
 
 from ..base import (
     AutoSklearnChoice,
@@ -22,8 +29,6 @@ _classifiers = find_components(
 )
 additional_components = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
 _addons["classification"] = additional_components
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 def add_classifier(classifier: Type[AutoSklearnClassificationAlgorithm]) -> None:
@@ -89,11 +94,11 @@ class ClassifierChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Dict[Union[str, int], str],
+        feat_type: FEAT_TYPE_TYPE,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
     ):
         if dataset_properties is None:
             dataset_properties = {}

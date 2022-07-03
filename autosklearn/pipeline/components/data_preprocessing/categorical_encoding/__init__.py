@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional
 
 import os
 from collections import OrderedDict
@@ -8,7 +8,14 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+    INIT_PARAMS_TYPE,
+    PIPELINE_DATA_DTYPE,
+)
 
 from ...base import (
     AutoSklearnChoice,
@@ -38,11 +45,11 @@ class OHEChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default: Optional[str] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
 
@@ -88,9 +95,9 @@ class OHEChoice(AutoSklearnChoice):
 
     def set_hyperparameters(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]],
+        feat_type: Optional[FEAT_TYPE_TYPE],
         configuration: Configuration,
-        init_params: Optional[Dict[str, Any]] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
     ) -> "OHEChoice":
         new_params = {}
 

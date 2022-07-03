@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 import importlib
 import inspect
@@ -9,9 +9,14 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    EXCLUDE_BASE_TYPE,
+    FEAT_TYPE_TYPE,
+    INCLUDE_BASE_TYPE,
+    INIT_PARAMS_TYPE,
+)
 from autosklearn.pipeline.constants import SPARSE
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 _addons = dict()  # type: Dict[str, 'ThirdPartyComponents']
 
@@ -102,7 +107,7 @@ class AutoSklearnComponent(BaseEstimator):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space of this classification algorithm.
@@ -145,8 +150,8 @@ class AutoSklearnComponent(BaseEstimator):
     def set_hyperparameters(
         self,
         configuration: Configuration,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
     ):
         params = configuration.get_dictionary()
 
@@ -350,7 +355,12 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
 
 class AutoSklearnChoice(object):
-    def __init__(self, dataset_properties, feat_type=None, random_state=None):
+    def __init__(
+        self,
+        dataset_properties: DATASET_PROPERTIES_TYPE,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        random_state=None,
+    ):
         """
         Parameters
         ----------
@@ -425,7 +435,12 @@ class AutoSklearnChoice(object):
 
         return components_dict
 
-    def set_hyperparameters(self, configuration, feat_type=None, init_params=None):
+    def set_hyperparameters(
+        self,
+        configuration: Configuration,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[INIT_PARAMS_TYPE] = None,
+    ):
         new_params = {}
 
         params = configuration.get_dictionary()
@@ -453,8 +468,8 @@ class AutoSklearnChoice(object):
         feat_type: Dict[Union[str, int], str],
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        include: Optional[INCLUDE_BASE_TYPE] = None,
+        exclude: Optional[EXCLUDE_BASE_TYPE] = None,
     ):
         raise NotImplementedError()
 

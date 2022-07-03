@@ -1,10 +1,14 @@
 from typing import Dict, Optional, Tuple, Union
 
-import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
+from autosklearn.askl_typing import (
+    DATASET_PROPERTIES_TYPE,
+    FEAT_TYPE_TYPE,
+    PIPELINE_DATA_DTYPE,
+    RANDOM_STATE_TYPE,
+)
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
@@ -13,7 +17,7 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
         strategy: str = "mean",
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        random_state: Optional[RANDOM_STATE_TYPE] = None,
     ) -> None:
         self.strategy = strategy
         self.random_state = random_state
@@ -62,7 +66,7 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         # TODO add replace by zero!
