@@ -6,6 +6,7 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from ..base import (
     AutoSklearnChoice,
     AutoSklearnRegressionAlgorithm,
@@ -82,7 +83,7 @@ class RegressorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Dict[Union[str, int], str],
+        feat_type: FEAT_TYPE_TYPE,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
         include: Optional[Dict[str, str]] = None,

@@ -7,6 +7,7 @@ from ConfigSpace import Configuration, ConfigurationSpace
 from sklearn.pipeline import Pipeline
 
 import autosklearn.pipeline.create_searchspace_util
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 
 from .components.base import AutoSklearnChoice, AutoSklearnComponent
 
@@ -34,7 +35,7 @@ class BasePipeline(Pipeline):
 
     def __init__(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -211,7 +212,7 @@ class BasePipeline(Pipeline):
     def set_hyperparameters(
         self,
         configuration: Configuration,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         init_params: Optional[Dict[str, Any]] = None,
     ):
         self.config = configuration
@@ -262,7 +263,7 @@ class BasePipeline(Pipeline):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space for the CASH problem.
@@ -284,7 +285,7 @@ class BasePipeline(Pipeline):
 
     def _get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -338,7 +339,7 @@ class BasePipeline(Pipeline):
         include: Dict[str, str],
         exclude: Dict[str, str],
         pipeline,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ):
         if include is None:
             if self.include is None:

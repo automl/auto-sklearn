@@ -6,6 +6,7 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from ..base import (
     AutoSklearnChoice,
     AutoSklearnPreprocessingAlgorithm,
@@ -104,7 +105,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
         include: Optional[Dict[str, str]] = None,

@@ -9,6 +9,7 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.constants import SPARSE
 
 DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
@@ -102,7 +103,7 @@ class AutoSklearnComponent(BaseEstimator):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ):
         """Return the configuration space of this classification algorithm.
@@ -145,7 +146,7 @@ class AutoSklearnComponent(BaseEstimator):
     def set_hyperparameters(
         self,
         configuration: Configuration,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         init_params: Optional[Dict[str, Any]] = None,
     ):
         params = configuration.get_dictionary()
@@ -450,7 +451,7 @@ class AutoSklearnChoice(object):
 
     def get_hyperparameter_search_space(
         self,
-        feat_type: Dict[Union[str, int], str],
+        feat_type: FEAT_TYPE_TYPE,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default=None,
         include: Optional[Dict[str, str]] = None,

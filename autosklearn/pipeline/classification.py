@@ -8,6 +8,7 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenAndConjunction, ForbiddenEqualsClause
 from sklearn.base import ClassifierMixin
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
@@ -72,7 +73,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
 
     def __init__(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties: Dict[str, bool] = None,
@@ -173,7 +174,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
 
     def _get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -360,7 +361,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
     def _get_pipeline_steps(
         self,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ):
         steps = []
 

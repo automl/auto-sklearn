@@ -8,6 +8,7 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenAndConjunction, ForbiddenEqualsClause
 from sklearn.base import RegressorMixin
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components import (
     feature_preprocessing as feature_preprocessing_components,
@@ -69,7 +70,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     def __init__(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
         steps=None,
         dataset_properties: Dict[str, bool] = None,
@@ -117,7 +118,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     def _get_hyperparameter_search_space(
         self,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
@@ -271,7 +272,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_pipeline_steps(
         self,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         init_params: Optional[Dict[str, Any]] = None,
     ):
         steps = []
