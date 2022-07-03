@@ -304,9 +304,7 @@ class AbstractEvaluator(object):
         # Please mypy to prevent not defined attr
         self.model = self._get_model(feat_type=self.feat_type)
 
-    def _get_model(
-        self, feat_type: Optional[FEAT_TYPE_TYPE]
-    ) -> BaseEstimator:
+    def _get_model(self, feat_type: Optional[FEAT_TYPE_TYPE]) -> BaseEstimator:
         if not isinstance(self.configuration, Configuration):
             model = self.model_class(
                 feat_type=feat_type,

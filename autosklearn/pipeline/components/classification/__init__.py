@@ -9,6 +9,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.askl_typing import FEAT_TYPE_TYPE
+
 from ..base import (
     AutoSklearnChoice,
     AutoSklearnClassificationAlgorithm,
