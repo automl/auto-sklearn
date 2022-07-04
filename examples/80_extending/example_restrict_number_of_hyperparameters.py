@@ -7,6 +7,7 @@ The following example demonstrates how to replace an existing
 component with a new component, implementing the same classifier,
 but with different hyperparameters .
 """
+from typing import Optional
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
@@ -17,6 +18,7 @@ from ConfigSpace.hyperparameters import (
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 import autosklearn.classification
 import autosklearn.pipeline.components.classification
 from autosklearn.pipeline.components.classification import (
@@ -84,7 +86,9 @@ class CustomRandomForest(AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
 
         # The maximum number of features used in the forest is calculated as m^max_features, where

@@ -47,7 +47,7 @@ class MLPComponentTest(BaseRegressionComponentTest):
     res["default_boston"] = 0.2750079862455884
     res["default_boston_places"] = 1
     res["boston_n_calls"] = [8, 9]
-    res["boston_iterative_n_iter"] = [236, 331]
+    res["boston_iterative_n_iter"] = [236, 327, 331]
     res["default_boston_iterative"] = res["default_boston"]
     res["default_boston_iterative_places"] = 1
     res["default_boston_sparse"] = -0.10972947168054104

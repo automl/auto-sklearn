@@ -6,6 +6,7 @@ Extending Auto-Sklearn with Classification Component
 The following example demonstrates how to create a new classification
 component for using in auto-sklearn.
 """
+from typing import Optional
 from pprint import pprint
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -16,6 +17,8 @@ from ConfigSpace.hyperparameters import (
 )
 
 import sklearn.metrics
+
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 import autosklearn.classification
 import autosklearn.pipeline.components.classification
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
@@ -100,7 +103,9 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
         hidden_layer_depth = UniformIntegerHyperparameter(
             name="hidden_layer_depth", lower=1, upper=3, default_value=1

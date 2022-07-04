@@ -1,3 +1,5 @@
+from typing import Optional
+
 import warnings
 
 from ConfigSpace.conditions import EqualsCondition
@@ -7,6 +9,7 @@ from ConfigSpace.hyperparameters import (
     UniformIntegerHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool, check_none
@@ -74,7 +77,9 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
 
         n_components = UniformIntegerHyperparameter(
