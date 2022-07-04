@@ -150,10 +150,11 @@ class AlgorithmSelectionProblem(object):
                 configuration = dict()
                 algorithm_id = line["idx"]
                 for hp_name, value in line.items():
-                    # Todo adapt to search space
                     if not value or hp_name == "idx":
                         continue
                     if hp_name not in hp_names:
+                        # skip meta learning configuration
+                        # if it is not existing in the current search space
                         continue
                     try:
                         value = int(value)
