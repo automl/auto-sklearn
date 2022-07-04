@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import copy
 from itertools import product
@@ -19,8 +19,6 @@ from autosklearn.pipeline.components.feature_preprocessing import (
     FeaturePreprocessorChoice,
 )
 from autosklearn.pipeline.constants import SPARSE
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
