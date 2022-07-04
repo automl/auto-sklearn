@@ -1,9 +1,9 @@
 from abc import ABCMeta
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 import numpy as np
 import scipy.sparse
-from ConfigSpace import Configuration, ConfigurationSpace
+from ConfigSpace import Configuration
 from sklearn.pipeline import Pipeline
 
 import autosklearn.pipeline.create_searchspace_util
@@ -211,9 +211,9 @@ class BasePipeline(Pipeline):
 
     def set_hyperparameters(
         self,
-        configuration: Configuration,
+        configuration,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        init_params=None,
     ):
         self.config = configuration
 
@@ -262,9 +262,7 @@ class BasePipeline(Pipeline):
         return self
 
     def get_hyperparameter_search_space(
-        self,
-        feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        self, feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
     ):
         """Return the configuration space for the CASH problem.
 
@@ -286,9 +284,9 @@ class BasePipeline(Pipeline):
     def _get_hyperparameter_search_space(
         self,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include=None,
+        exclude=None,
+        dataset_properties=None,
     ):
         """Return the configuration space for the CASH problem.
 
@@ -334,10 +332,10 @@ class BasePipeline(Pipeline):
 
     def _get_base_search_space(
         self,
-        cs: ConfigurationSpace,
-        dataset_properties: DATASET_PROPERTIES_TYPE,
-        include: Dict[str, str],
-        exclude: Dict[str, str],
+        cs,
+        dataset_properties,
+        include,
+        exclude,
         pipeline,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ):
@@ -544,7 +542,9 @@ class BasePipeline(Pipeline):
 
         return return_value
 
-    def _get_pipeline_steps(self, dataset_properties, feat_type=None):
+    def _get_pipeline_steps(
+        self, dataset_properties, feat_type: Optional[FEAT_TYPE_TYPE] = None
+    ):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):
