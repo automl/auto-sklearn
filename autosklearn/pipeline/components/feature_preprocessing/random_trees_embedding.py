@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
@@ -12,8 +12,6 @@ from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, SPARSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool, check_none
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
@@ -100,8 +98,7 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
     ):
         n_estimators = UniformIntegerHyperparameter(
             name="n_estimators", lower=10, upper=100, default_value=10

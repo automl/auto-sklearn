@@ -154,8 +154,8 @@ class DataPreprocessorChoice(AutoSklearnChoice):
     def set_hyperparameters(
         self,
         configuration: ConfigurationSpace,
-        init_params: Optional[Dict] = None,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[Dict] = None,
     ) -> "DataPreprocessorChoice":
         config = {}
         params = configuration.get_dictionary()

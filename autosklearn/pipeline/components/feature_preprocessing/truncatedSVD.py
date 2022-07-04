@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter
@@ -6,8 +6,6 @@ from ConfigSpace.hyperparameters import UniformIntegerHyperparameter
 from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
@@ -54,8 +52,7 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
     ):
         target_dim = UniformIntegerHyperparameter(
             "target_dim", 10, 256, default_value=128

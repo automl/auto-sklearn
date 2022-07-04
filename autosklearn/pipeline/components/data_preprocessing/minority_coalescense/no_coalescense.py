@@ -12,8 +12,8 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 class NoCoalescence(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
         pass
 

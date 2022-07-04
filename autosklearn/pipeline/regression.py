@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional, Union
 
 import copy
 from itertools import product
@@ -16,8 +16,6 @@ from autosklearn.pipeline.components import (
 from autosklearn.pipeline.components import regression as regression_components
 from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
 from autosklearn.pipeline.constants import SPARSE
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
@@ -73,11 +71,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
         steps=None,
-        dataset_properties: Dict[str, bool] = None,
-        include: Optional[Dict[str, List[str]]] = None,
-        exclude: Optional[Dict[str, List[str]]] = None,
+        dataset_properties=None,
+        include=None,
+        exclude=None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        init_params=None,
     ):
         self._output_dtype = np.float32
         if dataset_properties is None:
@@ -119,9 +117,9 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_hyperparameter_search_space(
         self,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        include=None,
+        exclude=None,
+        dataset_properties=None,
     ):
         """Return the configuration space for the CASH problem.
 
@@ -270,10 +268,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         return regression_components._regressors
 
     def _get_pipeline_steps(
-        self,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE],
-        feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        self, dataset_properties, feat_type: Optional[FEAT_TYPE_TYPE] = None
     ):
         steps = []
 

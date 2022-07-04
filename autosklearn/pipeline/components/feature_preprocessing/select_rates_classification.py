@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from functools import partial
 
@@ -18,8 +18,6 @@ from autosklearn.pipeline.constants import (
     SPARSE,
     UNSIGNED_DATA,
 )
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
@@ -122,8 +120,7 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(
-        feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
     ):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1

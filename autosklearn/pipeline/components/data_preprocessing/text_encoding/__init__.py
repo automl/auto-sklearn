@@ -94,8 +94,8 @@ class BagOfWordChoice(AutoSklearnChoice):
     def set_hyperparameters(
         self,
         configuration: Configuration,
-        init_params: Optional[Dict[str, Any]] = None,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params: Optional[Dict[str, Any]] = None,
     ) -> "BagOfWordChoice":
         new_params = {}
 

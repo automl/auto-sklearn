@@ -1,6 +1,6 @@
 __author__ = "feurerm"
 
-from typing import Dict, Optional, Type, Union
+from typing import Type
 
 import os
 from collections import OrderedDict
@@ -24,8 +24,6 @@ _classifiers = find_components(
 )
 additional_components = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
 _addons["classification"] = additional_components
-
-DATASET_PROPERTIES_TYPE = Dict[str, Union[str, int, bool]]
 
 
 def add_classifier(classifier: Type[AutoSklearnClassificationAlgorithm]) -> None:
@@ -92,10 +90,10 @@ class ClassifierChoice(AutoSklearnChoice):
     def get_hyperparameter_search_space(
         self,
         feat_type: FEAT_TYPE_TYPE,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+        dataset_properties=None,
         default=None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
+        include=None,
+        exclude=None,
     ):
         if dataset_properties is None:
             dataset_properties = {}
