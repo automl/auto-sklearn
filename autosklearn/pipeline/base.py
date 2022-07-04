@@ -35,14 +35,14 @@ class BasePipeline(Pipeline):
 
     def __init__(
         self,
+        config=None,
         feat_type: Optional[FEAT_TYPE_TYPE] = None,
-        config: Optional[Configuration] = None,
         steps=None,
-        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
-        include: Optional[Dict[str, str]] = None,
-        exclude: Optional[Dict[str, str]] = None,
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None,
+        dataset_properties=None,
+        include=None,
+        exclude=None,
+        random_state=None,
+        init_params=None,
     ):
 
         self.init_params = init_params if init_params is not None else {}
