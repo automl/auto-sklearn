@@ -110,43 +110,43 @@ To use ``n_jobs_`` we must guard the code
 
  .. code-block:: none
 
-    [ERROR] [2022-06-23 16:25:37,624:asyncio.events] 
+    [ERROR] [2022-07-08 13:59:00,943:asyncio.events] 
     Traceback (most recent call last):
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py", line 761, in wrapper
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 776, in wrapper
         return await func(*args, **kwargs)
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
         await self._ensure_connected(timeout=timeout)
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py", line 1241, in _ensure_connected
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1241, in _ensure_connected
         comm = await connect(
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/comm/core.py", line 313, in connect
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/comm/core.py", line 315, in connect
         await asyncio.sleep(backoff)
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
         return await future
     asyncio.exceptions.CancelledError
-    [ERROR] [2022-06-23 16:25:37,637:asyncio.events] 
+    [ERROR] [2022-07-08 13:59:00,957:asyncio.events] 
     Traceback (most recent call last):
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py", line 761, in wrapper
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 776, in wrapper
         return await func(*args, **kwargs)
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py", line 1400, in _handle_report
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1400, in _handle_report
         await self._reconnect()
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/utils.py", line 761, in wrapper
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 776, in wrapper
         return await func(*args, **kwargs)
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
         await self._ensure_connected(timeout=timeout)
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/client.py", line 1241, in _ensure_connected
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1241, in _ensure_connected
         comm = await connect(
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/distributed/comm/core.py", line 313, in connect
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/comm/core.py", line 315, in connect
         await asyncio.sleep(backoff)
-      File "/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
         return await future
     asyncio.exceptions.CancelledError
     auto-sklearn results:
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.985816
-      Number of target algorithm runs: 44
-      Number of successful target algorithm runs: 44
-      Number of crashed target algorithm runs: 0
+      Number of target algorithm runs: 51
+      Number of successful target algorithm runs: 50
+      Number of crashed target algorithm runs: 1
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
 
@@ -157,7 +157,7 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  6.235 seconds)
+   **Total running time of the script:** ( 2 minutes  5.110 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:
