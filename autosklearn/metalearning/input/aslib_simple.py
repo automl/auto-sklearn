@@ -153,7 +153,7 @@ class AlgorithmSelectionProblem(object):
                     if not value or hp_name == "idx":
                         continue
                     if hp_name not in hp_names:
-                        # skip meta learning configuration
+                        # skip hyperparameter
                         # if it is not existing in the current search space
                         continue
                     try:
