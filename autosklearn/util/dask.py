@@ -1,33 +1,3 @@
-""" Provides simplified 2 use cases of dask that we consider
-
-1. A UserDask is when a user supplies a dask client, in which case
-we don't close this down and leave it up to the user to control its lifetime.
-2.  A LocalDask is one we use when no user dask is supplied. In this case
-we make sure to spin up and close down clients as needed.
-
-Both of these can be uniformly accessed as a context manager.
-
-.. code:: python
-
-    # Locally controlled dask client
-    local_dask = LocalDask(n_jobs=2)
-    with local_dask as client:
-        # Do stuff with client
-        ...
-
-    # `client` is shutdown properly
-
-    # ----------------
-
-    # User controlled dask client
-    user_dask = UserDask(user_client)
-
-    with user_dask as client:
-        # Do stuff with (client == user_client)
-        ...
-
-    # `user_client` is still open and up to the user to close
-"""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -41,6 +11,7 @@ from autosklearn.util.single_thread_client import SingleThreadedClient
 
 
 class Dask(ABC):
+    @property
     @abstractmethod
     def client(self) -> Client:
         """Should return a dask client"""
@@ -52,7 +23,7 @@ class Dask(ABC):
         ...
 
     def __enter__(self) -> Client:
-        return self.client()
+        return self.client
 
     def __exit__(self, *args: Any, **kwargs: Any) -> None:
         self.close()
@@ -74,6 +45,7 @@ class UserDask(Dask):
         """
         self._client = client
 
+    @property
     def client(self) -> Client:
         """The dask client"""
         return self._client
@@ -88,11 +60,12 @@ class UserDask(Dask):
 
 
 class LocalDask(Dask):
-    def __init__(self, n_jobs: int | None = None) -> None:
+    def __init__(self, n_jobs: int) -> None:
         self.n_jobs = n_jobs
         self._client: Client | None = None
         self._cluster: LocalCluster | None = None
 
+    @property
     def client(self) -> Client:
         """Creates a usable dask client or returns an existing one
 
@@ -120,7 +93,9 @@ class LocalDask(Dask):
                 # Memory is handled by the pynisher, not by the dask worker/nanny
                 memory_limit=0,
             )
-            client = Client(cluster, heartbeat_interval=10000)  # 10s
+            client = Client(
+                self._cluster, heartbeat_interval=10000
+            )  # Heartbeat every 10s
 
         self._client = client
         self._cluster = cluster

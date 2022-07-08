@@ -898,6 +898,17 @@ class AutoML(BaseEstimator):
                             self._budget_type,
                         ) = _proc_smac.run_smbo()
 
+                    trajectory_filename = os.path.join(
+                        self._backend.get_smac_output_directory_for_run(self._seed),
+                        "trajectory.json",
+                    )
+                    saveable_trajectory = [
+                        list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
+                        for entry in self.trajectory_
+                    ]
+                    with open(trajectory_filename, "w") as fh:
+                        json.dump(saveable_trajectory, fh)
+
                         trajectory_filename = os.path.join(
                             self._backend.get_smac_output_directory_for_run(self._seed),
                             "trajectory.json",
