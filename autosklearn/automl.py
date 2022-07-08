@@ -21,7 +21,6 @@ import multiprocessing
 import os
 import platform
 import sys
-import tempfile
 import time
 import types
 import uuid
@@ -37,7 +36,7 @@ import scipy.stats
 import sklearn.utils
 from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from ConfigSpace.read_and_write import json as cs_json
-from dask.distributed import Client, LocalCluster
+from dask.distributed import Client
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -105,6 +104,7 @@ from autosklearn.pipeline.components.feature_preprocessing import (
 from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util import RE_PATTERN, pipeline
+from autosklearn.util.dask import Dask, LocalDask, UserDask
 from autosklearn.util.data import (
     DatasetCompressionSpec,
     default_dataset_compression_arg,
@@ -120,7 +120,6 @@ from autosklearn.util.logging_ import (
     warnings_to,
 )
 from autosklearn.util.parallel import preload_modules
-from autosklearn.util.single_thread_client import SingleThreadedClient
 from autosklearn.util.smac_wrap import SMACCallback, SmacRunCallback
 from autosklearn.util.stopwatch import StopWatch
 
@@ -299,21 +298,22 @@ class AutoML(BaseEstimator):
         self._initial_configurations_via_metalearning = (
             initial_configurations_via_metalearning
         )
+        self._n_jobs = n_jobs
 
         self._scoring_functions = scoring_functions or []
         self._resampling_strategy_arguments = resampling_strategy_arguments or {}
+        self._multiprocessing_context = "forkserver"
 
         # Single core, local runs should use fork to prevent the __main__ requirements
         # in examples. Nevertheless, multi-process runs have spawn as requirement to
         # reduce the possibility of a deadlock
-        if n_jobs == 1 and dask_client is None:
-            self._multiprocessing_context = "fork"
-            self._dask_client = SingleThreadedClient()
-            self._n_jobs = 1
+        self._dask: Dask
+        if dask_client is not None:
+            self._dask = UserDask(client=dask_client)
         else:
-            self._multiprocessing_context = "forkserver"
-            self._dask_client = dask_client
-            self._n_jobs = n_jobs
+            self._dask = LocalDask(n_jobs=n_jobs)
+            if n_jobs == 1:
+                self._multiprocessing_context = "fork"
 
         # Create the backend
         self._backend: Backend = create(
@@ -349,38 +349,6 @@ class AutoML(BaseEstimator):
         # identifier for each configuration saved to disk
         self.num_run = 0
         self.fitted = False
-
-    def _create_dask_client(self) -> None:
-        self._is_dask_client_internally_created = True
-        self._dask_client = Client(
-            LocalCluster(
-                n_workers=self._n_jobs,
-                processes=False,
-                threads_per_worker=1,
-                # We use the temporal directory to save the
-                # dask workers, because deleting workers takes
-                # more time than deleting backend directories
-                # This prevent an error saying that the worker
-                # file was deleted, so the client could not close
-                # the worker properly
-                local_directory=tempfile.gettempdir(),
-                # Memory is handled by the pynisher, not by the dask worker/nanny
-                memory_limit=0,
-            ),
-            # Heartbeat every 10s
-            heartbeat_interval=10000,
-        )
-
-    def _close_dask_client(self, force: bool = False) -> None:
-        if getattr(self, "_dask_client", None) is not None and (
-            force or getattr(self, "_is_dask_client_internally_created", False)
-        ):
-            self._dask_client.shutdown()
-            self._dask_client.close()
-            del self._dask_client
-            self._dask_client = None
-            self._is_dask_client_internally_created = False
-            del self._is_dask_client_internally_created
 
     def _get_logger(self, name: str) -> PicklableClientLogger:
         logger_name = "AutoML(%d):%s" % (self._seed, name)
@@ -747,17 +715,6 @@ class AutoML(BaseEstimator):
                     "autosklearn.metrics.Scorer."
                 )
 
-            # If no dask client was provided, we create one, so that we can
-            # start a ensemble process in parallel to smbo optimize
-            if self._dask_client is None and (
-                self._ensemble_class is not None
-                or self._n_jobs is not None
-                and self._n_jobs > 1
-            ):
-                self._create_dask_client()
-            else:
-                self._is_dask_client_internally_created = False
-
             self._dataset_name = dataset_name
             self._stopwatch.start(self._dataset_name)
 
@@ -902,42 +859,45 @@ class AutoML(BaseEstimator):
                         )
 
                     n_meta_configs = self._initial_configurations_via_metalearning
-                    _proc_smac = AutoMLSMBO(
-                        config_space=self.configuration_space,
-                        dataset_name=self._dataset_name,
-                        backend=self._backend,
-                        total_walltime_limit=time_left,
-                        func_eval_time_limit=per_run_time_limit,
-                        memory_limit=self._memory_limit,
-                        data_memory_limit=self._data_memory_limit,
-                        stopwatch=self._stopwatch,
-                        n_jobs=self._n_jobs,
-                        dask_client=self._dask_client,
-                        start_num_run=self.num_run,
-                        num_metalearning_cfgs=n_meta_configs,
-                        config_file=configspace_path,
-                        seed=self._seed,
-                        metadata_directory=self._metadata_directory,
-                        metrics=self._metrics,
-                        resampling_strategy=self._resampling_strategy,
-                        resampling_strategy_args=self._resampling_strategy_arguments,
-                        include=self._include,
-                        exclude=self._exclude,
-                        disable_file_output=self._disable_evaluator_output,
-                        get_smac_object_callback=self._get_smac_object_callback,
-                        smac_scenario_args=self._smac_scenario_args,
-                        scoring_functions=self._scoring_functions,
-                        port=self._logger_port,
-                        pynisher_context=self._multiprocessing_context,
-                        ensemble_callback=proc_ensemble,
-                        trials_callback=self._get_trials_callback,
-                    )
+                    with self._dask as dask_client:
+                        resamp_args = self._resampling_strategy_arguments
+                        _proc_smac = AutoMLSMBO(
+                            config_space=self.configuration_space,
+                            dataset_name=self._dataset_name,
+                            backend=self._backend,
+                            total_walltime_limit=time_left,
+                            func_eval_time_limit=per_run_time_limit,
+                            memory_limit=self._memory_limit,
+                            data_memory_limit=self._data_memory_limit,
+                            stopwatch=self._stopwatch,
+                            n_jobs=self._n_jobs,
+                            dask_client=dask_client,
+                            start_num_run=self.num_run,
+                            num_metalearning_cfgs=n_meta_configs,
+                            config_file=configspace_path,
+                            seed=self._seed,
+                            metadata_directory=self._metadata_directory,
+                            metrics=self._metrics,
+                            resampling_strategy=self._resampling_strategy,
+                            resampling_strategy_args=resamp_args,
+                            include=self._include,
+                            exclude=self._exclude,
+                            disable_file_output=self._disable_evaluator_output,
+                            get_smac_object_callback=self._get_smac_object_callback,
+                            smac_scenario_args=self._smac_scenario_args,
+                            scoring_functions=self._scoring_functions,
+                            port=self._logger_port,
+                            pynisher_context=self._multiprocessing_context,
+                            ensemble_callback=proc_ensemble,
+                            trials_callback=self._get_trials_callback,
+                        )
 
-                    (
-                        self.runhistory_,
-                        self.trajectory_,
-                        self._budget_type,
-                    ) = _proc_smac.run_smbo()
+                        (
+                            self.runhistory_,
+                            self.trajectory_,
+                            self._budget_type,
+                        ) = _proc_smac.run_smbo()
+
                     trajectory_filename = os.path.join(
                         self._backend.get_smac_output_directory_for_run(self._seed),
                         "trajectory.json",
@@ -1054,7 +1014,7 @@ class AutoML(BaseEstimator):
         self._logger.debug(
             "  multiprocessing_context: %s", str(self._multiprocessing_context)
         )
-        self._logger.debug("  dask_client: %s", str(self._dask_client))
+        self._logger.debug("  dask_client: %s", str(self._dask))
         self._logger.debug("  precision: %s", str(self.precision))
         self._logger.debug(
             "  disable_evaluator_output: %s", str(self._disable_evaluator_output)
@@ -1090,7 +1050,6 @@ class AutoML(BaseEstimator):
 
     def _fit_cleanup(self) -> None:
         self._logger.info("Closing the dask infrastructure")
-        self._close_dask_client()
         self._logger.info("Finished closing the dask infrastructure")
 
         # Clean up the logger
@@ -1555,12 +1514,6 @@ class AutoML(BaseEstimator):
         # Make sure that input is valid
         y = self.InputValidator.target_validator.transform(y)
 
-        # Create a client if needed
-        if self._dask_client is None:
-            self._create_dask_client()
-        else:
-            self._is_dask_client_internally_created = False
-
         metrics = metrics if metrics is not None else self._metrics
         if not isinstance(metrics, Sequence):
             metrics = [metrics]
@@ -1568,35 +1521,41 @@ class AutoML(BaseEstimator):
         # Use the current thread to start the ensemble builder process
         # The function ensemble_builder_process will internally create a ensemble
         # builder in the provide dask client
-        manager = EnsembleBuilderManager(
-            start_time=time.time(),
-            time_left_for_ensembles=self._time_for_task,
-            backend=copy.deepcopy(self._backend),
-            dataset_name=dataset_name if dataset_name else self._dataset_name,
-            task=task if task else self._task,
-            metrics=metrics if metrics is not None else self._metrics,
-            ensemble_class=(
-                ensemble_class if ensemble_class is not None else self._ensemble_class
-            ),
-            ensemble_kwargs=(
-                ensemble_kwargs
-                if ensemble_kwargs is not None
-                else self._ensemble_kwargs
-            ),
-            ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
-            max_models_on_disc=self._max_models_on_disc,
-            seed=self._seed,
-            precision=precision if precision else self.precision,
-            max_iterations=1,
-            read_at_most=None,
-            memory_limit=self._memory_limit,
-            random_state=self._seed,
-            logger_port=self._logger_port,
-            pynisher_context=self._multiprocessing_context,
-        )
-        manager.build_ensemble(self._dask_client)
-        future = manager.futures.pop()
-        result = future.result()
+        with self._dask as dask_client:
+            manager = EnsembleBuilderManager(
+                start_time=time.time(),
+                time_left_for_ensembles=self._time_for_task,
+                backend=copy.deepcopy(self._backend),
+                dataset_name=dataset_name if dataset_name else self._dataset_name,
+                task=task if task else self._task,
+                metrics=metrics if metrics is not None else self._metrics,
+                ensemble_class=(
+                    ensemble_class
+                    if ensemble_class is not None
+                    else self._ensemble_class
+                ),
+                ensemble_kwargs=(
+                    ensemble_kwargs
+                    if ensemble_kwargs is not None
+                    else self._ensemble_kwargs
+                ),
+                ensemble_nbest=ensemble_nbest
+                if ensemble_nbest
+                else self._ensemble_nbest,
+                max_models_on_disc=self._max_models_on_disc,
+                seed=self._seed,
+                precision=precision if precision else self.precision,
+                max_iterations=1,
+                read_at_most=None,
+                memory_limit=self._memory_limit,
+                random_state=self._seed,
+                logger_port=self._logger_port,
+                pynisher_context=self._multiprocessing_context,
+            )
+            manager.build_ensemble(dask_client)
+            future = manager.futures.pop()
+            result = future.result()
+
         if result is None:
             raise ValueError(
                 "Error building the ensemble - please check the log file and command "
@@ -1606,7 +1565,6 @@ class AutoML(BaseEstimator):
         self._ensemble_class = ensemble_class
 
         self._load_models()
-        self._close_dask_client()
         return self
 
     def _load_models(self):
@@ -2295,7 +2253,7 @@ class AutoML(BaseEstimator):
 
     def __getstate__(self) -> dict[str, Any]:
         # Cannot serialize a client!
-        self._dask_client = None
+        self._dask = None
         self.logging_server = None
         self.stop_logging_server = None
         return self.__dict__
@@ -2303,8 +2261,6 @@ class AutoML(BaseEstimator):
     def __del__(self) -> None:
         # Clean up the logger
         self._clean_logger()
-
-        self._close_dask_client()
 
 
 class AutoMLClassifier(AutoML):
