@@ -155,15 +155,11 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             else:
                 columns = set(range(n_feats))
             if expected != columns:
-                try:
-                    columns = [str(col) for col in columns]
-                except Exception as e:
-                    raise ValueError(
-                        f"Train data has columns={expected} yet the"
-                        f" feat_types are feat={columns}\n"
-                        f"Exception: {e}"
-                    )
-            transformer_lst = []
+                raise ValueError(
+                    f"Train data has columns={expected} yet the"
+                    f" feat_types are feat={columns}"
+                )
+            sklearn_transf_spec = []
 
             categorical_features = [
                 key
@@ -171,7 +167,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 if value.lower() == "categorical"
             ]
             if len(categorical_features) > 0:
-                transformer_lst.append(
+                sklearn_transf_spec.append(
                     ("categorical_transformer", self.categ_ppl, categorical_features)
                 )
 
@@ -181,7 +177,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 if value.lower() == "numerical"
             ]
             if len(numerical_features) > 0:
-                transformer_lst.append(
+                sklearn_transf_spec.append(
                     ("numerical_transformer", self.numer_ppl, numerical_features)
                 )
 
@@ -191,15 +187,9 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 if value.lower() == "string"
             ]
             if len(text_features) > 0:
-                transformer_lst.append(
+                sklearn_transf_spec.append(
                     ("text_transformer", self.txt_ppl, text_features)
                 )
-
-            sklearn_transf_spec = [
-                (name, transformer, feature_columns)
-                for name, transformer, feature_columns in transformer_lst
-                if len(feature_columns) > 0
-            ]
         else:
             # self.feature_type == None assumes numerical case
             sklearn_transf_spec = [

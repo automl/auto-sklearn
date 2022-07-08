@@ -221,7 +221,7 @@ class BasePipeline(Pipeline):
             node_name, node = n_
 
             sub_configuration_space = node.get_hyperparameter_search_space(
-                feat_type=feat_type, dataset_properties=self.dataset_properties
+                feat_type=self.feat_type, dataset_properties=self.dataset_properties
             )
             sub_config_dict = {}
             for param in configuration:
@@ -248,7 +248,7 @@ class BasePipeline(Pipeline):
                 node, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)
             ):
                 node.set_hyperparameters(
-                    feat_type=feat_type,
+                    feat_type=self.feat_type,
                     configuration=sub_configuration,
                     init_params=sub_init_params_dict,
                 )

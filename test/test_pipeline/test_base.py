@@ -1,17 +1,20 @@
+from typing import Optional
+
 import ConfigSpace.configuration_space
 
 import autosklearn.pipeline.base
 import autosklearn.pipeline.components.base
 import autosklearn.pipeline.components.classification as classification
 import autosklearn.pipeline.components.feature_preprocessing as feature_preprocessing
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 
 import unittest
 import unittest.mock
 
 
 class BasePipelineMock(autosklearn.pipeline.base.BasePipeline):
-    def __init__(self):
-        pass
+    def __init__(self, feat_type: Optional[FEAT_TYPE_TYPE] = None):
+        self.feat_type = feat_type
 
 
 class BaseTest(unittest.TestCase):
