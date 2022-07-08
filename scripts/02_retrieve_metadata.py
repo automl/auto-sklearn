@@ -181,7 +181,7 @@ def write_output(outputs, configurations, output_dir, configuration_space, metri
 class DummyDatamanager():
     def __init__(self, info):
         self.info = info
-        self.feat_type = {"A1": "numerical"}
+        self.feat_type = None
 
 def main():
     parser = ArgumentParser()

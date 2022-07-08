@@ -28,8 +28,8 @@ def get_configuration_space(
 
     Parameters
     ----------
-    datamanager: XYDataManager
-        XYDataManger object storing all important information about the dataset
+    datamanager: AbstractDataManager
+        AbstractDataManager object storing all important information about the dataset
 
     include: Optional[Dict[str, List[str]]] = None
         A dictionary of what components to include for each pipeline step
@@ -65,8 +65,8 @@ def _get_regression_configuration_space(
 
     Parameters
     ----------
-    datamanager: XYDataManager
-        XYDataManger object storing all important information about the dataset
+    datamanager: AbstractDataManager
+        AbstractDataManager object storing all important information about the dataset
 
     include: Optional[Dict[str, List[str]]] = None
         A dictionary of what components to include for each pipeline step
@@ -113,8 +113,8 @@ def _get_classification_configuration_space(
 
     Parameters
     ----------
-    datamanager: XYDataManager
-         XYDataManger object storing all important information about the dataset
+    datamanager: AbstractDataManager
+         AbstractDataManager object storing all important information about the dataset
 
     include: Optional[Dict[str, List[str]]] = None
         A dictionary of what components to include for each pipeline step

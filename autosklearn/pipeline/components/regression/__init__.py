@@ -123,7 +123,9 @@ class RegressorChoice(AutoSklearnChoice):
         for estimator_name in available_estimators.keys():
             estimator_configuration_space = available_estimators[
                 estimator_name
-            ].get_hyperparameter_search_space(dataset_properties=dataset_properties)
+            ].get_hyperparameter_search_space(
+                feat_type=feat_type, dataset_properties=dataset_properties
+            )
             parent_hyperparameter = {"parent": estimator, "value": estimator_name}
             cs.add_configuration_space(
                 estimator_name,
