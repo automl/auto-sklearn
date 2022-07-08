@@ -62,7 +62,7 @@ class DummyClassifier(AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
         cs = ConfigurationSpace()
         return cs
 
@@ -407,7 +407,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             },
         )
 
-        cs = pipeline.get_hyperparameter_search_space()
+        cs = pipeline.get_hyperparameter_search_space(feat_type=categorical)
 
         here = os.path.dirname(__file__)
         dataset_path = os.path.join(
@@ -474,8 +474,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             # Check through `set_hyperparameters`
             feat_types = {0: "categorical", 1: "categorical", 2: "numerical"}
 
-            default = cls.get_hyperparameter_search_space().get_default_configuration()
+            default = cls.get_hyperparameter_search_space(
+                feat_type=feat_types
+            ).get_default_configuration()
             cls.set_hyperparameters(
+                feat_type=feat_types,
                 configuration=default,
                 init_params={"data_preprocessor:feat_type": feat_types},
             )
@@ -571,7 +574,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 dataset_properties=dataset_properties,
                 init_params=init_params_,
             )
-            cls.set_hyperparameters(config, init_params=init_params_)
+            cls.set_hyperparameters(
+                config, init_params=init_params_, feat_type=feat_type
+            )
 
             # First make sure that for this configuration, setting the parameters
             # does not mistakenly set the estimator as fitted
