@@ -11,7 +11,7 @@ from autosklearn.constants import (
     MULTIOUTPUT_REGRESSION,
     REGRESSION_TASKS,
 )
-from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 
@@ -19,7 +19,7 @@ __all__ = ["get_configuration_space"]
 
 
 def get_configuration_space(
-    datamanager: XYDataManager,
+    datamanager: AbstractDataManager,
     include: Optional[Dict[str, List[str]]] = None,
     exclude: Optional[Dict[str, List[str]]] = None,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -56,7 +56,7 @@ def get_configuration_space(
 
 
 def _get_regression_configuration_space(
-    datamanager: XYDataManager,
+    datamanager: AbstractDataManager,
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -104,7 +104,7 @@ def _get_regression_configuration_space(
 
 
 def _get_classification_configuration_space(
-    datamanager: XYDataManager,
+    datamanager: AbstractDataManager,
     include: Optional[Dict[str, List[str]]],
     exclude: Optional[Dict[str, List[str]]],
     random_state: Optional[Union[int, np.random.RandomState]] = None,
