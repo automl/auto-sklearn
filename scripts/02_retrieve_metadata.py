@@ -179,9 +179,9 @@ def write_output(outputs, configurations, output_dir, configuration_space, metri
 
 
 class DummyDatamanager():
-    def __init__(self, info):
+    def __init__(self, info, feat_type=None):
         self.info = info
-        self.feat_type = None
+        self.feat_type = feat_type
 
 def main():
     parser = ArgumentParser()
