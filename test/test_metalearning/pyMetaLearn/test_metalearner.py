@@ -23,26 +23,14 @@ class MetaLearnerTest(unittest.TestCase):
         data_dir = os.path.join(data_dir, "test_meta_base_data")
         os.chdir(data_dir)
 
-        for feat_type in [
-            None,
-            {"A": "numerical"},
-            {"A": "categorical"},
-            {"A": "string"},
-            {"A": "numerical", "B": "categorical"},
-            {"A": "numerical", "B": "string"},
-            {"A": "categorical", "B": "string"},
-            {"A": "categorical", "B": "string", "C": "numerical"},
-        ]:
-            pipeline = (
-                autosklearn.pipeline.classification.SimpleClassificationPipeline()
-            )
-            self.cs = pipeline.get_hyperparameter_search_space(feat_type=feat_type)
+        pipeline = autosklearn.pipeline.classification.SimpleClassificationPipeline()
+        self.cs = pipeline.get_hyperparameter_search_space()
 
-            self.logger = logging.getLogger()
-            meta_base = MetaBase(self.cs, data_dir, logger=self.logger)
-            self.meta_optimizer = metalearner.MetaLearningOptimizer(
-                "233", self.cs, meta_base, logger=self.logger
-            )
+        self.logger = logging.getLogger()
+        meta_base = MetaBase(self.cs, data_dir, logger=self.logger)
+        self.meta_optimizer = metalearner.MetaLearningOptimizer(
+            "233", self.cs, meta_base, logger=self.logger
+        )
 
     def tearDown(self):
         os.chdir(self.cwd)

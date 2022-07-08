@@ -86,21 +86,6 @@ class PreprocessingPipelineFeatTypeTest(unittest.TestCase):
         for key in cs.get_hyperparameters_dict().keys():
             self.assertNotIn("numerical", key.split(":")[0])
 
-        DPP = FeatTypeSplit(feat_type={"A": "string", "B": "categorical"})
-        cs = DPP.get_hyperparameter_search_space(
-            feat_type={"A": "string", "B": "categorical"},
-            dataset_properties={
-                "task": 1,
-                "sparse": False,
-                "multilabel": False,
-                "multiclass": False,
-                "target_type": "classification",
-                "signed": False,
-            },
-        )
-        for key in cs.get_hyperparameters_dict().keys():
-            self.assertNotIn("numerical", key.split(":")[0])
-
         DPP = FeatTypeSplit(feat_type={"A": "string", "B": "numerical"})
         cs = DPP.get_hyperparameter_search_space(
             feat_type={"A": "string", "B": "numerical"},
