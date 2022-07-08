@@ -68,8 +68,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     def __init__(
         self,
-        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         steps=None,
         dataset_properties=None,
         include=None,
