@@ -186,9 +186,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         return self.pareto_set_[0].predict(base_models_predictions)
 
     def __str__(self) -> str:
-        return "MultiObjectiveDummyEnsemble:\n" + (
-            "\n".join([str(ensemble) for ensemble in self.pareto_set_])
-        )
+        return "MultiObjectiveDummyEnsemble: %d models" % len(self.pareto_set_)
 
     def get_models_with_weights(
         self, models: dict[tuple[int, int, float], BasePipeline]
@@ -206,16 +204,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         -------
         list[tuple[float, BasePipeline]]
         """
-        output = []
-        for i, weight in enumerate(self.pareto_set_[0].weights_):
-            if weight > 0.0:
-                identifier = self.pareto_set_[0].identifiers_[i]
-                model = models[identifier]
-                output.append((weight, model))
-
-        output.sort(reverse=True, key=lambda t: t[0])
-
-        return output
+        return self.pareto_set_[0].get_models_with_weights(models)
 
     def get_identifiers_with_weights(
         self,
@@ -233,7 +222,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         -------
         list[tuple[tuple[int, int, float], float]
         """
-        return list(zip(self.pareto_set_[0].identifiers_, self.pareto_set_[0].weights_))
+        return self.pareto_set_[0].get_identifiers_with_weights()
 
     def get_selected_model_identifiers(self) -> list[tuple[int, int, float]]:
         """Return identifiers of models in the ensemble that is best for the 1st metric.
@@ -244,14 +233,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         -------
         list
         """
-        output = []
-
-        for i, weight in enumerate(self.pareto_set_[0].weights_):
-            identifier = self.pareto_set_[0].identifiers_[i]
-            if weight > 0.0:
-                output.append(identifier)
-
-        return output
+        return self.pareto_set_[0].get_selected_model_identifiers()
 
     def get_validation_performance(self) -> float:
         """Return validation performance of the ensemble that is best for the 1st metric.

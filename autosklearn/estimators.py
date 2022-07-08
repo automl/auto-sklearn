@@ -405,12 +405,7 @@ class AutoSklearnEstimator(BaseEstimator):
         )
 
         # Need to resolve the ensemble class here so we can act on it below.
-        if ensemble_class == "default":
-            ensemble_class = (
-                EnsembleSelection
-                if metric is None or isinstance(metric, Scorer) or len(metric) == 1
-                else MultiObjectiveDummyEnsemble
-            )
+        ensemble_class = self.resolve_ensemble_class(ensemble_class, metric)
         self.ensemble_class = ensemble_class
 
         # User specified `ensemble_size` explicitly, warn them about deprecation
@@ -689,12 +684,7 @@ class AutoSklearnEstimator(BaseEstimator):
         """  # noqa: E501
 
         # Need to resolve the ensemble class here so we can act on it below.
-        if ensemble_class == "default":
-            ensemble_class = (
-                EnsembleSelection
-                if metric is None or isinstance(metric, Scorer) or len(metric) == 1
-                else MultiObjectiveDummyEnsemble
-            )
+        ensemble_class = self.resolve_ensemble_class(ensemble_class, metric)
 
         # User specified `ensemble_size` explicitly, warn them about deprecation
         if ensemble_size is not None:
@@ -751,6 +741,15 @@ class AutoSklearnEstimator(BaseEstimator):
             metrics=metric,
         )
         return self
+
+    def resolve_ensemble_class(self, ensemble_class, metric):
+        if ensemble_class == "default":
+            ensemble_class = (
+                EnsembleSelection
+                if metric is None or isinstance(metric, Scorer) or len(metric) == 1
+                else MultiObjectiveDummyEnsemble
+            )
+        return ensemble_class
 
     def refit(self, X, y):
         """Refit all models found with fit to new data.

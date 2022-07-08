@@ -104,17 +104,11 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
         return predictions[0]
 
     def __str__(self) -> str:
-        return "%s:\n\tMembers: %s" "\n\tWeights: %s\n\tIdentifiers: %s" % (
+        return "%s:\n\tMembers: %s" "\n\tWeights: %s\n\tIdentifiers: [%s]" % (
             self.__class__.__name__,
             self.indices_,  # type: ignore [attr-defined]
             self.weights_,
-            " ".join(
-                [
-                    str(identifier)
-                    for idx, identifier in enumerate(self.identifiers_)  # type: ignore [attr-defined]  # noqa: E501
-                    if self.weights_[idx] > 0
-                ]
-            ),
+            self.identifiers_[0],  # type: ignore [attr-defined]
         )
 
     def get_models_with_weights(
@@ -132,16 +126,7 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
         -------
         list[tuple[float, BasePipeline]]
         """
-        output = []
-        for i, weight in enumerate(self.weights_):
-            if weight > 0.0:
-                identifier = self.identifiers_[i]  # type: ignore [attr-defined]
-                model = models[identifier]
-                output.append((weight, model))
-
-        output.sort(reverse=True, key=lambda t: t[0])
-
-        return output
+        return [(self.weights_[0], models[self.identifiers_[0]])]  # type: ignore [attr-defined]  # noqa: E501
 
     def get_identifiers_with_weights(
         self,
@@ -169,14 +154,7 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
         -------
         list
         """
-        output = []
-
-        for i, weight in enumerate(self.weights_):
-            identifier = self.identifiers_[i]  # type: ignore [attr-defined]
-            if weight > 0.0:
-                output.append(identifier)
-
-        return output
+        return self.identifiers_  # type: ignore [attr-defined]
 
     def get_validation_performance(self) -> float:
         """Return validation performance of ensemble.
@@ -193,8 +171,11 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
 class SingleModelEnsemble(AbstractSingleModelEnsemble):
     """Ensemble consisting of a single model.
 
-    This class is used my the :cls:`MultiObjectiveDummyEnsemble` to represent ensembles
-    consisting of a single model, and this class should not be used on its own.
+    This class is used by the :class:`MultiObjectiveDummyEnsemble` to represent
+    ensembles consisting of a single model, and this class should not be used
+    on its own.
+
+    Do not use by yourself!
 
     Parameters
     ----------
@@ -375,6 +356,8 @@ class SingleBestFromRunhistory(AbstractSingleModelEnsemble):
     Such model is returned as an ensemble of a single
     object, to comply with the expected interface of an
     AbstractEnsemble.
+
+    Do not use by yourself!
     """
 
     def __init__(
