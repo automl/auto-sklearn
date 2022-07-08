@@ -11,7 +11,6 @@ from autosklearn.util.single_thread_client import SingleThreadedClient
 
 
 class Dask(ABC):
-    @property
     @abstractmethod
     def client(self) -> Client:
         """Should return a dask client"""
@@ -23,7 +22,7 @@ class Dask(ABC):
         ...
 
     def __enter__(self) -> Client:
-        return self.client
+        return self.client()
 
     def __exit__(self, *args: Any, **kwargs: Any) -> None:
         self.close()
@@ -45,7 +44,6 @@ class UserDask(Dask):
         """
         self._client = client
 
-    @property
     def client(self) -> Client:
         """The dask client"""
         return self._client
@@ -60,12 +58,11 @@ class UserDask(Dask):
 
 
 class LocalDask(Dask):
-    def __init__(self, n_jobs: int) -> None:
+    def __init__(self, n_jobs: int | None = None) -> None:
         self.n_jobs = n_jobs
         self._client: Client | None = None
         self._cluster: LocalCluster | None = None
 
-    @property
     def client(self) -> Client:
         """Creates a usable dask client or returns an existing one
 
@@ -93,9 +90,7 @@ class LocalDask(Dask):
                 # Memory is handled by the pynisher, not by the dask worker/nanny
                 memory_limit=0,
             )
-            client = Client(
-                self._cluster, heartbeat_interval=10000
-            )  # Heartbeat every 10s
+            client = Client(cluster, heartbeat_interval=10000)  # 10s
 
         self._client = client
         self._cluster = cluster
