@@ -225,7 +225,10 @@ def main():
             )
 
             configuration_space = pipeline.get_configuration_space(
-                DummyDatamanager({"is_sparse": sparse, "task": task})
+                DummyDatamanager(
+                    info={"is_sparse": sparse, "task": task},
+                    feat_type={"A": "numerical", "B": "categorical"}
+                )
             )
 
             outputs, configurations = retrieve_matadata(
