@@ -227,7 +227,7 @@ def main():
             configuration_space = pipeline.get_configuration_space(
                 DummyDatamanager(
                     info={"is_sparse": sparse, "task": task},
-                    feat_type={"A": "numerical", "B": "categorical"}
+                    feat_type={"A": "numerical"}
                 )
             )
 
