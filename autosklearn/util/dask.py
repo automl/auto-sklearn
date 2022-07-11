@@ -1,3 +1,33 @@
+""" Provides simplified 2 use cases of dask that we consider
+
+1. A UserDask is when a user supplies a dask client, in which case
+we don't close this down and leave it up to the user to control its lifetime.
+2.  A LocalDask is one we use when no user dask is supplied. In this case
+we make sure to spin up and close down clients as needed.
+
+Both of these can be uniformly accessed as a context manager.
+
+.. code:: python
+
+    # Locally controlled dask client
+    local_dask = LocalDask(n_jobs=2)
+    with local_dask as client:
+        # Do stuff with client
+        ...
+
+    # `client` is shutdown properly
+
+    # ----------------
+
+    # User controlled dask client
+    user_dask = UserDask(user_client)
+
+    with user_dask as client:
+        # Do stuff with (client == user_client)
+        ...
+
+    # `user_client` is still open and up to the user to close
+"""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
