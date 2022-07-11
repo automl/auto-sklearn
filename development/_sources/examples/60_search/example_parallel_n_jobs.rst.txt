@@ -110,9 +110,9 @@ To use ``n_jobs_`` we must guard the code
 
  .. code-block:: none
 
-    [ERROR] [2022-07-08 13:59:00,943:asyncio.events] 
+    [ERROR] [2022-07-11 10:25:34,930:asyncio.events] 
     Traceback (most recent call last):
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 776, in wrapper
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 778, in wrapper
         return await func(*args, **kwargs)
       File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
         await self._ensure_connected(timeout=timeout)
@@ -123,13 +123,13 @@ To use ``n_jobs_`` we must guard the code
       File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
         return await future
     asyncio.exceptions.CancelledError
-    [ERROR] [2022-07-08 13:59:00,957:asyncio.events] 
+    [ERROR] [2022-07-11 10:25:34,949:asyncio.events] 
     Traceback (most recent call last):
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 776, in wrapper
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 778, in wrapper
         return await func(*args, **kwargs)
       File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1400, in _handle_report
         await self._reconnect()
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 776, in wrapper
+      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 778, in wrapper
         return await func(*args, **kwargs)
       File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
         await self._ensure_connected(timeout=timeout)
@@ -157,7 +157,7 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  5.110 seconds)
+   **Total running time of the script:** ( 1 minutes  58.460 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:

@@ -172,8 +172,9 @@ to download the full example code or to run this example in your browser via Bin
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type      cost  duration
 model_id
-2            1             0.96  random_forest  0.123599  2.214426
-4            2             0.04    extra_trees  0.422129  1.125854
+2            1             0.88  random_forest  0.121883  2.278445
+22           2             0.06  random_forest  0.195631  2.577770
+8            3             0.06  decision_tree  0.365504  0.643842
 </pre></div>
 </div>
 </div>
@@ -183,25 +184,34 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;cost&#39;: 0.12359858141186975,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbdab2afc70&gt;,
-           &#39;ensemble_weight&#39;: 0.96,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbda91572e0&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;cost&#39;: 0.12188348155228435,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7962798bb0&gt;,
+           &#39;ensemble_weight&#39;: 0.88,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7965a39520&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fbda9157f40&gt;,
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7961f2ffa0&gt;,
            &#39;sklearn_regressor&#39;: RandomForestRegressor(max_features=1.0, n_estimators=512, n_jobs=1,
                       random_state=1, warm_start=True)},
-    4: {   &#39;cost&#39;: 0.4221293613354441,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fbda90fbdf0&gt;,
-           &#39;ensemble_weight&#39;: 0.04,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fbda8fa11c0&gt;,
-           &#39;model_id&#39;: 4,
+    8: {   &#39;cost&#39;: 0.36550447100935,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7967c94c70&gt;,
+           &#39;ensemble_weight&#39;: 0.06,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7965bdf4f0&gt;,
+           &#39;model_id&#39;: 8,
            &#39;rank&#39;: 2,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fbda8fa1430&gt;,
-           &#39;sklearn_regressor&#39;: ExtraTreesRegressor(criterion=&#39;friedman_mse&#39;, max_features=0.5144630032500372,
-                    min_samples_leaf=2, min_samples_split=12, n_estimators=512,
-                    n_jobs=1, random_state=1, warm_start=True)}}
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7965c21dc0&gt;,
+           &#39;sklearn_regressor&#39;: DecisionTreeRegressor(criterion=&#39;friedman_mse&#39;, max_depth=65,
+                      min_samples_leaf=8, min_samples_split=15, random_state=1)},
+    22: {   &#39;cost&#39;: 0.19563103725669062,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7963dfdee0&gt;,
+            &#39;ensemble_weight&#39;: 0.06,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f79631561c0&gt;,
+            &#39;model_id&#39;: 22,
+            &#39;rank&#39;: 3,
+            &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f79631567c0&gt;,
+            &#39;sklearn_regressor&#39;: RandomForestRegressor(bootstrap=False, max_features=0.978492653000109,
+                      min_samples_split=6, n_estimators=512, n_jobs=1,
+                      random_state=1, warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -212,7 +222,7 @@ model_id
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8872833331840241
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R2 score: 0.8553341558098918
 </pre></div>
 </div>
 </div>
@@ -443,7 +453,7 @@ model_id
     (Forbidden: regressor:__choice__ == &#39;random_forest&#39; &amp;&amp; Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  0.461 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.729 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-20-basic-example-multioutput-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo.svg" width="150px" /></a>
