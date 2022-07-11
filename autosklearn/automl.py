@@ -898,30 +898,37 @@ class AutoML(BaseEstimator):
                             self._budget_type,
                         ) = _proc_smac.run_smbo()
 
-                    trajectory_filename = os.path.join(
-                        self._backend.get_smac_output_directory_for_run(self._seed),
-                        "trajectory.json",
-                    )
-                    saveable_trajectory = [
-                        list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
-                        for entry in self.trajectory_
-                    ]
-                    with open(trajectory_filename, "w") as fh:
-                        json.dump(saveable_trajectory, fh)
+                        trajectory_filename = os.path.join(
+                            self._backend.get_smac_output_directory_for_run(self._seed),
+                            "trajectory.json",
+                        )
+                        saveable_trajectory = [
+                            list(entry[:2])
+                            + [entry[2].get_dictionary()]
+                            + list(entry[3:])
+                            for entry in self.trajectory_
+                        ]
+                        with open(trajectory_filename, "w") as fh:
+                            json.dump(saveable_trajectory, fh)
 
-            self._logger.info("Starting shutdown...")
-            # Wait until the ensemble process is finished to avoid shutting down
-            # while the ensemble builder tries to access the data
-            if proc_ensemble is not None:
-                self.ensemble_performance_history = list(proc_ensemble.history)
+                        self._logger.info("Starting shutdown...")
+                        # Wait until the ensemble process is finished to avoid shutting
+                        # down while the ensemble builder tries to access the data
+                        if proc_ensemble is not None:
+                            self.ensemble_performance_history = list(
+                                proc_ensemble.history
+                            )
 
-                if len(proc_ensemble.futures) > 0:
-                    # Now we wait for the future to return as it cannot be cancelled
-                    # while it is running: https://stackoverflow.com/a/49203129
-                    self._logger.info(
-                        "Ensemble script still running, waiting for it to finish."
-                    )
-                    result = proc_ensemble.futures.pop().result()
+                            if len(proc_ensemble.futures) > 0:
+                                # Now we wait for the future to return as it cannot be
+                                # cancelled while it is running
+                                # * https://stackoverflow.com/a/49203129
+                                self._logger.info(
+                                    "Ensemble script still running,"
+                                    " waiting for it to finish."
+                                )
+                                result = proc_ensemble.futures.pop().result()
+
                     if result:
                         ensemble_history, _ = result
                         self.ensemble_performance_history.extend(ensemble_history)
