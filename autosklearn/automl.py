@@ -929,10 +929,15 @@ class AutoML(BaseEstimator):
                                 )
                                 result = proc_ensemble.futures.pop().result()
 
-                    if result:
-                        ensemble_history, _ = result
-                        self.ensemble_performance_history.extend(ensemble_history)
-                    self._logger.info("Ensemble script finished, continue shutdown.")
+                            if result:
+                                ensemble_history, _ = result
+                                self.ensemble_performance_history.extend(
+                                    ensemble_history
+                                )
+
+                            self._logger.info(
+                                "Ensemble script finished, continue shutdown."
+                            )
 
                 # save the ensemble performance history file
                 if len(self.ensemble_performance_history) > 0:
