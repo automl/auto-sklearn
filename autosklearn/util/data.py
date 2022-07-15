@@ -1,16 +1,6 @@
-from typing import (
-    Any,
-    Dict,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from __future__ import annotations
+
+from typing import Any, Dict, Iterator, List, Mapping, Sequence, Union, cast
 
 import warnings
 
@@ -35,7 +25,8 @@ default_dataset_compression_arg: DatasetCompressionSpec = {
 
 
 def validate_dataset_compression_arg(
-    dataset_compression: Mapping[str, Any], memory_limit: int
+    dataset_compression: Mapping[str, Any],
+    memory_limit: int | None,
 ) -> DatasetCompressionSpec:
     """Validates and return a correct dataset_compression argument
 
@@ -45,6 +36,9 @@ def validate_dataset_compression_arg(
     ----------
     dataset_compression: Mapping[str, Any]
         The arg to validate
+
+    memory_limit: int
+        The memory limit to apply
 
     Returns
     -------
@@ -68,9 +62,7 @@ def validate_dataset_compression_arg(
         memory_allocation = dataset_compression["memory_allocation"]
 
         # "memory_allocation" must be float or int
-        if not (
-            isinstance(memory_allocation, float) or isinstance(memory_allocation, int)
-        ):
+        if not isinstance(memory_allocation, (float, int)):
             raise ValueError(
                 "key 'memory_allocation' must be an `int` or `float`"
                 f"\ntype = {memory_allocation}"
@@ -78,22 +70,29 @@ def validate_dataset_compression_arg(
             )
 
         # "memory_allocation" must be in (0,1) if float
-        if isinstance(memory_allocation, float) and not (0.0 < memory_allocation < 1.0):
-            raise ValueError(
-                "key 'memory_allocation' if float must be in (0, 1)"
-                f"\nmemory_allocation = {memory_allocation}"
-                f"\ndataset_compression = {dataset_compression}"
-            )
+        if isinstance(memory_allocation, float):
+            if not (0.0 < memory_allocation < 1.0):
+                raise ValueError(
+                    "key 'memory_allocation' if float must be in (0, 1)"
+                    f"\nmemory_allocation = {memory_allocation}"
+                    f"\ndataset_compression = {dataset_compression}"
+                )
+            if memory_limit is None:
+                raise ValueError(
+                    "key 'memory_allocation' if float must also then set `memory_limit`"
+                    " for it to make sense."
+                    f"\nmemory_allocation = {memory_allocation}"
+                    f"\ndataset_compression = {dataset_compression}"
+                )
 
         # "memory_allocation" if absolute, should be > 0 and < memory_limit
-        if isinstance(memory_allocation, int) and not (
-            0 < memory_allocation < memory_limit
-        ):
-            raise ValueError(
-                f"key 'memory_allocation' if int must be in (0, {memory_limit})"
-                f"\nmemory_allocation = {memory_allocation}"
-                f"\ndataset_compression = {dataset_compression}"
-            )
+        elif isinstance(memory_allocation, int):
+            if not (0 < memory_allocation < memory_limit):
+                raise ValueError(
+                    f"key 'memory_allocation' if int must be in (0, {memory_limit})"
+                    f"\nmemory_allocation = {memory_allocation}"
+                    f"\ndataset_compression = {dataset_compression}"
+                )
 
         # "methods" must be non-empty sequence
         if (
@@ -152,7 +151,7 @@ class _DtypeReductionMapping(Mapping):
     """
 
     # Information about dtype support
-    _mapping: Dict[type, type] = {
+    _mapping: dict[type, type] = {
         np.float32: np.float32,
         np.float64: np.float32,
     }
@@ -187,7 +186,7 @@ reduction_mapping = _DtypeReductionMapping()
 supported_precision_reductions = list(reduction_mapping)
 
 
-def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
+def binarization(array: list | np.ndarray) -> np.ndarray:
     # Takes a binary-class datafile and turn the max value (positive class)
     # into 1 and the min into 0
     array = np.array(array, dtype=float)  # conversion needed to use np.inf
@@ -205,7 +204,7 @@ def binarization(array: Union[List, np.ndarray]) -> np.ndarray:
     return np.array(array, dtype=int)
 
 
-def multilabel_to_multiclass(array: Union[List, np.ndarray]) -> np.ndarray:
+def multilabel_to_multiclass(array: list | np.ndarray) -> np.ndarray:
     array = binarization(array)
     return np.array([np.nonzero(array[i, :])[0][0] for i in range(len(array))])
 
@@ -223,7 +222,7 @@ def convert_to_num(Ybin: np.ndarray) -> np.ndarray:
     return result
 
 
-def convert_to_bin(Ycont: List, nval: int, verbose: bool = True) -> List:
+def convert_to_bin(Ycont: list, nval: int, verbose: bool = True) -> list:
     # Convert numeric vector to binary (typically classification target values)
     if verbose:
         pass
@@ -235,7 +234,7 @@ def convert_to_bin(Ycont: List, nval: int, verbose: bool = True) -> List:
     return Ybin
 
 
-def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
+def predict_RAM_usage(X: np.ndarray, categorical: list[bool]) -> float:
     # Return estimated RAM usage of dataset after OneHotEncoding in bytes.
     estimated_columns = 0
     for i, cat in enumerate(categorical):
@@ -250,12 +249,12 @@ def predict_RAM_usage(X: np.ndarray, categorical: List[bool]) -> float:
 
 
 def subsample(
-    X: Union[np.ndarray, spmatrix],
+    X: np.ndarray | spmatrix,
     y: np.ndarray,
     is_classification: bool,
-    sample_size: Union[float, int],
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
-) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
+    sample_size: float | int,
+    random_state: int | np.random.RandomState | None = None,
+) -> tuple[np.ndarray | spmatrix, np.ndarray]:
     """Subsamples data returning the same type as it recieved.
 
     If `is_classification`, we split using a stratified shuffle split which
@@ -293,10 +292,10 @@ def subsample(
     (np.ndarray | spmatrix, np.ndarray)
         The X and y subsampled according to sample_size
     """
-    if isinstance(X, List):
+    if isinstance(X, list):
         X = np.asarray(X)
 
-    if isinstance(y, List):
+    if isinstance(y, list):
         y = np.asarray(y)
 
     if is_classification:
@@ -330,9 +329,7 @@ def subsample(
     return X, y
 
 
-def reduce_precision(
-    X: Union[np.ndarray, spmatrix]
-) -> Tuple[Union[np.ndarray, spmatrix], Type]:
+def reduce_precision(X: np.ndarray | spmatrix) -> tuple[np.ndarray | spmatrix, type]:
     """Reduces the precision of a np.ndarray or spmatrix containing floats
 
     Parameters
@@ -356,14 +353,14 @@ def reduce_precision(
 
 
 def reduce_dataset_size_if_too_large(
-    X: Union[np.ndarray, spmatrix],
+    X: np.ndarray | spmatrix,
     y: np.ndarray,
     memory_limit: int,
     is_classification: bool,
-    random_state: Union[int, np.random.RandomState] = None,
-    operations: List[str] = ["precision", "subsample"],
-    memory_allocation: Union[int, float] = 0.1,
-) -> Tuple[Union[np.ndarray, spmatrix], np.ndarray]:
+    random_state: int | np.random.RandomState | None = None,
+    operations: list[str] = ["precision", "subsample"],
+    memory_allocation: int | float = 0.1,
+) -> tuple[np.ndarray | spmatrix, np.ndarray]:
     f"""Reduces the size of the dataset if it's too close to the memory limit.
 
     Follows the order of the operations passed in and retains the type of its
@@ -449,7 +446,7 @@ def reduce_dataset_size_if_too_large(
     if "precision" in operations and X.dtype not in supported_precision_reductions:
         raise ValueError(f"Unsupported type `{X.dtype}` for precision reduction")
 
-    def megabytes(arr: Union[np.ndarray, spmatrix]) -> float:
+    def megabytes(arr: np.ndarray | spmatrix) -> float:
         return (arr.nbytes if isinstance(X, np.ndarray) else arr.data.nbytes) / (
             2**20
         )

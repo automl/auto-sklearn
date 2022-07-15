@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Any, Generic, Iterable, Sequence, TypeVar
 
 import warnings
@@ -21,7 +21,7 @@ from sklearn.model_selection._split import (
 )
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import Literal
 
 from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
 from autosklearn.data.validation import convert_if_sparse
@@ -31,34 +31,23 @@ from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.util.smac_wrap import SMACCallback
 
-# Used to indicate what type the underlying AutoML instance is
-TAutoML = TypeVar("TAutoML", bound=AutoML)
-TParetoModel = TypeVar("TParetoModel", VotingClassifier, VotingRegressor)
-
 # Used to return self and give correct type information from subclasses,
 # see `fit(self: Self) -> Self`
 Self = TypeVar("Self", bound="AutoSklearnEstimator")
 
-ResampleOptions: TypeAlias = Literal[
-    "holdout",
-    "cv",
-    "holdout-iterative-fit",
-    "cv-iterative-fit",
-    "partial-cv",
-]
-DisableEvaluatorOptions: TypeAlias = Literal["y_optimization", "model"]
+# Used to indicate what type the underlying AutoML instance is
+TParetoModel = TypeVar("TParetoModel", VotingClassifier, VotingRegressor)
+TAutoML = TypeVar("TAutoML", bound=AutoML)
 
 
-class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
+class AutoSklearnEstimator(ABC, BaseEstimator, Generic[TAutoML, TParetoModel]):
 
-    # List of target types supported by the estimator class
-    supported_target_types: list[str]
-
-    # The automl class used by the estimator class
-    _automl_class: type[TAutoML]
+    supported_target_types: list[str]  # Support output types for the estimator
+    _automl_class: type[TAutoML]  # The automl class used by the estimator class
 
     def __init__(
         self,
+        *,
         time_left_for_this_task: int = 3600,
         per_run_time_limit: int | None = None,  # TODO: allow percentage
         initial_configurations_via_metalearning: int = 25,  # TODO validate
@@ -71,7 +60,9 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
         memory_limit: int | None = 3072,
         include: dict[str, list[str]] | None = None,
         exclude: dict[str, list[str]] | None = None,
-        resampling_strategy: ResampleOptions
+        resampling_strategy: Literal[
+            "holdout", "cv", "holdout-iterative-fit", "cv-iterative-fit", "partial-cv"
+        ]
         | BaseCrossValidator
         | _RepeatedSplits
         | BaseShuffleSplit = "holdout",
@@ -81,7 +72,7 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
         n_jobs: int = 1,
         dask_client: dask.distributed.Client | None = None,
         disable_evaluator_output: bool
-        | Sequence[DisableEvaluatorOptions] = False,  # TODO fill in
+        | Sequence[Literal["y_optimization", "model"]] = False,  # TODO: fill in
         get_smac_object_callback: SMACCallback | None = None,
         smac_scenario_args: dict[str, Any] | None = None,
         logging_config: dict[str, Any] | None = None,
@@ -490,7 +481,7 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
         self.allow_string_features = allow_string_features
 
         # Cached
-        self.automl_: AutoML | None = None
+        self.automl_: TAutoML | None = None
 
         # Handle the number of jobs and the time for them
         # Made private by `_n_jobs` to keep with sklearn compliance
@@ -504,21 +495,19 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
 
     @property
-    @abstractmethod
     def automl(self) -> TAutoML:
         """Get the underlying Automl instance
 
         Returns
         -------
         AutoML
-            The underlying AutoML instanec
+            The underlying AutoML instance
         """
         if self.automl_ is not None:
             return self.automl_
 
         initial_configs = self.initial_configurations_via_metalearning
-        cls = self._get_automl_class()
-        automl = cls(
+        automl = self._automl_class(
             temporary_directory=self.tmp_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             time_left_for_this_task=self.time_left_for_this_task,
@@ -568,16 +557,14 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
         NotFittedError
             If there this estimator has not been fitted
         """
-
-    def __getstate__(self) -> dict[str, Any]:
-        # Cannot serialize a client!
-        self.dask_client = None
-        return self.__dict__
+        # TODO
+        raise NotImplementedError()
 
     def fit(
         self: Self,
         X: np.ndarray | pd.DataFrame | list | spmatrix,
         y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
         X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
         y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
         feat_type: list[str] | None = None,
@@ -697,6 +684,7 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
         self,
         X: np.ndarray | pd.DataFrame | list | spmatrix,
         y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
         config: Configuration | dict[str, Any],
         dataset_name: str | None = None,
         X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
@@ -767,6 +755,7 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
     def fit_ensemble(
         self: Self,
         y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
         task: int | None = None,
         precision: Literal[16, 32, 64] = 32,
         dataset_name: str | None = None,
@@ -913,6 +902,7 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
     def predict(
         self,
         X: np.ndarray | pd.DataFrame | list | spmatrix,
+        *,
         batch_size: int | None = None,
         n_jobs: int = 1,
     ) -> np.ndarray:
@@ -1088,6 +1078,7 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
 
     def leaderboard(
         self,
+        *,
         detailed: bool = False,
         ensemble_only: bool = True,
         top_k: int | Literal["all"] = "all",
@@ -1501,6 +1492,7 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
         self,
         X: np.ndarray | pd.DataFrame | list | spmatrix,
         y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
         X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
         y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
         dataset_name: str | None = None,
@@ -1548,6 +1540,11 @@ class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
             VotingClassifier/VotingRegressor
         """
         return self.automl._load_pareto_set()
+
+    def __getstate__(self) -> dict[str, Any]:
+        # Cannot serialize a client!
+        self.dask_client = None
+        return self.__dict__
 
     def __sklearn_is_fitted__(self) -> bool:
         return self.automl_ is not None and self.automl.fitted

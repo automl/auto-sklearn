@@ -199,6 +199,8 @@ def _model_predict(
 class AutoML(BaseEstimator):
     """Base class for handling the AutoML procedure"""
 
+    _task_mapping: dict[str, int]
+
     def __init__(
         self,
         time_left_for_this_task: int,
@@ -243,12 +245,10 @@ class AutoML(BaseEstimator):
                 )
 
         # Validate dataset_compression and set its values
-        self._dataset_compression: DatasetCompressionSpec | None
+        self._dataset_compression: DatasetCompressionSpec | None = None
         if isinstance(dataset_compression, bool):
             if dataset_compression is True:
                 self._dataset_compression = default_dataset_compression_arg
-            else:
-                self._dataset_compression = None
         else:
             self._dataset_compression = validate_dataset_compression_arg(
                 dataset_compression,
@@ -307,18 +307,18 @@ class AutoML(BaseEstimator):
 
         # Create the backend
         self._backend: Backend = create(
-            temporary_directory=temporary_directory,
+            # TODO update backend as this does accept optional str
+            temporary_directory=temporary_directory,  # type: ignore
             output_directory=None,
             prefix="auto-sklearn",
             delete_output_folder_after_terminate=delete_tmp_folder_after_terminate,
         )
 
-        self._data_memory_limit = None  # TODO: dead variable? Always None
         self._datamanager = None
         self._dataset_name = None
         self._feat_type = None
         self._logger: PicklableClientLogger | None = None
-        self._task = None
+        self._task: int | None = None
         self._label_num = None
         self._parser = None
         self._can_predict = False
@@ -330,10 +330,11 @@ class AutoML(BaseEstimator):
         self.InputValidator: InputValidator | None = None
         self.configuration_space = None
 
-        # The ensemble performance history through time
         self._stopwatch = StopWatch()
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-        self.ensemble_performance_history = []
+
+        # The ensemble performance history through time
+        self.ensemble_performance_history: list[dict[str, Any]] = []
 
         # Num_run tell us how many runs have been launched. It can be seen as an
         # identifier for each configuration saved to disk
@@ -480,14 +481,6 @@ class AutoML(BaseEstimator):
 
         return
 
-    @classmethod
-    def _task_type_id(cls, task_type: str) -> int:
-        raise NotImplementedError
-
-    @classmethod
-    def _supports_task_type(cls, task_type: str) -> bool:
-        raise NotImplementedError
-
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
@@ -594,16 +587,12 @@ class AutoML(BaseEstimator):
         y = convert_if_sparse(y)
         y_test = convert_if_sparse(y_test) if y_test is not None else None
 
-        # Get the task if it doesn't exist
         if task is None:
-            y_task = type_of_target(y)
-            if not self._supports_task_type(y_task):
-                raise ValueError(
-                    f"{self.__class__.__name__} does not support" f" task {y_task}"
-                )
-            self._task = self._task_type_id(y_task)
-        else:
-            self._task = task
+            task = self._task_mapping.get(type_of_target(y), None)
+            if task is None:
+                raise ValueError(f"{self.__class__.__name__} does not support {task}")
+
+        self._task = task
 
         # Assign a metric if it doesnt exist
         if self._metrics is None:
@@ -612,9 +601,6 @@ class AutoML(BaseEstimator):
 
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
-
-        # By default try to use the TCP logging port or get a new port
-        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
         # Once we start the logging server, it starts in a new process
         # If an error occurs then we want to make sure that we exit cleanly
@@ -1272,11 +1258,9 @@ class AutoML(BaseEstimator):
         # Get the task if it doesn't exist
         if task is None:
             y_task = type_of_target(y)
-            if not self._supports_task_type(y_task):
-                raise ValueError(
-                    f"{self.__class__.__name__} does not support" f" task {y_task}"
-                )
-            self._task = self._task_type_id(y_task)
+            self._task = self._task_mapping.get(y_task, None)
+            if self._task is None:
+                raise ValueError(f"{self.__class__.__name__} does not support {y_task}")
         else:
             self._task = task
 
@@ -2271,14 +2255,6 @@ class AutoMLClassifier(AutoML):
         "binary": BINARY_CLASSIFICATION,
     }
 
-    @classmethod
-    def _task_type_id(cls, task_type: str) -> int:
-        return cls._task_mapping[task_type]
-
-    @classmethod
-    def _supports_task_type(cls, task_type: str) -> bool:
-        return task_type in cls._task_mapping.keys()
-
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
@@ -2360,14 +2336,6 @@ class AutoMLRegressor(AutoML):
         "continuous": REGRESSION,
         "multiclass": REGRESSION,
     }
-
-    @classmethod
-    def _task_type_id(cls, task_type: str) -> int:
-        return cls._task_mapping[task_type]
-
-    @classmethod
-    def _supports_task_type(cls, task_type: str) -> bool:
-        return task_type in cls._task_mapping.keys()
 
     def fit(
         self,

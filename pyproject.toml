@@ -95,7 +95,6 @@ ignore_errors = true
 # Submodules that need to be updated with mypy
 [[tool.mypy.overrides]]
 module = [
-    "autosklearn.automl",
     "autosklearn.smbo",
     "autosklearn.experimental.askl2",
     "autosklearn.evaluation", #__init__
