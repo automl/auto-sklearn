@@ -338,7 +338,7 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
         return self.estimator
 
 
-class AutoSklearnChoice(object):
+class AutoSklearnChoice:
     def __init__(self, dataset_properties, random_state=None):
         """
         Parameters
@@ -370,6 +370,7 @@ class AutoSklearnChoice(object):
         # self.set_hyperparameters(self.configuration)
         self.choice = None
 
+    @classmethod
     def get_components(cls):
         raise NotImplementedError()
 

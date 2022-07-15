@@ -115,7 +115,7 @@ def _fit_with_budget(
     budget_type: Optional[str],
     logger: Union[logging.Logger, PicklableClientLogger],
     model: BaseEstimator,
-    train_indices: List[int],
+    train_indices: Sequence[int] | np.ndarray,
     task_type: int,
 ) -> None:
     if (

@@ -64,7 +64,7 @@ class XYDataManager(AbstractDataManager):
         else:
             raise ValueError(
                 "Unsupported feat_type provided. We expect the user to "
-                "provide a Dict[str, str] mapping from column to categorical/ "
+                "provide a Dict[str | int, str] mapping from column to categorical/ "
                 "numerical."
             )
 
