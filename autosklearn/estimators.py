@@ -13,6 +13,7 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.ensemble import VotingClassifier, VotingRegressor
+from sklearn.exceptions import NotFittedError
 from sklearn.model_selection._split import (
     BaseCrossValidator,
     BaseShuffleSplit,
@@ -23,11 +24,7 @@ from smac.runhistory.runhistory import RunInfo, RunValue
 from typing_extensions import Literal, TypeAlias
 
 from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
-from autosklearn.data.validation import (
-    SUPPORTED_FEAT_TYPES,
-    SUPPORTED_TARGET_TYPES,
-    convert_if_sparse,
-)
+from autosklearn.data.validation import convert_if_sparse
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer
@@ -35,7 +32,8 @@ from autosklearn.pipeline.base import BasePipeline
 from autosklearn.util.smac_wrap import SMACCallback
 
 # Used to indicate what type the underlying AutoML instance is
-T_AutoML = TypeVar("T_AutoML", bound=type[AutoML])
+TAutoML = TypeVar("TAutoML", bound=AutoML)
+TParetoModel = TypeVar("TParetoModel", VotingClassifier, VotingRegressor)
 
 # Used to return self and give correct type information from subclasses,
 # see `fit(self: Self) -> Self`
@@ -51,7 +49,14 @@ ResampleOptions: TypeAlias = Literal[
 DisableEvaluatorOptions: TypeAlias = Literal["y_optimization", "model"]
 
 
-class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
+class AutoSklearnEstimator(ABC, Generic[TAutoML, TParetoModel], BaseEstimator):
+
+    # List of target types supported by the estimator class
+    supported_target_types: list[str]
+
+    # The automl class used by the estimator class
+    _automl_class: type[TAutoML]
+
     def __init__(
         self,
         time_left_for_this_task: int = 3600,
@@ -484,6 +489,7 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         self.dataset_compression = dataset_compression
         self.allow_string_features = allow_string_features
 
+        # Cached
         self.automl_: AutoML | None = None
 
         # Handle the number of jobs and the time for them
@@ -493,9 +499,13 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         else:
             self._n_jobs = n_jobs
 
+        # Automatically set the cutoff time per task
+        if per_run_time_limit is None:
+            self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
+
     @property
     @abstractmethod
-    def automl(self) -> T_AutoML:
+    def automl(self) -> TAutoML:
         """Get the underlying Automl instance
 
         Returns
@@ -541,31 +551,157 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         self.automl_ = automl
         return self.automl_
 
+    @property
+    def ensemble(self) -> AbstractEnsemble:
+        """Get the ensemble generated during the run if requested
+
+        Returns
+        -------
+        AbstractEnsemble
+
+        Raises
+        ------
+        ValueError
+            If there was no ensemble class provided
+            If the ensemble for the AutoML instance can't be loaded
+
+        NotFittedError
+            If there this estimator has not been fitted
+        """
+
     def __getstate__(self) -> dict[str, Any]:
         # Cannot serialize a client!
         self.dask_client = None
         return self.__dict__
 
-    def fit(self: Self, **kwargs: Any) -> Self:
-        # Automatically set the cutoff time per task
-        # TODO this should probably live in automl
-        if self.per_run_time_limit is None:
-            self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
+    def fit(
+        self: Self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+        X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
+        y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
+        feat_type: list[str] | None = None,
+        dataset_name: str | None = None,
+    ) -> Self:
+        """Fit AutoML to given training set (X, y).
 
-        self.automl.fit(load_models=self.load_models, **kwargs)
+        Fit both optimizes the machine learning models and builds an ensemble
+        out of them.
 
+        # TODO PR1213
+        #
+        #   `task: Optional[int]` and `is_classification`
+        #
+        #   `AutoML` tries to identify the task itself with `sklearn.type_of_target`,
+        #   leaving little for the subclasses to do.
+        #   Except this failes when type_of_target(y) == "multiclass".
+        #
+        #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
+        #   and so this is where the subclasses are used to determine which.
+        #   However, this could also be deduced from the `is_classification`
+        #   parameter.
+        #
+        #   In the future, there is little need for the subclasses of `AutoML`
+        #   and no need for the `task` parameter. The extra functionality
+        #   provided by `AutoMLClassifier` in predict could be moved to
+        #   `AutoSklearnClassifier`, leaving `AutoML` to just produce raw
+        #   outputs and simplifying the heirarchy.
+        #
+        #  `load_models`
+        #
+        #   This parameter is likely not needed as they are loaded upon demand
+        #   throughout `AutoML`.
+        #   Creating a @property models that loads models into self.models_ is
+        #   not loaded would remove the need for this parameter and simplyify
+        #   the verification of `load if self.models_ is None` to one place.
+        #
+        #   `only_return_configuration_space`
+        #
+        #   This parameter is indicative of a need to create a seperate method
+        #   for this as the functionality of `fit` and what it returns can vary.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The training input samples.
+
+        y : array-like, shape (n_samples) or (n_samples, n_outputs)
+            The target classes.
+
+        task : Optional[int]
+            The identifier for the task AutoML is to perform.
+
+        X_test : Optional[{array-like, sparse matrix}, shape (n_samples, n_features)]
+            Test data input samples. Will be used to save test predictions for
+            all models. This allows to evaluate the performance of Auto-sklearn
+            over time.
+
+        y_test : Optional[array-like, shape (n_samples) or (n_samples, n_outputs)]
+            Test data target classes. Will be used to calculate the test error
+            of all models. This allows to evaluate the performance of
+            Auto-sklearn over time.
+
+        feat_type : Optional[list],
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded. The values
+            used for a categorical attribute must be integers, obtained for
+            example by `sklearn.preprocessing.LabelEncoder
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+
+        dataset_name : Optional[str]
+            Create nicer output. If None, a string will be determined by the
+            md5 hash of the dataset.
+
+        only_return_configuration_space: bool = False
+            If set to true, fit will only return the configuration space that will
+            be used for model search. Otherwise fitting will be performed and an
+            ensemble created.
+
+        load_models: bool = True
+            If true, this will load the models into memory once complete.
+
+        is_classification: bool = False
+            Indicates whether this is a classification task if True or a
+            regression task if False.
+
+        Returns
+        -------
+        self
+        """
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
+        target_type = type_of_target(y)
+        if target_type not in self.supported_target_types:
+            raise ValueError(
+                f"Data of type {target_type} is not supported with"
+                f" {self.__class__.__name__}. Supported types are"
+                f" {self.supported_target_types}. You can find more information about"
+                " scikit-learn data types at:"
+                " https://scikit-learn.org/stable/modules/multiclass.html"
+            )
+
+        self.automl.fit(
+            X=X,
+            y=y,
+            X_test=X_test,
+            y_test=y_test,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+            load_models=self.load_models,
+        )
         return self
 
     def fit_pipeline(
         self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES | spmatrix,
-        config: Configuration | dict[str, str | float | int],
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+        config: Configuration | dict[str, Any],
         dataset_name: str | None = None,
-        X_test: SUPPORTED_FEAT_TYPES | None = None,
-        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
+        y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
         feat_type: list[str] | None = None,
-        *args: Any,
         **kwargs: Any,
     ) -> tuple[BasePipeline | None, RunInfo, RunValue]:
         """Fits and individual pipeline configuration and returns
@@ -616,6 +752,7 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         """
         if self.automl_ is None:
             self.automl_ = self.build_automl()
+
         return self.automl_.fit_pipeline(
             X=X,
             y=y,
@@ -624,13 +761,12 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
             feat_type=feat_type,
             X_test=X_test,
             y_test=y_test,
-            *args,
             **kwargs,
         )
 
     def fit_ensemble(
         self: Self,
-        y: SUPPORTED_TARGET_TYPES,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
         task: int | None = None,
         precision: Literal[16, 32, 64] = 32,
         dataset_name: str | None = None,
@@ -733,12 +869,7 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
                     stacklevel=2,
                 )
 
-        if self.automl_ is None:
-            # Build a dummy automl object to call fit_ensemble
-            # The ensemble size is honored in the .automl_.fit_ensemble
-            # call
-            self.automl_ = self.build_automl()
-        self.automl_.fit_ensemble(
+        self.automl.fit_ensemble(
             y=y,
             task=task,
             precision=precision,
@@ -750,7 +881,11 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         )
         return self
 
-    def refit(self: Self, X: SUPPORTED_FEAT_TYPES, y: SUPPORTED_TARGET_TYPES) -> Self:
+    def refit(
+        self: Self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+    ) -> Self:
         """Refit all models found with fit to new data.
 
         Necessary when using cross-validation. During training, auto-sklearn
@@ -772,26 +907,55 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         -------
         self
         """
-        self.automl_.refit(X, y)
+        self.automl.refit(X, y)
         return self
 
     def predict(
         self,
-        X: SUPPORTED_FEAT_TYPES,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
         batch_size: int | None = None,
         n_jobs: int = 1,
     ) -> np.ndarray:
-        return self.automl_.predict(X, batch_size=batch_size, n_jobs=n_jobs)
+        """Get predictions on the given X data
 
-    def predict_proba(
-        self, X: SUPPORTED_FEAT_TYPES, batch_size: int | None = None, n_jobs: int = 1
-    ) -> np.ndarray:
-        return self.automl_.predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
+        Parameters
+        ----------
+        X: np.ndarray | pd.DataFrame | list | spmatrix, (n_rows, n_features)
+            The X data to predict on
 
-    def score(self, X: SUPPORTED_FEAT_TYPES, y: SUPPORTED_TARGET_TYPES) -> float:
-        return self.automl_.score(X, y)
+        batch_size: int | None = None
+            ``batch_size`` controls whether the pipelines will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
 
-    def show_models(self) -> dict:
+        n_jobs: int = 1
+            Parallelize the predictions across the models with n_jobs processes.
+        """
+        return self.automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
+
+    def score(
+        self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+    ) -> float:
+        """
+
+        Parameters
+        ----------
+        X : np.ndarray | pd.DataFrame | list | spmatrix
+            The ``n`` rows of ``m`` features of the data
+
+        y : np.ndarray | pd.DataFrame | pd.Series | list, (n,)
+            The ``n`` labels for the data
+
+        Returns
+        -------
+        float
+            The score of the estimator
+        """
+        return self.automl.score(X, y)
+
+    def show_models(self) -> dict[int, Any]:
         """Returns a dictionary containing dictionaries of ensemble models.
 
         Each model in the ensemble can be accessed by giving its ``model_id`` as key.
@@ -868,12 +1032,11 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
 
         Returns
         -------
-        Dict(int, Any) : dictionary of length = number of models in the ensemble
+        dict[int, Any] : dictionary of length = number of models in the ensemble
             A dictionary of models in the ensemble, where ``model_id`` is the key.
 
         """  # noqa: E501
-
-        return self.automl_.show_models()
+        return self.automl.show_models()
 
     def get_models_with_weights(self) -> list[tuple[float, BasePipeline]]:
         """Return a list of the final ensemble found by auto-sklearn.
@@ -883,19 +1046,27 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         [(weight_1, model_1), ..., (weight_n, model_n)]
 
         """
-        return self.automl_.get_models_with_weights()
+        return self.automl.get_models_with_weights()
 
     @property
     def performance_over_time_(self) -> pd.DataFrame:
-        return self.automl_.performance_over_time_
+        """The performance of autosklearn over time during it's ensembling
+
+        Note
+        ----
+        Only returns for first metric currently, if multiple are given
+        """
+        return self.automl.performance_over_time_
 
     @property
     def cv_results_(self) -> dict[str, Any]:
-        return self.automl_.cv_results_
+        """Get the cv results of autosklearn"""
+        return self.automl.cv_results_
 
     @property
     def trajectory_(self) -> np.ndarray:
-        return self.automl_.trajectory_
+        """Get the tracjectory of autosklearns performance over time"""
+        return self.automl.trajectory_
 
     def sprint_statistics(self) -> str:
         """Return the following statistics of the training result:
@@ -913,14 +1084,14 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         -------
         str
         """
-        return self.automl_.sprint_statistics()
+        return self.automl.sprint_statistics()
 
     def leaderboard(
         self,
         detailed: bool = False,
         ensemble_only: bool = True,
         top_k: int | Literal["all"] = "all",
-        sort_by: str = "cost",
+        sort_by: str | list[str] = "cost",
         sort_order: Literal["auto", "ascending", "descending"] = "auto",
         include: str | Iterable[str] | None = None,
     ) -> pd.DataFrame:
@@ -966,7 +1137,7 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         top_k: int or "all" = "all"
             How many models to display.
 
-        sort_by: str = 'cost'
+        sort_by: str | list[str] = 'cost'
             What column to sort by. If that column is not present, the
             sorting defaults to the ``"model_id"`` index column.
 
@@ -1026,6 +1197,9 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         if include == ["model_id"]:
             raise ValueError("Must provide more than just `model_id`")
 
+        # Generate the list of columns for the output
+        columns: list[str]
+
         if include is not None:
             columns = [*include]
 
@@ -1068,6 +1242,9 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
                     f"{set(column_types['all'])}"
                 )
 
+        # Convert it to a list
+        _sort_by: list[str] = sort_by if isinstance(sort_by, list) else [sort_by]
+
         valid_sort_orders = ["auto", "ascending", "descending"]
         if not (isinstance(sort_order, str) and sort_order in valid_sort_orders):
             raise ValueError(
@@ -1076,11 +1253,11 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first.
-        def additional_info_has_key(rv, key):
-            return rv.additional_info and key in rv.additional_info
+        def additional_info_has_key(rv: RunValue, key: str) -> bool:
+            return rv.additional_info is not None and key in rv.additional_info
 
         model_runs = {}
-        for run_key, run_val in self.automl_.runhistory_.data.items():
+        for run_key, run_val in self.automl.runhistory_.data.items():
             if not additional_info_has_key(run_val, "num_run"):
                 continue
             else:
@@ -1118,7 +1295,7 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
             raise RuntimeError(f"Unknown `automl_class` {self._get_automl_class()}")
 
         # A dict mapping model ids to their configurations
-        configurations = self.automl_.runhistory_.ids_config
+        configurations = self.automl.runhistory_.ids_config
 
         for model_id, run_info in model_runs.items():
             config_id = run_info["config_id"]
@@ -1142,37 +1319,40 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
             )
 
         # Get the models ensemble weight if it has one
-        for (
-            _,
-            model_id,
-            _,
-        ), weight in self.automl_.ensemble_.get_identifiers_with_weights():
+        ensemble = self.automl.ensemble_
+        if ensemble is not None:
+            for (
+                _,
+                model_id,
+                _,
+            ), weight in ensemble.get_identifiers_with_weights():
 
-            # We had issues where the model's in the ensembles are not in the runhistory
-            # collected. I have no clue why this is but to prevent failures, we fill
-            # the values with NaN
-            if model_id not in model_runs:
-                model_run = {
-                    "model_id": model_id,
-                    "seed": pd.NA,
-                    "budget": pd.NA,
-                    "duration": pd.NA,
-                    "config_id": pd.NA,
-                    "start_time": pd.NA,
-                    "end_time": pd.NA,
-                    "status": pd.NA,
-                    "train_loss": pd.NA,
-                    "config_origin": pd.NA,
-                    "type": pd.NA,
-                }
-                if num_metrics == 1:
-                    model_run["cost"] = pd.NA
-                else:
-                    for cost_idx in range(num_metrics):
-                        model_run[f"cost_{cost_idx}"] = pd.NA
-                model_runs[model_id] = model_run
+                # We had issues where the model's in the ensembles are not in the
+                # runhistory collected.
+                # I have no clue why this is but to prevent failures, we fill the
+                # values with NaN
+                if model_id not in model_runs:
+                    model_run = {
+                        "model_id": model_id,
+                        "seed": pd.NA,
+                        "budget": pd.NA,
+                        "duration": pd.NA,
+                        "config_id": pd.NA,
+                        "start_time": pd.NA,
+                        "end_time": pd.NA,
+                        "status": pd.NA,
+                        "train_loss": pd.NA,
+                        "config_origin": pd.NA,
+                        "type": pd.NA,
+                    }
+                    if num_metrics == 1:
+                        model_run["cost"] = pd.NA
+                    else:
+                        for cost_idx in range(num_metrics):
+                            model_run[f"cost_{cost_idx}"] = pd.NA
+                    model_runs[model_id] = model_run
 
-            model_runs[model_id]["ensemble_weight"] = weight
+                model_runs[model_id]["ensemble_weight"] = weight
 
         # Filter out non-ensemble members if needed, else fill in a default
         # value of 0 if it's missing
@@ -1229,14 +1409,14 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         ascending_param: bool | list[bool]
         if sort_order == "auto":
             ascending_param = [
-                False if sby in descending_columns else True for sby in sort_by
+                False if sby in descending_columns else True for sby in _sort_by
             ]
         else:
             ascending_param = False if sort_order == "descending" else True
 
         # Sort by the given column name, defaulting to 'model_id' if not present
         if (
-            (not sort_by_cost and len(set(sort_by) - set(dataframe.columns)) > 0)
+            (not sort_by_cost and len(set(_sort_by) - set(dataframe.columns)) > 0)
             or (sort_by_cost and "cost" not in dataframe.columns)
             or (
                 sort_by_cost
@@ -1246,22 +1426,23 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
                 )
             )
         ):
-            self.automl_._logger.warning(
-                f"sort_by = '{sort_by}' was not present"
-                ", defaulting to sort on the index "
-                "'model_id'"
-            )
-            sort_by = "model_id"
+            if self.automl._logger is not None:
+                self.automl._logger.warning(
+                    f"sort_by = '{_sort_by}' was not present"
+                    ", defaulting to sort on the index "
+                    "'model_id'"
+                )
+            _sort_by = ["model_id"]
             sort_by_cost = False
             ascending_param = True
 
         # Single objective
         if sort_by_cost:
             dataframe.sort_values(
-                by=sort_by, ascending=[True] * len(sort_by), inplace=True
+                by=_sort_by, ascending=[True] * len(_sort_by), inplace=True
             )
         else:
-            dataframe.sort_values(by=sort_by, ascending=ascending_param, inplace=True)
+            dataframe.sort_values(by=_sort_by, ascending=ascending_param, inplace=True)
 
         if num_metrics == 1:
             if "cost" not in columns and "cost" in dataframe.columns:
@@ -1316,17 +1497,12 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         detailed = all
         return {"all": all, "detailed": detailed, "simple": simple}
 
-    @classmethod
-    @abstractmethod
-    def _get_automl_class(cls) -> type[T_AutoML]:
-        ...
-
     def get_configuration_space(
         self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
-        X_test: SUPPORTED_FEAT_TYPES | None = None,
-        y_test: SUPPORTED_TARGET_TYPES | None = None,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+        X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
+        y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
         dataset_name: str | None = None,
         feat_type: list[str] | None = None,
     ) -> ConfigurationSpace:
@@ -1348,11 +1524,8 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
         dataset_name: Optional[str]
             A string to tag the Auto-Sklearn run
         """
-        if self.automl_ is None:
-            self.automl_ = self.build_automl()
-
         return (
-            self.automl_.fit(
+            self.automl.fit(
                 X,
                 y,
                 X_test=X_test,
@@ -1361,127 +1534,53 @@ class AutoSklearnEstimator(ABC, Generic[T_AutoML], BaseEstimator):
                 feat_type=feat_type,
                 only_return_configuration_space=True,
             )
-            if self.automl_.configuration_space is None
-            else self.automl_.configuration_space
+            if self.automl.configuration_space is None
+            else self.automl.configuration_space
         )
 
-    def get_pareto_set(self) -> Sequence[VotingClassifier | VotingRegressor]:
-        return self.automl_._load_pareto_set()
+    def get_pareto_set(self) -> Sequence[TParetoModel]:
+        """Get the pareto set of optimal ensembles given by the ensembling class
+
+        Returns
+        -------
+        Sequence[TParetoModel]
+            The models that are on the pareto front, wrapped in the corresponding
+            VotingClassifier/VotingRegressor
+        """
+        return self.automl._load_pareto_set()
 
     def __sklearn_is_fitted__(self) -> bool:
-        return self.automl_ is not None and self.automl_.fitted
+        return self.automl_ is not None and self.automl.fitted
 
 
-class AutoSklearnClassifier(AutoSklearnEstimator[AutoMLClassifier], ClassifierMixin):
+class AutoSklearnClassifier(
+    AutoSklearnEstimator[AutoMLClassifier, VotingClassifier],
+    ClassifierMixin,
+):
     """This class implements the classification task."""
 
-    def fit(
-        self: Self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
-        X_test: SUPPORTED_FEAT_TYPES | None = None,
-        y_test: SUPPORTED_TARGET_TYPES | None = None,
-        feat_type: list[str] | None = None,
-        dataset_name: str | None = None,
-    ) -> Self:
-        """Fit *auto-sklearn* to given training set (X, y).
+    supported_target_types = ["binary", "multiclass", "multilabel-indicator"]
+    _automl_class = AutoMLClassifier
 
-        Fit both optimizes the machine learning models and builds an ensemble
-        out of them.
+    @property
+    def classes_(self) -> np.ndarray:
+        """Get the classes found when fitted
 
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-            The training input samples.
-
-        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
-            The target classes.
-
-        X_test : array-like or sparse matrix of shape = [n_samples, n_features]
-            Test data input samples. Will be used to save test predictions for
-            all models. This allows to evaluate the performance of Auto-sklearn
-            over time.
-
-        y_test : array-like, shape = [n_samples] or [n_samples, n_outputs]
-            Test data target classes. Will be used to calculate the test error
-            of all models. This allows to evaluate the performance of
-            Auto-sklearn over time.
-
-        feat_type : list, optional (default=None)
-            List of str of `len(X.shape[1])` describing the attribute type.
-            Possible types are `Categorical` and `Numerical`. `Categorical`
-            attributes will be automatically One-Hot encoded. The values
-            used for a categorical attribute must be integers, obtained for
-            example by `sklearn.preprocessing.LabelEncoder
-            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
-
-        dataset_name : str, optional (default=None)
-            Create nicer output. If None, a string will be determined by the
-            md5 hash of the dataset.
+        https://scikit-learn.org/stable/developers/develop.html#specific-models
 
         Returns
         -------
-        self
+        np.ndarray
+            Class labels seen during fit
         """
-        # AutoSklearn does not handle sparse y for now
-        y = convert_if_sparse(y)
+        if self.automl.InputValidator is None:
+            raise NotFittedError("Please call fit first")
 
-        # Before running anything else, first check that the
-        # type of data is compatible with auto-sklearn. Legal target
-        # types are: binary, multiclass, multilabel-indicator.
-        target_type = type_of_target(y)
-        supported_types = ["binary", "multiclass", "multilabel-indicator"]
-        if target_type not in supported_types:
-            raise ValueError(
-                "Classification with data of type {} is "
-                "not supported. Supported types are {}. "
-                "You can find more information about scikit-learn "
-                "data types in: "
-                "https://scikit-learn.org/stable/modules/multiclass.html"
-                "".format(target_type, supported_types)
-            )
-
-        # remember target type for using in predict_proba later.
-        self.target_type = target_type
-
-        super().fit(
-            X=X,
-            y=y,
-            X_test=X_test,
-            y_test=y_test,
-            feat_type=feat_type,
-            dataset_name=dataset_name,
-        )
-
-        # After fit, a classifier is expected to define classes_
-        # A list of class labels known to the classifier, mapping each label
-        # to a numerical index used in the model representation our output.
-        self.classes_ = self.automl_.InputValidator.target_validator.classes_
-
-        return self
-
-    def predict(
-        self,
-        X: SUPPORTED_FEAT_TYPES,
-        batch_size: int | None = None,
-        n_jobs: int = 1,
-    ) -> np.ndarray:
-        """Predict classes for X.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-
-        Returns
-        -------
-        y : array of shape = [n_samples] or [n_samples, n_labels]
-            The predicted classes.
-        """
-        return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
+        return self.automl.InputValidator.target_validator.classes_
 
     def predict_proba(
         self,
-        X: SUPPORTED_FEAT_TYPES,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
         batch_size: int | None = None,
         n_jobs: int = 1,
     ) -> np.ndarray:
@@ -1501,137 +1600,19 @@ class AutoSklearnClassifier(AutoSklearnEstimator[AutoMLClassifier], ClassifierMi
         y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
             The predicted class probabilities.
         """
-        pred_proba = super().predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
-
-        # Check if all probabilities sum up to 1.
-        # Assert only if target type is not multilabel-indicator.
-        if self.target_type not in ["multilabel-indicator"]:
-            assert np.allclose(
-                np.sum(pred_proba, axis=1), np.ones_like(pred_proba[:, 0])
-            ), "prediction probability does not sum up to 1!"
-
-        # Check that all probability values lie between 0 and 1.
-        assert (pred_proba >= 0).all() and (
-            pred_proba <= 1
-        ).all(), "found prediction probability value outside of [0, 1]!"
-
-        return pred_proba
-
-    @classmethod
-    def _get_automl_class(cls) -> type[AutoMLClassifier]:
-        return AutoMLClassifier
+        return self.automl.predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
 
 
-class AutoSklearnRegressor(AutoSklearnEstimator[AutoMLRegressor], RegressorMixin):
-    """
-    This class implements the regression task.
+class AutoSklearnRegressor(
+    AutoSklearnEstimator[AutoMLRegressor, VotingRegressor],
+    RegressorMixin,
+):
+    """This class implements the regression task."""
 
-    """
-
-    def fit(
-        self: Self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: SUPPORTED_TARGET_TYPES,
-        X_test: SUPPORTED_FEAT_TYPES | None = None,
-        y_test: SUPPORTED_TARGET_TYPES | None = None,
-        feat_type: list[str] | None = None,
-        dataset_name: str | None = None,
-    ) -> Self:
-        """Fit *Auto-sklearn* to given training set (X, y).
-
-        Fit both optimizes the machine learning models and builds an ensemble
-        out of them.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-            The training input samples.
-
-        y : array-like, shape = [n_samples] or [n_samples, n_targets]
-            The regression target.
-
-        X_test : array-like or sparse matrix of shape = [n_samples, n_features]
-            Test data input samples. Will be used to save test predictions for
-            all models. This allows to evaluate the performance of Auto-sklearn
-            over time.
-
-        y_test : array-like, shape = [n_samples] or [n_samples, n_targets]
-            The regression target. Will be used to calculate the test error
-            of all models. This allows to evaluate the performance of
-            Auto-sklearn over time.
-
-        feat_type : list, optional (default=None)
-            List of str of `len(X.shape[1])` describing the attribute type.
-            Possible types are `Categorical` and `Numerical`. `Categorical`
-            attributes will be automatically One-Hot encoded.
-
-        dataset_name : str, optional (default=None)
-            Create nicer output. If None, a string will be determined by the
-            md5 hash of the dataset.
-
-        Returns
-        -------
-        self
-
-        """
-        # Before running anything else, first check that the
-        # type of data is compatible with auto-sklearn. Legal target
-        # types are: continuous, continuous-multioutput, and the special cases:
-        # multiclass : because [3.0, 1.0, 5.0] is considered as multiclass
-        # binary: because [1.0, 0.0] is considered multiclass
-        # AutoSklearn does not handle sparse y for now
-        y = convert_if_sparse(y)
-
-        target_type = type_of_target(y)
-        supported_types = [
-            "continuous",
-            "binary",
-            "multiclass",
-            "continuous-multioutput",
-        ]
-        if target_type not in supported_types:
-            raise ValueError(
-                "Regression with data of type {} is "
-                "not supported. Supported types are {}. "
-                "You can find more information about scikit-learn "
-                "data types in: "
-                "https://scikit-learn.org/stable/modules/multiclass.html"
-                "".format(target_type, supported_types)
-            )
-
-        # Fit is supposed to be idempotent!
-        # But not if we use share_mode.
-        super().fit(
-            X=X,
-            y=y,
-            X_test=X_test,
-            y_test=y_test,
-            feat_type=feat_type,
-            dataset_name=dataset_name,
-        )
-
-        return self
-
-    def predict(
-        self,
-        X: SUPPORTED_FEAT_TYPES,
-        batch_size: int | None = None,
-        n_jobs: int = 1,
-    ) -> np.ndarray:
-        """Predict regression target for X.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-
-        Returns
-        -------
-        y : array of shape = [n_samples] or [n_samples, n_outputs]
-            The predicted values.
-
-        """
-        return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
-
-    @classmethod
-    def _get_automl_class(cls) -> type[AutoMLRegressor]:
-        return AutoMLRegressor
+    _automl_class = AutoMLRegressor
+    supported_target_types = [
+        "continuous",
+        "binary",
+        "multiclass",
+        "continuous-multioutput",
+    ]

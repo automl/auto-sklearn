@@ -99,6 +99,7 @@ module = [
     "autosklearn.smbo",
     "autosklearn.experimental.askl2",
     "autosklearn.evaluation", #__init__
+    "autosklearn.evaluation.splitter",
     "autosklearn.evaluation.abstract_evaluator",
     "autosklearn.evaluation.test_evaluator",
     "autosklearn.evaluation.train_evaluator",

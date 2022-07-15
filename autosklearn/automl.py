@@ -1,16 +1,6 @@
 from __future__ import annotations
 
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-)
+from typing import Any, Callable, Iterable, Mapping, Sequence
 
 import copy
 import io
@@ -130,8 +120,8 @@ def _model_predict(
     model: Any,
     X: SUPPORTED_FEAT_TYPES,
     task: int,
-    batch_size: Optional[int] = None,
-    logger: Optional[PicklableClientLogger] = None,
+    batch_size: int | None = None,
+    logger: PicklableClientLogger | None = None,
 ) -> np.ndarray:
     """Generates the predictions from a model.
 
@@ -213,29 +203,29 @@ class AutoML(BaseEstimator):
         self,
         time_left_for_this_task: int,
         per_run_time_limit: int | None = None,
-        temporary_directory: Optional[str] = None,
+        temporary_directory: str | None = None,
         delete_tmp_folder_after_terminate: bool = True,
         initial_configurations_via_metalearning: int = 25,
-        ensemble_class: Type[AbstractEnsemble] | None = EnsembleSelection,
-        ensemble_kwargs: Dict[str, Any] | None = None,
+        ensemble_class: type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_kwargs: dict[str, Any] | None = None,
         ensemble_nbest: int = 1,
         max_models_on_disc: int = 1,
         seed: int = 1,
         memory_limit: int | None = 3072,
-        metadata_directory: Optional[str] = None,
-        include: Optional[dict[str, list[str]]] = None,
-        exclude: Optional[dict[str, list[str]]] = None,
+        metadata_directory: str | None = None,
+        include: dict[str, list[str]] | None = None,
+        exclude: dict[str, list[str]] | None = None,
         resampling_strategy: str | Any = "holdout-iterative-fit",
         resampling_strategy_arguments: Mapping[str, Any] = None,
-        n_jobs: Optional[int] = None,
-        dask_client: Optional[Client] = None,
+        n_jobs: int | None = None,
+        dask_client: Client | None = None,
         precision: Literal[16, 32, 64] = 32,
         disable_evaluator_output: bool | Iterable[str] = False,
         get_smac_object_callback: Callable | None = None,
         smac_scenario_args: Mapping[str, Any] | None = None,
-        logging_config: Optional[Mapping] = None,
+        logging_config: Mapping | None = None,
         metrics: Sequence[Scorer] | None = None,
-        scoring_functions: Optional[Sequence[Scorer]] = None,
+        scoring_functions: Sequence[Scorer] | None = None,
         get_trials_callback: SMACCallback | None = None,
         dataset_compression: bool | Mapping[str, Any] = True,
         allow_string_features: bool = True,
@@ -244,7 +234,7 @@ class AutoML(BaseEstimator):
 
         if isinstance(disable_evaluator_output, Iterable):
             disable_evaluator_output = list(disable_evaluator_output)  # Incase iterator
-            allowed = set(["model", "cv_model", "y_optimization", "y_test"])
+            allowed = {"model", "cv_model", "y_optimization", "y_test", "y_valid"}
             unknown = allowed - set(disable_evaluator_output)
             if any(unknown):
                 raise ValueError(
@@ -253,7 +243,7 @@ class AutoML(BaseEstimator):
                 )
 
         # Validate dataset_compression and set its values
-        self._dataset_compression: Optional[DatasetCompressionSpec]
+        self._dataset_compression: DatasetCompressionSpec | None
         if isinstance(dataset_compression, bool):
             if dataset_compression is True:
                 self._dataset_compression = default_dataset_compression_arg
@@ -327,17 +317,17 @@ class AutoML(BaseEstimator):
         self._datamanager = None
         self._dataset_name = None
         self._feat_type = None
-        self._logger: Optional[PicklableClientLogger] = None
+        self._logger: PicklableClientLogger | None = None
         self._task = None
         self._label_num = None
         self._parser = None
         self._can_predict = False
         self._read_at_most = None
         self._max_ensemble_build_iterations = None
-        self.models_: Optional[dict] = None
-        self.cv_models_: Optional[dict] = None
+        self.models_: dict | None = None
+        self.cv_models_: dict | None = None
         self.ensemble_ = None
-        self.InputValidator: Optional[InputValidator] = None
+        self.InputValidator: InputValidator | None = None
         self.configuration_space = None
 
         # The ensemble performance history through time
@@ -502,11 +492,11 @@ class AutoML(BaseEstimator):
         self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES,
-        task: Optional[int] = None,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
-        feat_type: Optional[list[str]] = None,
-        dataset_name: Optional[str] = None,
+        task: int | None = None,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | None = None,
+        feat_type: list[str] | None = None,
+        dataset_name: str | None = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
         is_classification: bool = False,
@@ -1224,13 +1214,13 @@ class AutoML(BaseEstimator):
         y: SUPPORTED_TARGET_TYPES | spmatrix,
         is_classification: bool,
         config: Configuration | dict[str, str | float | int],
-        task: Optional[int] = None,
-        dataset_name: Optional[str] = None,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
-        feat_type: Optional[list[str]] = None,
+        task: int | None = None,
+        dataset_name: str | None = None,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        feat_type: list[str] | None = None,
         **kwargs: dict,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+    ) -> tuple[BasePipeline | None, RunInfo, RunValue]:
         """Fits and individual pipeline configuration and returns
         the result to the user.
 
@@ -1495,12 +1485,12 @@ class AutoML(BaseEstimator):
     def fit_ensemble(
         self,
         y: SUPPORTED_TARGET_TYPES,
-        task: Optional[int] = None,
+        task: int | None = None,
         precision: Literal[16, 32, 64] = 32,
-        dataset_name: Optional[str] = None,
-        ensemble_nbest: Optional[int] = None,
-        ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
-        ensemble_kwargs: Optional[Dict[str, Any]] = None,
+        dataset_name: str | None = None,
+        ensemble_nbest: int | None = None,
+        ensemble_class: type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_kwargs: dict[str, Any] | None = None,
         metrics: Scorer | Sequence[Scorer] | None = None,
     ):
         check_is_fitted(self)
@@ -1966,7 +1956,7 @@ class AutoML(BaseEstimator):
                 metric_dict[metric.name].append(metric_value)
                 metric_mask[metric.name].append(mask_value)
 
-            optimization_metric_names = set(m.name for m in self._metrics)
+            optimization_metric_names = {m.name for m in self._metrics}
             for metric in self._scoring_functions:
                 if metric.name in optimization_metric_names:
                     continue
@@ -2046,27 +2036,25 @@ class AutoML(BaseEstimator):
         num_runs = len(cv_results["status"])
         sio.write("  Number of target algorithm runs: %d\n" % num_runs)
         num_success = sum(
-            [
-                s in ["Success", "Success (but do not advance to higher budget)"]
-                for s in cv_results["status"]
-            ]
+            s in ["Success", "Success (but do not advance to higher budget)"]
+            for s in cv_results["status"]
         )
         sio.write("  Number of successful target algorithm runs: %d\n" % num_success)
-        num_crash = sum([s == "Crash" for s in cv_results["status"]])
+        num_crash = sum(s == "Crash" for s in cv_results["status"])
         sio.write("  Number of crashed target algorithm runs: %d\n" % num_crash)
-        num_timeout = sum([s == "Timeout" for s in cv_results["status"]])
+        num_timeout = sum(s == "Timeout" for s in cv_results["status"])
         sio.write(
             "  Number of target algorithms that exceeded the time "
             "limit: %d\n" % num_timeout
         )
-        num_memout = sum([s == "Memout" for s in cv_results["status"]])
+        num_memout = sum(s == "Memout" for s in cv_results["status"])
         sio.write(
             "  Number of target algorithms that exceeded the memory "
             "limit: %d\n" % num_memout
         )
         return sio.getvalue()
 
-    def get_models_with_weights(self) -> list[Tuple[float, BasePipeline]]:
+    def get_models_with_weights(self) -> list[tuple[float, BasePipeline]]:
         check_is_fitted(self)
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
@@ -2246,9 +2234,9 @@ class AutoML(BaseEstimator):
         tmp_dir: str,
         backend: Backend,
         datamanager: XYDataManager,
-        include: Optional[Mapping[str, list[str]]] = None,
-        exclude: Optional[Mapping[str, list[str]]] = None,
-    ) -> Tuple[ConfigurationSpace, str]:
+        include: Mapping[str, list[str]] | None = None,
+        exclude: Mapping[str, list[str]] | None = None,
+    ) -> tuple[ConfigurationSpace, str]:
         configspace_path = os.path.join(tmp_dir, "space.json")
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
@@ -2297,8 +2285,8 @@ class AutoMLClassifier(AutoML):
         y: SUPPORTED_TARGET_TYPES,
         X_test: SUPPORTED_FEAT_TYPES | None = None,
         y_test: SUPPORTED_TARGET_TYPES | None = None,
-        feat_type: Optional[list[str]] = None,
-        dataset_name: Optional[str] = None,
+        feat_type: list[str] | None = None,
+        dataset_name: str | None = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ) -> AutoMLClassifier:
@@ -2319,12 +2307,12 @@ class AutoMLClassifier(AutoML):
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES | spmatrix,
         config: Configuration | dict[str, str | float | int],
-        dataset_name: Optional[str] = None,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
-        feat_type: Optional[list[str]] = None,
+        dataset_name: str | None = None,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        feat_type: list[str] | None = None,
         **kwargs,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+    ) -> tuple[BasePipeline | None, RunInfo, RunValue]:
         return super().fit_pipeline(
             X=X,
             y=y,
@@ -2340,7 +2328,7 @@ class AutoMLClassifier(AutoML):
     def predict(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        batch_size: Optional[int] = None,
+        batch_size: int | None = None,
         n_jobs: int = 1,
     ) -> np.ndarray:
         check_is_fitted(self)
@@ -2359,7 +2347,7 @@ class AutoMLClassifier(AutoML):
     def predict_proba(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        batch_size: Optional[int] = None,
+        batch_size: int | None = None,
         n_jobs: int = 1,
     ) -> np.ndarray:
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
@@ -2385,10 +2373,10 @@ class AutoMLRegressor(AutoML):
         self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES | spmatrix,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
-        feat_type: Optional[list[str]] = None,
-        dataset_name: Optional[str] = None,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        feat_type: list[str] | None = None,
+        dataset_name: str | None = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ) -> AutoMLRegressor:
@@ -2409,12 +2397,12 @@ class AutoMLRegressor(AutoML):
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES | spmatrix,
         config: Configuration | dict[str, str | float | int],
-        dataset_name: Optional[str] = None,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
-        feat_type: Optional[list[str]] = None,
+        dataset_name: str | None = None,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | spmatrix | None = None,
+        feat_type: list[str] | None = None,
         **kwargs: dict,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+    ) -> tuple[BasePipeline | None, RunInfo, RunValue]:
         return super().fit_pipeline(
             X=X,
             y=y,
