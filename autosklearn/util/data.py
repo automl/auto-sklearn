@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterator, List, Mapping, Sequence, Union, cast
+from typing import Any, Iterable, Iterator, Mapping, TypeVar
 
 import warnings
 
@@ -11,122 +11,15 @@ from sklearn.model_selection import train_test_split
 
 from autosklearn.evaluation.splitter import CustomStratifiedShuffleSplit
 
-# TODO: TypedDict with python 3.8
-#
-#   When upgrading to python 3.8 as minimum version, this should be a TypedDict
-#   so that mypy can identify the fields types
-DatasetCompressionSpec = Dict[str, Union[float, List[str]]]
-
-# Default specification for arg `dataset_compression`
-default_dataset_compression_arg: DatasetCompressionSpec = {
-    "memory_allocation": 0.1,
-    "methods": ["precision", "subsample"],
-}
+T = TypeVar("T", np.ndarray, spmatrix)
 
 
-def validate_dataset_compression_arg(
-    dataset_compression: Mapping[str, Any],
-    memory_limit: int | None,
-) -> DatasetCompressionSpec:
-    """Validates and return a correct dataset_compression argument
-
-    The returned value can be safely used with `reduce_dataset_size_if_too_large`.
-
-    Parameters
-    ----------
-    dataset_compression: Mapping[str, Any]
-        The arg to validate
-
-    memory_limit: int
-        The memory limit to apply
-
-    Returns
-    -------
-    DatasetCompressionSpec
-        The validated and correct dataset compression spec
-    """
-    if isinstance(dataset_compression, Mapping):
-        # Fill with defaults if they don't exist
-        dataset_compression = {**default_dataset_compression_arg, **dataset_compression}
-
-        parsed_keys = set(dataset_compression.keys())
-        default_keys = set(default_dataset_compression_arg.keys())
-
-        # Must contain known keys
-        if parsed_keys != default_keys:
-            raise ValueError(
-                f"Unknown key(s) in ``dataset_compression``, {parsed_keys}."
-                f"\nPossible keys are {default_keys}"
-            )
-
-        memory_allocation = dataset_compression["memory_allocation"]
-
-        # "memory_allocation" must be float or int
-        if not isinstance(memory_allocation, (float, int)):
-            raise ValueError(
-                "key 'memory_allocation' must be an `int` or `float`"
-                f"\ntype = {memory_allocation}"
-                f"\ndataset_compression = {dataset_compression}"
-            )
-
-        # "memory_allocation" must be in (0,1) if float
-        if isinstance(memory_allocation, float):
-            if not (0.0 < memory_allocation < 1.0):
-                raise ValueError(
-                    "key 'memory_allocation' if float must be in (0, 1)"
-                    f"\nmemory_allocation = {memory_allocation}"
-                    f"\ndataset_compression = {dataset_compression}"
-                )
-            if memory_limit is None:
-                raise ValueError(
-                    "key 'memory_allocation' if float must also then set `memory_limit`"
-                    " for it to make sense."
-                    f"\nmemory_allocation = {memory_allocation}"
-                    f"\ndataset_compression = {dataset_compression}"
-                )
-
-        # "memory_allocation" if absolute, should be > 0 and < memory_limit
-        elif isinstance(memory_allocation, int):
-            if not (0 < memory_allocation < memory_limit):
-                raise ValueError(
-                    f"key 'memory_allocation' if int must be in (0, {memory_limit})"
-                    f"\nmemory_allocation = {memory_allocation}"
-                    f"\ndataset_compression = {dataset_compression}"
-                )
-
-        # "methods" must be non-empty sequence
-        if (
-            not isinstance(dataset_compression["methods"], Sequence)
-            or len(dataset_compression["methods"]) <= 0
-        ):
-            raise ValueError(
-                "key 'methods' must be a non-empty list"
-                f"\nmethods = {dataset_compression['methods']}"
-                f"\ndataset_compression = {dataset_compression}"
-            )
-
-        # "methods" must contain known methods
-        if any(
-            method
-            not in cast(Sequence, default_dataset_compression_arg["methods"])  # mypy
-            for method in dataset_compression["methods"]
-        ):
-            valid_methods = default_dataset_compression_arg["methods"]
-            raise ValueError(
-                f"key 'methods' can only contain {valid_methods}"
-                f"\nmethods = {dataset_compression['methods']}"
-                f"\ndataset_compression = {dataset_compression}"
-            )
-
-        return cast(DatasetCompressionSpec, dataset_compression)
-    else:
-        raise ValueError(
-            f"Unknown type for `dataset_compression` {type(dataset_compression)}"
-            f"\ndataset_compression = {dataset_compression}"
-        )
+def megabytes(arr: np.ndarray | spmatrix) -> float:
+    """Get the megabyte usage of some data"""
+    return (arr.nbytes if isinstance(arr, np.ndarray) else arr.data.nbytes) / (2**20)
 
 
-class _DtypeReductionMapping(Mapping):
+class _DtypeReductionMapping(Mapping[type, type]):
     """
     Unfortuantly, mappings compare by hash(item) and not the __eq__ operator
     between the key and the item.
@@ -156,10 +49,8 @@ class _DtypeReductionMapping(Mapping):
         np.float64: np.float32,
     }
 
-    # In spite of the names, np.float96 and np.float128
-    # provide only as much precision as np.longdouble,
-    # that is, 80 bits on most x86 machines and 64 bits
-    # in standard Windows builds.
+    # In spite of the names, np.float96 and np.float128 provide only as much precision
+    # as np.longdouble, that is, 80 bits on most x86 machines and 64 bits in Windows.
     if hasattr(np, "float96"):
         _mapping[np.float96] = np.float64
 
@@ -168,10 +59,10 @@ class _DtypeReductionMapping(Mapping):
 
     @classmethod
     def __getitem__(cls, item: type) -> type:
-        for k, v in cls._mapping.items():
-            if k == item:
-                return v
-        raise KeyError(item)
+        v = next((v for k, v in cls._mapping.items() if k == item), None)
+        if v is None:
+            raise KeyError(item)
+        return v
 
     @classmethod
     def __iter__(cls) -> Iterator[type]:
@@ -183,7 +74,239 @@ class _DtypeReductionMapping(Mapping):
 
 
 reduction_mapping = _DtypeReductionMapping()
-supported_precision_reductions = list(reduction_mapping)
+supported_precision_reductions = tuple(reduction_mapping)
+
+
+class DatasetCompression:
+
+    _valid_methods = ("precision", "subsample")
+    supported_precision_reductions = supported_precision_reductions
+
+    def __init__(
+        self,
+        *,
+        limit: int,
+        allocation: int | float = 0.1,
+        methods: Iterable[str] = ("precisions", "subsample"),
+    ):
+        self.limit = limit
+        self.allocation = allocation
+        self.methods = methods
+
+        if not any(methods):
+            raise ValueError("No methods passed for dataset compression")
+
+        invalid_methods = [m for m in self.methods if m not in self._valid_methods]
+        if any(invalid_methods):
+            raise ValueError(
+                f"Unrecognized `methods` {invalid_methods},"
+                f"must be in {self._valid_methods}"
+            )
+
+        mem = self.allocation
+        if isinstance(mem, float):
+            if 0 < mem < 1:
+                self.mem_usage = allocation * mem
+            else:
+                raise ValueError(f"`memory_allocation` float ({mem}) must be in (0, 1)")
+        else:
+            if 0 < mem < limit:
+                self.mem_usage = allocation
+            else:
+                raise ValueError(f"`memory_allocation` int ({mem}) must be < {limit}")
+
+    @staticmethod
+    def subsample(
+        X: T,
+        y: np.ndarray,
+        *,
+        size: float | int,
+        stratify: bool = False,
+        random_state: int | np.random.RandomState | None = None,
+    ) -> tuple[T, np.ndarray]:
+        """Subsamples data returning the same type as it recieved.
+
+        NOTE:
+        It's highly unadvisable to use lists here. In order to preserver types,
+        we convert to a numpy array and then back to a list.
+
+        NOTE2:
+        Interestingly enough, StratifiedShuffleSplut and descendants don't support
+        sparse `y` in `split(): _check_array` call. Hence, neither do we.
+
+        Parameters
+        ----------
+        X: np.ndarray | spmatrix
+            The X's to subsample
+
+        y: np.ndarray
+            The Y's to subsample
+
+        stratify: bool = False
+            Whether this is classification data or regression data.
+            Required for knowing how to split.
+
+        sample_size: float | int
+            If float, percentage of data to take otherwise if int, an absolute
+            count of samples to take.
+
+        random_state: int | RandomState | None = None
+            The random state to pass to the splitted
+
+        Returns
+        -------
+        (np.ndarray | spmatrix, np.ndarray)
+            The X and y subsampled according to sample_size
+        """
+        if isinstance(X, list):
+            X = np.asarray(X)
+
+        if isinstance(y, list):
+            y = np.asarray(y)
+
+        if stratify:
+            splitter = CustomStratifiedShuffleSplit(
+                train_size=size, random_state=random_state
+            )
+            left_idxs, _ = next(splitter.split(X=X, y=y))
+
+            # This function supports pandas objects but they won't get here
+            # yet as we do not reduce the size of pandas dataframes.
+            if isinstance(X, pd.DataFrame):
+                idxs = X.index[left_idxs]
+                X = X.loc[idxs]
+            else:
+                X = X[left_idxs]
+
+            if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
+                idxs = y.index[left_idxs]
+                y = y.loc[idxs]
+            else:
+                y = y[left_idxs]
+
+        else:
+            X, _, y, _ = train_test_split(
+                X, y, train_size=size, random_state=random_state
+            )
+
+        return X, y
+
+    @classmethod
+    def reduce_precision(cls, X: T) -> tuple[T, type]:
+        """Reduces the precision of a np.ndarray or spmatrix containing floats
+
+        Parameters
+        ----------
+        X:  np.ndarray | spmatrix
+            The data to reduce precision of.
+
+        Returns
+        -------
+        (ndarray | spmatrix, dtype)
+            Returns the reduced data X along with the dtype it was reduced to.
+        """
+        if X.dtype not in supported_precision_reductions:
+            raise ValueError(
+                f"X.dtype = {X.dtype} not equal to any supported"
+                f" {supported_precision_reductions}"
+            )
+
+        precision = reduction_mapping[X.dtype]
+        return X.astype(precision), precision
+
+    def compress(
+        self,
+        X: T,
+        y: np.ndarray,
+        *,
+        stratify: bool = False,
+        random_state: int | np.random.RandomState | None = None,
+    ) -> tuple[T, np.ndarray]:
+        """Reduces the size of the dataset if it's too close to the memory limit.
+
+        Follows the order of the method passed in and retains the type of its
+        input.
+
+        Subsampling will ensure that the memory limit is satisfied while precision
+        reduction will only perform one level of precision reduction.
+        Technically, you could supply multiple rounds of precision reduction,
+
+        However, if that's the use case, it'd be advised to simply use the function
+        `autosklearn.util.data.reduce_precision`.
+
+        NOTE: limitations
+        * Does not support dataframes yet
+            -   Requires implementing column wise precision reduction
+            -   Requires calculating memory usage
+
+        Parameters
+        ----------
+        X: np.ndarray | spmatrix
+            The features of the dataset.
+
+        y: np.ndarray
+            The labels of the dataset.
+
+        stratify: bool = False
+            Whether to stratify if subsampling
+
+        random_state: int | RandomState | None = None
+            The random_state to use for subsampling.
+
+        Returns
+        -------
+        (spmatrix | np.ndarray, np.ndarray)
+            The reduced X, y if reductions were needed
+        """
+        for method in self.methods:
+
+            if method == "precision":
+
+                if X.dtype not in self.supported_precision_reductions:
+                    warnings.warn(f"`precision` method on {X.dtype} not supported")
+                    continue
+
+                # If the dataset is too big for the allocated memory,
+                # we then try to reduce the precision if it's a high precision dataset
+                if megabytes(X) > self.mem_usage:
+                    X, precision = self.reduce_precision(X)
+                    warnings.warn(
+                        f"Dataset too large for allocated memory {self.mem_usage}MB, "
+                        f"reduced the precision from {X.dtype} to {precision}",
+                    )
+
+            elif method == "subsample":
+                # If the dataset is still too big such that we couldn't fit
+                # into the allocated memory, we subsample it so that it does
+                if megabytes(X) > self.mem_usage:
+
+                    n_samples_before = X.shape[0]
+                    sample_percentage = self.mem_usage / megabytes(X)
+
+                    X, y = self.subsample(
+                        X,
+                        y,
+                        size=sample_percentage,
+                        stratify=stratify,
+                        random_state=random_state,
+                    )
+
+                    n_samples_after = X.shape[0]
+                    warnings.warn(
+                        f"Dataset too large for allocated memory {self.mem_usage}MB,"
+                        f" reduced number of samples from {n_samples_before} to"
+                        f" {n_samples_after}."
+                    )
+
+            else:
+                raise ValueError(f"Unknown method `{method}`")
+
+        return X, y
+
+    @classmethod
+    def supports(self, X: Any, y: Any) -> bool:
+        # Currently don't support pd.Series or pd.Dataframe
+        return isinstance(X, (np.ndarray, spmatrix)) and isinstance(y, np.ndarray)
 
 
 def binarization(array: list | np.ndarray) -> np.ndarray:
@@ -246,251 +369,3 @@ def predict_RAM_usage(X: np.ndarray, categorical: list[bool]) -> float:
             estimated_columns += 1
     estimated_ram = estimated_columns * X.shape[0] * X.dtype.itemsize
     return estimated_ram
-
-
-def subsample(
-    X: np.ndarray | spmatrix,
-    y: np.ndarray,
-    is_classification: bool,
-    sample_size: float | int,
-    random_state: int | np.random.RandomState | None = None,
-) -> tuple[np.ndarray | spmatrix, np.ndarray]:
-    """Subsamples data returning the same type as it recieved.
-
-    If `is_classification`, we split using a stratified shuffle split which
-    preserves unique labels in the training set.
-
-    NOTE:
-    It's highly unadvisable to use lists here. In order to preserver types,
-    we convert to a numpy array and then back to a list.
-
-    NOTE2:
-    Interestingly enough, StratifiedShuffleSplut and descendants don't support
-    sparse `y` in `split(): _check_array` call. Hence, neither do we.
-
-    Parameters
-    ----------
-    X: Union[np.ndarray, spmatrix]
-        The X's to subsample
-
-    y: np.ndarray
-        The Y's to subsample
-
-    is_classification: bool
-        Whether this is classification data or regression data. Required for
-        knowing how to split.
-
-    sample_size: float | int
-        If float, percentage of data to take otherwise if int, an absolute
-        count of samples to take.
-
-    random_state: int | RandomState = None
-        The random state to pass to the splitted
-
-    Returns
-    -------
-    (np.ndarray | spmatrix, np.ndarray)
-        The X and y subsampled according to sample_size
-    """
-    if isinstance(X, list):
-        X = np.asarray(X)
-
-    if isinstance(y, list):
-        y = np.asarray(y)
-
-    if is_classification:
-        splitter = CustomStratifiedShuffleSplit(
-            train_size=sample_size, random_state=random_state
-        )
-        left_idxs, _ = next(splitter.split(X=X, y=y))
-
-        # This function supports pandas objects but they won't get here
-        # yet as we do not reduce the size of pandas dataframes.
-        if isinstance(X, pd.DataFrame):
-            idxs = X.index[left_idxs]
-            X = X.loc[idxs]
-        else:
-            X = X[left_idxs]
-
-        if isinstance(y, pd.DataFrame) or isinstance(y, pd.Series):
-            idxs = y.index[left_idxs]
-            y = y.loc[idxs]
-        else:
-            y = y[left_idxs]
-
-    else:
-        X, _, y, _ = train_test_split(  # type: ignore
-            X,
-            y,
-            train_size=sample_size,
-            random_state=random_state,
-        )
-
-    return X, y
-
-
-def reduce_precision(X: np.ndarray | spmatrix) -> tuple[np.ndarray | spmatrix, type]:
-    """Reduces the precision of a np.ndarray or spmatrix containing floats
-
-    Parameters
-    ----------
-    X:  np.ndarray | spmatrix
-        The data to reduce precision of.
-
-    Returns
-    -------
-    (ndarray | spmatrix, dtype)
-        Returns the reduced data X along with the dtype it was reduced to.
-    """
-    if X.dtype not in supported_precision_reductions:
-        raise ValueError(
-            f"X.dtype = {X.dtype} not equal to any supported"
-            f" {supported_precision_reductions}"
-        )
-
-    precision = reduction_mapping[X.dtype]
-    return X.astype(precision), precision
-
-
-def reduce_dataset_size_if_too_large(
-    X: np.ndarray | spmatrix,
-    y: np.ndarray,
-    memory_limit: int,
-    is_classification: bool,
-    random_state: int | np.random.RandomState | None = None,
-    operations: list[str] = ["precision", "subsample"],
-    memory_allocation: int | float = 0.1,
-) -> tuple[np.ndarray | spmatrix, np.ndarray]:
-    f"""Reduces the size of the dataset if it's too close to the memory limit.
-
-    Follows the order of the operations passed in and retains the type of its
-    input.
-
-    Precision reduction will only work on the following float types:
-    -   {supported_precision_reductions}
-
-    Subsampling will ensure that the memory limit is satisfied while precision reduction
-    will only perform one level of precision reduction. Technically, you could supply
-    multiple rounds of precision reduction, i.e. to reduce np.float128 to np.float32
-    you could use `operations = ['precision'] * 2`.
-
-    However, if that's the use case, it'd be advised to simply use the function
-    `autosklearn.util.data.reduce_precision`.
-
-    NOTE: limitations
-    * Does not support dataframes yet
-        -   Requires implementing column wise precision reduction
-        -   Requires calculating memory usage
-
-    Parameters
-    ----------
-    X: np.ndarray | spmatrix
-        The features of the dataset.
-
-    y: np.ndarray
-        The labels of the dataset.
-
-    memory_limit: int
-        The amount of memory allocated in megabytes
-
-    is_classification: bool
-        Whether it's a classificaiton dataset or not. This is important when
-        considering how to subsample.
-
-    random_state: int | RandomState = None
-        The random_state to use for subsampling.
-
-    operations: List[str] = ['precision', 'subsampling']
-        A list of operations that are permitted to be performed to reduce
-        the size of the dataset.
-
-        **precision**
-
-        Reduce the precision of float types
-
-        **subsample**
-
-        Reduce the amount of samples of the dataset such that it fits into the allocated
-        memory. Ensures stratification and that unique labels are present
-
-    memory_allocation: Union[int, float] = 0.1
-        The amount of memory to allocate to the dataset. A float specifys that the
-        dataset will try to be fit into that percentage of memory. An int specifies an
-        absolute amount.
-
-    Returns
-    -------
-    (spmatrix | np.ndarray, np.ndarray)
-        The reduced X, y if reductions were needed
-    """
-    # Validation
-    assert memory_limit > 0
-
-    if isinstance(memory_allocation, float):
-        if not (0.0 < memory_allocation < 1.0):
-            raise ValueError("memory_allocation if float must be in (0, 1)")
-
-        allocated_memory = memory_limit * memory_allocation
-
-    elif isinstance(memory_allocation, int):
-        if not (0 < memory_allocation < memory_limit):
-            raise ValueError("memory_allocation if int must be in (0, memory_limit)")
-
-        allocated_memory = memory_allocation
-
-    else:
-        raise ValueError(
-            f"Unknown type for `memory_allocation` {type(memory_allocation)}"
-        )
-
-    if "precision" in operations and X.dtype not in supported_precision_reductions:
-        raise ValueError(f"Unsupported type `{X.dtype}` for precision reduction")
-
-    def megabytes(arr: np.ndarray | spmatrix) -> float:
-        return (arr.nbytes if isinstance(X, np.ndarray) else arr.data.nbytes) / (
-            2**20
-        )
-
-    for operation in operations:
-
-        if operation == "precision":
-            # If the dataset is too big for the allocated memory,
-            # we then try to reduce the precision if it's a high precision dataset
-            if megabytes(X) > allocated_memory:
-                X, precision = reduce_precision(X)
-                warnings.warn(
-                    f"Dataset too large for allocated memory {allocated_memory}MB, "
-                    f"reduced the precision from {X.dtype} to {precision}",
-                )
-
-        elif operation == "subsample":
-            # If the dataset is still too big such that we couldn't fit
-            # into the allocated memory, we subsample it so that it does
-            if megabytes(X) > allocated_memory:
-
-                n_samples_before = X.shape[0]
-                sample_percentage = allocated_memory / megabytes(X)
-
-                # NOTE: type ignore
-                #
-                # Tried the generic `def subsample(X: T) -> T` approach but it was
-                # failing elsewhere, keeping it simple for now
-                X, y = subsample(  # type: ignore
-                    X,
-                    y,
-                    sample_size=sample_percentage,
-                    is_classification=is_classification,
-                    random_state=random_state,
-                )
-
-                n_samples_after = X.shape[0]
-                warnings.warn(
-                    f"Dataset too large for allocated memory {allocated_memory}MB,"
-                    f" reduced number of samples from {n_samples_before} to"
-                    f" {n_samples_after}."
-                )
-
-        else:
-            raise ValueError(f"Unknown operation `{operation}`")
-
-    return X, y

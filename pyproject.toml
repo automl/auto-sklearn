@@ -135,7 +135,7 @@ module = [
     "autosklearn.data.xy_data_manager",
     "autosklearn.data.target_validator",
     "autosklearn.data.feature_validator",
-    "autosklearn.util.single_threaded_client",
+    "autosklearn.util.single_thread_client",
     "autosklearn.util.logging_",
 ]
 ignore_errors = true
