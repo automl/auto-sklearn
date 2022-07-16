@@ -2,6 +2,7 @@
 from typing import Any, Dict, Optional, Union
 
 from autosklearn.automl import AutoML
+from autosklearn.util.dask import LocalDask
 from autosklearn.util.data import default_dataset_compression_arg
 from autosklearn.util.single_thread_client import SingleThreadedClient
 
@@ -87,4 +88,7 @@ def test_single_job_and_no_dask_client_sets_correct_multiprocessing_context() ->
 
     assert automl._multiprocessing_context == "fork"
     assert automl._n_jobs == 1
-    assert isinstance(automl._dask_client, SingleThreadedClient)
+    assert isinstance(automl._dask, LocalDask)
+
+    with automl._dask as client:
+        assert isinstance(client, SingleThreadedClient)

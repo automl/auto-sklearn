@@ -140,8 +140,6 @@ def test_fit_n_jobs(tmp_dir):
     assert count_succeses(automl.cv_results_) > 0
     assert includes_train_scores(automl.performance_over_time_.columns) is True
     assert performance_over_time_is_plausible(automl.performance_over_time_) is True
-    # For travis-ci it is important that the client no longer exists
-    assert automl.automl_._dask_client is None
 
 
 def test_feat_type_wrong_arguments():
