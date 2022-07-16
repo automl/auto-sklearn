@@ -33,6 +33,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
+import copy
 import tempfile
 
 from dask.distributed import Client, LocalCluster
@@ -61,6 +62,10 @@ class Dask(ABC):
     def __repr__(self) -> str:
         ...
 
+    @abstractmethod
+    def __getstate__(self) -> dict[str, Any]:
+        ...
+
 
 class UserDask(Dask):
     """A dask instance created by a user"""
@@ -85,6 +90,16 @@ class UserDask(Dask):
 
     def __repr__(self) -> str:
         return "UserDask(...)"
+
+    def __getstate__(self) -> dict[str, Any]:
+        # Note: Basically a useless instance upon pickling and reloading.
+        #   Once __getstate__ is called, the this classes entire use
+        #   is erased, perhaps a warning to a user when loading pickled
+        #   instance of this?
+        #   * Would be done through `__setstate__`
+        state = copy.deepcopy(self.__dict__)
+        state["client"] = None
+        return state
 
 
 class LocalDask(Dask):
@@ -140,3 +155,11 @@ class LocalDask(Dask):
 
     def __repr__(self) -> str:
         return f"LocalDask(n_jobs = {self.n_jobs})"
+
+    def __getstate__(self) -> dict[str, Any]:
+        # Note: Note sure thi makes sense, this class
+        # basically becomes useless once pickled
+        state = copy.deepcopy(self.__dict__)
+        state["client"] = None
+        state["cluster"] = None
+        return state

@@ -34,7 +34,7 @@ def add_rescaler(rescaler: Rescaling) -> None:
 
 class RescalingChoice(AutoSklearnChoice):
     @classmethod
-    def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
+    def get_components(cls) -> Dict[str, BaseEstimator]:
         components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_rescalers)
         components.update(additional_components.components)

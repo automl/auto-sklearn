@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from __future__ import annotations
 
 from typing import (
@@ -12,6 +11,7 @@ from typing import (
     Type,
     Union,
     cast,
+    overload,
 )
 
 import functools
@@ -98,7 +98,17 @@ def fit_predict_try_except_decorator(
         queue.close()
 
 
-def get_cost_of_crash(metrics: Sequence[Scorer]) -> List[float] | float:
+@overload
+def get_cost_of_crash(metrics: Sequence[Scorer]) -> List[float]:
+    ...
+
+
+@overload
+def get_cost_of_crash(metrics: Scorer) -> float:
+    ...
+
+
+def get_cost_of_crash(metrics: Sequence[Scorer] | Scorer) -> List[float] | float:
     """Return the cost of crash.
 
     Return value can be either a list (multi-objective optimization) or a
@@ -106,6 +116,9 @@ def get_cost_of_crash(metrics: Sequence[Scorer]) -> List[float] | float:
     two different cases.
     """
     costs = []
+    if isinstance(metrics, Scorer):
+        metrics = [metrics]
+
     for metric in metrics:
         if not isinstance(metric, Scorer):
             raise ValueError("The metric {metric} must be an instance of Scorer")

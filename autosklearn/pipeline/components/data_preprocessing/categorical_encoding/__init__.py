@@ -30,7 +30,7 @@ def add_ohe(ohe: "OHEChoice") -> None:
 
 class OHEChoice(AutoSklearnChoice):
     @classmethod
-    def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
+    def get_components(cls) -> Dict[str, BaseEstimator]:
         components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_ohes)
         components.update(additional_components.components)

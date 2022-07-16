@@ -1,5 +1,4 @@
-# -*- encoding: utf-8 -*-
-from typing import List, Optional, Tuple, Union
+from typing import overload
 
 import logging
 
@@ -16,7 +15,7 @@ from autosklearn.util.logging_ import get_named_client_logger
 
 def convert_if_sparse(
     y: SUPPORTED_TARGET_TYPES,
-) -> Union[np.ndarray, List, pd.DataFrame, pd.Series]:
+) -> np.ndarray | list | pd.DataFrame | pd.Series:
     """If the labels `y` are sparse, it will convert it to its dense representation
 
     Parameters
@@ -77,9 +76,9 @@ class InputValidator(BaseEstimator):
 
     def __init__(
         self,
-        feat_type: Optional[List[str]] = None,
+        feat_type: list[str] | None = None,
         is_classification: bool = False,
-        logger_port: Optional[int] = None,
+        logger_port: int | None = None,
         allow_string_features: bool = True,
     ) -> None:
         self.feat_type = feat_type
@@ -108,8 +107,8 @@ class InputValidator(BaseEstimator):
         self,
         X_train: SUPPORTED_FEAT_TYPES,
         y_train: SUPPORTED_TARGET_TYPES,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        X_test: SUPPORTED_FEAT_TYPES | None = None,
+        y_test: SUPPORTED_TARGET_TYPES | None = None,
     ) -> BaseEstimator:
         """
         Validates and fit a categorical encoder (if needed) to the features, and
@@ -172,11 +171,27 @@ class InputValidator(BaseEstimator):
 
         return self
 
+    @overload
     def transform(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Optional[Union[List, pd.Series, pd.DataFrame, np.ndarray]] = None,
-    ) -> Tuple[Union[np.ndarray, pd.DataFrame, spmatrix], Optional[np.ndarray]]:
+        y: None = None,
+    ) -> tuple[np.ndarray | pd.DataFrame | spmatrix, None]:
+        ...
+
+    @overload
+    def transform(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        y: list | pd.Series | pd.DataFrame | np.ndarray,
+    ) -> tuple[np.ndarray | pd.DataFrame | spmatrix, np.ndarray]:
+        ...
+
+    def transform(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        y: list | pd.Series | pd.DataFrame | np.ndarray | None = None,
+    ) -> tuple[np.ndarray | pd.DataFrame | spmatrix, np.ndarray | None]:
         """
         Transform the given target or features to a numpy array
 

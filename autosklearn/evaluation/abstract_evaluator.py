@@ -29,6 +29,7 @@ from autosklearn.data.target_validator import (
     SUPPORTED_TARGET_TYPES,
     SUPPORTED_XDATA_TYPES,
 )
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
 from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents, _addons
 from autosklearn.pipeline.implementations.util import (
@@ -164,8 +165,8 @@ class MyDummyRegressor(DummyRegressor):
 def _fit_and_suppress_warnings(
     logger: Union[logging.Logger, PicklableClientLogger],
     model: BaseEstimator,
-    X: np.ndarray,
-    y: np.ndarray,
+    X: SUPPORTED_FEAT_TYPES,
+    y: SUPPORTED_TARGET_TYPES,
 ) -> BaseEstimator:
     def send_warnings_to_log(
         message: Union[Warning, str],

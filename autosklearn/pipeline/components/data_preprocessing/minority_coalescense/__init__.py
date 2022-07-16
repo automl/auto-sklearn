@@ -30,7 +30,7 @@ def add_mc(mc: BaseEstimator) -> None:
 
 class CoalescenseChoice(AutoSklearnChoice):
     @classmethod
-    def get_components(cls: BaseEstimator) -> Dict[str, BaseEstimator]:
+    def get_components(cls) -> Dict[str, BaseEstimator]:
         components: Dict[str, BaseEstimator] = OrderedDict()
         components.update(_mcs)
         components.update(additional_components.components)

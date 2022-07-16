@@ -1,18 +1,7 @@
-# -*- encoding: utf-8 -*-
 from __future__ import annotations
 
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-)
+from abc import ABC
+from typing import Any, Generic, Iterable, Sequence, TypeVar
 
 import warnings
 
@@ -24,115 +13,140 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.ensemble import VotingClassifier, VotingRegressor
+from sklearn.model_selection._split import (
+    BaseCrossValidator,
+    BaseShuffleSplit,
+    _RepeatedSplits,
+)
 from sklearn.utils.multiclass import type_of_target
 from smac.runhistory.runhistory import RunInfo, RunValue
 from typing_extensions import Literal
 
 from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
-from autosklearn.data.validation import (
-    SUPPORTED_FEAT_TYPES,
-    SUPPORTED_TARGET_TYPES,
-    convert_if_sparse,
-)
+from autosklearn.data.validation import convert_if_sparse
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.util.smac_wrap import SMACCallback
 
+# Used to return self and give correct type information from subclasses,
+# see `fit(self: Self) -> Self`
+Self = TypeVar("Self", bound="AutoSklearnEstimator")
 
-class AutoSklearnEstimator(BaseEstimator):
+# Used to indicate what type the underlying AutoML instance is
+TParetoModel = TypeVar("TParetoModel", VotingClassifier, VotingRegressor)
+TAutoML = TypeVar("TAutoML", bound=AutoML)
+
+
+class AutoSklearnEstimator(ABC, BaseEstimator, Generic[TAutoML, TParetoModel]):
+
+    supported_target_types: list[str]  # Support output types for the estimator
+    _automl_class: type[TAutoML]  # The automl class used by the estimator class
+
     def __init__(
         self,
-        time_left_for_this_task=3600,
-        per_run_time_limit=None,
-        initial_configurations_via_metalearning=25,
+        *,
+        time_left_for_this_task: int = 3600,
+        per_run_time_limit: int | None = None,  # TODO: allow percentage
+        initial_configurations_via_metalearning: int = 25,  # TODO validate
         ensemble_size: int | None = None,
-        ensemble_class: Type[AbstractEnsemble] | None = EnsembleSelection,
-        ensemble_kwargs: Dict[str, Any] | None = None,
-        ensemble_nbest=50,
-        max_models_on_disc=50,
-        seed=1,
-        memory_limit=3072,
-        include: Optional[Dict[str, List[str]]] = None,
-        exclude: Optional[Dict[str, List[str]]] = None,
-        resampling_strategy="holdout",
-        resampling_strategy_arguments=None,
-        tmp_folder=None,
-        delete_tmp_folder_after_terminate=True,
-        n_jobs: Optional[int] = None,
-        dask_client: Optional[dask.distributed.Client] = None,
-        disable_evaluator_output=False,
-        get_smac_object_callback=None,
-        smac_scenario_args=None,
-        logging_config=None,
-        metadata_directory=None,
+        ensemble_class: type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_kwargs: dict[str, Any] | None = None,
+        ensemble_nbest: int = 50,
+        max_models_on_disc: int = 50,
+        seed: int = 1,
+        memory_limit: int | None = 3072,
+        include: dict[str, list[str]] | None = None,
+        exclude: dict[str, list[str]] | None = None,
+        resampling_strategy: Literal[
+            "holdout", "cv", "holdout-iterative-fit", "cv-iterative-fit", "partial-cv"
+        ]
+        | BaseCrossValidator
+        | _RepeatedSplits
+        | BaseShuffleSplit = "holdout",
+        resampling_strategy_arguments: dict[str, Any] | None = None,
+        tmp_folder: str | None = None,  # TODO support path
+        delete_tmp_folder_after_terminate: bool = True,
+        n_jobs: int = 1,
+        dask_client: dask.distributed.Client | None = None,
+        disable_evaluator_output: bool
+        | Sequence[Literal["y_optimization", "model"]] = False,  # TODO: fill in
+        get_smac_object_callback: SMACCallback | None = None,
+        smac_scenario_args: dict[str, Any] | None = None,
+        logging_config: dict[str, Any] | None = None,
+        metadata_directory: str | None = None,  # TODO Update for path
         metric: Scorer | Sequence[Scorer] | None = None,
-        scoring_functions: Optional[List[Scorer]] = None,
+        scoring_functions: Sequence[Scorer] | None = None,
         load_models: bool = True,
         get_trials_callback: SMACCallback | None = None,
-        dataset_compression: Union[bool, Mapping[str, Any]] = True,
+        dataset_compression: bool | dict[str, Any] = True,
         allow_string_features: bool = True,
     ):
         """
         Parameters
         ----------
-        time_left_for_this_task : int, optional (default=3600)
-            Time limit in seconds for the search of appropriate
-            models. By increasing this value, *auto-sklearn* has a higher
-            chance of finding better models.
+        time_left_for_this_task : int = 3600
+            Time limit in seconds for the search of appropriate models.
+            By increasing this value, *auto-sklearn* has a higher chance of finding better
+            models.
 
-        per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)
-            Time limit for a single call to the machine learning model.
-            Model fitting will be terminated if the machine learning
-            algorithm runs over the time limit. Set this value high enough so
-            that typical machine learning algorithms can be fit on the
-            training data.
+        per_run_time_limit : int | None = None
+            Time limit in seconds for a single call to the machine learning model.
+            Model fitting will be terminated if the machine learning algorithm runs over
+            the time limit.
 
-        initial_configurations_via_metalearning : int, optional (default=25)
+            If left as None, will default to 1/10th of the total `time_left_for_this_task`
+
+            Set this value high enough so that typical machine learning
+            algorithms can be fit on the training data.
+
+        initial_configurations_via_metalearning : int = 25
             Initialize the hyperparameter optimization algorithm with this
             many configurations which worked well on previously seen
             datasets. Disable if the hyperparameter optimization algorithm
             should start from scratch.
 
-        ensemble_size : int, optional
+        ensemble_size : int | None = None
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
             replacement. If set to ``0`` no ensemble is fit.
 
-            Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+            **Deprecated** - will be removed in Auto-sklearn 0.16. Please pass
             this argument via ``ensemble_kwargs={"ensemble_size": int}``
             if you want to change the ensemble size for ensemble selection.
 
-        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
-            Class implementing the post-hoc ensemble algorithm. Set to
-            ``None`` to disable ensemble building or use ``SingleBest``
-            to obtain only use the single best model instead of an
-            ensemble.
+        ensemble_class : type[AbstractEnsemble] | None = EnsembleSelection
+            Class implementing the post-hoc ensemble algorithm.
 
-        ensemble_kwargs : Dict, optional
+            Set to ``None`` to disable ensemble building, ``EnsembleSelection``
+            for the default ensemble autosklearn builds or use ``SingleBest``
+            to obtain only use the single best model instead of an ensemble.
+
+        ensemble_kwargs : dict[str, Any] | None = None
             Keyword arguments that are passed to the ensemble class upon
             initialization.
 
-        ensemble_nbest : int, optional (default=50)
+        ensemble_nbest : int = 50
             Only consider the ``ensemble_nbest`` models when building an
             ensemble. This is inspired by a concept called library pruning
             introduced in `Getting Most out of Ensemble Selection`. This
             is independent of the ``ensemble_class`` argument and this
             pruning step is done prior to constructing an ensemble.
 
-        max_models_on_disc: int, optional (default=50),
+        max_models_on_disc: int | None = 50
             Defines the maximum number of models that are kept in the disc.
             The additional number of models are permanently deleted. Due to the
             nature of this variable, it sets the upper limit on how many models
             can be used for an ensemble.
-            It must be an integer greater or equal than 1.
-            If set to None, all models are kept on the disc.
 
-        seed : int, optional (default=1)
+            * If int, must be >= 1
+            * If None, all models are kept on the disc.
+
+        seed : int = 1
             Used to seed SMAC. Will determine the output file names.
 
-        memory_limit : int, optional (3072)
+        memory_limit : int | None = 3072
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than ``memory_limit`` MB.
@@ -144,7 +158,7 @@ class AutoSklearnEstimator(BaseEstimator):
               ``n_jobs x memory_limit``.
             * The memory limit also applies to the ensemble creation process.
 
-        include : Optional[Dict[str, List[str]]] = None
+        include : dict[str, Sequence[str]] = None
             If None, all possible algorithms are used.
 
             Otherwise, specifies a step and the components that are included in search.
@@ -169,7 +183,7 @@ class AutoSklearnEstimator(BaseEstimator):
                     'feature_preprocessor': ["no_preprocessing"]
                 }
 
-        exclude : Optional[Dict[str, List[str]]] = None
+        exclude : dict[str, Sequence[str]]] = None
             If None, all possible algorithms are used.
 
             Otherwise, specifies a step and the components that are excluded from search.
@@ -194,7 +208,7 @@ class AutoSklearnEstimator(BaseEstimator):
                     'feature_preprocessor': ["no_preprocessing"]
                 }
 
-        resampling_strategy : str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = "holdout"
+        resampling_strategy : "holdout" | "holdout-iterative-fit" | "cv" | "cv-iterative-fit" | "partial-cv" | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = "holdout"
             How to to handle overfitting, might need to use ``resampling_strategy_arguments``
             if using ``"cv"`` based method or a Splitter object.
 
@@ -213,7 +227,7 @@ class AutoSklearnEstimator(BaseEstimator):
             and ensure that ``"subsample"`` is not included in the applied compression
             ``"methods"`` or disable it entirely with ``False``.
 
-        resampling_strategy_arguments : Optional[Dict] = None
+        resampling_strategy_arguments : dict[str, Any] | None = None
             Additional arguments for ``resampling_strategy``, this is required if
             using a ``cv`` based strategy. The default arguments if left as ``None``
             are:
@@ -230,34 +244,34 @@ class AutoSklearnEstimator(BaseEstimator):
             `PredefinedSplit <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold>`_,
             the value of ``"folds"`` will be used.
 
-        tmp_folder : string, optional (None)
+        tmp_folder : str | None = None
             folder to store configuration output and log files, if ``None``
             automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
 
-        delete_tmp_folder_after_terminate: bool, optional (True)
+        delete_tmp_folder_after_terminate: bool = True
             remove tmp_folder, when finished. If tmp_folder is None
             tmp_dir will always be deleted
 
-        n_jobs : int, optional, experimental
+        n_jobs : int = 1
             The number of jobs to run in parallel for ``fit()``. ``-1`` means
             using all processors.
 
             **Important notes**:
 
             * By default, Auto-sklearn uses one core.
-            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number
-              of models in the ensemble.
+                * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number
+                  of models in the ensemble.
             * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)
             * If ``dask_client`` is ``None``, a new dask client is created.
 
-        dask_client : dask.distributed.Client, optional
+        dask_client : dask.distributed.Client | None = None
             User-created dask client, can be used to start a dask cluster and then
             attach auto-sklearn to it.
 
-        disable_evaluator_output: bool or list, optional (False)
-            If True, disable model and prediction output. Cannot be used
+        disable_evaluator_output: bool | Sequence["y_optimization" | "model"] = False
+            If ``True``, disable model and prediction output. Cannot be used
             together with ensemble building. ``predict()`` cannot be used when
-            setting this True. Can also be used as a list to pass more
+            setting this ``True``. Can also be used as a list to pass more
             fine-grained information on what to save. Allowed elements in the
             list are:
 
@@ -266,12 +280,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
             * ``model`` : do not save any model files
 
-        smac_scenario_args : dict, optional (None)
-            Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation <https://automl.github.io/SMAC3/master/pages/details/scenario.html>`_
-            for a list of available arguments.
-
-        get_smac_object_callback : callable
+        get_smac_object_callback : Callable | None = None
             Callback function to create an object of class
             `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/master/apidoc/smac.optimizer.smbo.html>`_.
             The function must accept the arguments ``scenario_dict``,
@@ -279,29 +288,35 @@ class AutoSklearnEstimator(BaseEstimator):
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
 
-        logging_config : dict, optional (None)
-            dictionary object specifying the logger configuration. If None,
-            the default logging.yaml file is used, which can be found in
+        smac_scenario_args : dict[str, Any] | None = None
+            Additional arguments inserted into the scenario of SMAC. See the
+            `SMAC documentation <https://automl.github.io/SMAC3/master/pages/details/scenario.html>`_
+            for a list of available arguments.
+
+        logging_config : dict[str, Any] | None = None
+            dict object specifying the logger configuration.
+            If None, the default **logging.yaml** file is used, which can be found in
             the directory ``util/logging.yaml`` relative to the installation.
 
-        metadata_directory : str, optional (None)
+        metadata_directory : str | None = None
             path to the metadata directory. If None, the default directory
             (autosklearn.metalearning.files) is used.
 
-        metric : Scorer, optional (None)
+        metric : Scorer | Sequence[Scorer] | None = None
             An instance of :class:`autosklearn.metrics.Scorer` as created by
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
+            If multiple are passed, will evaluate models with respect to all metrics.
             If None is provided, a default metric is selected depending on the task.
 
-        scoring_functions : List[Scorer], optional (None)
+        scoring_functions : Sequnce[Scorer] | None = None
             List of scorers which will be calculated for each pipeline and results will be
             available via ``cv_results``
 
-        load_models : bool, optional (True)
+        load_models : bool = True
             Whether to load the models after fitting Auto-sklearn.
 
-        get_trials_callback: callable
+        get_trials_callback: Callable
             A callable with the following definition.
 
             * (smac.SMBO, smac.RunInfo, smac.RunValue, time_left: float) -> bool | None
@@ -316,7 +331,7 @@ class AutoSklearnEstimator(BaseEstimator):
             See the example:
             :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>`.
 
-        dataset_compression: Union[bool, Mapping[str, Any]] = True
+        dataset_compression: bool | dict[str, Any] = True
             We compress datasets so that they fit into some predefined amount of memory.
             Currently this does not apply to dataframes or sparse arrays, only to raw
             numpy arrays.
@@ -464,28 +479,34 @@ class AutoSklearnEstimator(BaseEstimator):
         self.dataset_compression = dataset_compression
         self.allow_string_features = allow_string_features
 
-        self.automl_ = None  # type: Optional[AutoML]
+        # Cached
+        self.automl_: TAutoML | None = None
 
         # Handle the number of jobs and the time for them
-        self._n_jobs = None
-        if self.n_jobs is None or self.n_jobs == 1:
-            self._n_jobs = 1
-        elif self.n_jobs == -1:
+        # Made private by `_n_jobs` to keep with sklearn compliance
+        if n_jobs == -1:
             self._n_jobs = joblib.cpu_count()
         else:
-            self._n_jobs = self.n_jobs
+            self._n_jobs = n_jobs
 
-        super().__init__()
+        # Automatically set the cutoff time per task
+        if per_run_time_limit is None:
+            self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
 
-    def __getstate__(self):
-        # Cannot serialize a client!
-        self.dask_client = None
-        return self.__dict__
+    @property
+    def automl(self) -> TAutoML:
+        """Get the underlying Automl instance
 
-    def build_automl(self):
+        Returns
+        -------
+        AutoML
+            The underlying AutoML instance
+        """
+        if self.automl_ is not None:
+            return self.automl_
 
         initial_configs = self.initial_configurations_via_metalearning
-        automl = self._get_automl_class()(
+        automl = self._automl_class(
             temporary_directory=self.tmp_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             time_left_for_this_task=self.time_left_for_this_task,
@@ -515,32 +536,113 @@ class AutoSklearnEstimator(BaseEstimator):
             allow_string_features=self.allow_string_features,
         )
 
-        return automl
+        self.automl_ = automl
+        return self.automl_
 
-    def fit(self, **kwargs):
+    @property
+    def ensemble(self) -> AbstractEnsemble:
+        """Get the ensemble generated during the run if requested
 
-        # Automatically set the cutoff time per task
-        if self.per_run_time_limit is None:
-            self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
+        Returns
+        -------
+        AbstractEnsemble
 
-        if self.automl_ is None:
-            self.automl_ = self.build_automl()
-        self.automl_.fit(load_models=self.load_models, **kwargs)
+        Raises
+        ------
+        ValueError
+            If there was no ensemble class provided
+            If the ensemble for the AutoML instance can't be loaded
 
+        NotFittedError
+            If there this estimator has not been fitted
+        """
+        # TODO
+        raise NotImplementedError()
+
+    def fit(
+        self: Self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
+        X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
+        y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
+        feat_type: list[str] | None = None,
+        dataset_name: str | None = None,
+    ) -> Self:
+        """Fit AutoML to given training set (X, y).
+
+        Fit both optimizes the machine learning models and builds an ensemble
+        out of them.
+
+        Parameters
+        ----------
+        X : np.ndarray | pd.DataFrame | list | spmatrix
+            The training input samples.
+
+        y : np.ndarray | pd.DataFrame | pd.Series | list
+            The target classes.
+
+        X_test : np.ndarray | pd.DataFrame | list | spmatrix | None = None
+            Test data input samples. Will be used to save test predictions for
+            all models. This allows to evaluate the performance of Auto-sklearn
+            over time.
+
+        y_test :  np.ndarray | pd.DataFrame | pd.Series | list | None = None
+            Test data target classes. Will be used to calculate the test error
+            of all models. This allows to evaluate the performance of
+            Auto-sklearn over time.
+
+        feat_type : list[str] | None = None,
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded. The values
+            used for a categorical attribute must be integers, obtained for
+            example by `sklearn.preprocessing.LabelEncoder
+            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
+
+        dataset_name : str | None = None
+            Create nicer output. If None, a pseudo-random hash will be used
+
+        Returns
+        -------
+        self
+        """
+        # AutoSklearn does not handle sparse y for now
+        y = convert_if_sparse(y)
+
+        target_type = type_of_target(y)
+        if target_type not in self.supported_target_types:
+            raise ValueError(
+                f"Data of type {target_type} is not supported with"
+                f" {self.__class__.__name__}. Supported types are"
+                f" {self.supported_target_types}. You can find more information about"
+                " scikit-learn data types at:"
+                " https://scikit-learn.org/stable/modules/multiclass.html"
+            )
+
+        self.automl.fit(
+            X=X,
+            y=y,
+            X_test=X_test,
+            y_test=y_test,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+            load_models=self.load_models,
+        )
         return self
 
     def fit_pipeline(
         self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
-        config: Union[Configuration, Dict[str, Union[str, float, int]]],
-        dataset_name: Optional[str] = None,
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[str]] = None,
-        *args,
-        **kwargs: Dict,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
+        config: Configuration | dict[str, Any],
+        dataset_name: str | None = None,
+        X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
+        y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
+        feat_type: list[str] | None = None,
+        **kwargs: Any,
+    ) -> tuple[BasePipeline | None, RunInfo, RunValue]:
         """Fits and individual pipeline configuration and returns
         the result to the user.
 
@@ -589,6 +691,7 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         if self.automl_ is None:
             self.automl_ = self.build_automl()
+
         return self.automl_.fit_pipeline(
             X=X,
             y=y,
@@ -597,22 +700,22 @@ class AutoSklearnEstimator(BaseEstimator):
             feat_type=feat_type,
             X_test=X_test,
             y_test=y_test,
-            *args,
             **kwargs,
         )
 
     def fit_ensemble(
-        self,
-        y,
-        task: int = None,
-        precision: Literal[16, 21, 64] = 32,
-        dataset_name: Optional[str] = None,
+        self: Self,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
+        task: int | None = None,
+        precision: Literal[16, 32, 64] = 32,
+        dataset_name: str | None = None,
         ensemble_size: int | None = None,
-        ensemble_kwargs: Optional[Dict[str, Any]] = None,
-        ensemble_nbest: Optional[int] = None,
-        ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
+        ensemble_kwargs: dict[str, Any] | None = None,
+        ensemble_nbest: int | None = None,
+        ensemble_class: type[AbstractEnsemble] | None = EnsembleSelection,
         metrics: Scorer | Sequence[Scorer] | None = None,
-    ):
+    ) -> Self:
         """Fit an ensemble to models trained during an optimization process.
 
         All parameters are ``None`` by default. If no other value is given,
@@ -623,19 +726,18 @@ class AutoSklearnEstimator(BaseEstimator):
         y : array-like
             Target values.
 
-        task : int
+        task : int | None = NOne
             A constant from the module ``autosklearn.constants``. Determines
             the task type (binary classification, multiclass classification,
             multilabel classification or regression).
 
-        precision : int
-            Numeric precision used when loading ensemble data. Can be either
-            ``16``, ``32`` or ``64``.
+        precision : 16 | 32 | 64 = 32
+            Numeric precision used when loading ensemble data.
 
-        dataset_name : str
+        dataset_name : str | None = None
             Name of the current data set.
 
-        ensemble_size : int, optional
+        ensemble_size : int | None = None
             Number of models added to the ensemble built by *Ensemble
             selection from libraries of models*. Models are drawn with
             replacement. If set to ``0`` no ensemble is fit.
@@ -644,18 +746,18 @@ class AutoSklearnEstimator(BaseEstimator):
             this argument via ``ensemble_kwargs={"ensemble_size": int}``
             if you want to change the ensemble size for ensemble selection.
 
-        ensemble_kwargs : Dict, optional
+        ensemble_kwargs : dict[str, Any] | None = None
             Keyword arguments that are passed to the ensemble class upon
             initialization.
 
-        ensemble_nbest : int
+        ensemble_nbest : int | None = None
             Only consider the ``ensemble_nbest`` models when building an
             ensemble. This is inspired by a concept called library pruning
             introduced in `Getting Most out of Ensemble Selection`. This
             is independent of the ``ensemble_class`` argument and this
             pruning step is done prior to constructing an ensemble.
 
-        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
+        ensemble_class : type[AbstractEnsemble] | None = EnsembleSelection
             Class implementing the post-hoc ensemble algorithm. Set to
             ``None`` to disable ensemble building or use ``SingleBest``
             to obtain only use the single best model instead of an
@@ -672,11 +774,11 @@ class AutoSklearnEstimator(BaseEstimator):
         if ensemble_size is not None:
             # Keep consistent behaviour
             message = (
-                "`ensemble_size` has been deprecated, please use `ensemble_kwargs = "
-                "{'ensemble_size': %d}`. Inserting `ensemble_size` into "
-                "`ensemble_kwargs` for now. `ensemble_size` will be removed in "
-                "auto-sklearn 0.16."
-            ) % ensemble_size
+                "`ensemble_size` has been deprecated, please use `ensemble_kwargs ="
+                f" {{'ensemble_size': {ensemble_size}}}`. Inserting `ensemble_size`"
+                " into `ensemble_kwargs` for now. `ensemble_size` will be removed in"
+                " auto-sklearn 0.16."
+            )
             if ensemble_class == EnsembleSelection:
                 if ensemble_kwargs is None:
                     ensemble_kwargs = {"ensemble_size": ensemble_size}
@@ -707,12 +809,7 @@ class AutoSklearnEstimator(BaseEstimator):
                     stacklevel=2,
                 )
 
-        if self.automl_ is None:
-            # Build a dummy automl object to call fit_ensemble
-            # The ensemble size is honored in the .automl_.fit_ensemble
-            # call
-            self.automl_ = self.build_automl()
-        self.automl_.fit_ensemble(
+        self.automl.fit_ensemble(
             y=y,
             task=task,
             precision=precision,
@@ -724,7 +821,11 @@ class AutoSklearnEstimator(BaseEstimator):
         )
         return self
 
-    def refit(self, X, y):
+    def refit(
+        self: Self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+    ) -> Self:
         """Refit all models found with fit to new data.
 
         Necessary when using cross-validation. During training, auto-sklearn
@@ -736,7 +837,6 @@ class AutoSklearnEstimator(BaseEstimator):
 
         Parameters
         ----------
-
         X : array-like or sparse matrix of shape = [n_samples, n_features]
             The training input samples.
 
@@ -745,23 +845,58 @@ class AutoSklearnEstimator(BaseEstimator):
 
         Returns
         -------
-
         self
-
         """
-        self.automl_.refit(X, y)
+        self.automl.refit(X, y)
         return self
 
-    def predict(self, X, batch_size=None, n_jobs=1):
-        return self.automl_.predict(X, batch_size=batch_size, n_jobs=n_jobs)
+    def predict(
+        self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        *,
+        batch_size: int | None = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
+        """Get predictions on the given X data
 
-    def predict_proba(self, X, batch_size=None, n_jobs=1):
-        return self.automl_.predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
+        Parameters
+        ----------
+        X: np.ndarray | pd.DataFrame | list | spmatrix, (n_rows, n_features)
+            The X data to predict on
 
-    def score(self, X, y):
-        return self.automl_.score(X, y)
+        batch_size: int | None = None
+            ``batch_size`` controls whether the pipelines will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
 
-    def show_models(self):
+        n_jobs: int = 1
+            Parallelize the predictions across the models with n_jobs processes.
+        """
+        return self.automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
+
+    def score(
+        self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+    ) -> float:
+        """
+
+        Parameters
+        ----------
+        X : np.ndarray | pd.DataFrame | list | spmatrix
+            The ``n`` rows of ``m`` features of the data
+
+        y : np.ndarray | pd.DataFrame | pd.Series | list, (n,)
+            The ``n`` labels for the data
+
+        Returns
+        -------
+        float
+            The score of the estimator
+        """
+        return self.automl.score(X, y)
+
+    def show_models(self) -> dict[int, Any]:
         """Returns a dictionary containing dictionaries of ensemble models.
 
         Each model in the ensemble can be accessed by giving its ``model_id`` as key.
@@ -838,14 +973,13 @@ class AutoSklearnEstimator(BaseEstimator):
 
         Returns
         -------
-        Dict(int, Any) : dictionary of length = number of models in the ensemble
+        dict[int, Any] : dictionary of length = number of models in the ensemble
             A dictionary of models in the ensemble, where ``model_id`` is the key.
 
         """  # noqa: E501
+        return self.automl.show_models()
 
-        return self.automl_.show_models()
-
-    def get_models_with_weights(self):
+    def get_models_with_weights(self) -> list[tuple[float, BasePipeline]]:
         """Return a list of the final ensemble found by auto-sklearn.
 
         Returns
@@ -853,25 +987,29 @@ class AutoSklearnEstimator(BaseEstimator):
         [(weight_1, model_1), ..., (weight_n, model_n)]
 
         """
-        return self.automl_.get_models_with_weights()
+        return self.automl.get_models_with_weights()
 
     @property
-    def performance_over_time_(self):
-        return self.automl_.performance_over_time_
+    def performance_over_time_(self) -> pd.DataFrame:
+        """The performance of autosklearn over time during it's ensembling
+
+        Note
+        ----
+        Only returns for first metric currently, if multiple are given
+        """
+        return self.automl.performance_over_time_
 
     @property
-    def cv_results_(self):
-        return self.automl_.cv_results_
+    def cv_results_(self) -> dict[str, Any]:
+        """Get the cv results of autosklearn"""
+        return self.automl.cv_results_
 
     @property
-    def trajectory_(self):
-        return self.automl_.trajectory_
+    def trajectory_(self) -> np.ndarray:
+        """Get the tracjectory of autosklearns performance over time"""
+        return self.automl.trajectory_
 
-    @property
-    def fANOVA_input_(self):
-        return self.automl_.fANOVA_input_
-
-    def sprint_statistics(self):
+    def sprint_statistics(self) -> str:
         """Return the following statistics of the training result:
 
         - dataset name
@@ -887,16 +1025,17 @@ class AutoSklearnEstimator(BaseEstimator):
         -------
         str
         """
-        return self.automl_.sprint_statistics()
+        return self.automl.sprint_statistics()
 
     def leaderboard(
         self,
+        *,
         detailed: bool = False,
         ensemble_only: bool = True,
-        top_k: Union[int, Literal["all"]] = "all",
-        sort_by: str = "cost",
+        top_k: int | Literal["all"] = "all",
+        sort_by: str | list[str] = "cost",
         sort_order: Literal["auto", "ascending", "descending"] = "auto",
-        include: Optional[Union[str, Iterable[str]]] = None,
+        include: str | Iterable[str] | None = None,
     ) -> pd.DataFrame:
         """Returns a pandas table of results for all evaluated models.
 
@@ -940,7 +1079,7 @@ class AutoSklearnEstimator(BaseEstimator):
         top_k: int or "all" = "all"
             How many models to display.
 
-        sort_by: str = 'cost'
+        sort_by: str | list[str] = 'cost'
             What column to sort by. If that column is not present, the
             sorting defaults to the ``"model_id"`` index column.
 
@@ -1000,6 +1139,9 @@ class AutoSklearnEstimator(BaseEstimator):
         if include == ["model_id"]:
             raise ValueError("Must provide more than just `model_id`")
 
+        # Generate the list of columns for the output
+        columns: list[str]
+
         if include is not None:
             columns = [*include]
 
@@ -1042,6 +1184,9 @@ class AutoSklearnEstimator(BaseEstimator):
                     f"{set(column_types['all'])}"
                 )
 
+        # Convert it to a list
+        _sort_by: list[str] = sort_by if isinstance(sort_by, list) else [sort_by]
+
         valid_sort_orders = ["auto", "ascending", "descending"]
         if not (isinstance(sort_order, str) and sort_order in valid_sort_orders):
             raise ValueError(
@@ -1050,11 +1195,11 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # To get all the models that were optmized, we collect what we can from
         # runhistory first.
-        def additional_info_has_key(rv, key):
-            return rv.additional_info and key in rv.additional_info
+        def additional_info_has_key(rv: RunValue, key: str) -> bool:
+            return rv.additional_info is not None and key in rv.additional_info
 
         model_runs = {}
-        for run_key, run_val in self.automl_.runhistory_.data.items():
+        for run_key, run_val in self.automl.runhistory_.data.items():
             if not additional_info_has_key(run_val, "num_run"):
                 continue
             else:
@@ -1092,7 +1237,7 @@ class AutoSklearnEstimator(BaseEstimator):
             raise RuntimeError(f"Unknown `automl_class` {self._get_automl_class()}")
 
         # A dict mapping model ids to their configurations
-        configurations = self.automl_.runhistory_.ids_config
+        configurations = self.automl.runhistory_.ids_config
 
         for model_id, run_info in model_runs.items():
             config_id = run_info["config_id"]
@@ -1116,37 +1261,40 @@ class AutoSklearnEstimator(BaseEstimator):
             )
 
         # Get the models ensemble weight if it has one
-        for (
-            _,
-            model_id,
-            _,
-        ), weight in self.automl_.ensemble_.get_identifiers_with_weights():
+        ensemble = self.automl.ensemble_
+        if ensemble is not None:
+            for (
+                _,
+                model_id,
+                _,
+            ), weight in ensemble.get_identifiers_with_weights():
 
-            # We had issues where the model's in the ensembles are not in the runhistory
-            # collected. I have no clue why this is but to prevent failures, we fill
-            # the values with NaN
-            if model_id not in model_runs:
-                model_run = {
-                    "model_id": model_id,
-                    "seed": pd.NA,
-                    "budget": pd.NA,
-                    "duration": pd.NA,
-                    "config_id": pd.NA,
-                    "start_time": pd.NA,
-                    "end_time": pd.NA,
-                    "status": pd.NA,
-                    "train_loss": pd.NA,
-                    "config_origin": pd.NA,
-                    "type": pd.NA,
-                }
-                if num_metrics == 1:
-                    model_run["cost"] = pd.NA
-                else:
-                    for cost_idx in range(num_metrics):
-                        model_run[f"cost_{cost_idx}"] = pd.NA
-                model_runs[model_id] = model_run
+                # We had issues where the model's in the ensembles are not in the
+                # runhistory collected.
+                # I have no clue why this is but to prevent failures, we fill the
+                # values with NaN
+                if model_id not in model_runs:
+                    model_run = {
+                        "model_id": model_id,
+                        "seed": pd.NA,
+                        "budget": pd.NA,
+                        "duration": pd.NA,
+                        "config_id": pd.NA,
+                        "start_time": pd.NA,
+                        "end_time": pd.NA,
+                        "status": pd.NA,
+                        "train_loss": pd.NA,
+                        "config_origin": pd.NA,
+                        "type": pd.NA,
+                    }
+                    if num_metrics == 1:
+                        model_run["cost"] = pd.NA
+                    else:
+                        for cost_idx in range(num_metrics):
+                            model_run[f"cost_{cost_idx}"] = pd.NA
+                    model_runs[model_id] = model_run
 
-            model_runs[model_id]["ensemble_weight"] = weight
+                model_runs[model_id]["ensemble_weight"] = weight
 
         # Filter out non-ensemble members if needed, else fill in a default
         # value of 0 if it's missing
@@ -1199,16 +1347,18 @@ class AutoSklearnEstimator(BaseEstimator):
 
         # Decide on the sort order depending on what it gets sorted by
         descending_columns = ["ensemble_weight", "duration"]
+
+        ascending_param: bool | list[bool]
         if sort_order == "auto":
             ascending_param = [
-                False if sby in descending_columns else True for sby in sort_by
+                False if sby in descending_columns else True for sby in _sort_by
             ]
         else:
             ascending_param = False if sort_order == "descending" else True
 
         # Sort by the given column name, defaulting to 'model_id' if not present
         if (
-            (not sort_by_cost and len(set(sort_by) - set(dataframe.columns)) > 0)
+            (not sort_by_cost and len(set(_sort_by) - set(dataframe.columns)) > 0)
             or (sort_by_cost and "cost" not in dataframe.columns)
             or (
                 sort_by_cost
@@ -1218,22 +1368,23 @@ class AutoSklearnEstimator(BaseEstimator):
                 )
             )
         ):
-            self.automl_._logger.warning(
-                f"sort_by = '{sort_by}' was not present"
-                ", defaulting to sort on the index "
-                "'model_id'"
-            )
-            sort_by = "model_id"
+            if self.automl._logger is not None:
+                self.automl._logger.warning(
+                    f"sort_by = '{_sort_by}' was not present"
+                    ", defaulting to sort on the index "
+                    "'model_id'"
+                )
+            _sort_by = ["model_id"]
             sort_by_cost = False
             ascending_param = True
 
         # Single objective
         if sort_by_cost:
             dataframe.sort_values(
-                by=sort_by, ascending=[True] * len(sort_by), inplace=True
+                by=_sort_by, ascending=[True] * len(_sort_by), inplace=True
             )
         else:
-            dataframe.sort_values(by=sort_by, ascending=ascending_param, inplace=True)
+            dataframe.sort_values(by=_sort_by, ascending=ascending_param, inplace=True)
 
         if num_metrics == 1:
             if "cost" not in columns and "cost" in dataframe.columns:
@@ -1254,7 +1405,7 @@ class AutoSklearnEstimator(BaseEstimator):
     @staticmethod
     def _leaderboard_columns(
         num_metrics: int,
-    ) -> Dict[Literal["all", "simple", "detailed"], List[str]]:
+    ) -> dict[Literal["all", "simple", "detailed"], list[str]]:
         if num_metrics == 1:
             cost_list = ["cost"]
         else:
@@ -1288,17 +1439,15 @@ class AutoSklearnEstimator(BaseEstimator):
         detailed = all
         return {"all": all, "detailed": detailed, "simple": simple}
 
-    def _get_automl_class(self):
-        raise NotImplementedError()
-
     def get_configuration_space(
         self,
-        X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
-        X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        dataset_name: Optional[str] = None,
-        feat_type: Optional[List[str]] = None,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        y: np.ndarray | pd.DataFrame | pd.Series | list,
+        *,
+        X_test: np.ndarray | pd.DataFrame | list | spmatrix | None = None,
+        y_test: np.ndarray | pd.DataFrame | pd.Series | list | None = None,
+        dataset_name: str | None = None,
+        feat_type: list[str] | None = None,
     ) -> ConfigurationSpace:
         """
         Returns the Configuration Space object, from which Auto-Sklearn
@@ -1318,11 +1467,8 @@ class AutoSklearnEstimator(BaseEstimator):
         dataset_name: Optional[str]
             A string to tag the Auto-Sklearn run
         """
-        if self.automl_ is None:
-            self.automl_ = self.build_automl()
-
         return (
-            self.automl_.fit(
+            self.automl.fit(
                 X,
                 y,
                 X_test=X_test,
@@ -1331,109 +1477,58 @@ class AutoSklearnEstimator(BaseEstimator):
                 feat_type=feat_type,
                 only_return_configuration_space=True,
             )
-            if self.automl_.configuration_space is None
-            else self.automl_.configuration_space
+            if self.automl.configuration_space is None
+            else self.automl.configuration_space
         )
 
-    def get_pareto_set(self) -> Sequence[VotingClassifier | VotingRegressor]:
-        return self.automl_._load_pareto_set()
+    def get_pareto_set(self) -> Sequence[TParetoModel]:
+        """Get the pareto set of optimal ensembles given by the ensembling class
+
+        Returns
+        -------
+        Sequence[TParetoModel]
+            The models that are on the pareto front, wrapped in the corresponding
+            VotingClassifier/VotingRegressor
+        """
+        return self.automl._load_pareto_set()
+
+    def __getstate__(self) -> dict[str, Any]:
+        # Cannot serialize a client!
+        self.dask_client = None
+        return self.__dict__
+
+    def __sklearn_is_fitted__(self) -> bool:
+        return self.automl_ is not None and self.automl.fitted
 
 
-class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
+class AutoSklearnClassifier(
+    AutoSklearnEstimator[AutoMLClassifier, VotingClassifier],
+    ClassifierMixin,
+):
     """This class implements the classification task."""
 
-    def fit(self, X, y, X_test=None, y_test=None, feat_type=None, dataset_name=None):
-        """Fit *auto-sklearn* to given training set (X, y).
+    supported_target_types = ["binary", "multiclass", "multilabel-indicator"]
+    _automl_class = AutoMLClassifier
 
-        Fit both optimizes the machine learning models and builds an ensemble
-        out of them.
+    @property
+    def classes_(self) -> np.ndarray:
+        """Get the classes found when fitted
 
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-            The training input samples.
-
-        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
-            The target classes.
-
-        X_test : array-like or sparse matrix of shape = [n_samples, n_features]
-            Test data input samples. Will be used to save test predictions for
-            all models. This allows to evaluate the performance of Auto-sklearn
-            over time.
-
-        y_test : array-like, shape = [n_samples] or [n_samples, n_outputs]
-            Test data target classes. Will be used to calculate the test error
-            of all models. This allows to evaluate the performance of
-            Auto-sklearn over time.
-
-        feat_type : list, optional (default=None)
-            List of str of `len(X.shape[1])` describing the attribute type.
-            Possible types are `Categorical` and `Numerical`. `Categorical`
-            attributes will be automatically One-Hot encoded. The values
-            used for a categorical attribute must be integers, obtained for
-            example by `sklearn.preprocessing.LabelEncoder
-            <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
-
-        dataset_name : str, optional (default=None)
-            Create nicer output. If None, a string will be determined by the
-            md5 hash of the dataset.
+        https://scikit-learn.org/stable/developers/develop.html#specific-models
 
         Returns
         -------
-        self
+        np.ndarray
+            Class labels seen during fit
         """
-        # AutoSklearn does not handle sparse y for now
-        y = convert_if_sparse(y)
+        return self.automl.input_validator.classes_
 
-        # Before running anything else, first check that the
-        # type of data is compatible with auto-sklearn. Legal target
-        # types are: binary, multiclass, multilabel-indicator.
-        target_type = type_of_target(y)
-        supported_types = ["binary", "multiclass", "multilabel-indicator"]
-        if target_type not in supported_types:
-            raise ValueError(
-                "Classification with data of type {} is "
-                "not supported. Supported types are {}. "
-                "You can find more information about scikit-learn "
-                "data types in: "
-                "https://scikit-learn.org/stable/modules/multiclass.html"
-                "".format(target_type, supported_types)
-            )
-
-        # remember target type for using in predict_proba later.
-        self.target_type = target_type
-
-        super().fit(
-            X=X,
-            y=y,
-            X_test=X_test,
-            y_test=y_test,
-            feat_type=feat_type,
-            dataset_name=dataset_name,
-        )
-
-        # After fit, a classifier is expected to define classes_
-        # A list of class labels known to the classifier, mapping each label
-        # to a numerical index used in the model representation our output.
-        self.classes_ = self.automl_.InputValidator.target_validator.classes_
-
-        return self
-
-    def predict(self, X, batch_size=None, n_jobs=1):
-        """Predict classes for X.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-
-        Returns
-        -------
-        y : array of shape = [n_samples] or [n_samples, n_labels]
-            The predicted classes.
-        """
-        return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
-
-    def predict_proba(self, X, batch_size=None, n_jobs=1):
+    def predict_proba(
+        self,
+        X: np.ndarray | pd.DataFrame | list | spmatrix,
+        batch_size: int | None = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
         """Predict probabilities of classes for all samples X.
 
         Parameters
@@ -1450,123 +1545,19 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
         y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
             The predicted class probabilities.
         """
-        pred_proba = super().predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
-
-        # Check if all probabilities sum up to 1.
-        # Assert only if target type is not multilabel-indicator.
-        if self.target_type not in ["multilabel-indicator"]:
-            assert np.allclose(
-                np.sum(pred_proba, axis=1), np.ones_like(pred_proba[:, 0])
-            ), "prediction probability does not sum up to 1!"
-
-        # Check that all probability values lie between 0 and 1.
-        assert (pred_proba >= 0).all() and (
-            pred_proba <= 1
-        ).all(), "found prediction probability value outside of [0, 1]!"
-
-        return pred_proba
-
-    def _get_automl_class(self):
-        return AutoMLClassifier
+        return self.automl.predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
 
 
-class AutoSklearnRegressor(AutoSklearnEstimator, RegressorMixin):
-    """
-    This class implements the regression task.
+class AutoSklearnRegressor(
+    AutoSklearnEstimator[AutoMLRegressor, VotingRegressor],
+    RegressorMixin,
+):
+    """This class implements the regression task."""
 
-    """
-
-    def fit(self, X, y, X_test=None, y_test=None, feat_type=None, dataset_name=None):
-        """Fit *Auto-sklearn* to given training set (X, y).
-
-        Fit both optimizes the machine learning models and builds an ensemble
-        out of them.
-
-        Parameters
-        ----------
-
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-            The training input samples.
-
-        y : array-like, shape = [n_samples] or [n_samples, n_targets]
-            The regression target.
-
-        X_test : array-like or sparse matrix of shape = [n_samples, n_features]
-            Test data input samples. Will be used to save test predictions for
-            all models. This allows to evaluate the performance of Auto-sklearn
-            over time.
-
-        y_test : array-like, shape = [n_samples] or [n_samples, n_targets]
-            The regression target. Will be used to calculate the test error
-            of all models. This allows to evaluate the performance of
-            Auto-sklearn over time.
-
-        feat_type : list, optional (default=None)
-            List of str of `len(X.shape[1])` describing the attribute type.
-            Possible types are `Categorical` and `Numerical`. `Categorical`
-            attributes will be automatically One-Hot encoded.
-
-        dataset_name : str, optional (default=None)
-            Create nicer output. If None, a string will be determined by the
-            md5 hash of the dataset.
-
-        Returns
-        -------
-        self
-
-        """
-        # Before running anything else, first check that the
-        # type of data is compatible with auto-sklearn. Legal target
-        # types are: continuous, continuous-multioutput, and the special cases:
-        # multiclass : because [3.0, 1.0, 5.0] is considered as multiclass
-        # binary: because [1.0, 0.0] is considered multiclass
-        # AutoSklearn does not handle sparse y for now
-        y = convert_if_sparse(y)
-
-        target_type = type_of_target(y)
-        supported_types = [
-            "continuous",
-            "binary",
-            "multiclass",
-            "continuous-multioutput",
-        ]
-        if target_type not in supported_types:
-            raise ValueError(
-                "Regression with data of type {} is "
-                "not supported. Supported types are {}. "
-                "You can find more information about scikit-learn "
-                "data types in: "
-                "https://scikit-learn.org/stable/modules/multiclass.html"
-                "".format(target_type, supported_types)
-            )
-
-        # Fit is supposed to be idempotent!
-        # But not if we use share_mode.
-        super().fit(
-            X=X,
-            y=y,
-            X_test=X_test,
-            y_test=y_test,
-            feat_type=feat_type,
-            dataset_name=dataset_name,
-        )
-
-        return self
-
-    def predict(self, X, batch_size=None, n_jobs=1):
-        """Predict regression target for X.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-
-        Returns
-        -------
-        y : array of shape = [n_samples] or [n_samples, n_outputs]
-            The predicted values.
-
-        """
-        return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
-
-    def _get_automl_class(self):
-        return AutoMLRegressor
+    _automl_class = AutoMLRegressor
+    supported_target_types = [
+        "continuous",
+        "binary",
+        "multiclass",
+        "continuous-multioutput",
+    ]

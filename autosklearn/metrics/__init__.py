@@ -431,7 +431,7 @@ for (base_name, sklearn_metric), average in product(
 
 def _validate_metrics(
     metrics: Sequence[Scorer],
-    scoring_functions: Optional[List[Scorer]] = None,
+    scoring_functions: Optional[Sequence[Scorer]] = None,
 ) -> None:
     """
     Validate metrics given to Auto-sklearn. Raises an Exception in case of a problem.
