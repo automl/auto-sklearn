@@ -405,7 +405,9 @@ class AutoSklearnEstimator(BaseEstimator):
         )
 
         # Need to resolve the ensemble class here so we can act on it below.
-        ensemble_class = self.resolve_ensemble_class(ensemble_class, metric)
+        if ensemble_class == "default":
+            ensemble_class = self._resolve_ensemble_class(metric)
+
         self.ensemble_class = ensemble_class
 
         # User specified `ensemble_size` explicitly, warn them about deprecation
@@ -683,8 +685,20 @@ class AutoSklearnEstimator(BaseEstimator):
         self
         """  # noqa: E501
 
-        # Need to resolve the ensemble class here so we can act on it below.
-        ensemble_class = self.resolve_ensemble_class(ensemble_class, metric)
+        if ensemble_class == "default":
+            # Things are actually a little more nuanced here:
+            # * If they passed `metric=None` at init, we would infer this in automl
+            #   during `fit` and store it in the automl instance.
+            # * If they passed a `metric` in init and left it `None` here, this would
+            #   also be in the automl instance
+            # => We can use self.automl_ as ground truth for metric if no metrics passed
+            #   and we have one created
+            if metric is None and self.automl_ is not None and self.automl_.metrics:
+                metric = self.automl_.metrics
+
+            ensemble_class = self._resolve_ensemble_class(metric)
+
+        self.ensemble_class = ensemble_class
 
         # User specified `ensemble_size` explicitly, warn them about deprecation
         if ensemble_size is not None:
@@ -742,14 +756,15 @@ class AutoSklearnEstimator(BaseEstimator):
         )
         return self
 
-    def resolve_ensemble_class(self, ensemble_class, metric):
-        if ensemble_class == "default":
-            ensemble_class = (
-                EnsembleSelection
-                if metric is None or isinstance(metric, Scorer) or len(metric) == 1
-                else MultiObjectiveDummyEnsemble
-            )
-        return ensemble_class
+    def _resolve_ensemble_class(
+        self,
+        metric: Scorer | Sequence[Scorer] | None,
+    ) -> type[AbstractEnsemble]:
+        return (
+            EnsembleSelection
+            if metric is None or isinstance(metric, Scorer) or len(metric) == 1
+            else MultiObjectiveDummyEnsemble
+        )
 
     def refit(self, X, y):
         """Refit all models found with fit to new data.
