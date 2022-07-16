@@ -1741,7 +1741,7 @@ class AutoML(ABC, BaseEstimator):
         check_is_fitted(self)
 
         prediction = self.predict(X)
-        y = self.InputValidator.target_validator.transform(y)
+        y = self.input_validator.target_validator.transform(y)
 
         # Encode the prediction using the input validator
         # We train autosklearn with a encoded version of y,
@@ -1749,7 +1749,7 @@ class AutoML(ABC, BaseEstimator):
         # Above call to validate() encodes the y given for score()
         # Below call encodes the prediction, so we compare in the
         # same representation domain
-        prediction = self.InputValidator.target_validator.transform(prediction)
+        prediction = self.input_validator.target_validator.transform(prediction)
 
         return compute_single_metric(
             solution=y,
@@ -2267,16 +2267,15 @@ class AutoMLClassifier(AutoML, ClassifierMixin):
         n_jobs: int = 1,
     ) -> np.ndarray:
         check_is_fitted(self)
-        assert self.InputValidator is not None
-
         probabilities = self.predict_proba(X, batch_size=batch_size, n_jobs=n_jobs)
+        validator = self.input_validator
 
-        if self.InputValidator.target_validator.is_single_column_target():
+        if validator.target_validator.is_single_column_target():
             predicted_indexes = np.argmax(probabilities, axis=1)
         else:
             predicted_indexes = (probabilities > 0.5).astype(int)
 
-        return self.InputValidator.target_validator.inverse_transform(predicted_indexes)
+        return validator.target_validator.inverse_transform(predicted_indexes)
 
     def predict_proba(
         self,

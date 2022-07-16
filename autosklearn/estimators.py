@@ -13,7 +13,6 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.ensemble import VotingClassifier, VotingRegressor
-from sklearn.exceptions import NotFittedError
 from sklearn.model_selection._split import (
     BaseCrossValidator,
     BaseShuffleSplit,
@@ -1522,10 +1521,7 @@ class AutoSklearnClassifier(
         np.ndarray
             Class labels seen during fit
         """
-        if self.automl.InputValidator is None:
-            raise NotFittedError("Please call fit first")
-
-        return self.automl.InputValidator.target_validator.classes_
+        return self.automl.input_validator.classes_
 
     def predict_proba(
         self,
