@@ -26,8 +26,8 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: int | np.random.RandomState | None,
         backend: Backend,
+        random_state: int | np.random.RandomState | None = None,
     ) -> None:
         """A dummy implementation of a multi-objective ensemble.
 
@@ -41,11 +41,11 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         metrics: Sequence[Scorer] | Scorer
             The metrics used to evaluate the models.
 
-        random_state: Optional[int | RandomState] = None
-            Not used.
-
         backend : Backend
             Gives access to the backend of Auto-sklearn. Not used.
+
+        random_state: int | RandomState | None = None
+            Not used.
         """
         self.task_type = task_type
         if isinstance(metrics, Sequence):
@@ -70,10 +70,10 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
     def fit(
         self,
         base_models_predictions: list[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
         model_identifiers: list[tuple[int, int, float]],
         runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> MultiObjectiveDummyEnsemble:
         """Select dummy ensembles given predictions of base models and targets.
 
@@ -87,7 +87,8 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
             Can be a list of 2d numpy arrays as well to prevent copying all
             predictions into a single, large numpy array.
 
-        X_data : list-like or sparse data
+        X_data : list-like | spmatrix | None = None
+            X data to give to the metric if required
 
         true_targets : array of shape [n_targets]
 

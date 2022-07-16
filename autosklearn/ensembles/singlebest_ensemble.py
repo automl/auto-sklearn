@@ -26,7 +26,7 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
     metrics: Sequence[Scorer] | Scorer
         The metrics used to evaluate the models.
 
-    random_state: Optional[int | RandomState] = None
+    random_state: int | RandomState | None = None
         Not used.
 
     backend : Backend
@@ -37,8 +37,8 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: int | np.random.RandomState | None,
         backend: Backend,
+        random_state: int | np.random.RandomState | None = None,
     ):
         self.weights_ = [1.0]
         self.task_type = task_type
@@ -54,33 +54,33 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
     def fit(
         self,
         base_models_predictions: np.ndarray | list[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
         model_identifiers: list[tuple[int, int, float]],
         runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> AbstractSingleModelEnsemble:
         """Fit the ensemble
 
-         Parameters
-         ----------
-         base_models_predictions: np.ndarray
-             shape = (n_base_models, n_data_points, n_targets)
-             n_targets is the number of classes in case of classification,
-             n_targets is 0 or 1 in case of regression
+        Parameters
+        ----------
+        base_models_predictions: np.ndarray
+            shape = (n_base_models, n_data_points, n_targets)
+            n_targets is the number of classes in case of classification,
+            n_targets is 0 or 1 in case of regression
 
-             Can be a list of 2d numpy arrays as well to prevent copying all
-             predictions into a single, large numpy array.
+            Can be a list of 2d numpy arrays as well to prevent copying all
+            predictions into a single, large numpy array.
 
-         X_data : list-like or sparse data
+        X_data : list-like | spamtrix | None = None
 
-         true_targets : array of shape [n_targets]
+        true_targets : array of shape [n_targets]
 
-         model_identifiers : identifier for each base model.
-             Can be used for practical text output of the ensemble.
+        model_identifiers : identifier for each base model.
+            Can be used for practical text output of the ensemble.
 
-         runs: Sequence[Run]
-             Additional information for each run executed by SMAC that was
-             considered by the ensemble builder.
+        runs: Sequence[Run]
+            Additional information for each run executed by SMAC that was
+            considered by the ensemble builder.
 
         Returns
         -------
@@ -185,7 +185,7 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
     metrics: Sequence[Scorer] | Scorer
         The metrics used to evaluate the models.
 
-    random_state: Optional[int | RandomState] = None
+    random_state: int | RandomState | None = None
         Not used.
 
     backend : Backend
@@ -201,9 +201,9 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: int | np.random.RandomState | None,
         backend: Backend,
         model_index: int,
+        random_state: int | np.random.RandomState | None = None,
     ):
         super().__init__(
             task_type=task_type,
@@ -216,10 +216,10 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
     def fit(
         self,
         base_models_predictions: np.ndarray | list[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
         model_identifiers: list[tuple[int, int, float]],
         runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> SingleModelEnsemble:
         """Dummy implementation of the ``fit`` method.
 
@@ -227,30 +227,31 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
         method only stores the identifier of the selected model and computes it's
         validation loss.
 
-         Parameters
-         ----------
-         base_models_predictions: np.ndarray
-             shape = (n_base_models, n_data_points, n_targets)
-             n_targets is the number of classes in case of classification,
-             n_targets is 0 or 1 in case of regression
+        Parameters
+        ----------
+        base_models_predictions: np.ndarray
+            shape = (n_base_models, n_data_points, n_targets)
+            n_targets is the number of classes in case of classification,
+            n_targets is 0 or 1 in case of regression
 
-             Can be a list of 2d numpy arrays as well to prevent copying all
-             predictions into a single, large numpy array.
+            Can be a list of 2d numpy arrays as well to prevent copying all
+            predictions into a single, large numpy array.
 
-         X_data : list-like or sparse data
+        X_data : list-like | spmatrix | None = None
+           X data to feed to a metric if it requires it
 
-         true_targets : array of shape [n_targets]
+        true_targets : array of shape [n_targets]
 
-         model_identifiers : identifier for each base model.
-             Can be used for practical text output of the ensemble.
+        model_identifiers : identifier for each base model.
+            Can be used for practical text output of the ensemble.
 
-         runs: Sequence[Run]
-             Additional information for each run executed by SMAC that was
-             considered by the ensemble builder. Not used.
+        runs: Sequence[Run]
+            Additional information for each run executed by SMAC that was
+            considered by the ensemble builder. Not used.
 
-         Returns
-         -------
-         self
+        Returns
+        -------
+        self
         """
         self.identifiers_ = [model_identifiers[self.indices_[0]]]
         loss = calculate_losses(
@@ -275,7 +276,7 @@ class SingleBest(AbstractSingleModelEnsemble):
     metrics: Sequence[Scorer] | Scorer
         The metrics used to evaluate the models.
 
-    random_state: Optional[int | RandomState] = None
+    random_state: int | RandomState | None = None
         Not used.
 
     backend : Backend
@@ -286,8 +287,8 @@ class SingleBest(AbstractSingleModelEnsemble):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: int | np.random.RandomState | None,
         backend: Backend,
+        random_state: int | np.random.RandomState | None = None,
     ):
         super().__init__(
             task_type=task_type,
@@ -299,10 +300,10 @@ class SingleBest(AbstractSingleModelEnsemble):
     def fit(
         self,
         base_models_predictions: np.ndarray | list[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
         model_identifiers: list[tuple[int, int, float]],
         runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> SingleBest:
         """Select the single best model.
 
@@ -316,7 +317,7 @@ class SingleBest(AbstractSingleModelEnsemble):
             Can be a list of 2d numpy arrays as well to prevent copying all
             predictions into a single, large numpy array.
 
-        X_data : list-like or sparse data
+        X_data : list | spmatrix | None = None
 
         true_targets : array of shape [n_targets]
 
@@ -364,10 +365,10 @@ class SingleBestFromRunhistory(AbstractSingleModelEnsemble):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: int | np.random.RandomState | None,
         backend: Backend,
         run_history: RunHistory,
         seed: int,
+        random_state: int | np.random.RandomState | None = None,
     ):
         super().__init__(
             task_type=task_type,
@@ -376,6 +377,8 @@ class SingleBestFromRunhistory(AbstractSingleModelEnsemble):
             backend=backend,
         )
 
+        # The seed here is seperate from RandomState and is used to indiicate a
+        # directory for the backend to search in
         self.seed = seed
         self.indices_ = [0]
         self.weights_ = [1.0]

@@ -18,8 +18,8 @@ class AbstractEnsemble(ABC):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: int | np.random.RandomState | None,
         backend: Backend,
+        random_state: int | np.random.RandomState | None = None,
     ):
         pass
 
@@ -27,10 +27,10 @@ class AbstractEnsemble(ABC):
     def fit(
         self,
         base_models_predictions: np.ndarray | List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES | None,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
         runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> "AbstractEnsemble":
         """Fit an ensemble given predictions of base models and targets.
 
