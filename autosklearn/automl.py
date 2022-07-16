@@ -1693,13 +1693,12 @@ class AutoML(BaseEstimator):
             raise ValueError("Pareto set only available if ensemble can be loaded.")
 
         if isinstance(self.ensemble_, AbstractMultiObjectiveEnsemble):
-            pareto_set = self.ensemble_.get_pareto_set()
+            pareto_set = self.ensemble_.pareto_set
         else:
             self._logger.warning(
                 "Pareto set not available for single objective ensemble "
                 "method. The Pareto set will only include the single ensemble "
-                "constructed by %s",
-                type(self.ensemble_),
+                f"constructed by {type(self.ensemble_)},"
             )
             pareto_set = [self.ensemble_]
 

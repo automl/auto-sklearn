@@ -140,5 +140,18 @@ class AbstractEnsemble(ABC):
 
 
 class AbstractMultiObjectiveEnsemble(AbstractEnsemble):
-    def get_pareto_set(self) -> Sequence[AbstractEnsemble]:
-        raise NotImplementedError()
+    @property
+    @abstractmethod
+    def pareto_set(self) -> Sequence[AbstractEnsemble]:
+        """Get a sequence on ensembles that are on the pareto front
+
+        Raises
+        ------
+        SklearnNotFittedError
+            If ``fit`` has not been called and the pareto set does not exist yet
+
+        Returns
+        -------
+        Sequence[AbstractEnsemble]
+        """
+        ...
