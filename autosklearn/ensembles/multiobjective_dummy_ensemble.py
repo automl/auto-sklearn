@@ -17,6 +17,7 @@ from autosklearn.ensembles.abstract_ensemble import (
 from autosklearn.ensembles.singlebest_ensemble import SingleModelEnsemble
 from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.util.multiobjective import pareto_front
 
 
 class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
@@ -106,32 +107,6 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         if self.task_type not in TASK_TYPES:
             raise ValueError("Unknown task type %s." % self.task_type)
 
-        def is_pareto_efficient_simple(costs: np.ndarray) -> np.ndarray:
-            """
-            Plot the Pareto Front in our 2d example.
-
-            source from: https://stackoverflow.com/a/40239615
-            Find the pareto-efficient points
-
-            Parameters
-            ----------
-            costs: np.ndarray
-
-            Returns
-            -------
-            np.ndarray
-            """
-
-            is_efficient = np.ones(costs.shape[0], dtype=bool)
-            for i, c in enumerate(costs):
-                if is_efficient[i]:
-                    # Keep any point with a lower cost
-                    is_efficient[is_efficient] = np.any(costs[is_efficient] < c, axis=1)
-
-                    # And keep self
-                    is_efficient[i] = True
-            return is_efficient
-
         all_costs = np.empty((len(base_models_predictions), len(self.metrics)))
         for i, base_model_prediction in enumerate(base_models_predictions):
             losses = calculate_losses(
@@ -142,9 +117,10 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
                 X_data=X_data,
             )
             all_costs[i] = [losses[metric.name] for metric in self.metrics]
+
         all_costs = np.array(all_costs)
         sort_by_first_metric = np.argsort(all_costs[:, 0])
-        efficient_points = is_pareto_efficient_simple(all_costs)
+        efficient_points = pareto_front(all_costs, is_loss=True)
         pareto_set = []
 
         for argsort_idx in sort_by_first_metric:
