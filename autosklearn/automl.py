@@ -578,9 +578,8 @@ class AutoML(ABC, BaseEstimator):
             example by `sklearn.preprocessing.LabelEncoder
             <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
-        dataset_name : Optional[str]
-            Create nicer output. If None, a string will be determined by the
-            md5 hash of the dataset.
+        dataset_name : str | None = None
+            Create nicer output. If None, a pseudo-random hash will be used
 
         only_return_configuration_space: bool = False
             If set to true, fit will only return the configuration space that will
