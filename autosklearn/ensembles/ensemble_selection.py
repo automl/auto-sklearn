@@ -142,18 +142,20 @@ class EnsembleSelection(AbstractEnsemble):
         self,
         predictions: List[np.ndarray],
         labels: np.ndarray,
+        *,
         X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> EnsembleSelection:
         if self.mode == "fast":
-            self._fast(predictions, X_data, labels)
+            self._fast(predictions=predictions, X_data=X_data, labels=labels)
         else:
-            self._slow(predictions, X_data, labels)
+            self._slow(predictions=predictions, X_data=X_data, labels=labels)
         return self
 
     def _fast(
         self,
         predictions: List[np.ndarray],
         labels: np.ndarray,
+        *,
         X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> None:
         """Fast version of Rich Caruana's ensemble selection method."""
@@ -232,6 +234,7 @@ class EnsembleSelection(AbstractEnsemble):
         self,
         predictions: List[np.ndarray],
         labels: np.ndarray,
+        *,
         X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> None:
         """Rich Caruana's ensemble selection method."""
@@ -311,7 +314,7 @@ class EnsembleSelection(AbstractEnsemble):
             # Bagging a set of models
             indices = sorted(random.sample(range(0, n_models), bag_size))
             bag = predictions[indices, :, :]
-            order, _ = self._fit(bag, labels)
+            order, _ = self._fit(predictions=bag, labels=labels)
             order_of_each_bag.append(order)
 
         return np.array(
