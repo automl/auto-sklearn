@@ -81,7 +81,7 @@ def subsample_indices(
     elif subsample > 1:
         raise ValueError("Subsample must not be larger than 1, but is %f" % subsample)
 
-    if subsample is not None and subsample < 1:
+    if subsample is not None and 0 <= subsample < 1:
         # Only subsample if there are more indices given to this method than
         # required to subsample because otherwise scikit-learn will complain
 
