@@ -172,7 +172,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         * At least 1 preprocessor component can be found
         * The inherit from AutoSklearnPreprocessingAlgorithm
         """
-        preprocessors = preprocessing_components._preprocessors
+        preprocessors = preprocessing_components._feature_preprocessors
         self.assertGreaterEqual(len(preprocessors), 1)
         for key in preprocessors:
             if hasattr(preprocessors[key], "get_components"):

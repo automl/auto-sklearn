@@ -179,7 +179,6 @@ class SGD(
             "handles_multilabel": False,
             "handles_multioutput": False,
             "is_deterministic": True,
-            "handles_sparse": True,
             "input": (DENSE, SPARSE, UNSIGNED_DATA),
             "output": (PREDICTIONS,),
         }
