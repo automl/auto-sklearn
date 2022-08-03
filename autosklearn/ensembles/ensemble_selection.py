@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 import random
 import warnings
@@ -91,16 +91,6 @@ class EnsembleSelection(AbstractEnsemble):
         #   None - Uses numpmys global singleton RandomState
         # https://scikit-learn.org/stable/common_pitfalls.html#controlling-randomness
         self.random_state = random_state
-
-    def __getstate__(self) -> Dict[str, Any]:
-        # Cannot serialize a metric if
-        # it is user defined.
-        # That is, if doing pickle dump
-        # the metric won't be the same as the
-        # one in __main__. we don't use the metric
-        # in the EnsembleSelection so this should
-        # be fine
-        return {key: value for key, value in self.__dict__.items() if key != "metrics"}
 
     def fit(
         self,

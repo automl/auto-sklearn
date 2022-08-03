@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Sequence, Tuple, Union
+from typing import Any, Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -22,6 +22,16 @@ class AbstractEnsemble(ABC):
         random_state: int | np.random.RandomState | None = None,
     ):
         pass
+
+    def __getstate__(self) -> Dict[str, Any]:
+        # Cannot serialize a metric if
+        # it is user defined.
+        # That is, if doing pickle dump
+        # the metric won't be the same as the
+        # one in __main__. we don't use the metric
+        # in the EnsembleSelection so this should
+        # be fine
+        return {key: value for key, value in self.__dict__.items() if key != "metrics"}
 
     @abstractmethod
     def fit(

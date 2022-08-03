@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Sequence
 
 import warnings
 
@@ -59,11 +59,10 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
             self.metric = [metrics]
         self.random_state = random_state
         self.backend = backend
-        self.pareto_set_: list[SingleModelEnsemble] | None = None
 
     @property
     def pareto_set(self) -> Sequence[AbstractEnsemble]:
-        if self.pareto_set_ is None:
+        if not hasattr(self, "pareto_set_"):
             raise NotFittedError("`pareto_set` not created, please call `fit()` first")
         return self.pareto_set_
 
@@ -219,13 +218,3 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         float
         """
         return self.pareto_set[0].get_validation_performance()
-
-    def __getstate__(self) -> dict[str, Any]:
-        # Cannot serialize a metric if
-        # it is user defined.
-        # That is, if doing pickle dump
-        # the metric won't be the same as the
-        # one in __main__. we don't use the metric
-        # in the EnsembleSelection so this should
-        # be fine
-        return {key: value for key, value in self.__dict__.items() if key != "metrics"}

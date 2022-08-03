@@ -32,7 +32,7 @@ def pareto_front(values: np.ndarray, *, is_loss: bool = True) -> np.ndarray:
     for i, c in enumerate(values):
         if is_efficient[i]:
             # Keep any point with a lower cost
-            is_efficient[is_efficient] = np.any(op(values, c), axis=1)
+            is_efficient[is_efficient] = np.any(op(values[is_efficient], c), axis=1)
 
             # And keep self
             is_efficient[i] = True
