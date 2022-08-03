@@ -530,11 +530,16 @@ class Kurtosisses(HelperFunction):
         kurts = []
         for i in range(X.shape[1]):
             if numerical[X.columns[i] if hasattr(X, "columns") else i]:
-                kurts.append(
-                    scipy.stats.kurtosis(
-                        X.iloc[:, i] if hasattr(X, "iloc") else X[:, i]
+                if np.isclose(
+                    np.var(X.iloc[:, i] if hasattr(X, "iloc") else X[:, i]), 0
+                ):
+                    kurts.append(0)
+                else:
+                    kurts.append(
+                        scipy.stats.kurtosis(
+                            X.iloc[:, i] if hasattr(X, "iloc") else X[:, i]
+                        )
                     )
-                )
         return kurts
 
     def _calculate_sparse(self, X, y, logger, feat_type):
@@ -548,7 +553,10 @@ class Kurtosisses(HelperFunction):
             if numerical[X.columns[i] if hasattr(X, "columns") else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i + 1]
-                kurts.append(scipy.stats.kurtosis(X_new.data[start:stop]))
+                if np.isclose(np.var(X_new.data[start:stop]), 0):
+                    kurts.append(0)
+                else:
+                    kurts.append(scipy.stats.kurtosis(X_new.data[start:stop]))
         return kurts
 
 
@@ -594,9 +602,16 @@ class Skewnesses(HelperFunction):
         skews = []
         for i in range(X.shape[1]):
             if numerical[X.columns[i] if hasattr(X, "columns") else i]:
-                skews.append(
-                    scipy.stats.skew(X.iloc[:, i] if hasattr(X, "iloc") else X[:, i])
-                )
+                if np.isclose(
+                    np.var(X.iloc[:, i] if hasattr(X, "iloc") else X[:, i]), 0
+                ):
+                    skews.append(0)
+                else:
+                    skews.append(
+                        scipy.stats.skew(
+                            X.iloc[:, i] if hasattr(X, "iloc") else X[:, i]
+                        )
+                    )
         return skews
 
     def _calculate_sparse(self, X, y, logger, feat_type):
@@ -610,7 +625,10 @@ class Skewnesses(HelperFunction):
             if numerical[X.columns[i] if hasattr(X, "columns") else i]:
                 start = X_new.indptr[i]
                 stop = X_new.indptr[i + 1]
-                skews.append(scipy.stats.skew(X_new.data[start:stop]))
+                if np.isclose(np.var(X_new.data[start:stop]), 0):
+                    skews.append(0)
+                else:
+                    skews.append(scipy.stats.skew(X_new.data[start:stop]))
         return skews
 
 

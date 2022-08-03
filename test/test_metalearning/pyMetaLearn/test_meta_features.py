@@ -148,17 +148,7 @@ def meta_train_data_transformed(request):
     if request.param == "numpy":
         return X_transformed, y, feat_type_transformed
     elif request.param == "pandas":
-        dtypes = {}
-        for key, value in feat_type.items():
-            if value == "categorical":
-                dtypes[key] = "category"
-            elif value == "numerical":
-                dtypes[key] = "float64"
-            elif value == "string":
-                dtypes[key] = "string"
-            else:
-                raise KeyError
-        X_transformed = pd.DataFrame(X_transformed).astype(dtypes)
+        X_transformed = pd.DataFrame(X_transformed)
         return X_transformed, y, feat_type_transformed
     else:
         raise ValueError(request.param)
@@ -881,10 +871,10 @@ def test_calculate_all_metafeatures_same_results_across_datatypes():
         "SkewnessMean": 1.47397188548894,
         "SkewnessMax": 29.916569235579203,
         "SkewnessMin": -29.916569235579203,
-        "KurtosisSTD": 153.0563504598898,
-        "KurtosisMean": 56.998860939761165,
+        "KurtosisSTD": 152.95700852863064,
+        "KurtosisMean": 57.258120199020425,
         "KurtosisMax": 893.0011148272025,
-        "KurtosisMin": -3.0,
+        "KurtosisMin": -1.998392219134577,
         "SymbolsSum": 49,
         "SymbolsSTD": 1.3679553264445183,
         "SymbolsMean": 1.8846153846153846,
