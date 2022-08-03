@@ -1,7 +1,10 @@
+from typing import Optional
+
 import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, PREDICTIONS, UNSIGNED_DATA
 from autosklearn.pipeline.implementations.util import softmax
@@ -72,7 +75,9 @@ class QDA(AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         reg_param = UniformFloatHyperparameter("reg_param", 0.0, 1.0, default_value=0.0)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(reg_param)

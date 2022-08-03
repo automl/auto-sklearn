@@ -11,13 +11,17 @@ import unittest
 class NumericalPreprocessingPipelineTest(unittest.TestCase):
     def test_data_type_consistency(self):
         X = np.random.rand(3, 4)
-        Y = NumericalPreprocessingPipeline().fit_transform(X)
+        Y = NumericalPreprocessingPipeline(
+            feat_type={0: "numerical", 1: "numerical", 2: "numerical"}
+        ).fit_transform(X)
         self.assertFalse(sparse.issparse(Y))
 
         X = sparse.csc_matrix(
             ([3.0, 6.0, 4.0, 5.0], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4)
         )
-        Y = NumericalPreprocessingPipeline().fit_transform(X)
+        Y = NumericalPreprocessingPipeline(
+            feat_type={0: "numerical", 1: "numerical", 2: "numerical"}
+        ).fit_transform(X)
         self.assertTrue(sparse.issparse(Y))
 
     def test_fit_transform(self):
@@ -37,12 +41,16 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
             ]
         )  # noqa : matrix legibility
         # dense input
-        Yt = NumericalPreprocessingPipeline().fit_transform(X)
+        Yt = NumericalPreprocessingPipeline(
+            feat_type={0: "numerical", 1: "numerical", 2: "numerical"}
+        ).fit_transform(X)
         np.testing.assert_array_almost_equal(Yt, Y1)
         # sparse input (uses with_mean=False)
         Y2 = np.array([[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]]) / sdev
         X_sparse = sparse.csc_matrix(X)
-        Yt = NumericalPreprocessingPipeline().fit_transform(X_sparse)
+        Yt = NumericalPreprocessingPipeline(
+            feat_type={0: "numerical", 1: "numerical", 2: "numerical"}
+        ).fit_transform(X_sparse)
         np.testing.assert_array_almost_equal(Yt.todense(), Y2)
 
     def test_transform(self):
@@ -51,7 +59,9 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
         )  # noqa : matrix legibility
         sdev = np.sqrt(2 / 3)
         # fit
-        NPP = NumericalPreprocessingPipeline()
+        NPP = NumericalPreprocessingPipeline(
+            feat_type={0: "numerical", 1: "numerical", 2: "numerical"}
+        )
         NPP.fit_transform(X1)
         # transform
         X2 = np.array([[1.0, 5.0, 8.0], [2.0, 6.0, 9.0], [3.0, 7.0, np.nan]])

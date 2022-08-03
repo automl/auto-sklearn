@@ -2251,7 +2251,7 @@ class AutoML(BaseEstimator):
     ) -> Tuple[ConfigurationSpace, str]:
         configspace_path = os.path.join(tmp_dir, "space.json")
         configuration_space = pipeline.get_configuration_space(
-            datamanager.info,
+            datamanager,
             include=include,
             exclude=exclude,
         )

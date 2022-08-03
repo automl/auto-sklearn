@@ -8,6 +8,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from sklearn.base import BaseEstimator
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 
 from ...base import (
@@ -38,6 +39,7 @@ class OHEChoice(AutoSklearnChoice):
 
     def get_hyperparameter_search_space(
         self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         default: Optional[str] = None,
         include: Optional[Dict[str, str]] = None,
@@ -73,7 +75,7 @@ class OHEChoice(AutoSklearnChoice):
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[
                 name
-            ].get_hyperparameter_search_space(dataset_properties)
+            ].get_hyperparameter_search_space(dataset_properties=dataset_properties)
             parent_hyperparameter = {"parent": preprocessor, "value": name}
             cs.add_configuration_space(
                 name,
@@ -86,7 +88,10 @@ class OHEChoice(AutoSklearnChoice):
         return cs
 
     def set_hyperparameters(
-        self, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
+        self,
+        feat_type: FEAT_TYPE_TYPE,
+        configuration: Configuration,
+        init_params: Optional[Dict[str, Any]] = None,
     ) -> "OHEChoice":
         new_params = {}
 

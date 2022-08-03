@@ -8,6 +8,7 @@ from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenAndConjunction, ForbiddenEqualsClause
 from sklearn.base import ClassifierMixin
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing import DataPreprocessorChoice
@@ -71,6 +72,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
     def __init__(
         self,
         config: Optional[Configuration] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         steps=None,
         dataset_properties=None,
         include=None,
@@ -84,6 +86,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         if "target_type" not in dataset_properties:
             dataset_properties["target_type"] = "classification"
         super().__init__(
+            feat_type=feat_type,
             config=config,
             steps=steps,
             dataset_properties=dataset_properties,
@@ -109,7 +112,9 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
             )
             _init_params.update(self.init_params)
             self.set_hyperparameters(
-                configuration=self.config, init_params=_init_params
+                feat_type=self.feat_type,
+                configuration=self.config,
+                init_params=_init_params,
             )
 
             if _fit_params is not None:
@@ -166,12 +171,18 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 return y
 
     def _get_hyperparameter_search_space(
-        self, include=None, exclude=None, dataset_properties=None
+        self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        include=None,
+        exclude=None,
+        dataset_properties=None,
     ):
         """Create the hyperparameter configuration space.
 
         Parameters
         ----------
+        feat_type : dict, maps columns to there datatypes
+
         include : dict (optional, default=None)
 
         Returns
@@ -194,6 +205,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
 
         cs = self._get_base_search_space(
             cs=cs,
+            feat_type=feat_type,
             dataset_properties=dataset_properties,
             exclude=exclude,
             include=include,
@@ -344,7 +356,9 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
         self.dataset_properties = dataset_properties
         return cs
 
-    def _get_pipeline_steps(self, dataset_properties):
+    def _get_pipeline_steps(
+        self, dataset_properties, feat_type: Optional[FEAT_TYPE_TYPE] = None
+    ):
         steps = []
 
         default_dataset_properties = {"target_type": "classification"}
@@ -356,6 +370,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 [
                     "data_preprocessor",
                     DataPreprocessorChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),
@@ -364,6 +379,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 [
                     "feature_preprocessor",
                     FeaturePreprocessorChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),
@@ -371,6 +387,7 @@ class SimpleClassificationPipeline(BasePipeline, ClassifierMixin):
                 [
                     "classifier",
                     ClassifierChoice(
+                        feat_type=feat_type,
                         dataset_properties=default_dataset_properties,
                         random_state=self.random_state,
                     ),

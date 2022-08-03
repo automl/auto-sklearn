@@ -215,7 +215,7 @@ class BalancingComponentTest(unittest.TestCase):
 
                 default._values["balancing:strategy"] = strategy
                 classifier = SimpleClassificationPipeline(
-                    default, random_state=1, include=include
+                    config=default, random_state=1, include=include
                 )
                 Xt, fit_params = classifier.fit_transformer(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)

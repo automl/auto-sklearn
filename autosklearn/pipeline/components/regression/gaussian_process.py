@@ -1,6 +1,9 @@
+from typing import Optional
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, PREDICTIONS, UNSIGNED_DATA
 
@@ -65,7 +68,9 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=1e-14, upper=1.0, default_value=1e-8, log=True
         )

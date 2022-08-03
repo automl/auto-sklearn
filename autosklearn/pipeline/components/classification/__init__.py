@@ -8,6 +8,8 @@ from collections import OrderedDict
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
+
 from ..base import (
     AutoSklearnChoice,
     AutoSklearnClassificationAlgorithm,
@@ -86,7 +88,12 @@ class ClassifierChoice(AutoSklearnChoice):
         return components_dict
 
     def get_hyperparameter_search_space(
-        self, dataset_properties=None, default=None, include=None, exclude=None
+        self,
+        feat_type: FEAT_TYPE_TYPE,
+        dataset_properties=None,
+        default=None,
+        include=None,
+        exclude=None,
     ):
         if dataset_properties is None:
             dataset_properties = {}
@@ -126,7 +133,9 @@ class ClassifierChoice(AutoSklearnChoice):
         for estimator_name in available_estimators.keys():
             estimator_configuration_space = available_estimators[
                 estimator_name
-            ].get_hyperparameter_search_space(dataset_properties)
+            ].get_hyperparameter_search_space(
+                feat_type=feat_type, dataset_properties=dataset_properties
+            )
             parent_hyperparameter = {"parent": estimator, "value": estimator_name}
             cs.add_configuration_space(
                 estimator_name,
