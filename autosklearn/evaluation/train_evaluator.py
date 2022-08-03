@@ -67,7 +67,7 @@ def _get_y_array(y: SUPPORTED_TARGET_TYPES, task_type: int) -> SUPPORTED_TARGET_
         return y
 
 
-T = TypeVar("T", SUPPORTED_FEAT_TYPES | SUPPORTED_TARGET_TYPES)
+T = TypeVar("T", SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES)
 
 
 def select(data: T, indices: np.ndarray) -> T:
