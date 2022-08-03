@@ -719,8 +719,12 @@ class TrainEvaluator(AbstractEvaluator):
                 test_indices=test_split,
                 add_model_to_self=True,
             )
-            train_loss = self._loss(self.Y_actual_train, train_pred)
-            loss = self._loss(self.Y_targets[fold], opt_pred)
+
+            # This is my best guess at what the X_data for these should be
+            X_train = select(self.X_train, train_split)  # From above (only cv?)
+            X_fold = select(self.X_targets, test_split)  # See _partial_fit call above
+            train_loss = self._loss(self.Y_actual_train, train_pred, X_data=X_train)
+            loss = self._loss(self.Y_targets[fold], opt_pred, X_data=X_fold)
 
             if self.model.estimator_supports_iterative_fit():
                 model_max_iter = self.model.get_max_iter()
