@@ -693,7 +693,7 @@ class AutoSklearnEstimator(BaseEstimator):
             #   also be in the automl instance
             # => We can use self.automl_ as ground truth for metric if no metrics passed
             #   and we have one created
-            if metric is None and self.automl_ is not None and self.automl_.metrics:
+            if metric is None and self.automl_ is not None and self.automl_._metrics:
                 metric = self.automl_._metrics
 
             ensemble_class = self._resolve_ensemble_class(metric)

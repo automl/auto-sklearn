@@ -87,9 +87,6 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
             Can be a list of 2d numpy arrays as well to prevent copying all
             predictions into a single, large numpy array.
 
-        X_data : list-like | spmatrix | None = None
-            X data to give to the metric if required
-
         true_targets : array of shape [n_targets]
 
         model_identifiers : identifier for each base model.
@@ -98,6 +95,9 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         runs: Sequence[Run]
             Additional information for each run executed by SMAC that was
             considered by the ensemble builder. Not used.
+
+        X_data : list-like | sparse matrix | None = None
+            X data to give to the metric if required
 
         Returns
         -------

@@ -26,11 +26,11 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
     metrics: Sequence[Scorer] | Scorer
         The metrics used to evaluate the models.
 
-    random_state: int | RandomState | None = None
-        Not used.
-
     backend : Backend
         Gives access to the backend of Auto-sklearn. Not used.
+
+    random_state: int | RandomState | None = None
+        Not used.
     """
 
     def __init__(
@@ -71,8 +71,6 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
             Can be a list of 2d numpy arrays as well to prevent copying all
             predictions into a single, large numpy array.
 
-        X_data : list-like | spamtrix | None = None
-
         true_targets : array of shape [n_targets]
 
         model_identifiers : identifier for each base model.
@@ -81,6 +79,8 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
         runs: Sequence[Run]
             Additional information for each run executed by SMAC that was
             considered by the ensemble builder.
+
+        X_data : list-like | sparse matrix | None = None
 
         Returns
         -------
@@ -185,9 +185,6 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
     metrics: Sequence[Scorer] | Scorer
         The metrics used to evaluate the models.
 
-    random_state: int | RandomState | None = None
-        Not used.
-
     backend : Backend
         Gives access to the backend of Auto-sklearn. Not used.
 
@@ -195,6 +192,9 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
         Index of the model that constitutes the ensemble. This index will
         be used to select the correct predictions that will be passed during
         ``fit`` and ``predict``.
+
+    random_state: int | RandomState | None = None
+        Not used.
     """
 
     def __init__(
@@ -237,9 +237,6 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
             Can be a list of 2d numpy arrays as well to prevent copying all
             predictions into a single, large numpy array.
 
-        X_data : list-like | spmatrix | None = None
-           X data to feed to a metric if it requires it
-
         true_targets : array of shape [n_targets]
 
         model_identifiers : identifier for each base model.
@@ -248,6 +245,9 @@ class SingleModelEnsemble(AbstractSingleModelEnsemble):
         runs: Sequence[Run]
             Additional information for each run executed by SMAC that was
             considered by the ensemble builder. Not used.
+
+        X_data : list-like | spmatrix | None = None
+           X data to feed to a metric if it requires it
 
         Returns
         -------
@@ -317,8 +317,6 @@ class SingleBest(AbstractSingleModelEnsemble):
             Can be a list of 2d numpy arrays as well to prevent copying all
             predictions into a single, large numpy array.
 
-        X_data : list | spmatrix | None = None
-
         true_targets : array of shape [n_targets]
 
         model_identifiers : identifier for each base model.
@@ -327,6 +325,8 @@ class SingleBest(AbstractSingleModelEnsemble):
         runs: Sequence[Run]
             Additional information for each run executed by SMAC that was
             considered by the ensemble builder. Not used.
+
+        X_data : array-like | sparse matrix | None = None
 
         Returns
         -------
