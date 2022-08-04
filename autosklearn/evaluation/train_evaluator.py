@@ -766,6 +766,8 @@ class TrainEvaluator(AbstractEvaluator):
         if model.estimator_supports_iterative_fit():
             X = select(self.X_train, train_indices)
             y = select(self.Y_train, train_indices)
+
+            X_test = select(self.X_train, test_indices)
             y_test = select(self.Y_train, test_indices)
 
             Xt, fit_params = model.fit_transformer(X, y)
@@ -800,7 +802,7 @@ class TrainEvaluator(AbstractEvaluator):
                     self.model = model
 
                 train_loss = self._loss(y, Y_train_pred, X_data=X)
-                loss = self._loss(y_test, Y_optimization_pred, X_data=X)
+                loss = self._loss(y_test, Y_optimization_pred, X_data=X_test)
 
                 additional_run_info = model.get_additional_run_info()
 
