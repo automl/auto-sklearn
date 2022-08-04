@@ -17,6 +17,7 @@ from threadpoolctl import threadpool_limits
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
@@ -45,6 +46,7 @@ class MyDummyClassifier(DummyClassifier):
         self,
         config: Configuration,
         random_state: Optional[Union[int, np.random.RandomState]],
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         init_params: Optional[Dict[str, Any]] = None,
         dataset_properties: Dict[str, Any] = {},
         include: Optional[List[str]] = None,
@@ -61,6 +63,7 @@ class MyDummyClassifier(DummyClassifier):
         self.dataset_properties = dataset_properties
         self.include = include
         self.exclude = exclude
+        self.feat_type = feat_type
 
     def pre_transform(
         self,
@@ -108,6 +111,7 @@ class MyDummyRegressor(DummyRegressor):
         self,
         config: Configuration,
         random_state: Optional[Union[int, np.random.RandomState]],
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         init_params: Optional[Dict[str, Any]] = None,
         dataset_properties: Dict[str, Any] = {},
         include: Optional[List[str]] = None,
@@ -123,6 +127,7 @@ class MyDummyRegressor(DummyRegressor):
         self.dataset_properties = dataset_properties
         self.include = include
         self.exclude = exclude
+        self.feat_type = feat_type
 
     def pre_transform(
         self,
@@ -217,6 +222,7 @@ class AbstractEvaluator(object):
         self.queue = queue
 
         self.datamanager = self.backend.load_datamanager()
+        self.feat_type = self.datamanager.feat_type
         self.include = include
         self.exclude = exclude
 
@@ -294,11 +300,12 @@ class AbstractEvaluator(object):
                     _addons[key].add_component(component)
 
         # Please mypy to prevent not defined attr
-        self.model = self._get_model()
+        self.model = self._get_model(feat_type=self.feat_type)
 
-    def _get_model(self) -> BaseEstimator:
+    def _get_model(self, feat_type: Optional[FEAT_TYPE_TYPE]) -> BaseEstimator:
         if not isinstance(self.configuration, Configuration):
             model = self.model_class(
+                feat_type=feat_type,
                 config=self.configuration,
                 random_state=self.seed,
                 init_params=self._init_params,
@@ -318,6 +325,7 @@ class AbstractEvaluator(object):
                     "multiclass": self.task_type == MULTICLASS_CLASSIFICATION,
                 }
             model = self.model_class(
+                feat_type=feat_type,
                 config=self.configuration,
                 dataset_properties=dataset_properties,
                 random_state=self.seed,

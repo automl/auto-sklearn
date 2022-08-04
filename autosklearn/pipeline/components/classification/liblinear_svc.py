@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenAndConjunction, ForbiddenEqualsClause
 from ConfigSpace.hyperparameters import (
@@ -6,6 +8,7 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, PREDICTIONS, SPARSE, UNSIGNED_DATA
 from autosklearn.pipeline.implementations.util import softmax
@@ -104,7 +107,9 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
 
         penalty = CategoricalHyperparameter("penalty", ["l1", "l2"], default_value="l2")

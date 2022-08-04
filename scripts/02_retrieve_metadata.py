@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from collections import defaultdict
 import csv
 import glob
 import itertools
@@ -10,6 +9,7 @@ import arff
 import numpy as np
 
 from ConfigSpace.configuration_space import Configuration
+from ConfigSpace.util import deactivate_inactive_hyperparameters
 
 from autosklearn.constants import *
 from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
@@ -66,8 +66,18 @@ def retrieve_matadata(
                 n_better += 1
 
                 try:
+                    for hp in configuration_space.get_hyperparameters():
+                        if hp.name not in config:
+                            config[hp.name] = hp.default_value
+
                     best_configuration = Configuration(
-                        configuration_space=configuration_space, values=config
+                        configuration_space=configuration_space,
+                        values=config,
+                        allow_inactive_with_values=True,
+                    )
+                    best_configuration = deactivate_inactive_hyperparameters(
+                        configuration=best_configuration,
+                        configuration_space=configuration_space,
                     )
                     best_value = score
                     best_configuration_dir = validation_trajectory_file
@@ -178,6 +188,11 @@ def write_output(outputs, configurations, output_dir, configuration_space, metri
             fh.write("%s: %s\n" % (key, description[key]))
 
 
+class DummyDatamanager():
+    def __init__(self, info, feat_type=None):
+        self.info = info
+        self.feat_type = feat_type
+
 def main():
     parser = ArgumentParser()
 
@@ -220,7 +235,10 @@ def main():
             )
 
             configuration_space = pipeline.get_configuration_space(
-                {"is_sparse": sparse, "task": task}
+                DummyDatamanager(
+                    info={"is_sparse": sparse, "task": task},
+                    feat_type={"A": "numerical", "B": "categorical"}
+                )
             )
 
             outputs, configurations = retrieve_matadata(

@@ -86,11 +86,22 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 self.assertTrue(np.isfinite(return_value[0]["loss"]))
 
 
+class DummyDatamanager:
+    def __init__(self):
+        self.info = {"task": MULTICLASS_CLASSIFICATION, "is_sparse": False}
+        self.feat_type = {
+            0: "numerical",
+            1: "Numerical",
+            2: "numerical",
+            3: "numerical",
+        }
+
+
 class FunctionsTest(unittest.TestCase):
     def setUp(self):
         self.queue = multiprocessing.Queue()
         self.configuration = get_configuration_space(
-            {"task": MULTICLASS_CLASSIFICATION, "is_sparse": False}
+            DummyDatamanager()
         ).get_default_configuration()
         self.data = get_multiclass_classification_datamanager()
         self.tmp_dir = os.path.join(os.path.dirname(__file__), ".test_cv_functions")

@@ -5,12 +5,15 @@ Extending Auto-Sklearn with Data Preprocessor Component
 
 The following example demonstrates how to turn off data preprocessing step in auto-skearn.
 """
+from typing import Optional
 from pprint import pprint
 
 import autosklearn.classification
 import autosklearn.pipeline.components.data_preprocessing
 import sklearn.metrics
 from ConfigSpace.configuration_space import ConfigurationSpace
+
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
 from sklearn.datasets import load_breast_cancer
@@ -49,7 +52,9 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         return ConfigurationSpace()  # Return an empty configuration as there is None
 
 

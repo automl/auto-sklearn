@@ -1,3 +1,5 @@
+from typing import Optional
+
 from functools import partial
 
 from ConfigSpace import NotEqualsCondition
@@ -7,6 +9,7 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
@@ -84,7 +87,9 @@ class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1
         )

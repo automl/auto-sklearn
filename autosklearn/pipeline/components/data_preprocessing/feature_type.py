@@ -7,6 +7,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from scipy import sparse
 from sklearn.base import BaseEstimator
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
 from autosklearn.pipeline.base import (
     DATASET_PROPERTIES_TYPE,
@@ -46,7 +47,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         exclude: Optional[Dict[str, str]] = None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
         init_params: Optional[Dict[str, Any]] = None,
-        feat_type: Optional[Dict[Union[str, int], str]] = None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         force_sparse_output: bool = False,
         column_transformer: Optional[sklearn.compose.ColumnTransformer] = None,
     ):
@@ -72,6 +73,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.categ_ppl = CategoricalPreprocessingPipeline(
+            feat_type=self.feat_type,
             config=None,
             steps=pipeline,
             dataset_properties=dataset_properties,
@@ -88,6 +90,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.numer_ppl = NumericalPreprocessingPipeline(
+            feat_type=self.feat_type,
             config=None,
             steps=pipeline,
             dataset_properties=dataset_properties,
@@ -105,6 +108,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         # TODO: Extract the child configuration space from the FeatTypeSplit to the
         # pipeline if needed
         self.txt_ppl = TextPreprocessingPipeline(
+            feat_type=self.feat_type,
             config=None,
             steps=pipeline,
             dataset_properties=dataset_properties,
@@ -114,13 +118,28 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
             init_params=init_params,
         )
 
-        self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
-            ("categorical_transformer", self.categ_ppl),
-            ("numerical_transformer", self.numer_ppl),
-            ("text_transformer", self.txt_ppl),
-        ]
+        if self.feat_type is None:
+            self._transformers: List[Tuple[str, AutoSklearnComponent]] = [
+                ("categorical_transformer", self.categ_ppl),
+                ("numerical_transformer", self.numer_ppl),
+                ("text_transformer", self.txt_ppl),
+            ]
+        else:
+            self._transformers: List[Tuple[str, AutoSklearnComponent]] = []
+            if "categorical" in self.feat_type.values():
+                self._transformers.append(("categorical_transformer", self.categ_ppl))
+            if "numerical" in self.feat_type.values():
+                self._transformers.append(("numerical_transformer", self.numer_ppl))
+            if "string" in self.feat_type.values():
+                self._transformers.append(("text_transformer", self.txt_ppl))
+
         if self.config:
-            self.set_hyperparameters(self.config, init_params=init_params)
+            self.set_hyperparameters(
+                feat_type=self.feat_type,
+                configuration=self.config,
+                init_params=init_params,
+            )
+
         self.column_transformer = column_transformer
 
     def fit(
@@ -128,9 +147,6 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
     ) -> "FeatTypeSplit":
 
         n_feats = X.shape[1]
-        categorical_features = []
-        numerical_features = []
-        text_features = []
         if self.feat_type is not None:
             # Make sure that we are not missing any column!
             expected = set(self.feat_type.keys())
@@ -143,31 +159,37 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                     f"Train data has columns={expected} yet the"
                     f" feat_types are feat={columns}"
                 )
+            sklearn_transf_spec = []
+
             categorical_features = [
                 key
                 for key, value in self.feat_type.items()
                 if value.lower() == "categorical"
             ]
+            if len(categorical_features) > 0:
+                sklearn_transf_spec.append(
+                    ("categorical_transformer", self.categ_ppl, categorical_features)
+                )
+
             numerical_features = [
                 key
                 for key, value in self.feat_type.items()
                 if value.lower() == "numerical"
             ]
+            if len(numerical_features) > 0:
+                sklearn_transf_spec.append(
+                    ("numerical_transformer", self.numer_ppl, numerical_features)
+                )
+
             text_features = [
                 key
                 for key, value in self.feat_type.items()
                 if value.lower() == "string"
             ]
-
-            sklearn_transf_spec = [
-                (name, transformer, feature_columns)
-                for name, transformer, feature_columns in [
-                    ("categorical_transformer", self.categ_ppl, categorical_features),
-                    ("numerical_transformer", self.numer_ppl, numerical_features),
-                    ("text_transformer", self.txt_ppl, text_features),
-                ]
-                if len(feature_columns) > 0
-            ]
+            if len(text_features) > 0:
+                sklearn_transf_spec.append(
+                    ("text_transformer", self.txt_ppl, text_features)
+                )
         else:
             # self.feature_type == None assumes numerical case
             sklearn_transf_spec = [
@@ -223,7 +245,10 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         }
 
     def set_hyperparameters(
-        self, configuration: Configuration, init_params: Optional[Dict[str, Any]] = None
+        self,
+        feat_type: FEAT_TYPE_TYPE,
+        configuration: Configuration,
+        init_params: Optional[Dict[str, Any]] = None,
     ) -> "FeatTypeSplit":
         if init_params is not None and "feat_type" in init_params.keys():
             self.feat_type = init_params["feat_type"]
@@ -232,7 +257,7 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
         for transf_name, transf_op in self._transformers:
             sub_configuration_space = transf_op.get_hyperparameter_search_space(
-                dataset_properties=self.dataset_properties
+                dataset_properties=self.dataset_properties, feat_type=feat_type
             )
             sub_config_dict = {}
             for param in configuration:
@@ -258,7 +283,9 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
                 transf_op, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)
             ):
                 transf_op.set_hyperparameters(
-                    configuration=sub_configuration, init_params=sub_init_params_dict
+                    feat_type=feat_type,
+                    configuration=sub_configuration,
+                    init_params=sub_init_params_dict,
                 )
             else:
                 raise NotImplementedError("Not supported yet!")
@@ -267,12 +294,16 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
 
     def get_hyperparameter_search_space(
         self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         self.dataset_properties = dataset_properties
         cs = ConfigurationSpace()
         cs = FeatTypeSplit._get_hyperparameter_search_space_recursevely(
-            dataset_properties, cs, self._transformers
+            feat_type=feat_type,
+            dataset_properties=dataset_properties,
+            cs=cs,
+            transformer=self._transformers,
         )
         return cs
 
@@ -281,12 +312,15 @@ class FeatTypeSplit(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: DATASET_PROPERTIES_TYPE,
         cs: ConfigurationSpace,
         transformer: BaseEstimator,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ) -> ConfigurationSpace:
         for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):
                 cs.add_configuration_space(
                     st_name,
-                    st_operation.get_hyperparameter_search_space(dataset_properties),
+                    st_operation.get_hyperparameter_search_space(
+                        dataset_properties=dataset_properties
+                    ),
                 )
             else:
                 return FeatTypeSplit._get_hyperparameter_search_space_recursevely(

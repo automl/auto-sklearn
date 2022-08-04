@@ -23,8 +23,10 @@ def test_dummy_pipeline(task_type: str) -> None:
         pytest.fail(task_type)
         return
 
-    estimator = estimator_class(config=1, random_state=0)
     X, y = data_maker(random_state=0)
+    estimator = estimator_class(
+        feat_type={i: "numerical" for i in range(X.shape[1])}, config=1, random_state=0
+    )
     estimator.fit(X, y)
     check_is_fitted(estimator)
 

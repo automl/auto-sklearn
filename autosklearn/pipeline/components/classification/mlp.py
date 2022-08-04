@@ -1,3 +1,5 @@
+from typing import Optional
+
 import copy
 
 import numpy as np
@@ -11,6 +13,7 @@ from ConfigSpace.hyperparameters import (
     UnParametrizedHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     IterativeComponent,
@@ -203,7 +206,9 @@ class MLPClassifier(IterativeComponent, AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
         hidden_layer_depth = UniformIntegerHyperparameter(
             name="hidden_layer_depth", lower=1, upper=3, default_value=1

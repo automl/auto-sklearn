@@ -6,6 +6,7 @@ Extending Auto-Sklearn with Regression Component
 The following example demonstrates how to create a new regression
 component for using in auto-sklearn.
 """
+from typing import Optional
 from pprint import pprint
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -17,6 +18,8 @@ from ConfigSpace.hyperparameters import (
 from ConfigSpace.conditions import EqualsCondition
 
 import sklearn.metrics
+
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 import autosklearn.regression
 import autosklearn.pipeline.components.regression
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
@@ -86,7 +89,9 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=10**-5, upper=1, log=True, default_value=1.0

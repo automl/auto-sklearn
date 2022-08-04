@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
@@ -5,6 +7,7 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool
@@ -55,7 +58,9 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         keep_variance = UniformFloatHyperparameter(
             "keep_variance", 0.5, 0.9999, default_value=0.9999
         )

@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 import numpy as np
 import scipy.sparse
@@ -7,6 +7,7 @@ from ConfigSpace import Configuration
 from sklearn.pipeline import Pipeline
 
 import autosklearn.pipeline.create_searchspace_util
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 
 from .components.base import AutoSklearnChoice, AutoSklearnComponent
 
@@ -35,6 +36,7 @@ class BasePipeline(Pipeline):
     def __init__(
         self,
         config=None,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         steps=None,
         dataset_properties=None,
         include=None,
@@ -50,15 +52,18 @@ class BasePipeline(Pipeline):
             dataset_properties if dataset_properties is not None else {}
         )
         self.random_state = random_state
+        self.feat_type = feat_type
 
         if steps is None:
-            self.steps = self._get_pipeline_steps(dataset_properties=dataset_properties)
+            self.steps = self._get_pipeline_steps(
+                feat_type=feat_type, dataset_properties=dataset_properties
+            )
         else:
             self.steps = steps
 
         self._validate_include_exclude_params()
 
-        self.config_space = self.get_hyperparameter_search_space()
+        self.config_space = self.get_hyperparameter_search_space(feat_type=feat_type)
 
         if config is None:
             self.config = self.config_space.get_default_configuration()
@@ -82,7 +87,9 @@ class BasePipeline(Pipeline):
                 )
             self.config = config
 
-        self.set_hyperparameters(self.config, init_params=init_params)
+        self.set_hyperparameters(
+            self.config, feat_type=feat_type, init_params=init_params
+        )
 
         super().__init__(steps=self.steps)
 
@@ -202,14 +209,19 @@ class BasePipeline(Pipeline):
 
                 return y
 
-    def set_hyperparameters(self, configuration, init_params=None):
+    def set_hyperparameters(
+        self,
+        configuration,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params=None,
+    ):
         self.config = configuration
 
         for node_idx, n_ in enumerate(self.steps):
             node_name, node = n_
 
             sub_configuration_space = node.get_hyperparameter_search_space(
-                dataset_properties=self.dataset_properties
+                feat_type=feat_type, dataset_properties=self.dataset_properties
             )
             sub_config_dict = {}
             for param in configuration:
@@ -236,7 +248,9 @@ class BasePipeline(Pipeline):
                 node, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)
             ):
                 node.set_hyperparameters(
-                    configuration=sub_configuration, init_params=sub_init_params_dict
+                    feat_type=feat_type,
+                    configuration=sub_configuration,
+                    init_params=sub_init_params_dict,
                 )
             else:
                 raise NotImplementedError("Not supported yet!")
@@ -247,7 +261,9 @@ class BasePipeline(Pipeline):
 
         return self
 
-    def get_hyperparameter_search_space(self, dataset_properties=None):
+    def get_hyperparameter_search_space(
+        self, feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         """Return the configuration space for the CASH problem.
 
         Returns
@@ -258,6 +274,7 @@ class BasePipeline(Pipeline):
         """
         if not hasattr(self, "config_space") or self.config_space is None:
             self.config_space = self._get_hyperparameter_search_space(
+                feat_type=feat_type,
                 include=self.include,
                 exclude=self.exclude,
                 dataset_properties=self.dataset_properties,
@@ -265,7 +282,11 @@ class BasePipeline(Pipeline):
         return self.config_space
 
     def _get_hyperparameter_search_space(
-        self, include=None, exclude=None, dataset_properties=None
+        self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        include=None,
+        exclude=None,
+        dataset_properties=None,
     ):
         """Return the configuration space for the CASH problem.
 
@@ -278,6 +299,9 @@ class BasePipeline(Pipeline):
 
         Parameters
         ----------
+        feat_type: dict
+            python dictionary which maps the columns of the dataset to the data types
+
         estimator_name : str
             Name of the estimator hyperparameter which will be used in the
             configuration space. For a classification task, this would be
@@ -307,7 +331,13 @@ class BasePipeline(Pipeline):
         raise NotImplementedError()
 
     def _get_base_search_space(
-        self, cs, dataset_properties, exclude, include, pipeline
+        self,
+        cs,
+        dataset_properties,
+        include,
+        exclude,
+        pipeline,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ):
         if include is None:
             if self.include is None:
@@ -343,7 +373,10 @@ class BasePipeline(Pipeline):
             dataset_properties["signed"] = False
 
         matches = autosklearn.pipeline.create_searchspace_util.get_match_array(
-            pipeline, dataset_properties, include=include, exclude=exclude
+            pipeline=pipeline,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
         )
 
         # Now we have only legal combinations at this step of the pipeline
@@ -370,7 +403,9 @@ class BasePipeline(Pipeline):
             if not is_choice:
                 cs.add_configuration_space(
                     node_name,
-                    node.get_hyperparameter_search_space(dataset_properties),
+                    node.get_hyperparameter_search_space(
+                        dataset_properties=dataset_properties, feat_type=feat_type
+                    ),
                 )
             # If the node is a choice, we have to figure out which of its
             #  choices are actually legal choices
@@ -386,7 +421,9 @@ class BasePipeline(Pipeline):
                     )
                 )
                 sub_config_space = node.get_hyperparameter_search_space(
-                    dataset_properties, include=choices_list
+                    feat_type=feat_type,
+                    dataset_properties=dataset_properties,
+                    include=choices_list,
                 )
                 cs.add_configuration_space(node_name, sub_config_space)
 
@@ -505,7 +542,9 @@ class BasePipeline(Pipeline):
 
         return return_value
 
-    def _get_pipeline_steps(self, dataset_properties):
+    def _get_pipeline_steps(
+        self, dataset_properties, feat_type: Optional[FEAT_TYPE_TYPE] = None
+    ):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

@@ -1,10 +1,12 @@
-from typing import Type
+from typing import Optional, Type
 
 import os
 from collections import OrderedDict
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
+
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 
 from ..base import (
     AutoSklearnChoice,
@@ -101,7 +103,12 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
         return components_dict
 
     def get_hyperparameter_search_space(
-        self, dataset_properties=None, default=None, include=None, exclude=None
+        self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        dataset_properties=None,
+        default=None,
+        include=None,
+        exclude=None,
     ):
         cs = ConfigurationSpace()
 
@@ -130,7 +137,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[
                 name
-            ].get_hyperparameter_search_space(dataset_properties)
+            ].get_hyperparameter_search_space(dataset_properties=dataset_properties)
             parent_hyperparameter = {"parent": preprocessor, "value": name}
             cs.add_configuration_space(
                 name,

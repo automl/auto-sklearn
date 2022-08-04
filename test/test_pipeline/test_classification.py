@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 import copy
 import itertools
@@ -20,6 +20,7 @@ from sklearn.utils.validation import check_is_fitted
 
 import autosklearn.pipeline.components.classification as classification_components
 import autosklearn.pipeline.components.feature_preprocessing as preprocessing_components
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.base import (
     AutoSklearnChoice,
@@ -61,7 +62,7 @@ class DummyClassifier(AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(feat_type=None, dataset_properties=None):
         cs = ConfigurationSpace()
         return cs
 
@@ -352,16 +353,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         -------
         * All configurations should fit, predict and predict_proba successfully
         """
-        pipeline = SimpleClassificationPipeline(
-            dataset_properties={"sparse": False},
-            include={
-                "feature_preprocessor": ["no_preprocessing"],
-                "classifier": ["sgd", "adaboost"],
-            },
-        )
-
-        cs = pipeline.get_hyperparameter_search_space()
-
         categorical_columns = [
             True,
             True,
@@ -407,6 +398,17 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             for i, is_categorical in enumerate(categorical_columns)
         }
 
+        pipeline = SimpleClassificationPipeline(
+            feat_type=categorical,
+            dataset_properties={"sparse": False},
+            include={
+                "feature_preprocessor": ["no_preprocessing"],
+                "classifier": ["sgd", "adaboost"],
+            },
+        )
+
+        cs = pipeline.get_hyperparameter_search_space(feat_type=categorical)
+
         here = os.path.dirname(__file__)
         dataset_path = os.path.join(
             here, "components", "data_preprocessing", "dataset.pkl"
@@ -429,7 +431,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         init_params = {"data_preprocessor:feat_type": categorical}
 
         self._test_configurations(
-            configurations_space=cs, dataset=data, init_params=init_params
+            configurations_space=cs,
+            dataset=data,
+            init_params=init_params,
+            feat_type=categorical,
         )
 
     @unittest.mock.patch(
@@ -459,7 +464,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             feat_types = {0: "categorical", 1: "numerical"}
 
             cls = SimpleClassificationPipeline(
-                init_params={"data_preprocessor:feat_type": feat_types}
+                feat_type=feat_types,
+                init_params={"data_preprocessor:feat_type": feat_types},
             )
 
             init_args = ohe_mock.call_args[1]["init_params"]
@@ -468,8 +474,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             # Check through `set_hyperparameters`
             feat_types = {0: "categorical", 1: "categorical", 2: "numerical"}
 
-            default = cls.get_hyperparameter_search_space().get_default_configuration()
+            default = cls.get_hyperparameter_search_space(
+                feat_type=feat_types
+            ).get_default_configuration()
             cls.set_hyperparameters(
+                feat_type=feat_types,
                 configuration=default,
                 init_params={"data_preprocessor:feat_type": feat_types},
             )
@@ -485,6 +494,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         init_params: Dict[str, Any] = None,
         dataset_properties: Dict[str, Any] = None,
         n_samples: int = 10,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
     ):
         """Tests a configuration space by taking multiple samples and fiting each
         before calling predict and predict_proba.
@@ -560,9 +570,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             init_params_ = copy.deepcopy(init_params)
 
             cls = SimpleClassificationPipeline(
-                dataset_properties=dataset_properties, init_params=init_params_
+                feat_type=feat_type,
+                dataset_properties=dataset_properties,
+                init_params=init_params_,
             )
-            cls.set_hyperparameters(config, init_params=init_params_)
+            cls.set_hyperparameters(
+                config, init_params=init_params_, feat_type=feat_type
+            )
 
             # First make sure that for this configuration, setting the parameters
             # does not mistakenly set the estimator as fitted
@@ -659,7 +673,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         * (n_hyperparameters - 4) different conditionals for the pipeline
         * 53 forbidden combinations
         """
-        pipeline = SimpleClassificationPipeline()
+        pipeline = SimpleClassificationPipeline(
+            feat_type={"A": "numerical", "B": "categorical", "C": "string"}
+        )
         cs = pipeline.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
 
@@ -897,7 +913,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             perform near identically
         """
         # Multiclass
-        cls = SimpleClassificationPipeline(include={"classifier": ["sgd"]})
+        cls = SimpleClassificationPipeline(
+            feat_type={i: "numerical" for i in range(0, 64)},
+            include={"classifier": ["sgd"]},
+        )
         X_train, Y_train, X_test, Y_test = get_dataset(dataset="digits")
 
         with ignore_warnings(classifier_warnings):
@@ -951,6 +970,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             perform near identically
         """
         cls = SimpleClassificationPipeline(
+            feat_type={i: "numerical" for i in range(0, 64)},
             dataset_properties={"sparse": True, "multiclass": True},
             include={"classifier": ["sgd"]},
         )
@@ -1313,3 +1333,43 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         del preprocessing_components.additional_components.components[
             "CrashPreprocessor"
         ]
+
+    def test_get_hyperparameter_search_space_feat_type(self):
+        cs_mc = SimpleClassificationPipeline(
+            feat_type={"1": "numerical"}
+        ).get_hyperparameter_search_space(dataset_properties={"multiclass": True})
+        self.assertNotIn("data_preprocessor:feature_type:categorical", str(cs_mc))
+        self.assertNotIn("data_preprocessor:feature_type:text", str(cs_mc))
+
+        cs_mc = SimpleClassificationPipeline(
+            feat_type={"1": "categorical"}
+        ).get_hyperparameter_search_space(dataset_properties={"multilabel": True})
+        self.assertNotIn("data_preprocessor:feature_type:numerical", str(cs_mc))
+        self.assertNotIn("data_preprocessor:feature_type:text", str(cs_mc))
+
+        cs_mc = SimpleClassificationPipeline(
+            feat_type={"1": "string"}
+        ).get_hyperparameter_search_space(dataset_properties={"sparse": True})
+        self.assertNotIn("data_preprocessor:feature_type:numerical", str(cs_mc))
+        self.assertNotIn("data_preprocessor:feature_type:categorical", str(cs_mc))
+
+        cs_mc = SimpleClassificationPipeline(
+            feat_type={"1": "numerical", "2": "categorical"}
+        ).get_hyperparameter_search_space(
+            dataset_properties={"multilabel": True, "multiclass": True}
+        )
+        self.assertNotIn("data_preprocessor:feature_type:text", str(cs_mc))
+
+        cs_mc = SimpleClassificationPipeline(
+            feat_type={"1": "numerical", "2": "string"}
+        ).get_hyperparameter_search_space(
+            dataset_properties={"multilabel": True, "multiclass": True}
+        )
+        self.assertNotIn("data_preprocessor:feature_type:categorical", str(cs_mc))
+
+        cs_mc = SimpleClassificationPipeline(
+            feat_type={"1": "categorical", "2": "string"}
+        ).get_hyperparameter_search_space(
+            dataset_properties={"multilabel": True, "multiclass": True}
+        )
+        self.assertNotIn("data_preprocessor:feature_type:numerical", str(cs_mc))

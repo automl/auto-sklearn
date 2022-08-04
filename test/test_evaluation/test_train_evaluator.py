@@ -2833,11 +2833,22 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(len(test_samples), 3)
 
 
+class DummyDatamanager:
+    def __init__(self):
+        self.info = {"task": MULTICLASS_CLASSIFICATION, "is_sparse": False}
+        self.feat_type = {
+            0: "numerical",
+            1: "Numerical",
+            2: "numerical",
+            3: "numerical",
+        }
+
+
 class FunctionsTest(unittest.TestCase):
     def setUp(self):
         self.queue = multiprocessing.Queue()
         self.configuration = get_configuration_space(
-            {"task": MULTICLASS_CLASSIFICATION, "is_sparse": False}
+            DummyDatamanager()
         ).get_default_configuration()
         self.data = get_multiclass_classification_datamanager()
         self.tmp_dir = os.path.join(
@@ -3096,7 +3107,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_budget_iterations_converged_multi_objective(self):
         configuration = get_configuration_space(
             exclude={"classifier": ["random_forest", "liblinear_svc"]},
-            info={"task": MULTICLASS_CLASSIFICATION, "is_sparse": False},
+            datamanager=DummyDatamanager(),
         ).get_default_configuration()
         eval_holdout(
             queue=self.queue,
@@ -3131,7 +3142,7 @@ class FunctionsTest(unittest.TestCase):
         }
         configuration = get_configuration_space(
             exclude={"classifier": ["random_forest", "liblinear_svc"]},
-            info={"task": MULTICLASS_CLASSIFICATION, "is_sparse": False},
+            datamanager=DummyDatamanager(),
         ).get_default_configuration()
         eval_holdout(
             queue=self.queue,
@@ -3248,7 +3259,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_budget_mixed_subsample(self):
         configuration = get_configuration_space(
             exclude={"classifier": ["random_forest"]},
-            info={"task": MULTICLASS_CLASSIFICATION, "is_sparse": False},
+            datamanager=DummyDatamanager(),
         ).get_default_configuration()
         self.assertEqual(configuration["classifier:__choice__"], "liblinear_svc")
         eval_holdout(
