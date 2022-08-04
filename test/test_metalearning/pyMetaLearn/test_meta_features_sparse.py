@@ -338,38 +338,36 @@ def test_skewnesses(sparse_data_transformed):
     mf = meta_features.helper_functions["Skewnesses"](
         X_transformed, y, logging.getLogger("Meta")
     )
-    print(mf.value)
-    print(fixture)
     np.testing.assert_allclose(mf.value, fixture)
 
 
 def test_kurtosisses(sparse_data_transformed):
     fixture = [
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
-        -3.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
         -1.1005836114255763,
         -1.1786325509475744,
         -1.23879983823279,
@@ -381,7 +379,6 @@ def test_kurtosisses(sparse_data_transformed):
     mf = meta_features.helper_functions["Kurtosisses"](
         X_transformed, y, logging.getLogger("Meta")
     )
-    print(mf.value)
     np.testing.assert_allclose(mf.value, fixture)
 
 

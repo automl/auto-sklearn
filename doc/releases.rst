@@ -657,7 +657,7 @@ Version 0.4.0
   for the ensemble.
 * Adds an operating system check at import and installation time to make sure
   to not accidentaly run on a Windows machine.
-* New examples gallery using sphinx gallery: :ref:`sphx_glr_examples`
+* New examples gallery using sphinx gallery: :ref:`examples`
 * Safeguard Auto-sklearn against deleting directories it did not create (Issue
   `#317 <https://github.com/automl/auto-sklearn/issues/317>`_.
 
