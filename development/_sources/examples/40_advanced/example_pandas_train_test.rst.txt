@@ -164,7 +164,8 @@ Build and fit a classifier
  .. code-block:: none
 
 
-    AutoSklearnClassifier(per_run_time_limit=30, time_left_for_this_task=120)
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          per_run_time_limit=30, time_left_for_this_task=120)
 
 
 
@@ -189,7 +190,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score 0.8608695652173913
+    Accuracy score 0.8695652173913043
 
 
 
@@ -230,7 +231,7 @@ be directly used for plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.395 seconds)
+   **Total running time of the script:** ( 2 minutes  2.492 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:

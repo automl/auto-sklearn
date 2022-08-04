@@ -231,7 +231,8 @@ and can change from use case to use case.</p>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;breast_cancer&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(ensemble_kwargs={&#39;ensemble_size&#39;: 1},
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
+                      ensemble_kwargs={&#39;ensemble_size&#39;: 1},
                       include={&#39;classifier&#39;: [&#39;decision_tree&#39;, &#39;lda&#39;, &#39;sgd&#39;],
                                &#39;feature_preprocessor&#39;: [&#39;no_preprocessing&#39;,
                                                         &#39;polynomial&#39;,
@@ -246,18 +247,19 @@ and can change from use case to use case.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   59: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef161d7a90&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   50: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f43d13a09a0&gt;,
             &#39;cost&#39;: 0.007092198581560294,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1bd335e0&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f43d605eca0&gt;,
             &#39;ensemble_weight&#39;: 1.0,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef161d7b50&gt;,
-            &#39;model_id&#39;: 59,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f43d13a0640&gt;,
+            &#39;model_id&#39;: 50,
             &#39;rank&#39;: 1,
-            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=9.813136926397195e-05, average=True,
-              eta0=0.004487732396108354, learning_rate=&#39;invscaling&#39;, loss=&#39;log&#39;,
-              max_iter=128, power_t=0.1642124368111979, random_state=1,
-              tol=0.00017266832321938255, warm_start=True)}}
+            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=0.004358345940850274, eta0=0.01751991596960003,
+              l1_ratio=0.1331541768044844, learning_rate=&#39;invscaling&#39;,
+              loss=&#39;squared_hinge&#39;, max_iter=16, penalty=&#39;elasticnet&#39;,
+              power_t=0.5143687308012153, random_state=1,
+              tol=0.039297113247238634, warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -267,10 +269,10 @@ and can change from use case to use case.</p>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score:&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.972027972027972
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.958041958041958
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  0.076 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  6.160 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

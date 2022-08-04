@@ -101,7 +101,8 @@ Holdout
  .. code-block:: none
 
 
-    AutoSklearnClassifier(per_run_time_limit=30,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          per_run_time_limit=30,
                           resampling_strategy_arguments={'train_size': 0.67},
                           time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_resampling_example_tmp')
@@ -130,7 +131,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score holdout:  0.9370629370629371
+    Accuracy score holdout:  0.958041958041958
 
 
 
@@ -203,7 +204,7 @@ final ensemble on the whole dataset.
  .. code-block:: none
 
     After re-fit
-    Accuracy score CV 0.965034965034965
+    Accuracy score CV 0.958041958041958
 
 
 
@@ -258,8 +259,8 @@ to the use case at hand.
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.964789
-      Number of target algorithm runs: 28
-      Number of successful target algorithm runs: 27
+      Number of target algorithm runs: 25
+      Number of successful target algorithm runs: 24
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
@@ -288,7 +289,8 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
  .. code-block:: none
 
 
-    AutoSklearnClassifier(per_run_time_limit=30,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          per_run_time_limit=30,
                           resampling_strategy=PredefinedSplit(test_fold=array([0, 0, ..., 1, 1])),
                           time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_resampling_example_tmp')
@@ -327,7 +329,7 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  23.641 seconds)
+   **Total running time of the script:** ( 6 minutes  46.954 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:

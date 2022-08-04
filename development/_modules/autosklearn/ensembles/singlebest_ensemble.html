@@ -113,7 +113,7 @@
   <h1>Source code for autosklearn.ensembles.singlebest_ensemble</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -124,29 +124,36 @@
 <span class="kn">from</span> <span class="nn">autosklearn.data.validation</span> <span class="kn">import</span> <span class="n">SUPPORTED_FEAT_TYPES</span>
 <span class="kn">from</span> <span class="nn">autosklearn.ensemble_building.run</span> <span class="kn">import</span> <span class="n">Run</span>
 <span class="kn">from</span> <span class="nn">autosklearn.ensembles.abstract_ensemble</span> <span class="kn">import</span> <span class="n">AbstractEnsemble</span>
-<span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span>
+<span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">calculate_losses</span>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.base</span> <span class="kn">import</span> <span class="n">BasePipeline</span>
 
 
-<div class="viewcode-block" id="SingleBest"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest">[docs]</a><span class="k">class</span> <span class="nc">SingleBest</span><span class="p">(</span><span class="n">AbstractEnsemble</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    In the case of a crash, this class searches</span>
-<span class="sd">    for the best individual model.</span>
+<span class="k">class</span> <span class="nc">AbstractSingleModelEnsemble</span><span class="p">(</span><span class="n">AbstractEnsemble</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ensemble consisting of a single model.</span>
 
-<span class="sd">    Such model is returned as an ensemble of a single</span>
-<span class="sd">    object, to comply with the expected interface of an</span>
-<span class="sd">    AbstractEnsemble.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    task_type: int</span>
+<span class="sd">        An identifier indicating which task is being performed.</span>
+
+<span class="sd">    metrics: Sequence[Scorer] | Scorer</span>
+<span class="sd">        The metrics used to evaluate the models.</span>
+
+<span class="sd">    backend : Backend</span>
+<span class="sd">        Gives access to the backend of Auto-sklearn. Not used.</span>
+
+<span class="sd">    random_state: int | RandomState | None = None</span>
+<span class="sd">        Not used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="n">Scorer</span><span class="p">,</span>
-        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">:</span> <span class="n">Backend</span><span class="p">,</span>
-        <span class="n">run_history</span><span class="p">:</span> <span class="n">RunHistory</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">task_type</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
@@ -154,26 +161,344 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">metrics</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
 
-        <span class="c1"># Add some default values -- at least 1 model in ensemble is assumed</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_models_predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">true_targets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">model_identifiers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+        <span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Run</span><span class="p">],</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractSingleModelEnsemble</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Fit the ensemble</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        base_models_predictions: np.ndarray</span>
+<span class="sd">            shape = (n_base_models, n_data_points, n_targets)</span>
+<span class="sd">            n_targets is the number of classes in case of classification,</span>
+<span class="sd">            n_targets is 0 or 1 in case of regression</span>
+
+<span class="sd">            Can be a list of 2d numpy arrays as well to prevent copying all</span>
+<span class="sd">            predictions into a single, large numpy array.</span>
+
+<span class="sd">        true_targets : array of shape [n_targets]</span>
+
+<span class="sd">        model_identifiers : identifier for each base model.</span>
+<span class="sd">            Can be used for practical text output of the ensemble.</span>
+
+<span class="sd">        runs: Sequence[Run]</span>
+<span class="sd">            Additional information for each run executed by SMAC that was</span>
+<span class="sd">            considered by the ensemble builder.</span>
+
+<span class="sd">        X_data : list-like | sparse matrix | None = None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Select the predictions of the selected model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        base_models_predictions : np.ndarray</span>
+<span class="sd">            shape = (n_base_models, n_data_points, n_targets)</span>
+<span class="sd">            Same as in the fit method.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">:</span><span class="se">\n\t</span><span class="s2">Members: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Weights: </span><span class="si">%s</span><span class="se">\n\t</span><span class="s2">Identifiers: [</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">,</span>  <span class="c1"># type: ignore [attr-defined]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># type: ignore [attr-defined]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_models_with_weights</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">BasePipeline</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">BasePipeline</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of (weight, model) pairs for the model selected by this ensemble.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        models : dict {identifier : model object}</span>
+<span class="sd">            The identifiers are the same as the one presented to the fit()</span>
+<span class="sd">            method. Models can be used for nice printing.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[tuple[float, BasePipeline]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">models</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">[</span><span class="mi">0</span><span class="p">]])]</span>  <span class="c1"># type: ignore [attr-defined]  # noqa: E501</span>
+
+    <span class="k">def</span> <span class="nf">get_identifiers_with_weights</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return a (identifier, weight)-pairs for the model selected by this ensemble.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        models : dict {identifier : model object}</span>
+<span class="sd">            The identifiers are the same as the one presented to the fit()</span>
+<span class="sd">            method. Models can be used for nice printing.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[tuple[tuple[int, int, float], float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">))</span>  <span class="c1"># type: ignore [attr-defined]  # noqa: E501</span>
+
+    <span class="k">def</span> <span class="nf">get_selected_model_identifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return identifier of models in the ensemble.</span>
+
+<span class="sd">        This includes models which have a weight of zero!</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span>  <span class="c1"># type: ignore [attr-defined]</span>
+
+    <span class="k">def</span> <span class="nf">get_validation_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return validation performance of ensemble.</span>
+
+<span class="sd">        In case of multi-objective problem, only the first metric will be returned.</span>
+
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_model_score_</span>  <span class="c1"># type: ignore [attr-defined]</span>
+
+
+<div class="viewcode-block" id="SingleModelEnsemble"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleModelEnsemble">[docs]</a><span class="k">class</span> <span class="nc">SingleModelEnsemble</span><span class="p">(</span><span class="n">AbstractSingleModelEnsemble</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ensemble consisting of a single model.</span>
+
+<span class="sd">    This class is used by the :class:`MultiObjectiveDummyEnsemble` to represent</span>
+<span class="sd">    ensembles consisting of a single model, and this class should not be used</span>
+<span class="sd">    on its own.</span>
+
+<span class="sd">    Do not use by yourself!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    task_type: int</span>
+<span class="sd">        An identifier indicating which task is being performed.</span>
+
+<span class="sd">    metrics: Sequence[Scorer] | Scorer</span>
+<span class="sd">        The metrics used to evaluate the models.</span>
+
+<span class="sd">    backend : Backend</span>
+<span class="sd">        Gives access to the backend of Auto-sklearn. Not used.</span>
+
+<span class="sd">    model_index : int</span>
+<span class="sd">        Index of the model that constitutes the ensemble. This index will</span>
+<span class="sd">        be used to select the correct predictions that will be passed during</span>
+<span class="sd">        ``fit`` and ``predict``.</span>
+
+<span class="sd">    random_state: int | RandomState | None = None</span>
+<span class="sd">        Not used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="n">Scorer</span><span class="p">,</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">Backend</span><span class="p">,</span>
+        <span class="n">model_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_index</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SingleModelEnsemble.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleModelEnsemble.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_models_predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">true_targets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">model_identifiers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+        <span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Run</span><span class="p">],</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SingleModelEnsemble</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dummy implementation of the ``fit`` method.</span>
+
+<span class="sd">        Actualy work of passing the model index is done in the constructor. This</span>
+<span class="sd">        method only stores the identifier of the selected model and computes it&#39;s</span>
+<span class="sd">        validation loss.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        base_models_predictions: np.ndarray</span>
+<span class="sd">            shape = (n_base_models, n_data_points, n_targets)</span>
+<span class="sd">            n_targets is the number of classes in case of classification,</span>
+<span class="sd">            n_targets is 0 or 1 in case of regression</span>
+
+<span class="sd">            Can be a list of 2d numpy arrays as well to prevent copying all</span>
+<span class="sd">            predictions into a single, large numpy array.</span>
+
+<span class="sd">        true_targets : array of shape [n_targets]</span>
+
+<span class="sd">        model_identifiers : identifier for each base model.</span>
+<span class="sd">            Can be used for practical text output of the ensemble.</span>
+
+<span class="sd">        runs: Sequence[Run]</span>
+<span class="sd">            Additional information for each run executed by SMAC that was</span>
+<span class="sd">            considered by the ensemble builder. Not used.</span>
+
+<span class="sd">        X_data : list-like | spmatrix | None = None</span>
+<span class="sd">           X data to feed to a metric if it requires it</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_identifiers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">calculate_losses</span><span class="p">(</span>
+            <span class="n">solution</span><span class="o">=</span><span class="n">true_targets</span><span class="p">,</span>
+            <span class="n">prediction</span><span class="o">=</span><span class="n">base_models_predictions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="n">task_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+            <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_model_score_</span> <span class="o">=</span> <span class="n">loss</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
+
+
+<div class="viewcode-block" id="SingleBest"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest">[docs]</a><span class="k">class</span> <span class="nc">SingleBest</span><span class="p">(</span><span class="n">AbstractSingleModelEnsemble</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ensemble consisting of the single best model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    task_type: int</span>
+<span class="sd">        An identifier indicating which task is being performed.</span>
+
+<span class="sd">    metrics: Sequence[Scorer] | Scorer</span>
+<span class="sd">        The metrics used to evaluate the models.</span>
+
+<span class="sd">    random_state: int | RandomState | None = None</span>
+<span class="sd">        Not used.</span>
+
+<span class="sd">    backend : Backend</span>
+<span class="sd">        Gives access to the backend of Auto-sklearn. Not used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="n">Scorer</span><span class="p">,</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">Backend</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="SingleBest.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_models_predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">true_targets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">model_identifiers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+        <span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Run</span><span class="p">],</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SingleBest</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Select the single best model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        base_models_predictions: np.ndarray</span>
+<span class="sd">            shape = (n_base_models, n_data_points, n_targets)</span>
+<span class="sd">            n_targets is the number of classes in case of classification,</span>
+<span class="sd">            n_targets is 0 or 1 in case of regression</span>
+
+<span class="sd">            Can be a list of 2d numpy arrays as well to prevent copying all</span>
+<span class="sd">            predictions into a single, large numpy array.</span>
+
+<span class="sd">        true_targets : array of shape [n_targets]</span>
+
+<span class="sd">        model_identifiers : identifier for each base model.</span>
+<span class="sd">            Can be used for practical text output of the ensemble.</span>
+
+<span class="sd">        runs: Sequence[Run]</span>
+<span class="sd">            Additional information for each run executed by SMAC that was</span>
+<span class="sd">            considered by the ensemble builder. Not used.</span>
+
+<span class="sd">        X_data : array-like | sparse matrix | None = None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">         self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">calculate_losses</span><span class="p">(</span>
+                <span class="n">solution</span><span class="o">=</span><span class="n">true_targets</span><span class="p">,</span>
+                <span class="n">prediction</span><span class="o">=</span><span class="n">base_model_prediction</span><span class="p">,</span>
+                <span class="n">task_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
+                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+                <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span>
+            <span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">base_model_prediction</span> <span class="ow">in</span> <span class="n">base_models_predictions</span>
+        <span class="p">]</span>
+        <span class="n">argmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span> <span class="o">=</span> <span class="p">[</span><span class="n">argmin</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_identifiers</span><span class="p">[</span><span class="n">argmin</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_model_score_</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="n">argmin</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
+
+
+<div class="viewcode-block" id="SingleBestFromRunhistory"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBestFromRunhistory">[docs]</a><span class="k">class</span> <span class="nc">SingleBestFromRunhistory</span><span class="p">(</span><span class="n">AbstractSingleModelEnsemble</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In the case of a crash, this class searches</span>
+<span class="sd">    for the best individual model.</span>
+
+<span class="sd">    Such model is returned as an ensemble of a single</span>
+<span class="sd">    object, to comply with the expected interface of an</span>
+<span class="sd">    AbstractEnsemble.</span>
+
+<span class="sd">    Do not use by yourself!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="n">Scorer</span><span class="p">,</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">Backend</span><span class="p">,</span>
+        <span class="n">run_history</span><span class="p">:</span> <span class="n">RunHistory</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># The seed here is seperate from RandomState and is used to indiicate a</span>
+        <span class="c1"># directory for the backend to search in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_history</span> <span class="o">=</span> <span class="n">run_history</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_identifiers_from_run_history</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SingleBest.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">base_models_predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
-        <span class="n">true_targets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">model_identifiers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
-        <span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Run</span><span class="p">],</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AbstractEnsemble&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="SingleBest.get_identifiers_from_run_history"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.get_identifiers_from_run_history">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifiers_from_run_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<div class="viewcode-block" id="SingleBestFromRunhistory.get_identifiers_from_run_history"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBestFromRunhistory.get_identifiers_from_run_history">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifiers_from_run_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Parses the run history, to identify the best performing model</span>
 
 <span class="sd">        Populates the identifiers attribute, which is used by the backend to access</span>
@@ -227,59 +552,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">best_model_score_</span> <span class="o">=</span> <span class="n">best_model_score</span>
 
-        <span class="k">return</span> <span class="n">best_model_identifier</span></div>
-
-<div class="viewcode-block" id="SingleBest.predict"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="s2">&quot;Single Model Selection:</span><span class="se">\n\t</span><span class="s2">Members: </span><span class="si">%s</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Weights: </span><span class="si">%s</span><span class="se">\n\t</span><span class="s2">Identifiers: </span><span class="si">%s</span><span class="s2">&quot;</span>
-            <span class="o">%</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">,</span>
-                <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                    <span class="p">]</span>
-                <span class="p">),</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
-<div class="viewcode-block" id="SingleBest.get_models_with_weights"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.get_models_with_weights">[docs]</a>    <span class="k">def</span> <span class="nf">get_models_with_weights</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">BasePipeline</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">BasePipeline</span><span class="p">]]:</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">weight</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
-                <span class="n">identifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
-                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">weight</span><span class="p">,</span> <span class="n">model</span><span class="p">))</span>
-
-        <span class="n">output</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-        <span class="k">return</span> <span class="n">output</span></div>
-
-<div class="viewcode-block" id="SingleBest.get_identifiers_with_weights"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.get_identifiers_with_weights">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifiers_with_weights</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]:</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="SingleBest.get_selected_model_identifiers"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.get_selected_model_identifiers">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_model_identifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_</span><span class="p">):</span>
-            <span class="n">identifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifiers_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">weight</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
-                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">output</span></div>
-
-<div class="viewcode-block" id="SingleBest.get_validation_performance"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.SingleBest.get_validation_performance">[docs]</a>    <span class="k">def</span> <span class="nf">get_validation_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_model_score_</span></div></div>
+        <span class="k">return</span> <span class="n">best_model_identifier</span></div></div>
 </pre></div>
 
     </div>

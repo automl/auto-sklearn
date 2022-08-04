@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>autosklearn.ensembles.multiobjective_dummy_ensemble &#8212; AutoSklearn 0.14.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.14.6</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../index.html">Start</a></li>
+                <li><a href="../../../releases.html">Releases</a></li>
+                <li><a href="../../../installation.html">Installation</a></li>
+                <li><a href="../../../manual.html">Manual</a></li>
+                <li><a href="../../../examples/index.html">Examples</a></li>
+                <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../extending.html">Extending</a></li>
+                <li><a href="../../../faq.html">FAQ</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <h1>Source code for autosklearn.ensembles.multiobjective_dummy_ensemble</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">NotFittedError</span>
+
+<span class="kn">from</span> <span class="nn">autosklearn.automl_common.common.utils.backend</span> <span class="kn">import</span> <span class="n">Backend</span>
+<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="n">TASK_TYPES</span>
+<span class="kn">from</span> <span class="nn">autosklearn.data.validation</span> <span class="kn">import</span> <span class="n">SUPPORTED_FEAT_TYPES</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensemble_building.run</span> <span class="kn">import</span> <span class="n">Run</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.abstract_ensemble</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AbstractEnsemble</span><span class="p">,</span>
+    <span class="n">AbstractMultiObjectiveEnsemble</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.singlebest_ensemble</span> <span class="kn">import</span> <span class="n">SingleModelEnsemble</span>
+<span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">calculate_losses</span>
+<span class="kn">from</span> <span class="nn">autosklearn.pipeline.base</span> <span class="kn">import</span> <span class="n">BasePipeline</span>
+<span class="kn">from</span> <span class="nn">autosklearn.util.multiobjective</span> <span class="kn">import</span> <span class="n">pareto_front</span>
+
+
+<div class="viewcode-block" id="MultiObjectiveDummyEnsemble"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.MultiObjectiveDummyEnsemble">[docs]</a><span class="k">class</span> <span class="nc">MultiObjectiveDummyEnsemble</span><span class="p">(</span><span class="n">AbstractMultiObjectiveEnsemble</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="n">Scorer</span><span class="p">,</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">Backend</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;A dummy implementation of a multi-objective ensemble.</span>
+
+<span class="sd">        Builds ensembles that are individual models on the Pareto front each.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task_type: int</span>
+<span class="sd">            An identifier indicating which task is being performed.</span>
+
+<span class="sd">        metrics: Sequence[Scorer] | Scorer</span>
+<span class="sd">            The metrics used to evaluate the models.</span>
+
+<span class="sd">        backend : Backend</span>
+<span class="sd">            Gives access to the backend of Auto-sklearn. Not used.</span>
+
+<span class="sd">        random_state: int | RandomState | None = None</span>
+<span class="sd">            Not used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">task_type</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Passed only a single metric to a multi-objective ensemble. &quot;</span>
+                    <span class="s2">&quot;Please use a single-objective ensemble in such cases.&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pareto_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;pareto_set_&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span><span class="s2">&quot;`pareto_set` not created, please call `fit()` first&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pareto_set_</span>
+
+<div class="viewcode-block" id="MultiObjectiveDummyEnsemble.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.MultiObjectiveDummyEnsemble.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_models_predictions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">true_targets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">model_identifiers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+        <span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Run</span><span class="p">],</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiObjectiveDummyEnsemble</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Select dummy ensembles given predictions of base models and targets.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        base_models_predictions: np.ndarray</span>
+<span class="sd">            shape = (n_base_models, n_data_points, n_targets)</span>
+<span class="sd">            n_targets is the number of classes in case of classification,</span>
+<span class="sd">            n_targets is 0 or 1 in case of regression</span>
+
+<span class="sd">            Can be a list of 2d numpy arrays as well to prevent copying all</span>
+<span class="sd">            predictions into a single, large numpy array.</span>
+
+<span class="sd">        true_targets : array of shape [n_targets]</span>
+
+<span class="sd">        model_identifiers : identifier for each base model.</span>
+<span class="sd">            Can be used for practical text output of the ensemble.</span>
+
+<span class="sd">        runs: Sequence[Run]</span>
+<span class="sd">            Additional information for each run executed by SMAC that was</span>
+<span class="sd">            considered by the ensemble builder. Not used.</span>
+
+<span class="sd">        X_data : list-like | sparse matrix | None = None</span>
+<span class="sd">            X data to give to the metric if required</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TASK_TYPES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown task type </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span><span class="p">)</span>
+
+        <span class="n">all_costs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">base_models_predictions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">base_model_prediction</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">base_models_predictions</span><span class="p">):</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="n">calculate_losses</span><span class="p">(</span>
+                <span class="n">solution</span><span class="o">=</span><span class="n">true_targets</span><span class="p">,</span>
+                <span class="n">prediction</span><span class="o">=</span><span class="n">base_model_prediction</span><span class="p">,</span>
+                <span class="n">task_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
+                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+                <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">all_costs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">losses</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">]</span>
+
+        <span class="n">all_costs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_costs</span><span class="p">)</span>
+        <span class="n">sort_by_first_metric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">all_costs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">efficient_points</span> <span class="o">=</span> <span class="n">pareto_front</span><span class="p">(</span><span class="n">all_costs</span><span class="p">,</span> <span class="n">is_loss</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">pareto_set</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">argsort_idx</span> <span class="ow">in</span> <span class="n">sort_by_first_metric</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">efficient_points</span><span class="p">[</span><span class="n">argsort_idx</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="n">ensemble</span> <span class="o">=</span> <span class="n">SingleModelEnsemble</span><span class="p">(</span>
+                <span class="n">task_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
+                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                <span class="n">backend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">,</span>
+                <span class="n">model_index</span><span class="o">=</span><span class="n">argsort_idx</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ensemble</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">base_models_predictions</span><span class="o">=</span><span class="n">base_models_predictions</span><span class="p">,</span>
+                <span class="n">true_targets</span><span class="o">=</span><span class="n">true_targets</span><span class="p">,</span>
+                <span class="n">model_identifiers</span><span class="o">=</span><span class="n">model_identifiers</span><span class="p">,</span>
+                <span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">,</span>
+                <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">pareto_set</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pareto_set_</span> <span class="o">=</span> <span class="n">pareto_set</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="MultiObjectiveDummyEnsemble.predict"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.MultiObjectiveDummyEnsemble.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">base_models_predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Predict using the ensemble which is best for the 1st metric.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        base_models_predictions : np.ndarray</span>
+<span class="sd">            shape = (n_base_models, n_data_points, n_targets)</span>
+<span class="sd">            Same as in the fit method.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pareto_set</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">base_models_predictions</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;MultiObjectiveDummyEnsemble: </span><span class="si">%d</span><span class="s2"> models&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pareto_set</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultiObjectiveDummyEnsemble.get_models_with_weights"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.MultiObjectiveDummyEnsemble.get_models_with_weights">[docs]</a>    <span class="k">def</span> <span class="nf">get_models_with_weights</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">BasePipeline</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">BasePipeline</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of (weight, model) pairs for the ensemble that is</span>
+<span class="sd">        best for the 1st metric.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        models : dict {identifier : model object}</span>
+<span class="sd">            The identifiers are the same as the one presented to the fit()</span>
+<span class="sd">            method. Models can be used for nice printing.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[tuple[float, BasePipeline]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pareto_set</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_models_with_weights</span><span class="p">(</span><span class="n">models</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiObjectiveDummyEnsemble.get_identifiers_with_weights"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.MultiObjectiveDummyEnsemble.get_identifiers_with_weights">[docs]</a>    <span class="k">def</span> <span class="nf">get_identifiers_with_weights</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return a (identifier, weight)-pairs for all models that were passed to the</span>
+<span class="sd">        ensemble builder based on the ensemble that is best for the 1st metric.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        models : dict {identifier : model object}</span>
+<span class="sd">            The identifiers are the same as the one presented to the fit()</span>
+<span class="sd">            method. Models can be used for nice printing.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[tuple[tuple[int, int, float], float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pareto_set</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_identifiers_with_weights</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MultiObjectiveDummyEnsemble.get_selected_model_identifiers"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.MultiObjectiveDummyEnsemble.get_selected_model_identifiers">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_model_identifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return identifiers of models in the ensemble that is best for the 1st metric.</span>
+
+<span class="sd">        This includes models which have a weight of zero!</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pareto_set</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_selected_model_identifiers</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MultiObjectiveDummyEnsemble.get_validation_performance"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.MultiObjectiveDummyEnsemble.get_validation_performance">[docs]</a>    <span class="k">def</span> <span class="nf">get_validation_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return validation performance of the ensemble that is best for the 1st metric.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pareto_set</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_validation_performance</span><span class="p">()</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2022, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

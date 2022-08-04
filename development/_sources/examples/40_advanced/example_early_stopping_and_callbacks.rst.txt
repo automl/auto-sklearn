@@ -134,9 +134,10 @@ Build and fit a classifier
       'feature_preprocessor:polynomial:interaction_only': 'False',
     })
     , instance='{"task_id": "breast_cancer"}', instance_specific='0', seed=0, cutoff=30.0, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.014184397163120588, time=1.5850260257720947, status=<StatusType.SUCCESS: 1>, starttime=1659604346.4614913, endtime=1659604348.0678127, additional_info={'duration': 1.4923174381256104, 'num_run': 7, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.014184397163120588, time=2.003490924835205, status=<StatusType.SUCCESS: 1>, starttime=1659606481.147033, endtime=1659606483.1746552, additional_info={'duration': 1.8940749168395996, 'num_run': 7, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
 
-    AutoSklearnClassifier(get_trials_callback=<function callback at 0x7fef2f2f1700>,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          get_trials_callback=<function callback at 0x7f43d0da1dc0>,
                           per_run_time_limit=30, time_left_for_this_task=120)
 
 
@@ -163,9 +164,9 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    7            1             0.68    extra_trees  0.014184  1.585026
-    2            2             0.10  random_forest  0.028369  1.702847
-    3            3             0.22            mlp  0.028369  0.972648
+    7            1             0.68    extra_trees  0.014184  2.003491
+    2            2             0.10  random_forest  0.028369  2.216568
+    3            3             0.22            mlp  0.028369  1.322828
 
 
 
@@ -191,21 +192,21 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef15cbafd0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f43ceab8d90>,
                'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1b8577f0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f43d6178fd0>,
                'ensemble_weight': 0.1,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef1bd5fb20>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f43d61d5d30>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         3: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef17212040>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f43d3df1910>,
                'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1be293a0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f43d606b640>,
                'ensemble_weight': 0.22,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef1c1d2d60>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f43d3df1460>,
                'model_id': 3,
                'rank': 2,
                'sklearn_classifier': MLPClassifier(activation='tanh', alpha=0.0001363185819149026, beta_1=0.999,
@@ -214,11 +215,11 @@ Print the final ensemble constructed by auto-sklearn
                   learning_rate_init=0.00018009776276177523, max_iter=32,
                   n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
         7: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef17b880a0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f43d5e55130>,
                'cost': 0.014184397163120588,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef172f76a0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f43d623a1c0>,
                'ensemble_weight': 0.68,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef17b88b80>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f43d5e55910>,
                'model_id': 7,
                'rank': 3,
                'sklearn_classifier': ExtraTreesClassifier(max_features=34, min_samples_leaf=3, min_samples_split=11,
@@ -256,7 +257,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.377 seconds)
+   **Total running time of the script:** ( 0 minutes  19.819 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_early_stopping_and_callbacks.py:

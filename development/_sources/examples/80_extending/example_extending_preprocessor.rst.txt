@@ -221,7 +221,8 @@ Fit the model using LDA as preprocessor
  .. code-block:: none
 
 
-    AutoSklearnClassifier(include={'feature_preprocessor': ['LDA']},
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          include={'feature_preprocessor': ['LDA']},
                           initial_configurations_via_metalearning=0,
                           per_run_time_limit=3,
                           smac_scenario_args={'runcount_limit': 5},
@@ -250,13 +251,13 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.9440559440559441
+    accuracy:  0.9230769230769231
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef1658df40>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f43cb2d1c40>,
                'cost': 0.049645390070921946,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1b90d790>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f43d3c718e0>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef19ab1940>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f43d1a9e4c0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=1, n_estimators=512, n_jobs=1,
@@ -268,7 +269,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.917 seconds)
+   **Total running time of the script:** ( 0 minutes  32.345 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:

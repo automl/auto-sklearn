@@ -119,7 +119,8 @@ Building the classifier
  .. code-block:: none
 
 
-    AutoSklearnClassifier(initial_configurations_via_metalearning=0,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          initial_configurations_via_metalearning=0,
                           per_run_time_limit=30,
                           smac_scenario_args={'runcount_limit': 1},
                           time_left_for_this_task=60)
@@ -149,7 +150,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1              1.0  random_forest  0.447294  3.290227
+    2            1              1.0  random_forest  0.447294  4.188492
 
 
 
@@ -175,11 +176,11 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef199b9b20>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f43d0ce7670>,
                'cost': 0.4472941828699525,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1658d250>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f43d3e275b0>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef199b9c10>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f43d5fe4880>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=15, n_estimators=512, n_jobs=1,
@@ -252,7 +253,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.931 seconds)
+   **Total running time of the script:** ( 0 minutes  24.921 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:

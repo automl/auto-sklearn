@@ -149,6 +149,9 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">autosklearn.ensembles.abstract_ensemble</span> <span class="kn">import</span> <span class="n">AbstractEnsemble</span>
 <span class="kn">from</span> <span class="nn">autosklearn.ensembles.ensemble_selection</span> <span class="kn">import</span> <span class="n">EnsembleSelection</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.multiobjective_dummy_ensemble</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MultiObjectiveDummyEnsemble</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.base</span> <span class="kn">import</span> <span class="n">BasePipeline</span>
 <span class="kn">from</span> <span class="nn">autosklearn.util.smac_wrap</span> <span class="kn">import</span> <span class="n">SMACCallback</span>
@@ -161,7 +164,7 @@
         <span class="n">per_run_time_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">EnsembleSelection</span><span class="p">,</span>
+        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
         <span class="n">ensemble_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
@@ -217,11 +220,15 @@
 <span class="sd">            this argument via ``ensemble_kwargs={&quot;ensemble_size&quot;: int}``</span>
 <span class="sd">            if you want to change the ensemble size for ensemble selection.</span>
 
-<span class="sd">        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)</span>
+<span class="sd">        ensemble_class : Type[AbstractEnsemble] | &quot;default&quot;, optional (default=&quot;default&quot;)</span>
 <span class="sd">            Class implementing the post-hoc ensemble algorithm. Set to</span>
-<span class="sd">            ``None`` to disable ensemble building or use ``SingleBest``</span>
+<span class="sd">            ``None`` to disable ensemble building or use :class:`SingleBest`</span>
 <span class="sd">            to obtain only use the single best model instead of an</span>
 <span class="sd">            ensemble.</span>
+
+<span class="sd">            If set to &quot;default&quot; it will use :class:`EnsembleSelection` for</span>
+<span class="sd">            single-objective problems and :class:`MultiObjectiveDummyEnsemble`</span>
+<span class="sd">            for multi-objective problems.</span>
 
 <span class="sd">        ensemble_kwargs : Dict, optional</span>
 <span class="sd">            Keyword arguments that are passed to the ensemble class upon</span>
@@ -509,6 +516,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_configurations_via_metalearning</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">initial_configurations_via_metalearning</span>
         <span class="p">)</span>
+
+        <span class="c1"># Need to resolve the ensemble class here so we can act on it below.</span>
+        <span class="k">if</span> <span class="n">ensemble_class</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+            <span class="n">ensemble_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_ensemble_class</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_class</span> <span class="o">=</span> <span class="n">ensemble_class</span>
 
         <span class="c1"># User specified `ensemble_size` explicitly, warn them about deprecation</span>
@@ -723,8 +735,8 @@
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ensemble_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]</span> <span class="o">=</span> <span class="n">EnsembleSelection</span><span class="p">,</span>
-        <span class="n">metrics</span><span class="p">:</span> <span class="n">Scorer</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fit an ensemble to models trained during an optimization process.</span>
 
@@ -768,19 +780,39 @@
 <span class="sd">            is independent of the ``ensemble_class`` argument and this</span>
 <span class="sd">            pruning step is done prior to constructing an ensemble.</span>
 
-<span class="sd">        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)</span>
+<span class="sd">        ensemble_class : Type[AbstractEnsemble] | &quot;default&quot;, optional (default=&quot;default&quot;)</span>
 <span class="sd">            Class implementing the post-hoc ensemble algorithm. Set to</span>
-<span class="sd">            ``None`` to disable ensemble building or use ``SingleBest``</span>
+<span class="sd">            ``None`` to disable ensemble building or use class:`SingleBest`</span>
 <span class="sd">            to obtain only use the single best model instead of an</span>
 <span class="sd">            ensemble.</span>
 
-<span class="sd">        metrics: Scorer | Sequence[Scorer] | None = None</span>
+<span class="sd">            If set to &quot;default&quot; it will use :class:`EnsembleSelection` for</span>
+<span class="sd">            single-objective problems and :class:`MultiObjectiveDummyEnsemble`</span>
+<span class="sd">            for multi-objective problems.</span>
+
+<span class="sd">        metric: Scorer | Sequence[Scorer] | None = None</span>
 <span class="sd">            A metric or list of metrics to score the ensemble with</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        self</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+
+        <span class="k">if</span> <span class="n">ensemble_class</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+            <span class="c1"># Things are actually a little more nuanced here:</span>
+            <span class="c1"># * If they passed `metric=None` at init, we would infer this in automl</span>
+            <span class="c1">#   during `fit` and store it in the automl instance.</span>
+            <span class="c1"># * If they passed a `metric` in init and left it `None` here, this would</span>
+            <span class="c1">#   also be in the automl instance</span>
+            <span class="c1"># =&gt; We can use self.automl_ as ground truth for metric if no metrics passed</span>
+            <span class="c1">#   and we have one created</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metrics</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">_metrics</span>
+
+            <span class="n">ensemble_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_ensemble_class</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_class</span> <span class="o">=</span> <span class="n">ensemble_class</span>
+
         <span class="c1"># User specified `ensemble_size` explicitly, warn them about deprecation</span>
         <span class="k">if</span> <span class="n">ensemble_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Keep consistent behaviour</span>
@@ -833,9 +865,19 @@
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="n">ensemble_nbest</span><span class="p">,</span>
             <span class="n">ensemble_class</span><span class="o">=</span><span class="n">ensemble_class</span><span class="p">,</span>
             <span class="n">ensemble_kwargs</span><span class="o">=</span><span class="n">ensemble_kwargs</span><span class="p">,</span>
-            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_resolve_ensemble_class</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">metric</span><span class="p">:</span> <span class="n">Scorer</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">AbstractEnsemble</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">EnsembleSelection</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">Scorer</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">else</span> <span class="n">MultiObjectiveDummyEnsemble</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">refit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Refit all models found with fit to new data.</span>

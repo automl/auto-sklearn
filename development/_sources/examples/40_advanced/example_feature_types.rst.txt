@@ -121,7 +121,8 @@ Build and fit a classifier
  .. code-block:: none
 
 
-    AutoSklearnClassifier(initial_configurations_via_metalearning=0,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          initial_configurations_via_metalearning=0,
                           per_run_time_limit=3,
                           smac_scenario_args={'runcount_limit': 1},
                           time_left_for_this_task=30)
@@ -156,7 +157,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.049 seconds)
+   **Total running time of the script:** ( 0 minutes  21.533 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_feature_types.py:

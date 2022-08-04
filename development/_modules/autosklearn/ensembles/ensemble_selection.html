@@ -113,7 +113,7 @@
   <h1>Source code for autosklearn.ensembles.ensemble_selection</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -136,11 +136,11 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">task_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">metrics</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">|</span> <span class="n">Scorer</span><span class="p">,</span>
-        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">]],</span>
         <span class="n">backend</span><span class="p">:</span> <span class="n">Backend</span><span class="p">,</span>
         <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">bagging</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fast&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;An ensemble of selected algorithms</span>
 
@@ -156,14 +156,6 @@
 <span class="sd">            The metric used to evaluate the models. If multiple metrics are passed,</span>
 <span class="sd">            ensemble selection only optimizes for the first</span>
 
-<span class="sd">        random_state: Optional[int | RandomState] = None</span>
-<span class="sd">            The random_state used for ensemble selection.</span>
-
-<span class="sd">            * None - Uses numpy&#39;s default RandomState object</span>
-<span class="sd">            * int - Successive calls to fit will produce the same results</span>
-<span class="sd">            * RandomState - Truly random, each call to fit will produce</span>
-<span class="sd">              different results, even with the same object.</span>
-
 <span class="sd">        backend : Backend</span>
 <span class="sd">            Gives access to the backend of Auto-sklearn. Not used by Ensemble Selection.</span>
 
@@ -174,6 +166,14 @@
 <span class="sd">            Which kind of ensemble generation to use</span>
 <span class="sd">            * &#39;slow&#39; - The original method used in Rich Caruana&#39;s ensemble selection.</span>
 <span class="sd">            * &#39;fast&#39; - A faster version of Rich Caruanas&#39; ensemble selection.</span>
+
+<span class="sd">        random_state: int | RandomState | None = None</span>
+<span class="sd">            The random_state used for ensemble selection.</span>
+
+<span class="sd">            * None - Uses numpy&#39;s default RandomState object</span>
+<span class="sd">            * int - Successive calls to fit will produce the same results</span>
+<span class="sd">            * RandomState - Truly random, each call to fit will produce</span>
+<span class="sd">              different results, even with the same object.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
@@ -205,23 +205,13 @@
         <span class="c1"># https://scikit-learn.org/stable/common_pitfalls.html#controlling-randomness</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
 
-    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-        <span class="c1"># Cannot serialize a metric if</span>
-        <span class="c1"># it is user defined.</span>
-        <span class="c1"># That is, if doing pickle dump</span>
-        <span class="c1"># the metric won&#39;t be the same as the</span>
-        <span class="c1"># one in __main__. we don&#39;t use the metric</span>
-        <span class="c1"># in the EnsembleSelection so this should</span>
-        <span class="c1"># be fine</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;metrics&quot;</span><span class="p">}</span>
-
 <div class="viewcode-block" id="EnsembleSelection.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.ensembles.EnsembleSelection.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">base_models_predictions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
         <span class="n">true_targets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">model_identifiers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
         <span class="n">runs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Run</span><span class="p">],</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnsembleSelection</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -254,20 +244,22 @@
     <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">predictions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
         <span class="n">labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnsembleSelection</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;fast&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fast</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">X_data</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fast</span><span class="p">(</span><span class="n">predictions</span><span class="o">=</span><span class="n">predictions</span><span class="p">,</span> <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_slow</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">X_data</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_slow</span><span class="p">(</span><span class="n">predictions</span><span class="o">=</span><span class="n">predictions</span><span class="p">,</span> <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">_fast</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">predictions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
         <span class="n">labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Fast version of Rich Caruana&#39;s ensemble selection method.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_input_models_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
@@ -344,8 +336,9 @@
     <span class="k">def</span> <span class="nf">_slow</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">predictions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span><span class="p">,</span>
         <span class="n">labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">X_data</span><span class="p">:</span> <span class="n">SUPPORTED_FEAT_TYPES</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Rich Caruana&#39;s ensemble selection method.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_input_models_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
@@ -424,7 +417,7 @@
             <span class="c1"># Bagging a set of models</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_models</span><span class="p">),</span> <span class="n">bag_size</span><span class="p">))</span>
             <span class="n">bag</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="n">indices</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
-            <span class="n">order</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">bag</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="n">order</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">predictions</span><span class="o">=</span><span class="n">bag</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
             <span class="n">order_of_each_bag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>

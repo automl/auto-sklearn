@@ -161,6 +161,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">X_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_XDATA_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -175,6 +176,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">X_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_XDATA_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -242,6 +244,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">X_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_XDATA_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -302,6 +305,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">X_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SUPPORTED_XDATA_TYPES</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -621,11 +625,11 @@
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_single_scorer</span><span class="p">(</span>
-                    <span class="n">metric_</span><span class="p">,</span>
-                    <span class="n">prediction</span><span class="p">,</span>
-                    <span class="n">solution</span><span class="p">,</span>
-                    <span class="n">task_type</span><span class="p">,</span>
-                    <span class="n">X_data</span><span class="p">,</span>
+                    <span class="n">metric</span><span class="o">=</span><span class="n">metric_</span><span class="p">,</span>
+                    <span class="n">prediction</span><span class="o">=</span><span class="n">prediction</span><span class="p">,</span>
+                    <span class="n">solution</span><span class="o">=</span><span class="n">solution</span><span class="p">,</span>
+                    <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span>
+                    <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -645,11 +649,11 @@
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">score_dict</span><span class="p">[</span><span class="n">metric_</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_compute_single_scorer</span><span class="p">(</span>
-                    <span class="n">metric_</span><span class="p">,</span>
-                    <span class="n">prediction</span><span class="p">,</span>
-                    <span class="n">solution</span><span class="p">,</span>
-                    <span class="n">task_type</span><span class="p">,</span>
-                    <span class="n">X_data</span><span class="p">,</span>
+                    <span class="n">metric</span><span class="o">=</span><span class="n">metric_</span><span class="p">,</span>
+                    <span class="n">prediction</span><span class="o">=</span><span class="n">prediction</span><span class="p">,</span>
+                    <span class="n">solution</span><span class="o">=</span><span class="n">solution</span><span class="p">,</span>
+                    <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span>
+                    <span class="n">X_data</span><span class="o">=</span><span class="n">X_data</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;multiclass format is not supported&quot;</span><span class="p">:</span>

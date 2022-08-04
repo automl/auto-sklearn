@@ -211,7 +211,8 @@ Fit Random forest classifier to the data
  .. code-block:: none
 
 
-    AutoSklearnClassifier(exclude={'classifier': ['random_forest']},
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          exclude={'classifier': ['random_forest']},
                           initial_configurations_via_metalearning=0,
                           per_run_time_limit=10,
                           smac_scenario_args={'runcount_limit': 1},
@@ -658,7 +659,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.252 seconds)
+   **Total running time of the script:** ( 0 minutes  6.949 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:
