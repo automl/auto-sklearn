@@ -15,7 +15,7 @@ repos:
         files: test/.*
 
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 22.6.0
     hooks:
       - id: black
         name: black formatter autosklearn
@@ -39,14 +39,14 @@ repos:
         additional_dependencies: ["toml"] # Needed to parse pyproject.toml
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.942
+    rev: v0.971
     hooks:
       - id: mypy
         name: mypy auto-sklearn
         files: autosklearn/.*
 
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 4.0.1
+    rev: 3.9.2
     hooks:
       - id: flake8
         name: flake8 autosklearn
