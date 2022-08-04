@@ -193,7 +193,7 @@ if __name__ == "__main__":
         delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=10,
-        memory_limit=1024,
+        memory_limit=2048,
         tmp_folder=tmp_folder,
         seed=777,
         # n_jobs is ignored internally as we pass a dask client.

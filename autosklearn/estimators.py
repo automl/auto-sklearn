@@ -36,6 +36,9 @@ from autosklearn.data.validation import (
 )
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
+from autosklearn.ensembles.multiobjective_dummy_ensemble import (
+    MultiObjectiveDummyEnsemble,
+)
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.util.smac_wrap import SMACCallback
@@ -48,7 +51,7 @@ class AutoSklearnEstimator(BaseEstimator):
         per_run_time_limit=None,
         initial_configurations_via_metalearning=25,
         ensemble_size: int | None = None,
-        ensemble_class: Type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_class: Type[AbstractEnsemble] | Literal["default"] | None = "default",
         ensemble_kwargs: Dict[str, Any] | None = None,
         ensemble_nbest=50,
         max_models_on_disc=50,
@@ -104,11 +107,15 @@ class AutoSklearnEstimator(BaseEstimator):
             this argument via ``ensemble_kwargs={"ensemble_size": int}``
             if you want to change the ensemble size for ensemble selection.
 
-        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
+        ensemble_class : Type[AbstractEnsemble] | "default", optional (default="default")
             Class implementing the post-hoc ensemble algorithm. Set to
-            ``None`` to disable ensemble building or use ``SingleBest``
+            ``None`` to disable ensemble building or use :class:`SingleBest`
             to obtain only use the single best model instead of an
             ensemble.
+
+            If set to "default" it will use :class:`EnsembleSelection` for
+            single-objective problems and :class:`MultiObjectiveDummyEnsemble`
+            for multi-objective problems.
 
         ensemble_kwargs : Dict, optional
             Keyword arguments that are passed to the ensemble class upon
@@ -396,6 +403,11 @@ class AutoSklearnEstimator(BaseEstimator):
         self.initial_configurations_via_metalearning = (
             initial_configurations_via_metalearning
         )
+
+        # Need to resolve the ensemble class here so we can act on it below.
+        if ensemble_class == "default":
+            ensemble_class = self._resolve_ensemble_class(metric)
+
         self.ensemble_class = ensemble_class
 
         # User specified `ensemble_size` explicitly, warn them about deprecation
@@ -610,8 +622,8 @@ class AutoSklearnEstimator(BaseEstimator):
         ensemble_size: int | None = None,
         ensemble_kwargs: Optional[Dict[str, Any]] = None,
         ensemble_nbest: Optional[int] = None,
-        ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
-        metrics: Scorer | Sequence[Scorer] | None = None,
+        ensemble_class: Type[AbstractEnsemble] | Literal["default"] | None = "default",
+        metric: Scorer | Sequence[Scorer] | None = None,
     ):
         """Fit an ensemble to models trained during an optimization process.
 
@@ -655,19 +667,39 @@ class AutoSklearnEstimator(BaseEstimator):
             is independent of the ``ensemble_class`` argument and this
             pruning step is done prior to constructing an ensemble.
 
-        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)
+        ensemble_class : Type[AbstractEnsemble] | "default", optional (default="default")
             Class implementing the post-hoc ensemble algorithm. Set to
-            ``None`` to disable ensemble building or use ``SingleBest``
+            ``None`` to disable ensemble building or use class:`SingleBest`
             to obtain only use the single best model instead of an
             ensemble.
 
-        metrics: Scorer | Sequence[Scorer] | None = None
+            If set to "default" it will use :class:`EnsembleSelection` for
+            single-objective problems and :class:`MultiObjectiveDummyEnsemble`
+            for multi-objective problems.
+
+        metric: Scorer | Sequence[Scorer] | None = None
             A metric or list of metrics to score the ensemble with
 
         Returns
         -------
         self
-        """
+        """  # noqa: E501
+
+        if ensemble_class == "default":
+            # Things are actually a little more nuanced here:
+            # * If they passed `metric=None` at init, we would infer this in automl
+            #   during `fit` and store it in the automl instance.
+            # * If they passed a `metric` in init and left it `None` here, this would
+            #   also be in the automl instance
+            # => We can use self.automl_ as ground truth for metric if no metrics passed
+            #   and we have one created
+            if metric is None and self.automl_ is not None and self.automl_._metrics:
+                metric = self.automl_._metrics
+
+            ensemble_class = self._resolve_ensemble_class(metric)
+
+        self.ensemble_class = ensemble_class
+
         # User specified `ensemble_size` explicitly, warn them about deprecation
         if ensemble_size is not None:
             # Keep consistent behaviour
@@ -720,9 +752,19 @@ class AutoSklearnEstimator(BaseEstimator):
             ensemble_nbest=ensemble_nbest,
             ensemble_class=ensemble_class,
             ensemble_kwargs=ensemble_kwargs,
-            metrics=metrics,
+            metrics=metric,
         )
         return self
+
+    def _resolve_ensemble_class(
+        self,
+        metric: Scorer | Sequence[Scorer] | None,
+    ) -> type[AbstractEnsemble]:
+        return (
+            EnsembleSelection
+            if metric is None or isinstance(metric, Scorer) or len(metric) == 1
+            else MultiObjectiveDummyEnsemble
+        )
 
     def refit(self, X, y):
         """Refit all models found with fit to new data.

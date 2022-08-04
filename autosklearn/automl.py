@@ -79,7 +79,7 @@ from autosklearn.ensembles.abstract_ensemble import (
     AbstractMultiObjectiveEnsemble,
 )
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.ensembles.singlebest_ensemble import SingleBest
+from autosklearn.ensembles.singlebest_ensemble import SingleBestFromRunhistory
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
@@ -1638,7 +1638,7 @@ class AutoML(BaseEstimator):
             return None
 
         # SingleBest contains the best model found by AutoML
-        ensemble = SingleBest(
+        ensemble = SingleBestFromRunhistory(
             metrics=self._metrics,
             task_type=self._task,
             seed=self._seed,
@@ -1663,13 +1663,12 @@ class AutoML(BaseEstimator):
             raise ValueError("Pareto set only available if ensemble can be loaded.")
 
         if isinstance(self.ensemble_, AbstractMultiObjectiveEnsemble):
-            pareto_set = self.ensemble_.get_pareto_set()
+            pareto_set = self.ensemble_.pareto_set
         else:
             self._logger.warning(
                 "Pareto set not available for single objective ensemble "
                 "method. The Pareto set will only include the single ensemble "
-                "constructed by %s",
-                type(self.ensemble_),
+                f"constructed by {type(self.ensemble_)},"
             )
             pareto_set = [self.ensemble_]
 

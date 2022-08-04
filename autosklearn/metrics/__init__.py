@@ -48,6 +48,7 @@ class Scorer(object, metaclass=ABCMeta):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        *,
         X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
@@ -62,6 +63,7 @@ class _PredictScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        *,
         X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
@@ -129,6 +131,7 @@ class _ProbaScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        *,
         X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
@@ -189,6 +192,7 @@ class _ThresholdScorer(Scorer):
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
+        *,
         X_data: Optional[SUPPORTED_XDATA_TYPES] = None,
         sample_weight: Optional[List[float]] = None,
     ) -> float:
@@ -508,11 +512,11 @@ def calculate_scores(
 
             try:
                 score_dict[metric_.name] = _compute_single_scorer(
-                    metric_,
-                    prediction,
-                    solution,
-                    task_type,
-                    X_data,
+                    metric=metric_,
+                    prediction=prediction,
+                    solution=solution,
+                    task_type=task_type,
+                    X_data=X_data,
                 )
             except ValueError as e:
                 print(e, e.args[0])
@@ -532,11 +536,11 @@ def calculate_scores(
 
             try:
                 score_dict[metric_.name] = _compute_single_scorer(
-                    metric_,
-                    prediction,
-                    solution,
-                    task_type,
-                    X_data,
+                    metric=metric_,
+                    prediction=prediction,
+                    solution=solution,
+                    task_type=task_type,
+                    X_data=X_data,
                 )
             except ValueError as e:
                 if e.args[0] == "multiclass format is not supported":
