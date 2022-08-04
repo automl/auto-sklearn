@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Sequence, Tuple, Union
+from typing import Any, Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -18,19 +18,29 @@ class AbstractEnsemble(ABC):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: int | np.random.RandomState | None,
         backend: Backend,
+        random_state: int | np.random.RandomState | None = None,
     ):
         pass
+
+    def __getstate__(self) -> Dict[str, Any]:
+        # Cannot serialize a metric if
+        # it is user defined.
+        # That is, if doing pickle dump
+        # the metric won't be the same as the
+        # one in __main__. we don't use the metric
+        # in the EnsembleSelection so this should
+        # be fine
+        return {key: value for key, value in self.__dict__.items() if key != "metrics"}
 
     @abstractmethod
     def fit(
         self,
         base_models_predictions: np.ndarray | List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
         runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> "AbstractEnsemble":
         """Fit an ensemble given predictions of base models and targets.
 
@@ -79,7 +89,7 @@ class AbstractEnsemble(ABC):
 
         Returns
         -------
-        array : [n_data_points]
+        np.ndarray
         """
         pass
 
@@ -97,7 +107,7 @@ class AbstractEnsemble(ABC):
 
         Returns
         -------
-        array : [(weight_1, model_1), ..., (weight_n, model_n)]
+        List[Tuple[float, BasePipeline]]
         """
 
     @abstractmethod
@@ -115,7 +125,7 @@ class AbstractEnsemble(ABC):
 
         Returns
         -------
-        array : [(identifier_1, weight_1), ..., (identifier_n, weight_n)]
+        List[Tuple[Tuple[int, int, float], float]
         """
 
     @abstractmethod
@@ -133,12 +143,25 @@ class AbstractEnsemble(ABC):
     def get_validation_performance(self) -> float:
         """Return validation performance of ensemble.
 
-        Return
-        ------
+        Returns
+        -------
         float
         """
 
 
 class AbstractMultiObjectiveEnsemble(AbstractEnsemble):
-    def get_pareto_set(self) -> Sequence[AbstractEnsemble]:
-        pass
+    @property
+    @abstractmethod
+    def pareto_set(self) -> Sequence[AbstractEnsemble]:
+        """Get a sequence on ensembles that are on the pareto front
+
+        Raises
+        ------
+        SklearnNotFittedError
+            If ``fit`` has not been called and the pareto set does not exist yet
+
+        Returns
+        -------
+        Sequence[AbstractEnsemble]
+        """
+        ...

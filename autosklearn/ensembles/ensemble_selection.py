@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 import random
 import warnings
@@ -23,11 +23,11 @@ class EnsembleSelection(AbstractEnsemble):
         self,
         task_type: int,
         metrics: Sequence[Scorer] | Scorer,
-        random_state: Optional[Union[int, np.random.RandomState]],
         backend: Backend,
         ensemble_size: int = 50,
         bagging: bool = False,
         mode: str = "fast",
+        random_state: int | np.random.RandomState | None = None,
     ) -> None:
         """An ensemble of selected algorithms
 
@@ -43,14 +43,6 @@ class EnsembleSelection(AbstractEnsemble):
             The metric used to evaluate the models. If multiple metrics are passed,
             ensemble selection only optimizes for the first
 
-        random_state: Optional[int | RandomState] = None
-            The random_state used for ensemble selection.
-
-            * None - Uses numpy's default RandomState object
-            * int - Successive calls to fit will produce the same results
-            * RandomState - Truly random, each call to fit will produce
-              different results, even with the same object.
-
         backend : Backend
             Gives access to the backend of Auto-sklearn. Not used by Ensemble Selection.
 
@@ -61,6 +53,14 @@ class EnsembleSelection(AbstractEnsemble):
             Which kind of ensemble generation to use
             * 'slow' - The original method used in Rich Caruana's ensemble selection.
             * 'fast' - A faster version of Rich Caruanas' ensemble selection.
+
+        random_state: int | RandomState | None = None
+            The random_state used for ensemble selection.
+
+            * None - Uses numpy's default RandomState object
+            * int - Successive calls to fit will produce the same results
+            * RandomState - Truly random, each call to fit will produce
+              different results, even with the same object.
 
         References
         ----------
@@ -92,23 +92,13 @@ class EnsembleSelection(AbstractEnsemble):
         # https://scikit-learn.org/stable/common_pitfalls.html#controlling-randomness
         self.random_state = random_state
 
-    def __getstate__(self) -> Dict[str, Any]:
-        # Cannot serialize a metric if
-        # it is user defined.
-        # That is, if doing pickle dump
-        # the metric won't be the same as the
-        # one in __main__. we don't use the metric
-        # in the EnsembleSelection so this should
-        # be fine
-        return {key: value for key, value in self.__dict__.items() if key != "metrics"}
-
     def fit(
         self,
         base_models_predictions: List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
         true_targets: np.ndarray,
         model_identifiers: List[Tuple[int, int, float]],
         runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> EnsembleSelection:
         self.ensemble_size = int(self.ensemble_size)
         if self.ensemble_size < 1:
@@ -141,20 +131,22 @@ class EnsembleSelection(AbstractEnsemble):
     def _fit(
         self,
         predictions: List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
         labels: np.ndarray,
+        *,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> EnsembleSelection:
         if self.mode == "fast":
-            self._fast(predictions, X_data, labels)
+            self._fast(predictions=predictions, X_data=X_data, labels=labels)
         else:
-            self._slow(predictions, X_data, labels)
+            self._slow(predictions=predictions, X_data=X_data, labels=labels)
         return self
 
     def _fast(
         self,
         predictions: List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
         labels: np.ndarray,
+        *,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> None:
         """Fast version of Rich Caruana's ensemble selection method."""
         self.num_input_models_ = len(predictions)
@@ -231,8 +223,9 @@ class EnsembleSelection(AbstractEnsemble):
     def _slow(
         self,
         predictions: List[np.ndarray],
-        X_data: SUPPORTED_FEAT_TYPES,
         labels: np.ndarray,
+        *,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> None:
         """Rich Caruana's ensemble selection method."""
         self.num_input_models_ = len(predictions)
@@ -311,7 +304,7 @@ class EnsembleSelection(AbstractEnsemble):
             # Bagging a set of models
             indices = sorted(random.sample(range(0, n_models), bag_size))
             bag = predictions[indices, :, :]
-            order, _ = self._fit(bag, labels)
+            order, _ = self._fit(predictions=bag, labels=labels)
             order_of_each_bag.append(order)
 
         return np.array(

@@ -29,6 +29,7 @@ import autosklearn.pipeline.util as putil
 from autosklearn.automl import AutoMLClassifier
 from autosklearn.data.validation import InputValidator
 from autosklearn.ensemble_building.run import Run
+from autosklearn.ensembles import EnsembleSelection, MultiObjectiveDummyEnsemble
 from autosklearn.estimators import (
     AutoSklearnClassifier,
     AutoSklearnEstimator,
@@ -1727,3 +1728,16 @@ def test_param_dataset_compression(dataset_compression: Union[bool, Dict[str, An
     model = AutoSklearnClassifier(dataset_compression=dataset_compression)
 
     assert model.dataset_compression == dataset_compression
+
+
+def test_ensemble_default_resolves():
+    model = AutoSklearnClassifier(
+        ensemble_class="default",
+        metric=accuracy,
+    )
+    assert model.ensemble_class == EnsembleSelection
+    model = AutoSklearnClassifier(
+        ensemble_class="default",
+        metric=[accuracy, f1_macro],
+    )
+    assert model.ensemble_class == MultiObjectiveDummyEnsemble
