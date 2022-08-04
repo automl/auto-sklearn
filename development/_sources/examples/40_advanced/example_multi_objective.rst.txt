@@ -101,8 +101,6 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -132,8 +130,6 @@ Compute the two competing metrics
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Precision 0.7142857142857143
@@ -161,20 +157,18 @@ They are by default sorted by the first metric given to *auto-sklearn*.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
               rank  ensemble_weight  ...    cost_1  duration
     model_id                         ...                    
-    2            2             0.12  ...  0.586667  1.854118
-    3            5             0.04  ...  0.533333  1.779224
-    4            8             0.06  ...  0.426667  1.703627
-    8            3             0.04  ...  0.586667  1.753551
-    16           4             0.52  ...  0.933333  1.858474
-    21           1             0.18  ...  0.586667  1.864695
-    24           6             0.02  ...  0.600000  0.979650
-    27           7             0.02  ...  0.226667  1.011533
+    2            2             0.12  ...  0.586667  1.888447
+    3            5             0.04  ...  0.533333  1.824072
+    4            8             0.06  ...  0.426667  1.743947
+    8            3             0.04  ...  0.586667  1.793458
+    16           4             0.52  ...  0.933333  1.901787
+    21           1             0.18  ...  0.586667  1.917471
+    24           6             0.02  ...  0.600000  1.007004
+    27           7             0.02  ...  0.226667  1.040020
 
     [8 rows x 6 columns]
 
@@ -200,8 +194,6 @@ to *auto-sklearn*.
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -235,12 +227,12 @@ to *auto-sklearn*.
                  0.0,
                  0.0,
                  0.0],
-     'mean_fit_time': array([ 1.85411835,  1.77922392,  1.70362663,  1.7868762 ,  2.34962845,
-            2.20710731,  1.75355077,  1.03737259,  1.92265701, 12.01773024,
-            1.31987286,  1.41598225,  1.4495976 ,  0.85842085,  1.85847449,
-            1.03761506,  4.85008144,  1.1398859 ,  8.11723232,  1.8646946 ,
-            1.6442852 ,  0.83312821,  0.97965002,  1.8513813 ,  1.04942179,
-            1.01153326,  2.51501679,  1.1499548 ,  1.08182216,  0.83192182]),
+     'mean_fit_time': array([ 1.88844657,  1.82407236,  1.74394703,  1.82287359,  2.38982821,
+            2.31927514,  1.79345846,  1.06429052,  1.97211313, 12.01571536,
+            1.36067224,  1.47306561,  1.48371506,  0.88376832,  1.90178704,
+            1.06216097,  4.98244214,  1.17524099,  9.276443  ,  1.91747069,
+            1.68475246,  0.86481619,  1.00700402,  1.8898325 ,  1.07976818,
+            1.04002047,  2.56826091,  1.19058681,  1.10807204,  0.85436916]),
      'mean_test_precision': array([0.68888889, 0.61403509, 0.42156863, 0.55072464, 0.53333333,
            0.70588235, 0.67391304, 0.34313725, 0.51401869, 0.        ,
            0.49090909, 0.55263158, 0.50526316, 0.59016393, 0.625     ,
@@ -2804,35 +2796,30 @@ Visualize the Pareto set
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  5.902 seconds)
+   **Total running time of the script:** ( 2 minutes  59.492 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_multi_objective.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_multi_objective.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_multi_objective.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_multi_objective.py <example_multi_objective.py>`
 
-     :download:`Download Python source code: example_multi_objective.py <example_multi_objective.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_multi_objective.ipynb <example_multi_objective.ipynb>`
+      :download:`Download Jupyter notebook: example_multi_objective.ipynb <example_multi_objective.ipynb>`
 
 
 .. only:: html

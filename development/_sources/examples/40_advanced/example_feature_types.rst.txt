@@ -84,8 +84,6 @@ Load Australian dataset from https://www.openml.org/d/40981
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     /home/runner/work/auto-sklearn/auto-sklearn/examples/40_advanced/example_feature_types.py:31: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
@@ -120,8 +118,6 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -150,8 +146,6 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Accuracy score 0.8786127167630058
@@ -162,35 +156,30 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.160 seconds)
+   **Total running time of the script:** ( 0 minutes  26.049 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_feature_types.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_feature_types.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_feature_types.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_feature_types.py <example_feature_types.py>`
 
-     :download:`Download Python source code: example_feature_types.py <example_feature_types.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_feature_types.ipynb <example_feature_types.ipynb>`
+      :download:`Download Jupyter notebook: example_feature_types.ipynb <example_feature_types.ipynb>`
 
 
 .. only:: html

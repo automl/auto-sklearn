@@ -106,40 +106,8 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    [ERROR] [2022-07-11 10:25:34,930:asyncio.events] 
-    Traceback (most recent call last):
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 778, in wrapper
-        return await func(*args, **kwargs)
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
-        await self._ensure_connected(timeout=timeout)
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1241, in _ensure_connected
-        comm = await connect(
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/comm/core.py", line 315, in connect
-        await asyncio.sleep(backoff)
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
-        return await future
-    asyncio.exceptions.CancelledError
-    [ERROR] [2022-07-11 10:25:34,949:asyncio.events] 
-    Traceback (most recent call last):
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 778, in wrapper
-        return await func(*args, **kwargs)
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1400, in _handle_report
-        await self._reconnect()
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/utils.py", line 778, in wrapper
-        return await func(*args, **kwargs)
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1211, in _reconnect
-        await self._ensure_connected(timeout=timeout)
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/client.py", line 1241, in _ensure_connected
-        comm = await connect(
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/site-packages/distributed/comm/core.py", line 315, in connect
-        await asyncio.sleep(backoff)
-      File "/opt/hostedtoolcache/Python/3.8.13/x64/lib/python3.8/asyncio/tasks.py", line 659, in sleep
-        return await future
-    asyncio.exceptions.CancelledError
     auto-sklearn results:
       Dataset name: breast_cancer
       Metric: accuracy
@@ -157,35 +125,30 @@ To use ``n_jobs_`` we must guard the code
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.460 seconds)
+   **Total running time of the script:** ( 2 minutes  3.521 seconds)
 
 
 .. _sphx_glr_download_examples_60_search_example_parallel_n_jobs.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_n_jobs.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_n_jobs.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_parallel_n_jobs.py <example_parallel_n_jobs.py>`
 
-     :download:`Download Python source code: example_parallel_n_jobs.py <example_parallel_n_jobs.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_parallel_n_jobs.ipynb <example_parallel_n_jobs.ipynb>`
+      :download:`Download Jupyter notebook: example_parallel_n_jobs.ipynb <example_parallel_n_jobs.ipynb>`
 
 
 .. only:: html

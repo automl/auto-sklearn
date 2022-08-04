@@ -118,8 +118,6 @@ Data Loading
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     A1         bool
@@ -163,8 +161,6 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -191,11 +187,9 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Accuracy score 0.8666666666666667
+    Accuracy score 0.8608695652173913
 
 
 
@@ -236,35 +230,30 @@ be directly used for plotting
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.959 seconds)
+   **Total running time of the script:** ( 1 minutes  57.395 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_pandas_train_test.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_pandas_train_test.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_pandas_train_test.py <example_pandas_train_test.py>`
 
-     :download:`Download Python source code: example_pandas_train_test.py <example_pandas_train_test.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_pandas_train_test.ipynb <example_pandas_train_test.ipynb>`
+      :download:`Download Jupyter notebook: example_pandas_train_test.ipynb <example_pandas_train_test.ipynb>`
 
 
 .. only:: html

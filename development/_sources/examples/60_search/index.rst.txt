@@ -1,0 +1,118 @@
+
+
+.. _sphx_glr_examples_60_search:
+
+.. _search_examples:
+
+===============
+Search Examples
+===============
+
+Examples of changing the search procedure of Auto-sklearn.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;_ for p...">
+
+.. only:: html
+
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_parallel_n_jobs_thumb.png
+    :alt: Parallel Usage  on a single machine
+
+  :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Parallel Usage  on a single machine</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="By default, *auto-sklearn* fits the machine learning models and build their ensembles in parall...">
+
+.. only:: html
+
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_sequential_thumb.png
+    :alt: Sequential Usage
+
+  :ref:`sphx_glr_examples_60_search_example_sequential.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Sequential Usage</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses `dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;`_ for...">
+
+.. only:: html
+
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_parallel_manual_spawning_cli_thumb.png
+    :alt: Parallel Usage: Spawning workers from the command line
+
+  :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Parallel Usage: Spawning workers from the command line</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMA...">
+
+.. only:: html
+
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_random_search_thumb.png
+    :alt: Random Search
+
+  :ref:`sphx_glr_examples_60_search_example_random_search.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Random Search</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This advanced  example illustrates how to interact with the SMAC callback and get relevant info...">
+
+.. only:: html
+
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_successive_halving_thumb.png
+    :alt: Successive Halving
+
+  :ref:`sphx_glr_examples_60_search_example_successive_halving.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Successive Halving</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/60_search/example_parallel_n_jobs
+   /examples/60_search/example_sequential
+   /examples/60_search/example_parallel_manual_spawning_cli
+   /examples/60_search/example_random_search
+   /examples/60_search/example_successive_halving
+

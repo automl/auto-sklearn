@@ -98,8 +98,6 @@ Holdout
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -130,11 +128,9 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Accuracy score holdout:  0.9440559440559441
+    Accuracy score holdout:  0.9370629370629371
 
 
 
@@ -173,8 +169,6 @@ Cross-validation
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Before re-fit
@@ -205,8 +199,6 @@ final ensemble on the whole dataset.
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -260,8 +252,6 @@ to the use case at hand.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     auto-sklearn results:
@@ -269,9 +259,9 @@ to the use case at hand.
       Metric: accuracy
       Best validation score: 0.964789
       Number of target algorithm runs: 28
-      Number of successful target algorithm runs: 28
+      Number of successful target algorithm runs: 27
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
 
@@ -294,8 +284,6 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -329,11 +317,9 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Accuracy score custom split 0.965034965034965
+    Accuracy score custom split 0.951048951048951
 
 
 
@@ -341,35 +327,30 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  41.456 seconds)
+   **Total running time of the script:** ( 6 minutes  23.641 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_resampling.py <example_resampling.py>`
 
-     :download:`Download Python source code: example_resampling.py <example_resampling.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_resampling.ipynb <example_resampling.ipynb>`
+      :download:`Download Jupyter notebook: example_resampling.ipynb <example_resampling.ipynb>`
 
 
 .. only:: html

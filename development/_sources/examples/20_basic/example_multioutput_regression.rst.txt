@@ -90,8 +90,6 @@ Build and fit a regressor
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -119,15 +117,13 @@ View the models found by auto-sklearn
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1             0.88  random_forest  0.121883  2.278445
-    22           2             0.06  random_forest  0.195631  2.577770
-    8            3             0.06  decision_tree  0.365504  0.643842
+    2            1             0.62  random_forest  0.112775  2.278319
+    11           2             0.36  random_forest  0.117536  1.513921
+    8            3             0.02  decision_tree  0.292617  0.631720
 
 
 
@@ -150,36 +146,35 @@ Print the final ensemble constructed by auto-sklearn
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    {   2: {   'cost': 0.12188348155228435,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7962798bb0>,
-               'ensemble_weight': 0.88,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7965a39520>,
+    {   2: {   'cost': 0.11277483427062818,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1bea3040>,
+               'ensemble_weight': 0.62,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef2f6008b0>,
                'model_id': 2,
                'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7961f2ffa0>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fef17c439a0>,
                'sklearn_regressor': RandomForestRegressor(max_features=1.0, n_estimators=512, n_jobs=1,
                           random_state=1, warm_start=True)},
-        8: {   'cost': 0.36550447100935,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7967c94c70>,
-               'ensemble_weight': 0.06,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7965bdf4f0>,
+        8: {   'cost': 0.29261679201435076,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef165f2340>,
+               'ensemble_weight': 0.02,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef1724dca0>,
                'model_id': 8,
                'rank': 2,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f7965c21dc0>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fef1724ddc0>,
                'sklearn_regressor': DecisionTreeRegressor(criterion='friedman_mse', max_depth=65,
                           min_samples_leaf=8, min_samples_split=15, random_state=1)},
-        22: {   'cost': 0.19563103725669062,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7963dfdee0>,
-                'ensemble_weight': 0.06,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f79631561c0>,
-                'model_id': 22,
+        11: {   'cost': 0.11753565110819608,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1bb02400>,
+                'ensemble_weight': 0.36,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef1658d430>,
+                'model_id': 11,
                 'rank': 3,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f79631567c0>,
-                'sklearn_regressor': RandomForestRegressor(bootstrap=False, max_features=0.978492653000109,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fef164961c0>,
+                'sklearn_regressor': RandomForestRegressor(bootstrap=False, criterion='friedman_mse',
+                          max_features=0.6301558736139196, min_samples_leaf=4,
                           min_samples_split=6, n_estimators=512, n_jobs=1,
                           random_state=1, warm_start=True)}}
 
@@ -205,11 +200,9 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    R2 score: 0.8553341558098918
+    R2 score: 0.8974395659848465
 
 
 
@@ -231,8 +224,6 @@ Get the configuration space
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -462,35 +453,30 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.729 seconds)
+   **Total running time of the script:** ( 1 minutes  55.404 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/20_basic/example_multioutput_regression.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_multioutput_regression.py <example_multioutput_regression.py>`
 
-     :download:`Download Python source code: example_multioutput_regression.py <example_multioutput_regression.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_multioutput_regression.ipynb <example_multioutput_regression.ipynb>`
+      :download:`Download Jupyter notebook: example_multioutput_regression.ipynb <example_multioutput_regression.ipynb>`
 
 
 .. only:: html

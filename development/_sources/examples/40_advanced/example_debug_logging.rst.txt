@@ -169,19 +169,17 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
-    2022-07-11 10:10:31,770 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-07-11 10:10:31.754162'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.07.11-10.10.31 for iteration 0.
-    2022-07-11 10:10:35,266 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-07-11 10:10:35.248953'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.07.11-10.10.35 for iteration 1.
-    tmp_folder/.auto-sklearn
-    tmp_folder/distributed.log
+    2022-08-04 09:26:44,330 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-08-04 09:26:44.313158'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.08.04-09.26.44 for iteration 0.
+    2022-08-04 09:26:47,902 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-08-04 09:26:47.884904'), 'ensemble_optimization_score': 0.98989898989899, 'ensemble_test_score': 0.9924906132665833}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.08.04-09.26.47 for iteration 1.
     tmp_folder/space.json
-    tmp_folder/AutoML(1):ab9df1e9-0101-11ed-8800-d3569ad63cfd.log
+    tmp_folder/.auto-sklearn
+    tmp_folder/AutoML(1):8c0932e1-13d7-11ed-8804-717006343ef2.log
     tmp_folder/smac3-output
+    tmp_folder/distributed.log
 
 
 
@@ -189,35 +187,30 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.231 seconds)
+   **Total running time of the script:** ( 0 minutes  12.624 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_debug_logging.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_debug_logging.py <example_debug_logging.py>`
 
-     :download:`Download Python source code: example_debug_logging.py <example_debug_logging.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_debug_logging.ipynb <example_debug_logging.ipynb>`
+      :download:`Download Jupyter notebook: example_debug_logging.ipynb <example_debug_logging.ipynb>`
 
 
 .. only:: html

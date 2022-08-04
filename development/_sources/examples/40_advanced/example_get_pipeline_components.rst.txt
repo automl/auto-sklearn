@@ -99,8 +99,6 @@ Build and fit the classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -128,8 +126,6 @@ Predict using the model
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -170,37 +166,35 @@ model is stored in the ``'estimators'`` list in the dict, along with the
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f795c41c640>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef1be29400>,
                'cost': 0.07801418439716312,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7962667b50>,
-               'ensemble_weight': 0.16,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f795c41cb20>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef110c0c40>,
+               'ensemble_weight': 0.08,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef1be29e50>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         3: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7961dea610>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef11315970>,
                'cost': 0.07092198581560283,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7965e371c0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef0fc67bb0>,
                'ensemble_weight': 0.12,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7961deabe0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef1bea34c0>,
                'model_id': 3,
                'rank': 2,
                'sklearn_classifier': RandomForestClassifier(max_features=1, min_samples_leaf=2, min_samples_split=20,
                            n_estimators=512, n_jobs=1, random_state=1,
                            warm_start=True)},
         4: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7965c21d00>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef10213970>,
                'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f796802b820>,
-               'ensemble_weight': 0.04,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f796201e3d0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1bc95820>,
+               'ensemble_weight': 0.14,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef10213d00>,
                'model_id': 4,
                'rank': 3,
                'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.103855734598575e-05, beta_1=0.999,
@@ -209,80 +203,77 @@ model is stored in the ``'estimators'`` list in the dict, along with the
                   learning_rate_init=0.00014375616988222174, max_iter=32,
                   n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
         5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7962bfe0d0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef1792a400>,
                'cost': 0.1063829787234043,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f795c41cee0>,
-               'ensemble_weight': 0.04,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f795d41efd0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef167a5250>,
+               'ensemble_weight': 0.06,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef16f4dfa0>,
                'model_id': 5,
                'rank': 4,
                'sklearn_classifier': KNeighborsClassifier(n_neighbors=4, weights='distance')},
         6: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7965bbe9d0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef1652b220>,
                'cost': 0.11347517730496459,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7963156550>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1989d3d0>,
                'ensemble_weight': 0.1,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7965bbea30>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef1652b0a0>,
                'model_id': 6,
                'rank': 5,
-               'sklearn_classifier': SVC(C=100.5905006626969, cache_size=1783.09375, coef0=0.08087614244138486,
-        gamma=0.011333066835975528, kernel='poly', max_iter=-1.0, random_state=1,
-        tol=0.012391313886912093)},
-        8: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7964097850>,
-               'cost': 0.04255319148936165,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7963c65760>,
+               'sklearn_classifier': SVC(C=100.5905006626969, cache_size=1789.8776041666667,
+        coef0=0.08087614244138486, gamma=0.011333066835975528, kernel='poly',
+        max_iter=-1.0, random_state=1, tol=0.012391313886912093)},
+        7: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef17243c70>,
+               'cost': 0.03546099290780147,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1384cc40>,
                'ensemble_weight': 0.12,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7964097280>,
-               'model_id': 8,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef17243250>,
+               'model_id': 7,
                'rank': 6,
+               'sklearn_classifier': LinearSVC(C=10.369811497206404, class_weight='balanced', dual=False,
+              intercept_scaling=1.0, random_state=1, tol=0.0015130257264171173)},
+        8: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef102a87c0>,
+               'cost': 0.04255319148936165,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef196fdfa0>,
+               'ensemble_weight': 0.12,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef102a80d0>,
+               'model_id': 8,
+               'rank': 7,
                'sklearn_classifier': LinearDiscriminantAnalysis(tol=0.010552900863349885)},
         9: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f795b333eb0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef17347c10>,
                'cost': 0.05673758865248224,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f795b24e640>,
-               'ensemble_weight': 0.14,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f795b3331f0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1814c9a0>,
+               'ensemble_weight': 0.02,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef17347be0>,
                'model_id': 9,
-               'rank': 7,
+               'rank': 8,
                'sklearn_classifier': DecisionTreeClassifier(max_depth=1, min_samples_leaf=12, min_samples_split=10,
                            random_state=1)},
         10: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f79630e3370>,
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef15e4c670>,
                 'cost': 0.07801418439716312,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7963af2430>,
-                'ensemble_weight': 0.06,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f79630e33d0>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef17433250>,
+                'ensemble_weight': 0.1,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef15e4c220>,
                 'model_id': 10,
-                'rank': 8,
+                'rank': 9,
                 'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.1648635177663599e-07, beta_1=0.999,
                   beta_2=0.9, hidden_layer_sizes=(78,),
                   learning_rate_init=0.10405546728298488, max_iter=128,
                   n_iter_no_change=32, random_state=1, validation_fraction=0.0,
                   verbose=0, warm_start=True)},
         11: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f795b295bb0>,
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef12fd26d0>,
                 'cost': 0.03546099290780147,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7963172640>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef17e14790>,
                 'ensemble_weight': 0.14,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f795b295fa0>,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef12fd2b20>,
                 'model_id': 11,
-                'rank': 9,
-                'sklearn_classifier': PassiveAggressiveClassifier(C=0.009945692083946422, max_iter=32, random_state=1,
-                                tol=0.00039533312192938314, warm_start=True)},
-        12: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7963199730>,
-                'cost': 0.028368794326241176,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f795f788880>,
-                'ensemble_weight': 0.08,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7963199f70>,
-                'model_id': 12,
                 'rank': 10,
-                'sklearn_classifier': MLPClassifier(alpha=2.0254725986516904e-07, beta_1=0.999, beta_2=0.9,
-                  hidden_layer_sizes=(224,),
-                  learning_rate_init=0.007525773377111993, max_iter=64,
-                  n_iter_no_change=32, random_state=1, validation_fraction=0.0,
-                  verbose=0, warm_start=True)}}
+                'sklearn_classifier': PassiveAggressiveClassifier(C=0.009945692083946422, max_iter=32, random_state=1,
+                                tol=0.00039533312192938314, warm_start=True)}}
 
 
 
@@ -307,8 +298,6 @@ iterations, number of models failed with a time out etc.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     auto-sklearn results:
@@ -316,9 +305,9 @@ iterations, number of models failed with a time out etc.
       Metric: accuracy
       Best validation score: 0.971631
       Number of target algorithm runs: 11
-      Number of successful target algorithm runs: 11
+      Number of successful target algorithm runs: 10
       Number of crashed target algorithm runs: 0
-      Number of target algorithms that exceeded the time limit: 0
+      Number of target algorithms that exceeded the time limit: 1
       Number of target algorithms that exceeded the memory limit: 0
 
 
@@ -348,11 +337,9 @@ runhistory.runhistory.html#smac.runhistory.runhistory.RunHistory>`_.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    <smac.runhistory.runhistory.RunHistory object at 0x7f7965e37e50>
+    <smac.runhistory.runhistory.RunHistory object at 0x7fef0fc67610>
 
 
 
@@ -373,8 +360,6 @@ Runs are stored inside an ``OrderedDict`` called ``data``:
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -403,46 +388,44 @@ Let's iterative over all entries
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     #########
     RunKey(config_id=1, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.07801418439716312, time=1.6488323211669922, status=<StatusType.SUCCESS: 1>, starttime=1657534642.9389224, endtime=1657534644.607634, additional_info={'duration': 1.5547723770141602, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.07801418439716312, time=1.665266752243042, status=<StatusType.SUCCESS: 1>, starttime=1659605597.9166224, endtime=1659605599.6026316, additional_info={'duration': 1.5715999603271484, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=2, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.07092198581560283, time=1.4287490844726562, status=<StatusType.SUCCESS: 1>, starttime=1657534644.6604865, endtime=1657534646.110799, additional_info={'duration': 1.3432507514953613, 'num_run': 3, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.07092198581560283, time=1.450683832168579, status=<StatusType.SUCCESS: 1>, starttime=1659605599.659791, endtime=1659605601.1332564, additional_info={'duration': 1.3582627773284912, 'num_run': 3, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=3, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.028368794326241176, time=1.2042551040649414, status=<StatusType.SUCCESS: 1>, starttime=1657534646.2003047, endtime=1657534647.4260333, additional_info={'duration': 1.136216163635254, 'num_run': 4, 'train_loss': 0.04210526315789476, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.028368794326241176, time=1.2643566131591797, status=<StatusType.SUCCESS: 1>, starttime=1659605601.228772, endtime=1659605602.5150702, additional_info={'duration': 1.189220905303955, 'num_run': 4, 'train_loss': 0.04210526315789476, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=4, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.1063829787234043, time=0.7737343311309814, status=<StatusType.SUCCESS: 1>, starttime=1657534647.5312452, endtime=1657534648.3268216, additional_info={'duration': 0.7080216407775879, 'num_run': 5, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.1063829787234043, time=0.7826023101806641, status=<StatusType.SUCCESS: 1>, starttime=1659605602.6265242, endtime=1659605603.4315138, additional_info={'duration': 0.7097976207733154, 'num_run': 5, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=5, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.11347517730496459, time=0.6301054954528809, status=<StatusType.SUCCESS: 1>, starttime=1657534648.444008, endtime=1657534649.0950193, additional_info={'duration': 0.5656402111053467, 'num_run': 6, 'train_loss': 0.09122807017543855, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.11347517730496459, time=0.6443793773651123, status=<StatusType.SUCCESS: 1>, starttime=1659605603.5554883, endtime=1659605604.221928, additional_info={'duration': 0.5718612670898438, 'num_run': 6, 'train_loss': 0.09122807017543855, 'configuration_origin': 'Initial design'})
     #########
     RunKey(config_id=6, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.03546099290780147, time=0.8233890533447266, status=<StatusType.SUCCESS: 1>, starttime=1657534651.3850884, endtime=1657534652.229515, additional_info={'duration': 0.7517752647399902, 'num_run': 7, 'train_loss': 0.007017543859649145, 'configuration_origin': 'Random Search (sorted)'})
+    RunValue(cost=0.03546099290780147, time=0.838538646697998, status=<StatusType.SUCCESS: 1>, starttime=1659605606.521962, endtime=1659605607.3815315, additional_info={'duration': 0.7633266448974609, 'num_run': 7, 'train_loss': 0.007017543859649145, 'configuration_origin': 'Random Search (sorted)'})
     #########
     RunKey(config_id=7, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.04255319148936165, time=0.8649485111236572, status=<StatusType.SUCCESS: 1>, starttime=1657534652.3919866, endtime=1657534653.2785575, additional_info={'duration': 0.7946085929870605, 'num_run': 8, 'train_loss': 0.06666666666666665, 'configuration_origin': 'Random Search'})
+    RunValue(cost=0.04255319148936165, time=0.8846068382263184, status=<StatusType.SUCCESS: 1>, starttime=1659605607.5501392, endtime=1659605608.457146, additional_info={'duration': 0.8106861114501953, 'num_run': 8, 'train_loss': 0.06666666666666665, 'configuration_origin': 'Random Search'})
     #########
     RunKey(config_id=8, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.05673758865248224, time=0.656745195388794, status=<StatusType.SUCCESS: 1>, starttime=1657534653.4544163, endtime=1657534654.1322172, additional_info={'duration': 0.585057258605957, 'num_run': 9, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Random Search'})
+    RunValue(cost=0.05673758865248224, time=0.6636483669281006, status=<StatusType.SUCCESS: 1>, starttime=1659605608.6401572, endtime=1659605609.3250265, additional_info={'duration': 0.589911937713623, 'num_run': 9, 'train_loss': 0.06315789473684208, 'configuration_origin': 'Random Search'})
     #########
     RunKey(config_id=9, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.07801418439716312, time=0.9248342514038086, status=<StatusType.SUCCESS: 1>, starttime=1657534656.7920334, endtime=1657534657.7396007, additional_info={'duration': 0.8568909168243408, 'num_run': 10, 'train_loss': 0.07719298245614037, 'configuration_origin': 'Random Search (sorted)'})
+    RunValue(cost=0.07801418439716312, time=0.9587688446044922, status=<StatusType.SUCCESS: 1>, starttime=1659605612.0034423, endtime=1659605612.9866302, additional_info={'duration': 0.8870344161987305, 'num_run': 10, 'train_loss': 0.07719298245614037, 'configuration_origin': 'Random Search (sorted)'})
     #########
     RunKey(config_id=10, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.03546099290780147, time=0.9135403633117676, status=<StatusType.SUCCESS: 1>, starttime=1657534657.9489183, endtime=1657534658.886226, additional_info={'duration': 0.8443083763122559, 'num_run': 11, 'train_loss': 0.01403508771929829, 'configuration_origin': 'Random Search'})
+    RunValue(cost=0.03546099290780147, time=0.9445621967315674, status=<StatusType.SUCCESS: 1>, starttime=1659605613.206195, endtime=1659605614.175349, additional_info={'duration': 0.8745887279510498, 'num_run': 11, 'train_loss': 0.01403508771929829, 'configuration_origin': 'Random Search'})
     #########
     RunKey(config_id=11, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=0.028368794326241176, time=1.1023728847503662, status=<StatusType.SUCCESS: 1>, starttime=1657534659.1109164, endtime=1657534660.2368379, additional_info={'duration': 1.0365715026855469, 'num_run': 12, 'train_loss': 0.0, 'configuration_origin': 'Random Search'})
+    RunValue(cost=1.0, time=1.0084612369537354, status=<StatusType.TIMEOUT: 2>, starttime=1659605614.408601, endtime=1659605616.4394977, additional_info={'error': 'Timeout', 'configuration_origin': 'Random Search'})
     #########
     RunKey(config_id=12, instance_id='{"task_id": "breast_cancer"}', seed=0, budget=0.0)
-    RunValue(cost=1.0, time=0.0, status=<StatusType.STOP: 8>, starttime=1657534660.475829, endtime=1657534660.4758294, additional_info={})
+    RunValue(cost=1.0, time=0.0, status=<StatusType.STOP: 8>, starttime=1659605616.5113099, endtime=1659605616.51131, additional_info={})
 
 
 
@@ -486,8 +469,6 @@ The ``run_key`` contains all information describing a run:
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Configuration ID: 1
@@ -514,8 +495,6 @@ and the configuration can be looked up in the run history as well:
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -582,16 +561,14 @@ The ``run_value`` contains all output from running the configuration:
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Cost: 0.07801418439716312
-    Time: 1.6488323211669922
+    Time: 1.665266752243042
     Status: StatusType.SUCCESS
-    Additional information: {'duration': 1.5547723770141602, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'}
-    Start time: 1657534642.9389224
-    End time 1657534644.607634
+    Additional information: {'duration': 1.5715999603271484, 'num_run': 2, 'train_loss': 0.0, 'configuration_origin': 'Initial design'}
+    Start time: 1659605597.9166224
+    End time 1659605599.6026316
 
 
 
@@ -632,8 +609,6 @@ for the entry with the lowest loss:
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -701,15 +676,13 @@ model_selection.GridSearchCV.html>`_.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     {'mean_test_score': array([0.92198582, 0.92907801, 0.97163121, 0.89361702, 0.88652482,
            0.96453901, 0.95744681, 0.94326241, 0.92198582, 0.96453901,
-           0.97163121]), 'rank_test_scores': array([ 8,  7,  1, 10, 11,  3,  5,  6,  8,  3,  1]), 'mean_fit_time': array([1.64883232, 1.42874908, 1.2042551 , 0.77373433, 0.6301055 ,
-           0.82338905, 0.86494851, 0.6567452 , 0.92483425, 0.91354036,
-           1.10237288]), 'params': [{'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 0}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'normalize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'liblinear_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:liblinear_svc:C': 10.369811497206404, 'classifier:liblinear_svc:dual': 'False', 'classifier:liblinear_svc:fit_intercept': 'True', 'classifier:liblinear_svc:intercept_scaling': 1, 'classifier:liblinear_svc:loss': 'squared_hinge', 'classifier:liblinear_svc:multi_class': 'ovr', 'classifier:liblinear_svc:penalty': 'l2', 'classifier:liblinear_svc:tol': 0.0015130257264171173, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'power_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding_distinct', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 137, 'feature_preprocessor:pca:keep_variance': 0.9677965620214456, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative': 0.08656832316003299}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'lda', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:lda:shrinkage': 'None', 'classifier:lda:tol': 0.010552900863349885, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 2, 'feature_preprocessor:pca:keep_variance': 0.5940439727806581, 'feature_preprocessor:pca:whiten': 'True', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0006032458390939325, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1660, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative': 0.36019594124973353}, {'balancing:strategy': 'none', 'classifier:__choice__': 'decision_tree', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:decision_tree:criterion': 'gini', 'classifier:decision_tree:max_depth_factor': 0.09679641236056158, 'classifier:decision_tree:max_features': 1.0, 'classifier:decision_tree:max_leaf_nodes': 'None', 'classifier:decision_tree:min_impurity_decrease': 0.0, 'classifier:decision_tree:min_samples_leaf': 12, 'classifier:decision_tree:min_samples_split': 10, 'classifier:decision_tree:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'median', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 15, 'feature_preprocessor:pca:keep_variance': 0.9889862560610739, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.016731911468974747, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 373, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 2, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': False, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative': 0.0969631806397533}, {'balancing:strategy': 'none', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.1648635177663599e-07, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'train', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 1, 'classifier:mlp:learning_rate_init': 0.10405546728298488, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 78, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 44, 'feature_preprocessor:pca:keep_variance': 0.885953981598865, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.001146136570174522, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.8953706157299287, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.21476609150297996, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 2, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 10}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:passive_aggressive:C': 0.009945692083946422, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.00039533312192938314, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 1174, 'feature_preprocessor:pca:keep_variance': 0.9742266416789866, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 3, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 9}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'relu', 'classifier:mlp:alpha': 2.0254725986516904e-07, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'train', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 1, 'classifier:mlp:learning_rate_init': 0.007525773377111993, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 224, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 5796, 'feature_preprocessor:pca:keep_variance': 0.8322479037809868, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 3, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': False, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute': 2}], 'status': ['Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success'], 'budgets': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'param_balancing:strategy': masked_array(data=['none', 'none', 'weighting', 'weighting', 'none',
+           0.        ]), 'rank_test_scores': array([ 7,  6,  1,  9, 10,  2,  4,  5,  7,  2, 11]), 'mean_fit_time': array([1.66526675, 1.45068383, 1.26435661, 0.78260231, 0.64437938,
+           0.83853865, 0.88460684, 0.66364837, 0.95876884, 0.9445622 ,
+           1.00846124]), 'params': [{'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.5, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 1, 'classifier:random_forest:min_samples_split': 2, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9999, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.01, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 0}, {'balancing:strategy': 'none', 'classifier:__choice__': 'random_forest', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:random_forest:bootstrap': 'True', 'classifier:random_forest:criterion': 'gini', 'classifier:random_forest:max_depth': 'None', 'classifier:random_forest:max_features': 0.9331254454871041, 'classifier:random_forest:max_leaf_nodes': 'None', 'classifier:random_forest:min_impurity_decrease': 0.0, 'classifier:random_forest:min_samples_leaf': 2, 'classifier:random_forest:min_samples_split': 20, 'classifier:random_forest:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'none', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9967857433838874, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.005069923784737444, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.103855734598575e-05, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'valid', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 3, 'classifier:mlp:learning_rate_init': 0.00014375616988222174, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 229, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.7895711479212801, 'feature_preprocessor:pca:whiten': 'True', 'classifier:mlp:validation_fraction': 0.1, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.002766772136115771, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 180, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'k_nearest_neighbors', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:k_nearest_neighbors:n_neighbors': 4, 'classifier:k_nearest_neighbors:p': 2, 'classifier:k_nearest_neighbors:weights': 'distance', 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'normalize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.8047274080856589, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.008015420020402715, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'none', 'classifier:__choice__': 'libsvm_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:libsvm_svc:C': 100.5905006626969, 'classifier:libsvm_svc:gamma': 0.011333066835975528, 'classifier:libsvm_svc:kernel': 'poly', 'classifier:libsvm_svc:max_iter': -1, 'classifier:libsvm_svc:shrinking': 'True', 'classifier:libsvm_svc:tol': 0.012391313886912093, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 100, 'feature_preprocessor:pca:keep_variance': 0.9290439925152777, 'feature_preprocessor:pca:whiten': 'False', 'classifier:libsvm_svc:coef0': 0.08087614244138486, 'classifier:libsvm_svc:degree': 3, 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.010000000000000004, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 1}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'liblinear_svc', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:liblinear_svc:C': 10.369811497206404, 'classifier:liblinear_svc:dual': 'False', 'classifier:liblinear_svc:fit_intercept': 'True', 'classifier:liblinear_svc:intercept_scaling': 1, 'classifier:liblinear_svc:loss': 'squared_hinge', 'classifier:liblinear_svc:multi_class': 'ovr', 'classifier:liblinear_svc:penalty': 'l2', 'classifier:liblinear_svc:tol': 0.0015130257264171173, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'power_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding_distinct', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 137, 'feature_preprocessor:pca:keep_variance': 0.9677965620214456, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative': 0.08656832316003299}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'lda', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:lda:shrinkage': 'None', 'classifier:lda:tol': 0.010552900863349885, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 2, 'feature_preprocessor:pca:keep_variance': 0.5940439727806581, 'feature_preprocessor:pca:whiten': 'True', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0006032458390939325, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 1660, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'normal', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 1, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative': 0.36019594124973353}, {'balancing:strategy': 'none', 'classifier:__choice__': 'decision_tree', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:decision_tree:criterion': 'gini', 'classifier:decision_tree:max_depth_factor': 0.09679641236056158, 'classifier:decision_tree:max_features': 1.0, 'classifier:decision_tree:max_leaf_nodes': 'None', 'classifier:decision_tree:min_impurity_decrease': 0.0, 'classifier:decision_tree:min_samples_leaf': 12, 'classifier:decision_tree:min_samples_split': 10, 'classifier:decision_tree:min_weight_fraction_leaf': 0.0, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'median', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'quantile_transformer', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 15, 'feature_preprocessor:pca:keep_variance': 0.9889862560610739, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.016731911468974747, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles': 373, 'data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution': 'uniform', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_relative', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 2, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': False, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative': 0.0969631806397533}, {'balancing:strategy': 'none', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'tanh', 'classifier:mlp:alpha': 1.1648635177663599e-07, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'train', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 1, 'classifier:mlp:learning_rate_init': 0.10405546728298488, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 78, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'robust_scaler', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 44, 'feature_preprocessor:pca:keep_variance': 0.885953981598865, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.001146136570174522, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max': 0.8953706157299287, 'data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min': 0.21476609150297996, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 2, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 10}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'passive_aggressive', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:passive_aggressive:C': 0.009945692083946422, 'classifier:passive_aggressive:average': 'False', 'classifier:passive_aggressive:fit_intercept': 'True', 'classifier:passive_aggressive:loss': 'hinge', 'classifier:passive_aggressive:tol': 0.00039533312192938314, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'bag_of_word_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 1174, 'feature_preprocessor:pca:keep_variance': 0.9742266416789866, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound': 3, 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute': 9}, {'balancing:strategy': 'weighting', 'classifier:__choice__': 'mlp', 'data_preprocessor:__choice__': 'feature_type', 'feature_preprocessor:__choice__': 'pca', 'classifier:mlp:activation': 'relu', 'classifier:mlp:alpha': 2.0254725986516904e-07, 'classifier:mlp:batch_size': 'auto', 'classifier:mlp:beta_1': 0.9, 'classifier:mlp:beta_2': 0.999, 'classifier:mlp:early_stopping': 'train', 'classifier:mlp:epsilon': 1e-08, 'classifier:mlp:hidden_layer_depth': 1, 'classifier:mlp:learning_rate_init': 0.007525773377111993, 'classifier:mlp:n_iter_no_change': 32, 'classifier:mlp:num_nodes_per_layer': 224, 'classifier:mlp:shuffle': 'True', 'classifier:mlp:solver': 'adam', 'classifier:mlp:tol': 0.0001, 'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding', 'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense', 'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'most_frequent', 'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'standardize', 'data_preprocessor:feature_type:text_transformer:text_encoding:__choice__': 'tfidf_encoding', 'data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components': 5796, 'feature_preprocessor:pca:keep_variance': 0.8322479037809868, 'feature_preprocessor:pca:whiten': 'False', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice': 'min_df_absolute', 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound': 3, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf': False, 'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute': 2}], 'status': ['Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Success', 'Timeout'], 'budgets': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'param_balancing:strategy': masked_array(data=['none', 'none', 'weighting', 'weighting', 'none',
                        'weighting', 'weighting', 'none', 'none', 'weighting',
                        'weighting'],
                  mask=[False, False, False, False, False, False, False, False,
@@ -1269,31 +1242,30 @@ The explained variance ratio per stage
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    The 0th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
+    The 0th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
+    The 1th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+     0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117
+     0.0075763 ]
+    The 2th pipeline has a explained variance of [0.98080571 0.01684553]
+    The 3th pipeline has a explained variance of [0.44685232 0.17122959 0.1085501  0.07063243 0.06437417 0.03986668
+     0.02462169 0.01589975 0.01257378 0.00948519 0.00858029]
+    The 4th pipeline has a explained variance of [0.46038401 0.16124884]
+    The 5th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
+     0.01851537 0.01223987]
+    The 6th pipeline has a explained variance of [0.71293893 0.1129465  0.0806497 ]
+    The 7th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
      5.94611519e-02 3.70629898e-02 2.38430977e-02 1.49326086e-02
      1.37641366e-02 1.13704890e-02 1.03737258e-02 8.74116751e-03
      7.57629717e-03 4.86528503e-03 3.32225143e-03 2.55773043e-03
      2.20759805e-03 1.88675402e-03 1.36245140e-03 1.03409213e-03
      8.39749085e-04 7.91287172e-04 6.75655689e-04 5.42961621e-04
      5.02641737e-04 2.07827509e-04 1.74597367e-04]
-    The 1th pipeline has a explained variance of [0.4595393  0.18012072 0.09809101 0.06332899 0.0587162  0.03690793
+    The 8th pipeline has a explained variance of [0.76699224 0.17152095]
+    The 9th pipeline has a explained variance of [0.4595393  0.18012072 0.09809101 0.06332899 0.0587162  0.03690793
      0.02471434 0.01657568 0.01327702 0.0102346  0.00829202 0.0068371
      0.00546871 0.00382248 0.00336889]
-    The 2th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
-     0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117
-     0.0075763 ]
-    The 3th pipeline has a explained variance of [0.98080571 0.01684553]
-    The 4th pipeline has a explained variance of [0.46038401 0.16124884]
-    The 5th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
-     0.01851537 0.01223987]
-    The 6th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115]
-    The 7th pipeline has a explained variance of [0.71293893 0.1129465  0.0806497 ]
-    The 8th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
-    The 9th pipeline has a explained variance of [0.76699224 0.17152095]
 
 
 
@@ -1301,35 +1273,30 @@ The explained variance ratio per stage
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.867 seconds)
+   **Total running time of the script:** ( 0 minutes  25.097 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_get_pipeline_components.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_get_pipeline_components.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_get_pipeline_components.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_get_pipeline_components.py <example_get_pipeline_components.py>`
 
-     :download:`Download Python source code: example_get_pipeline_components.py <example_get_pipeline_components.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_get_pipeline_components.ipynb <example_get_pipeline_components.ipynb>`
+      :download:`Download Jupyter notebook: example_get_pipeline_components.ipynb <example_get_pipeline_components.ipynb>`
 
 
 .. only:: html

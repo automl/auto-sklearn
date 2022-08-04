@@ -13,7 +13,7 @@ give short explanations (click the title to expand text), e.g.
 
     We provide examples on using *auto-sklearn* for multiple use cases ranging from
     simple classification to advanced uses such as feature importance, parallel runs
-    and customization. They can be found in the :ref:`sphx_glr_examples`.
+    and customization. They can be found in the :ref:`examples`.
 
 .. collapse:: <b>Material from talks and presentations</b>
 

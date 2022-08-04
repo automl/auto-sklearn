@@ -113,8 +113,6 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -147,11 +145,9 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Accuracy score 0.9440559440559441
+    Accuracy score 0.951048951048951
     ################################################################################
     Metric results
      rank_test_scores param_classifier:__choice__  mean_test_score  metric_balanced_accuracy  metric_precision  metric_recall  metric_f1  metric_custom_error
@@ -181,20 +177,18 @@ Get the Score of the final ensemble
                    24                    adaboost         0.950355                  0.944685          0.955556       0.966292   0.960894             0.049645
                     6                 extra_trees         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
                    30                 gaussian_nb         0.929078                  0.903846          0.898990       1.000000   0.946809             0.070922
-                   37                 extra_trees         0.879433                  0.836538          0.839623       1.000000   0.912821             0.120567
+                   36                 extra_trees         0.879433                  0.836538          0.839623       1.000000   0.912821             0.120567
                    16                bernoulli_nb         0.964539                  0.963915          0.977273       0.966292   0.971751             0.035461
                    34         k_nearest_neighbors         0.914894                  0.888613          0.888889       0.988764   0.936170             0.085106
                    28               decision_tree         0.936170                  0.937446          0.965116       0.932584   0.948571             0.063830
                    32                 extra_trees         0.921986                  0.898228          0.897959       0.988764   0.941176             0.078014
-                   38                         mlp         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
+                   37                         mlp         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
                    35                    adaboost         0.886525                  0.862143          0.876289       0.955056   0.913978             0.113475
                    22                 extra_trees         0.957447                  0.962295          0.988235       0.943820   0.965517             0.042553
                     2           gradient_boosting         0.978723                  0.975151          0.977778       0.988764   0.983240             0.021277
                    28                         lda         0.936170                  0.913462          0.908163       1.000000   0.951872             0.063830
-                   38                         qda         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
+                   37                         qda         0.631206                  0.500000          0.631206       1.000000   0.773913             0.368794
                     2                         sgd         0.978723                  0.979149          0.988636       0.977528   0.983051             0.021277
-                   40                bernoulli_nb         0.390071                  0.516854          1.000000       0.033708   0.065217             0.609929
-                   35          passive_aggressive         0.886525                  0.846154          0.847619       1.000000   0.917526             0.113475
 
 
 
@@ -202,35 +196,30 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  3.540 seconds)
+   **Total running time of the script:** ( 1 minutes  59.983 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_calc_multiple_metrics.py <example_calc_multiple_metrics.py>`
 
-     :download:`Download Python source code: example_calc_multiple_metrics.py <example_calc_multiple_metrics.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_calc_multiple_metrics.ipynb <example_calc_multiple_metrics.ipynb>`
+      :download:`Download Jupyter notebook: example_calc_multiple_metrics.ipynb <example_calc_multiple_metrics.ipynb>`
 
 
 .. only:: html

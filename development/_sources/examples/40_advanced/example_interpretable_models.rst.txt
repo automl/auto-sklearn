@@ -66,8 +66,6 @@ as well.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     adaboost
@@ -112,8 +110,6 @@ Show available preprocessors
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -199,8 +195,6 @@ and can change from use case to use case.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -232,16 +226,14 @@ Print the final ensemble constructed by auto-sklearn
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     {   59: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7967f5d0d0>,
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fef161d7a90>,
                 'cost': 0.007092198581560294,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7968302f10>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fef1bd335e0>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7967f5d970>,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fef161d7b50>,
                 'model_id': 59,
                 'rank': 1,
                 'sklearn_classifier': SGDClassifier(alpha=9.813136926397195e-05, average=True,
@@ -270,8 +262,6 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Accuracy score: 0.972027972027972
@@ -282,35 +272,30 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.469 seconds)
+   **Total running time of the script:** ( 2 minutes  0.076 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_interpretable_models.py <example_interpretable_models.py>`
 
-     :download:`Download Python source code: example_interpretable_models.py <example_interpretable_models.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_interpretable_models.ipynb <example_interpretable_models.ipynb>`
+      :download:`Download Jupyter notebook: example_interpretable_models.ipynb <example_interpretable_models.ipynb>`
 
 
 .. only:: html

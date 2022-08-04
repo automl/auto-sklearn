@@ -168,7 +168,6 @@ future.</p>
 <span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;German Credit&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(delete_tmp_folder_after_terminate=False,
                       metric=[precision, recall], per_run_time_limit=12,
                       time_left_for_this_task=120)
@@ -182,7 +181,6 @@ future.</p>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Recall&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Precision 0.7142857142857143
 Recall 0.2702702702702703
 </pre></div>
@@ -194,17 +192,16 @@ Recall 0.2702702702702703
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">leaderboard</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight  ...    cost_1  duration
 model_id                         ...
-2            2             0.12  ...  0.586667  1.854118
-3            5             0.04  ...  0.533333  1.779224
-4            8             0.06  ...  0.426667  1.703627
-8            3             0.04  ...  0.586667  1.753551
-16           4             0.52  ...  0.933333  1.858474
-21           1             0.18  ...  0.586667  1.864695
-24           6             0.02  ...  0.600000  0.979650
-27           7             0.02  ...  0.226667  1.011533
+2            2             0.12  ...  0.586667  1.888447
+3            5             0.04  ...  0.533333  1.824072
+4            8             0.06  ...  0.426667  1.743947
+8            3             0.04  ...  0.586667  1.793458
+16           4             0.52  ...  0.933333  1.901787
+21           1             0.18  ...  0.586667  1.917471
+24           6             0.02  ...  0.600000  1.007004
+27           7             0.02  ...  0.226667  1.040020
 
 [8 rows x 6 columns]
 </pre></div>
@@ -217,7 +214,6 @@ to <em>auto-sklearn</em>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">cv_results_</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;budgets&#39;: [0.0,
              0.0,
              0.0,
@@ -248,12 +244,12 @@ to <em>auto-sklearn</em>.</p>
              0.0,
              0.0,
              0.0],
- &#39;mean_fit_time&#39;: array([ 1.85411835,  1.77922392,  1.70362663,  1.7868762 ,  2.34962845,
-        2.20710731,  1.75355077,  1.03737259,  1.92265701, 12.01773024,
-        1.31987286,  1.41598225,  1.4495976 ,  0.85842085,  1.85847449,
-        1.03761506,  4.85008144,  1.1398859 ,  8.11723232,  1.8646946 ,
-        1.6442852 ,  0.83312821,  0.97965002,  1.8513813 ,  1.04942179,
-        1.01153326,  2.51501679,  1.1499548 ,  1.08182216,  0.83192182]),
+ &#39;mean_fit_time&#39;: array([ 1.88844657,  1.82407236,  1.74394703,  1.82287359,  2.38982821,
+        2.31927514,  1.79345846,  1.06429052,  1.97211313, 12.01571536,
+        1.36067224,  1.47306561,  1.48371506,  0.88376832,  1.90178704,
+        1.06216097,  4.98244214,  1.17524099,  9.276443  ,  1.91747069,
+        1.68475246,  0.86481619,  1.00700402,  1.8898325 ,  1.07976818,
+        1.04002047,  2.56826091,  1.19058681,  1.10807204,  0.85436916]),
  &#39;mean_test_precision&#39;: array([0.68888889, 0.61403509, 0.42156863, 0.55072464, 0.53333333,
        0.70588235, 0.67391304, 0.34313725, 0.51401869, 0.        ,
        0.49090909, 0.55263158, 0.50526316, 0.59016393, 0.625     ,
@@ -2796,8 +2792,8 @@ to <em>auto-sklearn</em>.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_multi_objective_001.png" srcset="../../_images/sphx_glr_example_multi_objective_001.png" alt="Pareto set" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  5.902 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-multi-objective-py">
+<img src="../../_images/sphx_glr_example_multi_objective_001.png" srcset="../../_images/sphx_glr_example_multi_objective_001.png" alt="Pareto set" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  59.492 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-multi-objective-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_multi_objective.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
 </div>
