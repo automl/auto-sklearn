@@ -19,7 +19,7 @@ class ScalingComponentTest(unittest.TestCase):
         original_X_train = X_train.copy()
         configuration_space = Preprocessor(
             dataset_properties
-        ).get_hyperparameter_search_space(dataset_properties)
+        ).get_hyperparameter_search_space(dataset_properties=dataset_properties)
         default = configuration_space.get_default_configuration()
 
         preprocessor = Preprocessor(dataset_properties, random_state=1)

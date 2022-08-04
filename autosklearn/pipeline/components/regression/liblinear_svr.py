@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenAndConjunction, ForbiddenEqualsClause
 from ConfigSpace.hyperparameters import (
@@ -6,6 +8,7 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import DENSE, PREDICTIONS, SPARSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool
@@ -83,7 +86,9 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
         C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True, default_value=1.0)
         loss = CategoricalHyperparameter(

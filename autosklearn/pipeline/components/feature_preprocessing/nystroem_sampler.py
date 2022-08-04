@@ -1,4 +1,5 @@
-import numpy as np
+from typing import Optional
+
 from ConfigSpace.conditions import EqualsCondition, InCondition
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
@@ -7,6 +8,7 @@ from ConfigSpace.hyperparameters import (
     UniformIntegerHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import (
     DENSE,
@@ -54,7 +56,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
             else:
                 X[X < 0] = 0.0
 
-        self.preprocessor.fit(X.astype(np.float64))
+        self.preprocessor.fit(X)
         return self
 
     def transform(self, X):
@@ -94,7 +96,9 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         if dataset_properties is not None and (
             dataset_properties.get("sparse") is True
             or dataset_properties.get("signed") is False

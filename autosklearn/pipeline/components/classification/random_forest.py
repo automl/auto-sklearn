@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import (
     CategoricalHyperparameter,
@@ -6,6 +8,7 @@ from ConfigSpace.hyperparameters import (
     UnParametrizedHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     IterativeComponentWithSampleWeight,
@@ -149,7 +152,9 @@ class RandomForest(
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini"

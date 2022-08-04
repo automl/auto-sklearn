@@ -5,13 +5,15 @@ from collections import OrderedDict, defaultdict
 
 import arff
 import pandas as pd
+from ConfigSpace.configuration_space import ConfigurationSpace
 
 
 class AlgorithmSelectionProblem(object):
-    def __init__(self, directory):
+    def __init__(self, directory: str, cs: ConfigurationSpace):
         self.logger = logging.getLogger(__name__)
 
         # Create data structures
+        self.cs = cs
         self.dir_ = directory
         self.algorithm_runs = None
         self.configurations = None
@@ -143,13 +145,17 @@ class AlgorithmSelectionProblem(object):
             csv_reader = csv.DictReader(fh)
 
             configurations = dict()
+            hp_names = self.cs.get_hyperparameter_names()
             for line in csv_reader:
                 configuration = dict()
                 algorithm_id = line["idx"]
                 for hp_name, value in line.items():
                     if not value or hp_name == "idx":
                         continue
-
+                    if hp_name not in hp_names:
+                        # skip hyperparameter
+                        # if it is not existing in the current search space
+                        continue
                     try:
                         value = int(value)
                     except Exception:

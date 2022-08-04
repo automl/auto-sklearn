@@ -1,17 +1,20 @@
+from typing import Optional
+
 import ConfigSpace.configuration_space
 
 import autosklearn.pipeline.base
 import autosklearn.pipeline.components.base
 import autosklearn.pipeline.components.classification as classification
 import autosklearn.pipeline.components.feature_preprocessing as feature_preprocessing
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 
 import unittest
 import unittest.mock
 
 
 class BasePipelineMock(autosklearn.pipeline.base.BasePipeline):
-    def __init__(self):
-        pass
+    def __init__(self, feat_type: Optional[FEAT_TYPE_TYPE] = None):
+        self.feat_type = feat_type
 
 
 class BaseTest(unittest.TestCase):
@@ -37,7 +40,11 @@ class BaseTest(unittest.TestCase):
 
         base = BasePipelineMock()
         cs = base._get_base_search_space(
-            cs, dataset_properties, exclude, include, pipeline
+            cs=cs,
+            dataset_properties=dataset_properties,
+            exclude=exclude,
+            include=include,
+            pipeline=pipeline,
         )
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 13)
@@ -51,7 +58,11 @@ class BaseTest(unittest.TestCase):
         dataset_properties = {"target_type": "classification", "signed": True}
         include = {"c": ["multinomial_nb"]}
         cs = base._get_base_search_space(
-            cs, dataset_properties, exclude, include, pipeline
+            cs=cs,
+            dataset_properties=dataset_properties,
+            exclude=exclude,
+            include=include,
+            pipeline=pipeline,
         )
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 13)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices), 10)
@@ -66,7 +77,11 @@ class BaseTest(unittest.TestCase):
         dataset_properties = {"target_type": "classification", "signed": True}
         include = {}
         cs = base._get_base_search_space(
-            cs, dataset_properties, exclude, include, pipeline
+            cs=cs,
+            dataset_properties=dataset_properties,
+            exclude=exclude,
+            include=include,
+            pipeline=pipeline,
         )
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 13)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices), 15)
@@ -78,7 +93,11 @@ class BaseTest(unittest.TestCase):
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {"target_type": "classification", "sparse": True}
         cs = base._get_base_search_space(
-            cs, dataset_properties, exclude, include, pipeline
+            cs=cs,
+            dataset_properties=dataset_properties,
+            exclude=exclude,
+            include=include,
+            pipeline=pipeline,
         )
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 12)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices), 15)
@@ -93,7 +112,11 @@ class BaseTest(unittest.TestCase):
             "signed": True,
         }
         cs = base._get_base_search_space(
-            cs, dataset_properties, exclude, include, pipeline
+            cs=cs,
+            dataset_properties=dataset_properties,
+            exclude=exclude,
+            include=include,
+            pipeline=pipeline,
         )
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 12)

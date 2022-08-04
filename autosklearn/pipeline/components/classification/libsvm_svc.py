@@ -1,3 +1,5 @@
+from typing import Optional
+
 import resource
 import sys
 
@@ -10,6 +12,7 @@ from ConfigSpace.hyperparameters import (
     UnParametrizedHyperparameter,
 )
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, PREDICTIONS, SPARSE, UNSIGNED_DATA
 from autosklearn.pipeline.implementations.util import softmax
@@ -138,7 +141,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True, default_value=1.0)
         # No linear kernel here, because we have liblinear
         kernel = CategoricalHyperparameter(

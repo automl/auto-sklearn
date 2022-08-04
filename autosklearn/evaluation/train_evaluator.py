@@ -247,6 +247,7 @@ class TrainEvaluator(AbstractEvaluator):
             budget_type=budget_type,
         )
 
+        self.feat_type = self.backend.load_datamanager().feat_type
         self.resampling_strategy = resampling_strategy
         if resampling_strategy_args is None:
             self.resampling_strategy_args = {}
@@ -305,7 +306,7 @@ class TrainEvaluator(AbstractEvaluator):
 
                 # Test if the model allows for an iterative fit, if not,
                 # call this method again without the iterative argument
-                model = self._get_model()
+                model = self._get_model(self.feat_type)
                 if not model.estimator_supports_iterative_fit():
                     self.fit_predict_and_loss(iterative=False)
                     return
@@ -319,7 +320,9 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred = [None] * self.num_cv_folds
                 train_splits = [None] * self.num_cv_folds
 
-                self.models = [self._get_model() for i in range(self.num_cv_folds)]
+                self.models = [
+                    self._get_model(self.feat_type) for i in range(self.num_cv_folds)
+                ]
                 iterations = [1] * self.num_cv_folds
                 total_n_iterations = [0] * self.num_cv_folds
                 # model.estimator_supports_iterative_fit -> true
@@ -515,7 +518,7 @@ class TrainEvaluator(AbstractEvaluator):
                     self.Y_optimization = Y_targets
                     self.Y_actual_train = Y_train_targets
 
-                    self.model = self._get_model()
+                    self.model = self._get_model(self.feat_type)
                     status = StatusType.DONOTADVANCE
                     if any(
                         [
@@ -679,7 +682,7 @@ class TrainEvaluator(AbstractEvaluator):
             self.Y_actual_train = Y_train_targets
 
             if self.num_cv_folds > 1:
-                self.model = self._get_model()
+                self.model = self._get_model(self.feat_type)
                 # Bad style, but necessary for unit testing that self.model is
                 # actually a new model
                 self._added_empty_model = True
@@ -798,7 +801,7 @@ class TrainEvaluator(AbstractEvaluator):
         test_indices: List[int],
         add_model_to_self: bool,
     ) -> None:
-        model = self._get_model()
+        model = self._get_model(self.feat_type)
 
         self.indices[fold] = (train_indices, test_indices)
 
@@ -939,7 +942,7 @@ class TrainEvaluator(AbstractEvaluator):
         PIPELINE_DATA_DTYPE,  # test_pred
         TYPE_ADDITIONAL_INFO,
     ]:
-        model = self._get_model()
+        model = self._get_model(self.feat_type)
 
         self.indices[fold] = (train_indices, test_indices)
 
@@ -1005,7 +1008,7 @@ class TrainEvaluator(AbstractEvaluator):
         # Add this statement for mypy
         assert self.budget is not None
 
-        model = self._get_model()
+        model = self._get_model(self.feat_type)
         self.indices[fold] = (train_indices, test_indices)
         self.X_targets[fold] = self.X_train[test_indices]
         self.Y_targets[fold] = self.Y_train[test_indices]

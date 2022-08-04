@@ -5,7 +5,11 @@ from typing import Callable, Collection, Optional, Union
 import numpy as np
 from sklearn.ensemble import VotingClassifier, VotingRegressor
 
-from autosklearn.data.validation import SUPPORTED_FEAT_TYPES, SUPPORTED_TARGET_TYPES
+from autosklearn.data.validation import (
+    SUPPORTED_FEAT_TYPES,
+    SUPPORTED_TARGET_TYPES,
+    InputValidator,
+)
 from autosklearn.evaluation.abstract_evaluator import (
     MyDummyClassifier,
     MyDummyRegressor,
@@ -42,9 +46,16 @@ def make_voting_classifier() -> Callable[..., VotingClassifier]:
         seed: Union[int, None, np.random.RandomState] = DEFAULT_SEED,
     ) -> VotingClassifier:
         assert not (X is None) ^ (y is None)
-
         if not models:
-            models = [MyDummyClassifier(config=1, random_state=seed) for _ in range(5)]
+            validator = InputValidator(is_classification=True).fit(X, y)
+            models = [
+                MyDummyClassifier(
+                    feat_type=validator.feature_validator.feat_type,
+                    config=1,
+                    random_state=seed,
+                )
+                for _ in range(5)
+            ]
 
         if X is not None:
             for model in models:
@@ -81,7 +92,15 @@ def make_voting_regressor() -> Callable[..., VotingRegressor]:
         assert not (X is None) ^ (y is None)
 
         if not models:
-            models = [MyDummyRegressor(config=1, random_state=seed) for _ in range(5)]
+            validator = InputValidator(is_classification=False).fit(X, y)
+            models = [
+                MyDummyRegressor(
+                    feat_type=validator.feature_validator.feat_type,
+                    config=1,
+                    random_state=seed,
+                )
+                for _ in range(5)
+            ]
 
         if X is not None:
             for model in models:

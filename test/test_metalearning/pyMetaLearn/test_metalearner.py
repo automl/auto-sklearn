@@ -25,6 +25,7 @@ class MetaLearnerTest(unittest.TestCase):
 
         pipeline = autosklearn.pipeline.classification.SimpleClassificationPipeline()
         self.cs = pipeline.get_hyperparameter_search_space()
+        # print(self.cs.get_default_configuration())
 
         self.logger = logging.getLogger()
         meta_base = MetaBase(self.cs, data_dir, logger=self.logger)
