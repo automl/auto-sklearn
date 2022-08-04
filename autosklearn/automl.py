@@ -348,6 +348,7 @@ class AutoML(ABC, BaseEstimator):
 
     @property
     def logger(self) -> PicklableClientLogger:
+        """The logger for the instance"""
         # TODO: This is here to remove typing errors `self._logger` could be None
         #   All logger things should be coupled together and use context manager for
         #   lifetimes.
@@ -357,6 +358,7 @@ class AutoML(ABC, BaseEstimator):
 
     @property
     def task(self) -> int:
+        """The task type this automl instance is fitted on"""
         if self._task is None:
             raise NotFittedError("`task` has not been set, please call `fit` first")
 
@@ -364,6 +366,7 @@ class AutoML(ABC, BaseEstimator):
 
     @property
     def metrics(self) -> Sequence[Scorer]:
+        """The metrics this instance is using"""
         if self._metrics is None:
             raise NotFittedError(
                 "`metrics` has not been set, please pass in `init` or call `fit` first"
@@ -373,6 +376,7 @@ class AutoML(ABC, BaseEstimator):
 
     @property
     def configuration_space(self) -> ConfigurationSpace:
+        """The configuration space of this instance"""
         if self._configuration_space is None:
             raise NotFittedError(
                 "`configuration_space` has not been set, please call `fit` first"
@@ -382,6 +386,7 @@ class AutoML(ABC, BaseEstimator):
 
     @property
     def input_validator(self) -> InputValidator:
+        """The input validator of this instance"""
         if self._input_validator is None:
             raise NotFittedError(
                 "`input_validator` has not been set, please call `fit` first"
@@ -391,6 +396,7 @@ class AutoML(ABC, BaseEstimator):
 
     @property
     def is_classification(self) -> bool:
+        """Whether this automl instance is a classifier or not"""
         return self._estimator_type == "classifier"
 
     def _create_logger(self, name: str) -> PicklableClientLogger:
@@ -1472,11 +1478,54 @@ class AutoML(ABC, BaseEstimator):
         task: int | None = None,
         precision: Literal[16, 32, 64] = 32,
         dataset_name: str | None = None,
-        ensemble_nbest: int | None = None,
+        ensemble_nbest: int | float | None = None,
         ensemble_class: type[AbstractEnsemble] | None = EnsembleSelection,
         ensemble_kwargs: dict[str, Any] | None = None,
         metrics: Scorer | Sequence[Scorer] | None = None,
     ) -> Self:
+        """Fit the ensemble for this automl instance
+
+        Relies on models having already been trained with X data that corresponds to
+        the y data passed in.
+
+        Parameters
+        ----------
+        y : SUPPORTED_TARGET_TYPES
+            The labels to fit towards
+
+        task : int | None = None
+            The task type to consider if not infered from the previous fit
+
+        precision : Literal[16, 32, 64] = 32
+            The precision of model predictions to consider
+
+        dataset_name : str | None = None
+            The dataset name for nicer logging, defaults to a random uuid if not
+            provided or can not be infered from a previous call to `fit()`.
+
+        ensemble_nbest: int | float | None = None
+            If int: consider only the n best predictions
+            If float: consider only this fraction of the best models
+            If None: default to whatever was used at construction
+
+        ensemble_class : type[AbstractEnsemble] | None = EnsembleSelection
+            The ensembling class to use when fitting
+            If None, defaults to the ensemble class used during fit
+
+        ensemble_kwargs : dict[str, Any] | None = None
+            Any kwargs to pass to the ensemble when constructing it.
+            If None, defaults to constructor arguments used
+
+        metrics : Scorer | Sequence[Scorer] | None = None
+            A single metric or sequence of metrics to build the ensemble from.
+            In case of multiple metrics, the ensemble class must be able to support
+            multiple metrics.
+            If None, defaults to the metrics used during fit.
+
+        Returns
+        -------
+        Self
+        """
         check_is_fitted(self)
         task = task if task is not None else self.task
         ensemble_class = ensemble_class if ensemble_class else self._ensemble_class
