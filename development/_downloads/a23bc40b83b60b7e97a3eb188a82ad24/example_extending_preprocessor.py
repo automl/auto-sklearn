@@ -7,6 +7,7 @@ The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
 in auto-sklearn.
 """
+from typing import Optional
 from pprint import pprint
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -17,6 +18,8 @@ from ConfigSpace.hyperparameters import (
 from ConfigSpace.conditions import InCondition
 
 import sklearn.metrics
+
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 import autosklearn.classification
 import autosklearn.pipeline.components.feature_preprocessing
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -76,7 +79,9 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
         }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
         solver = CategoricalHyperparameter(
             name="solver", choices=["svd", "lsqr", "eigen"], default_value="svd"

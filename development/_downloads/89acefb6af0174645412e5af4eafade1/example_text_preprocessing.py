@@ -59,7 +59,6 @@ X_test = pd.DataFrame({"Text": pd.Series(X_test, dtype="string")})
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=60,
     per_run_time_limit=30,
-    tmp_folder="/tmp/autosklearn_text_example_tmp",
 )
 
 automl.fit(X_train, y_train, dataset_name="20_Newsgroups")  # fit the automl model

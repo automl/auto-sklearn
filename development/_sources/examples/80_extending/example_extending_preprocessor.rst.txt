@@ -26,10 +26,11 @@ The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
 in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-30
+.. GENERATED FROM PYTHON SOURCE LINES 10-33
 
 .. code-block:: default
 
+    from typing import Optional
     from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
@@ -40,6 +41,8 @@ in auto-sklearn.
     from ConfigSpace.conditions import InCondition
 
     import sklearn.metrics
+
+    from autosklearn.askl_typing import FEAT_TYPE_TYPE
     import autosklearn.classification
     import autosklearn.pipeline.components.feature_preprocessing
     from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
@@ -57,12 +60,12 @@ in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-33
+.. GENERATED FROM PYTHON SOURCE LINES 34-36
 
 Create LDA component for auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-99
+.. GENERATED FROM PYTHON SOURCE LINES 36-104
 
 .. code-block:: default
 
@@ -112,7 +115,9 @@ Create LDA component for auto-sklearn
             }
 
         @staticmethod
-        def get_hyperparameter_search_space(dataset_properties=None):
+        def get_hyperparameter_search_space(
+            feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+        ):
             cs = ConfigurationSpace()
             solver = CategoricalHyperparameter(
                 name="solver", choices=["svd", "lsqr", "eigen"], default_value="svd"
@@ -139,12 +144,12 @@ Create LDA component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-102
+.. GENERATED FROM PYTHON SOURCE LINES 105-107
 
 Create dataset
 ==============
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-106
+.. GENERATED FROM PYTHON SOURCE LINES 107-111
 
 .. code-block:: default
 
@@ -159,12 +164,12 @@ Create dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-109
+.. GENERATED FROM PYTHON SOURCE LINES 112-114
 
 Configuration space
 ===================
 
-.. GENERATED FROM PYTHON SOURCE LINES 109-113
+.. GENERATED FROM PYTHON SOURCE LINES 114-118
 
 .. code-block:: default
 
@@ -192,12 +197,12 @@ Configuration space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-116
+.. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 Fit the model using LDA as preprocessor
 =======================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-127
+.. GENERATED FROM PYTHON SOURCE LINES 121-132
 
 .. code-block:: default
 
@@ -230,12 +235,12 @@ Fit the model using LDA as preprocessor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-130
+.. GENERATED FROM PYTHON SOURCE LINES 133-135
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-134
+.. GENERATED FROM PYTHON SOURCE LINES 135-139
 
 .. code-block:: default
 
@@ -251,17 +256,38 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.9300699300699301
+    accuracy:  0.972027972027972
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f7207b5b340>,
-               'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7207843760>,
-               'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f7207843460>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7c13e1c0>,
+               'cost': 0.03546099290780147,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7be9c5e0>,
+               'ensemble_weight': 0.44,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7f0a21f0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=1, n_estimators=512, n_jobs=1,
-                           random_state=1, warm_start=True)}}
+                           random_state=1, warm_start=True)},
+        4: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7d0b0850>,
+               'cost': 0.08510638297872342,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7f06d5b0>,
+               'ensemble_weight': 0.34,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7d0b0580>,
+               'model_id': 4,
+               'rank': 2,
+               'sklearn_classifier': BernoulliNB(alpha=23.95520684365466, fit_prior=False)},
+        5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7d094b50>,
+               'cost': 0.08510638297872342,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7d6b9b50>,
+               'ensemble_weight': 0.22,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7d094550>,
+               'model_id': 5,
+               'rank': 3,
+               'sklearn_classifier': AdaBoostClassifier(algorithm='SAMME',
+                       base_estimator=DecisionTreeClassifier(max_depth=7),
+                       learning_rate=1.371412136822841, n_estimators=135,
+                       random_state=1)}}
 
 
 
@@ -269,7 +295,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  21.219 seconds)
+   **Total running time of the script:** ( 0 minutes  34.515 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:

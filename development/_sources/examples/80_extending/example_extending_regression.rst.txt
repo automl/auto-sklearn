@@ -25,10 +25,11 @@ Extending Auto-Sklearn with Regression Component
 The following example demonstrates how to create a new regression
 component for using in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-35
+.. GENERATED FROM PYTHON SOURCE LINES 9-38
 
 .. code-block:: default
 
+    from typing import Optional
     from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
@@ -40,6 +41,8 @@ component for using in auto-sklearn.
     from ConfigSpace.conditions import EqualsCondition
 
     import sklearn.metrics
+
+    from autosklearn.askl_typing import FEAT_TYPE_TYPE
     import autosklearn.regression
     import autosklearn.pipeline.components.regression
     from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
@@ -62,12 +65,12 @@ component for using in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-38
+.. GENERATED FROM PYTHON SOURCE LINES 39-41
 
 Implement kernel ridge regression component for auto-sklearn
 ============================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-125
+.. GENERATED FROM PYTHON SOURCE LINES 41-130
 
 .. code-block:: default
 
@@ -122,7 +125,9 @@ Implement kernel ridge regression component for auto-sklearn
             }
 
         @staticmethod
-        def get_hyperparameter_search_space(dataset_properties=None):
+        def get_hyperparameter_search_space(
+            feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+        ):
             cs = ConfigurationSpace()
             alpha = UniformFloatHyperparameter(
                 name="alpha", lower=10**-5, upper=1, log=True, default_value=1.0
@@ -181,12 +186,12 @@ Implement kernel ridge regression component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-128
+.. GENERATED FROM PYTHON SOURCE LINES 131-133
 
 Generate data
 =============
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-132
+.. GENERATED FROM PYTHON SOURCE LINES 133-137
 
 .. code-block:: default
 
@@ -201,12 +206,12 @@ Generate data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 133-135
+.. GENERATED FROM PYTHON SOURCE LINES 138-140
 
 Fit the model using KRR
 =======================
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-147
+.. GENERATED FROM PYTHON SOURCE LINES 140-152
 
 .. code-block:: default
 
@@ -240,12 +245,12 @@ Fit the model using KRR
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-150
+.. GENERATED FROM PYTHON SOURCE LINES 153-155
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 150-153
+.. GENERATED FROM PYTHON SOURCE LINES 155-158
 
 .. code-block:: default
 
@@ -260,15 +265,24 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.034122389529556374
-    {   2: {   'cost': 0.9328864989668533,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7207fc2250>,
-               'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720a4c5e20>,
+    r2 score:  -0.2666460880915704
+    {   2: {   'cost': 0.6174139669370072,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c72e260d0>,
+               'ensemble_weight': 0.24,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c740a2e50>,
                'model_id': 2,
                'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f720a4b30a0>,
-               'sklearn_regressor': KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel='polynomial')}}
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f9c928d37c0>,
+               'sklearn_regressor': KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel='polynomial')},
+        5: {   'cost': 0.4727699437182096,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c72d8e670>,
+               'ensemble_weight': 0.76,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7c5725b0>,
+               'model_id': 5,
+               'rank': 2,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f9c7c572550>,
+               'sklearn_regressor': KernelRidge(alpha=0.12092279509584172, coef0=0.8084604056638881, degree=2,
+                gamma=0.0005846787584894724, kernel='polynomial')}}
 
 
 
@@ -276,7 +290,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  12.746 seconds)
+   **Total running time of the script:** ( 0 minutes  9.711 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:

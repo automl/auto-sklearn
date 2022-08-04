@@ -128,7 +128,8 @@ to download the full example code or to run this example in your browser via Bin
 <span id="sphx-glr-examples-80-extending-example-extending-regression-py"></span><h1>Extending Auto-Sklearn with Regression Component<a class="headerlink" href="#extending-auto-sklearn-with-regression-component" title="Permalink to this headline">¶</a></h1>
 <p>The following example demonstrates how to create a new regression
 component for using in auto-sklearn.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="p">(</span>
@@ -139,6 +140,8 @@ component for using in auto-sklearn.</p>
 <span class="kn">from</span> <span class="nn">ConfigSpace.conditions</span> <span class="kn">import</span> <span class="n">EqualsCondition</span>
 
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+
+<span class="kn">from</span> <span class="nn">autosklearn.askl_typing</span> <span class="kn">import</span> <span class="n">FEAT_TYPE_TYPE</span>
 <span class="kn">import</span> <span class="nn">autosklearn.regression</span>
 <span class="kn">import</span> <span class="nn">autosklearn.pipeline.components.regression</span>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.base</span> <span class="kn">import</span> <span class="n">AutoSklearnRegressionAlgorithm</span>
@@ -205,7 +208,9 @@ component for using in auto-sklearn.</p>
         <span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span>
+        <span class="n">feat_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FEAT_TYPE_TYPE</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">ConfigurationSpace</span><span class="p">()</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">UniformFloatHyperparameter</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">5</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mf">1.0</span>
@@ -292,18 +297,27 @@ component for using in auto-sklearn.</p>
 <span class="n">pprint</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.034122389529556374
-{   2: {   &#39;cost&#39;: 0.9328864989668533,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7207fc2250&gt;,
-           &#39;ensemble_weight&#39;: 1.0,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720a4c5e20&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.2666460880915704
+{   2: {   &#39;cost&#39;: 0.6174139669370072,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c72e260d0&gt;,
+           &#39;ensemble_weight&#39;: 0.24,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c740a2e50&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f720a4b30a0&gt;,
-           &#39;sklearn_regressor&#39;: KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel=&#39;polynomial&#39;)}}
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f9c928d37c0&gt;,
+           &#39;sklearn_regressor&#39;: KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel=&#39;polynomial&#39;)},
+    5: {   &#39;cost&#39;: 0.4727699437182096,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c72d8e670&gt;,
+           &#39;ensemble_weight&#39;: 0.76,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7c5725b0&gt;,
+           &#39;model_id&#39;: 5,
+           &#39;rank&#39;: 2,
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f9c7c572550&gt;,
+           &#39;sklearn_regressor&#39;: KernelRidge(alpha=0.12092279509584172, coef0=0.8084604056638881, degree=2,
+            gamma=0.0005846787584894724, kernel=&#39;polynomial&#39;)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.746 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  9.711 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

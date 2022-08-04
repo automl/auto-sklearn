@@ -164,8 +164,10 @@
         <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="n">hp_names</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameter_names</span><span class="p">()</span>
+                <span class="n">_member</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">member</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">member</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hp_names</span><span class="p">}</span>
                 <span class="n">initial_configurations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">_member</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">pass</span>
@@ -216,8 +218,10 @@
         <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="n">hp_names</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameter_names</span><span class="p">()</span>
+                <span class="n">_member</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">member</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">member</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hp_names</span><span class="p">}</span>
                 <span class="n">initial_configurations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">_member</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">pass</span>

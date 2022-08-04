@@ -26,10 +26,11 @@ The following example demonstrates how to replace an existing
 component with a new component, implementing the same classifier,
 but with different hyperparameters .
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-28
+.. GENERATED FROM PYTHON SOURCE LINES 10-30
 
 .. code-block:: default
 
+    from typing import Optional
 
     from ConfigSpace.configuration_space import ConfigurationSpace
     from ConfigSpace.hyperparameters import (
@@ -40,6 +41,7 @@ but with different hyperparameters .
     from sklearn.datasets import load_breast_cancer
     from sklearn.model_selection import train_test_split
 
+    from autosklearn.askl_typing import FEAT_TYPE_TYPE
     import autosklearn.classification
     import autosklearn.pipeline.components.classification
     from autosklearn.pipeline.components.classification import (
@@ -55,12 +57,12 @@ but with different hyperparameters .
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-31
+.. GENERATED FROM PYTHON SOURCE LINES 31-33
 
 Subclass auto-sklearn's random forest classifier
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-110
+.. GENERATED FROM PYTHON SOURCE LINES 33-114
 
 .. code-block:: default
 
@@ -120,7 +122,9 @@ Subclass auto-sklearn's random forest classifier
             }
 
         @staticmethod
-        def get_hyperparameter_search_space(dataset_properties=None):
+        def get_hyperparameter_search_space(
+            feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+        ):
             cs = ConfigurationSpace()
 
             # The maximum number of features used in the forest is calculated as m^max_features, where
@@ -160,12 +164,12 @@ Subclass auto-sklearn's random forest classifier
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-113
+.. GENERATED FROM PYTHON SOURCE LINES 115-117
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-117
+.. GENERATED FROM PYTHON SOURCE LINES 117-121
 
 .. code-block:: default
 
@@ -180,12 +184,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-120
+.. GENERATED FROM PYTHON SOURCE LINES 122-124
 
 Fit Random forest classifier to the data
 ========================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-133
+.. GENERATED FROM PYTHON SOURCE LINES 124-137
 
 .. code-block:: default
 
@@ -220,12 +224,12 @@ Fit Random forest classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-136
+.. GENERATED FROM PYTHON SOURCE LINES 138-140
 
 Print the configuration space
 =============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 136-142
+.. GENERATED FROM PYTHON SOURCE LINES 140-146
 
 .. code-block:: default
 
@@ -341,30 +345,12 @@ Print the configuration space
         classifier:sgd:power_t, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.5
         classifier:sgd:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
         data_preprocessor:__choice__, Type: Categorical, Choices: {feature_type, NoPreprocessing}, Default: feature_type
-        data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
         data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
         data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {normal, uniform}, Default: normal
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
-        data_preprocessor:feature_type:text_transformer:text_encoding:__choice__, Type: Categorical, Choices: {bag_of_word_encoding, bag_of_word_encoding_distinct, tfidf_encoding}, Default: bag_of_word_encoding
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute, Type: UniformInteger, Range: [0, 10], Default: 0
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice, Type: Categorical, Choices: {min_df_absolute, min_df_relative}, Default: min_df_absolute
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative, Type: UniformFloat, Range: [0.01, 1.0], Default: 0.01, on log-scale
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound, Type: UniformInteger, Range: [1, 3], Default: 1
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf, Type: Categorical, Choices: {False, True}, Default: False
-        data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components, Type: UniformInteger, Range: [1, 10000], Default: 100, on log-scale
         feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
         feature_preprocessor:LDA:solver, Type: Categorical, Choices: {svd, lsqr, eigen}, Default: svd
         feature_preprocessor:LDA:tol, Type: UniformFloat, Range: [0.0001, 1.0], Default: 0.0001
@@ -518,30 +504,12 @@ Print the configuration space
         classifier:sgd:penalty | classifier:__choice__ == 'sgd'
         classifier:sgd:power_t | classifier:sgd:learning_rate == 'invscaling'
         classifier:sgd:tol | classifier:__choice__ == 'sgd'
-        data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__ | data_preprocessor:__choice__ == 'feature_type'
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ | data_preprocessor:__choice__ == 'feature_type'
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ == 'minority_coalescer'
         data_preprocessor:feature_type:numerical_transformer:imputation:strategy | data_preprocessor:__choice__ == 'feature_type'
         data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ | data_preprocessor:__choice__ == 'feature_type'
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'robust_scaler'
-        data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ | data_preprocessor:__choice__ == 'feature_type'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == 'min_df_absolute'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:min_df_choice == 'min_df_relative'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == 'min_df_absolute'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding_distinct'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:min_df_choice == 'min_df_relative'
-        data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'bag_of_word_encoding_distinct'
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_absolute | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == 'min_df_absolute'
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_relative | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df_choice == 'min_df_relative'
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_upper_bound | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
-        data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:use_idf | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == 'tfidf_encoding'
-        data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components | data_preprocessor:__choice__ == 'feature_type'
         feature_preprocessor:LDA:shrinkage | feature_preprocessor:LDA:solver in {'lsqr', 'eigen'}
         feature_preprocessor:LDA:solver | feature_preprocessor:__choice__ == 'LDA'
         feature_preprocessor:LDA:tol | feature_preprocessor:__choice__ == 'LDA'
@@ -659,7 +627,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.865 seconds)
+   **Total running time of the script:** ( 0 minutes  12.583 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

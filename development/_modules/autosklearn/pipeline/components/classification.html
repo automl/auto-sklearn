@@ -121,6 +121,8 @@
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">CategoricalHyperparameter</span>
 
+<span class="kn">from</span> <span class="nn">autosklearn.askl_typing</span> <span class="kn">import</span> <span class="n">FEAT_TYPE_TYPE</span>
+
 <span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">AutoSklearnChoice</span><span class="p">,</span>
     <span class="n">AutoSklearnClassificationAlgorithm</span><span class="p">,</span>
@@ -199,7 +201,12 @@
         <span class="k">return</span> <span class="n">components_dict</span>
 
     <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feat_type</span><span class="p">:</span> <span class="n">FEAT_TYPE_TYPE</span><span class="p">,</span>
+        <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">dataset_properties</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dataset_properties</span> <span class="o">=</span> <span class="p">{}</span>
@@ -239,7 +246,9 @@
         <span class="k">for</span> <span class="n">estimator_name</span> <span class="ow">in</span> <span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">estimator_configuration_space</span> <span class="o">=</span> <span class="n">available_estimators</span><span class="p">[</span>
                 <span class="n">estimator_name</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="p">)</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">(</span>
+                <span class="n">feat_type</span><span class="o">=</span><span class="n">feat_type</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="n">dataset_properties</span>
+            <span class="p">)</span>
             <span class="n">parent_hyperparameter</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">estimator</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">estimator_name</span><span class="p">}</span>
             <span class="n">cs</span><span class="o">.</span><span class="n">add_configuration_space</span><span class="p">(</span>
                 <span class="n">estimator_name</span><span class="p">,</span>

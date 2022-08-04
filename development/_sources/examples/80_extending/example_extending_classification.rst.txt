@@ -25,10 +25,11 @@ Extending Auto-Sklearn with Classification Component
 The following example demonstrates how to create a new classification
 component for using in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-33
+.. GENERATED FROM PYTHON SOURCE LINES 9-36
 
 .. code-block:: default
 
+    from typing import Optional
     from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
@@ -39,6 +40,8 @@ component for using in auto-sklearn.
     )
 
     import sklearn.metrics
+
+    from autosklearn.askl_typing import FEAT_TYPE_TYPE
     import autosklearn.classification
     import autosklearn.pipeline.components.classification
     from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
@@ -60,12 +63,12 @@ component for using in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-36
+.. GENERATED FROM PYTHON SOURCE LINES 37-39
 
 Create MLP classifier component for auto-sklearn
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-139
+.. GENERATED FROM PYTHON SOURCE LINES 39-144
 
 .. code-block:: default
 
@@ -136,7 +139,9 @@ Create MLP classifier component for auto-sklearn
             }
 
         @staticmethod
-        def get_hyperparameter_search_space(dataset_properties=None):
+        def get_hyperparameter_search_space(
+            feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+        ):
             cs = ConfigurationSpace()
             hidden_layer_depth = UniformIntegerHyperparameter(
                 name="hidden_layer_depth", lower=1, upper=3, default_value=1
@@ -192,12 +197,12 @@ Create MLP classifier component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 140-142
+.. GENERATED FROM PYTHON SOURCE LINES 145-147
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-146
+.. GENERATED FROM PYTHON SOURCE LINES 147-151
 
 .. code-block:: default
 
@@ -212,12 +217,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 147-149
+.. GENERATED FROM PYTHON SOURCE LINES 152-154
 
 Fit MLP classifier to the data
 ==============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 149-161
+.. GENERATED FROM PYTHON SOURCE LINES 154-166
 
 .. code-block:: default
 
@@ -251,12 +256,12 @@ Fit MLP classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 162-164
+.. GENERATED FROM PYTHON SOURCE LINES 167-169
 
 Print test accuracy and statistics
 ==================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 164-168
+.. GENERATED FROM PYTHON SOURCE LINES 169-173
 
 .. code-block:: default
 
@@ -272,46 +277,36 @@ Print test accuracy and statistics
 
  .. code-block:: none
 
-    accuracy:  0.9440559440559441
+    accuracy:  0.986013986013986
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720763c2e0>,
-               'cost': 0.03546099290780147,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7207fa2190>,
-               'ensemble_weight': 0.3,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720763c970>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7d103a60>,
+               'cost': 0.014184397163120588,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7c1fbd60>,
+               'ensemble_weight': 0.48000000000000004,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7d1033a0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': MLPClassifier(hidden_layer_sizes=(32,), random_state=1)},
-        4: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720a5f33d0>,
-               'cost': 0.049645390070921946,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7207902b50>,
-               'ensemble_weight': 0.3,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720c876fd0>,
-               'model_id': 4,
+        3: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7f83c430>,
+               'cost': 0.021276595744680882,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7ef2f100>,
+               'ensemble_weight': 0.44000000000000006,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7f83ca00>,
+               'model_id': 3,
                'rank': 2,
-               'sklearn_classifier': MLPClassifier(alpha=0.9370622711515105, hidden_layer_sizes=(179, 179),
-                  random_state=1, solver='lbfgs')},
+               'sklearn_classifier': MLPClassifier(activation='identity', alpha=0.2945332422116951,
+                  hidden_layer_sizes=(54,), random_state=1, solver='lbfgs')},
         5: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720c5e7ac0>,
-               'cost': 0.375886524822695,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f720ca16f70>,
-               'ensemble_weight': 0.18,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720c5e7310>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7cf313a0>,
+               'cost': 0.36879432624113473,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7ef69850>,
+               'ensemble_weight': 0.08000000000000002,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7cf31dc0>,
                'model_id': 5,
                'rank': 3,
-               'sklearn_classifier': MLPClassifier(activation='logistic', alpha=0.6554997385843834,
-                  hidden_layer_sizes=(158, 158, 158), random_state=1, solver='sgd')},
-        6: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720c600250>,
-               'cost': 0.06382978723404253,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f720719c760>,
-               'ensemble_weight': 0.22,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720c963490>,
-               'model_id': 6,
-               'rank': 4,
-               'sklearn_classifier': MLPClassifier(activation='logistic', alpha=0.6724692077492787,
-                  hidden_layer_sizes=(128,), random_state=1, solver='sgd')}}
+               'sklearn_classifier': MLPClassifier(alpha=0.311408649459819, hidden_layer_sizes=(123, 123, 123),
+                  random_state=1, solver='sgd')}}
 
 
 
@@ -319,7 +314,7 @@ Print test accuracy and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.991 seconds)
+   **Total running time of the script:** ( 0 minutes  15.396 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_classification.py:

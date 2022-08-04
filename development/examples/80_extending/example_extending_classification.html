@@ -128,7 +128,8 @@ to download the full example code or to run this example in your browser via Bin
 <span id="sphx-glr-examples-80-extending-example-extending-classification-py"></span><h1>Extending Auto-Sklearn with Classification Component<a class="headerlink" href="#extending-auto-sklearn-with-classification-component" title="Permalink to this headline">¶</a></h1>
 <p>The following example demonstrates how to create a new classification
 component for using in auto-sklearn.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="p">(</span>
@@ -138,6 +139,8 @@ component for using in auto-sklearn.</p>
 <span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+
+<span class="kn">from</span> <span class="nn">autosklearn.askl_typing</span> <span class="kn">import</span> <span class="n">FEAT_TYPE_TYPE</span>
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 <span class="kn">import</span> <span class="nn">autosklearn.pipeline.components.classification</span>
 <span class="kn">from</span> <span class="nn">autosklearn.pipeline.components.base</span> <span class="kn">import</span> <span class="n">AutoSklearnClassificationAlgorithm</span>
@@ -219,7 +222,9 @@ component for using in auto-sklearn.</p>
         <span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span>
+        <span class="n">feat_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FEAT_TYPE_TYPE</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">ConfigurationSpace</span><span class="p">()</span>
         <span class="n">hidden_layer_depth</span> <span class="o">=</span> <span class="n">UniformIntegerHyperparameter</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hidden_layer_depth&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">1</span>
@@ -303,49 +308,39 @@ component for using in auto-sklearn.</p>
 <span class="n">pprint</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.9440559440559441
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.986013986013986
 {   2: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720763c2e0&gt;,
-           &#39;cost&#39;: 0.03546099290780147,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7207fa2190&gt;,
-           &#39;ensemble_weight&#39;: 0.3,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720763c970&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7d103a60&gt;,
+           &#39;cost&#39;: 0.014184397163120588,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7c1fbd60&gt;,
+           &#39;ensemble_weight&#39;: 0.48000000000000004,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7d1033a0&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
            &#39;sklearn_classifier&#39;: MLPClassifier(hidden_layer_sizes=(32,), random_state=1)},
-    4: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720a5f33d0&gt;,
-           &#39;cost&#39;: 0.049645390070921946,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f7207902b50&gt;,
-           &#39;ensemble_weight&#39;: 0.3,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720c876fd0&gt;,
-           &#39;model_id&#39;: 4,
+    3: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7f83c430&gt;,
+           &#39;cost&#39;: 0.021276595744680882,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7ef2f100&gt;,
+           &#39;ensemble_weight&#39;: 0.44000000000000006,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7f83ca00&gt;,
+           &#39;model_id&#39;: 3,
            &#39;rank&#39;: 2,
-           &#39;sklearn_classifier&#39;: MLPClassifier(alpha=0.9370622711515105, hidden_layer_sizes=(179, 179),
-              random_state=1, solver=&#39;lbfgs&#39;)},
+           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;identity&#39;, alpha=0.2945332422116951,
+              hidden_layer_sizes=(54,), random_state=1, solver=&#39;lbfgs&#39;)},
     5: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720c5e7ac0&gt;,
-           &#39;cost&#39;: 0.375886524822695,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f720ca16f70&gt;,
-           &#39;ensemble_weight&#39;: 0.18,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720c5e7310&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7cf313a0&gt;,
+           &#39;cost&#39;: 0.36879432624113473,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7ef69850&gt;,
+           &#39;ensemble_weight&#39;: 0.08000000000000002,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7cf31dc0&gt;,
            &#39;model_id&#39;: 5,
            &#39;rank&#39;: 3,
-           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;logistic&#39;, alpha=0.6554997385843834,
-              hidden_layer_sizes=(158, 158, 158), random_state=1, solver=&#39;sgd&#39;)},
-    6: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f720c600250&gt;,
-           &#39;cost&#39;: 0.06382978723404253,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f720719c760&gt;,
-           &#39;ensemble_weight&#39;: 0.22,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f720c963490&gt;,
-           &#39;model_id&#39;: 6,
-           &#39;rank&#39;: 4,
-           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;logistic&#39;, alpha=0.6724692077492787,
-              hidden_layer_sizes=(128,), random_state=1, solver=&#39;sgd&#39;)}}
+           &#39;sklearn_classifier&#39;: MLPClassifier(alpha=0.311408649459819, hidden_layer_sizes=(123, 123, 123),
+              random_state=1, solver=&#39;sgd&#39;)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  18.991 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.396 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-classification-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_classification.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
