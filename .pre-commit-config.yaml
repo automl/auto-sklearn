@@ -45,7 +45,7 @@ repos:
         name: mypy auto-sklearn
         files: autosklearn/.*
 
-  - repo: https://gitlab.com/pycqa/flake8
+  - repo: https://github.com/PyCQA/flake8
     rev: 5.0.4
     hooks:
       - id: flake8
