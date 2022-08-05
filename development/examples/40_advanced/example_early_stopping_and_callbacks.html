@@ -203,10 +203,10 @@ RunInfo(config=Configuration(values={
   &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;,
 })
 , instance=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, instance_specific=&#39;0&#39;, seed=0, cutoff=30.0, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.014184397163120588, time=1.4849152565002441, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1659614708.8911188, endtime=1659614710.3949049, additional_info={&#39;duration&#39;: 1.4045569896697998, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.014184397163120588, time=1.4291326999664307, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1659691292.869759, endtime=1659691294.3163881, additional_info={&#39;duration&#39;: 1.355139970779419, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 
 AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
-                      get_trials_callback=&lt;function callback at 0x7f9c7f39e940&gt;,
+                      get_trials_callback=&lt;function callback at 0x7f2d516ab700&gt;,
                       per_run_time_limit=30, time_left_for_this_task=120)
 </pre></div>
 </div>
@@ -218,9 +218,9 @@ AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemb
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>          rank  ensemble_weight           type      cost  duration
 model_id
-7            1             0.68    extra_trees  0.014184  1.484915
-2            2             0.10  random_forest  0.028369  1.615789
-3            3             0.22            mlp  0.028369  0.868624
+7            1             0.68    extra_trees  0.014184  1.429133
+2            2             0.10  random_forest  0.028369  1.534058
+3            3             0.22            mlp  0.028369  0.836079
 </pre></div>
 </div>
 </div>
@@ -230,21 +230,21 @@ model_id
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7f212670&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2d3c388370&gt;,
            &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7c9c7e50&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2d51941040&gt;,
            &#39;ensemble_weight&#39;: 0.1,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7f212610&gt;,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2d3c388850&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
            &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)},
     3: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7ef85f70&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2d3b7964f0&gt;,
            &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7f25f1c0&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2d3e022ee0&gt;,
            &#39;ensemble_weight&#39;: 0.22,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7ef85b20&gt;,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2d3b796fa0&gt;,
            &#39;model_id&#39;: 3,
            &#39;rank&#39;: 2,
            &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=0.0001363185819149026, beta_1=0.999,
@@ -253,11 +253,11 @@ model_id
               learning_rate_init=0.00018009776276177523, max_iter=32,
               n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
     7: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9c7efe5580&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2d3ac1a3a0&gt;,
            &#39;cost&#39;: 0.014184397163120588,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9c7f0843a0&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2d3e209c40&gt;,
            &#39;ensemble_weight&#39;: 0.68,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9c7efe51c0&gt;,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2d3e075070&gt;,
            &#39;model_id&#39;: 7,
            &#39;rank&#39;: 3,
            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(max_features=34, min_samples_leaf=3, min_samples_split=11,
@@ -275,7 +275,7 @@ model_id
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.9440559440559441
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.086 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.739 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-early-stopping-and-callbacks-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_early_stopping_and_callbacks.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
