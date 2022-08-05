@@ -722,7 +722,7 @@ class TrainEvaluator(AbstractEvaluator):
 
             # This is my best guess at what the X_data for these should be
             X_train = select(self.X_train, train_split)  # From above (only cv?)
-            X_fold = select(self.X_targets, test_split)  # See _partial_fit call above
+            X_fold = self.X_targets[fold]
             train_loss = self._loss(self.Y_actual_train, train_pred, X_data=X_train)
             loss = self._loss(self.Y_targets[fold], opt_pred, X_data=X_fold)
 
