@@ -97,7 +97,7 @@ class AbstractEnsemble(ABC):
     def get_models_with_weights(
         self, models: Dict[Tuple[int, int, float], BasePipeline]
     ) -> List[Tuple[float, BasePipeline]]:
-        """Return a list of (weight, model) pairs for all models included in the ensemble.
+        """List of (weight, model) pairs for all models included in the ensemble.
 
         Parameters
         ----------

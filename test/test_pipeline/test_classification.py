@@ -306,7 +306,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs, dataset=data)
 
     def test_configurations(self):
-        """Tests a non-seeded random set of configurations with default dataset properties
+        """Test non-seeded random sets of configurations with default dataset properties
 
         Expects
         -------

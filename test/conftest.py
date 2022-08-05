@@ -142,8 +142,8 @@ def pytest_runtest_setup(item: Item) -> None:
 
 
 def pytest_sessionstart(session: Session) -> None:
-    """Called after the ``Session`` object has been created and before performing collection
-    and entering the run test loop.
+    """Called after the ``Session`` object has been created and before performing
+    collection and entering the run test loop.
 
     Parameters
     ----------
