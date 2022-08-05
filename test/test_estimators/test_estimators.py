@@ -1713,13 +1713,8 @@ def test_autosklearn_anneal(as_frame):
     "dataset_compression", [False, True, {"memory_allocation": 0.2}]
 )
 def test_param_dataset_compression(dataset_compression: Union[bool, Dict[str, Any]]):
-    """We expect this does not get parsed and modified until it gets to the AutoML class,
-    In the meantime, it's value remains whatever was passed in.
-
-    Parameters
-    ----------
-    dataset_compression: Union[bool, Dict[str, Any]
-        The arg to pass to the estimator
+    """We expect this does not get parsed and modified until it gets to the AutoML
+    class, In the meantime, it's value remains whatever was passed in.
 
     Expects
     -------

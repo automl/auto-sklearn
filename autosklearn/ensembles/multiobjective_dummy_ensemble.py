@@ -211,7 +211,7 @@ class MultiObjectiveDummyEnsemble(AbstractMultiObjectiveEnsemble):
         return self.pareto_set[0].get_selected_model_identifiers()
 
     def get_validation_performance(self) -> float:
-        """Return validation performance of the ensemble that is best for the 1st metric.
+        """Validation performance of the ensemble that is best for the 1st metric.
 
         Returns
         -------
