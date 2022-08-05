@@ -114,7 +114,7 @@ class AbstractSingleModelEnsemble(AbstractEnsemble):
     def get_models_with_weights(
         self, models: dict[tuple[int, int, float], BasePipeline]
     ) -> list[tuple[float, BasePipeline]]:
-        """Return a list of (weight, model) pairs for the model selected by this ensemble.
+        """List of (weight, model) pairs for the model selected by this ensemble.
 
         Parameters
         ----------
