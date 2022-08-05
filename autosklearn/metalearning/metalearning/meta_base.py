@@ -40,6 +40,9 @@ class MetaBase(object):
         self.logger = logger
 
         self.configuration_space = configuration_space
+        self.default_configuration_space_dict = dict(
+            configuration_space.get_default_configuration()
+        )
         self.aslib_directory = aslib_directory
 
         aslib_reader = aslib_simple.AlgorithmSelectionProblem(
@@ -55,8 +58,13 @@ class MetaBase(object):
         for algorithm_id in self.configurations:
             configuration = self.configurations[algorithm_id]
             try:
+                for key in self.default_configuration_space_dict.keys():
+                    if key not in configuration:
+                        configuration[key] = self.default_configuration_space_dict[key]
                 configurations[str(algorithm_id)] = Configuration(
-                    configuration_space, values=configuration
+                    configuration_space,
+                    values=configuration,
+                    allow_inactive_with_values=True,
                 )
             except (ValueError, KeyError) as e:
                 self.logger.debug("Error reading configurations: %s", e)
