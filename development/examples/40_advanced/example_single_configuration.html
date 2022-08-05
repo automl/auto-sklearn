@@ -211,60 +211,60 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(
-{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2d3c2a2e80&gt;, &#39;balancing&#39;: Balancing(random_state=1), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2d2f3bf700&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2d2f3bf5b0&gt;}
+{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f153be2bf40&gt;, &#39;balancing&#39;: Balancing(random_state=1), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f1541513d00&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f1541513040&gt;}
 RunInfo(config=Configuration(values={
   &#39;balancing:strategy&#39;: &#39;none&#39;,
   &#39;classifier:__choice__&#39;: &#39;random_forest&#39;,
   &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;,
-  &#39;classifier:random_forest:criterion&#39;: &#39;entropy&#39;,
+  &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;,
   &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;,
-  &#39;classifier:random_forest:max_features&#39;: 0.5156674055637924,
+  &#39;classifier:random_forest:max_features&#39;: 0.08562221332450437,
   &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;,
   &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0,
   &#39;classifier:random_forest:min_samples_leaf&#39;: 7,
   &#39;classifier:random_forest:min_samples_split&#39;: 11,
   &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0,
   &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;,
-  &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;,
-  &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;manhattan&#39;,
-  &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;complete&#39;,
-  &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 68,
-  &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;max&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.04473784946378019,
+  &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;,
+  &#39;feature_preprocessor:polynomial:degree&#39;: 2,
+  &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;,
+  &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;,
 })
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.02274881516587679, time=1.9935541152954102, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1659692037.7821178, endtime=1659692039.795136, additional_info={&#39;duration&#39;: 1.9169745445251465, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.026156001868285816, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.10331753554502365, time=2.379121780395508, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1659692031.84682, endtime=1659692034.2506242, additional_info={&#39;duration&#39;: 2.293802261352539, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.07379729098552079, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration(values={
   &#39;balancing:strategy&#39;: &#39;none&#39;,
   &#39;classifier:__choice__&#39;: &#39;random_forest&#39;,
   &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;,
-  &#39;classifier:random_forest:criterion&#39;: &#39;entropy&#39;,
+  &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;,
   &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;,
-  &#39;classifier:random_forest:max_features&#39;: 0.5156674055637924,
+  &#39;classifier:random_forest:max_features&#39;: 0.08562221332450437,
   &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;,
   &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0,
   &#39;classifier:random_forest:min_samples_leaf&#39;: 7,
   &#39;classifier:random_forest:min_samples_split&#39;: 11,
   &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0,
   &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;no_coalescense&#39;,
-  &#39;feature_preprocessor:__choice__&#39;: &#39;feature_agglomeration&#39;,
-  &#39;feature_preprocessor:feature_agglomeration:affinity&#39;: &#39;manhattan&#39;,
-  &#39;feature_preprocessor:feature_agglomeration:linkage&#39;: &#39;complete&#39;,
-  &#39;feature_preprocessor:feature_agglomeration:n_clusters&#39;: 68,
-  &#39;feature_preprocessor:feature_agglomeration:pooling_func&#39;: &#39;max&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.04473784946378019,
+  &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;,
+  &#39;feature_preprocessor:polynomial:degree&#39;: 2,
+  &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;,
+  &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;,
 })
 
-Random Forest: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=6, min_samples_leaf=7,
-                       min_samples_split=11, n_estimators=512, n_jobs=1,
-                       random_state=1, warm_start=True)
+Random Forest: RandomForestClassifier(max_features=1, min_samples_leaf=7, min_samples_split=11,
+                       n_estimators=512, n_jobs=1, random_state=1,
+                       warm_start=True)
 /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  10.957 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  32.581 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
