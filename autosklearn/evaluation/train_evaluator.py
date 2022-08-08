@@ -361,18 +361,23 @@ class TrainEvaluator(AbstractEvaluator):
                             self.X_targets[i] = select(self.X_train, test_indices)
                             self.Y_targets[i] = select(self.Y_train, test_indices)
 
-                            X = select(self.X_train, train_indices)
-                            y = select(self.Y_train, train_indices)
-                            Xt, fit_params = model.fit_transformer(X, y)
+                            # Note: Be careful moving these into variables, caused a
+                            # headache when trying to debug why things were breaking
+                            Xt, fit_params = model.fit_transformer(
+                                select(self.X_train, train_indices),
+                                select(self.Y_train, train_indices),
+                            )
                             Xt_array[i] = Xt
                             fit_params_array[i] = fit_params
 
                         n_iter = int(2 ** iterations[i] / 2) if iterations[i] > 1 else 2
                         total_n_iterations[i] = total_n_iterations[i] + n_iter
 
-                        y = select(self.Y_train, train_indices)
                         model.iterative_fit(
-                            Xt_array[i], y, n_iter=n_iter, **fit_params_array[i]
+                            Xt_array[i],
+                            select(self.Y_train, train_indices),
+                            n_iter=n_iter,
+                            **fit_params_array[i],
                         )
 
                         (train_pred, opt_pred, test_pred) = self._predict(
@@ -386,7 +391,11 @@ class TrainEvaluator(AbstractEvaluator):
                         Y_test_pred[i] = test_pred
                         train_splits[i] = train_indices
 
-                        train_loss = self._loss(y, train_pred, X_data=Xt_array[i])
+                        train_loss = self._loss(
+                            select(self.Y_train, train_indices),
+                            train_pred,
+                            X_data=Xt_array[i],
+                        )
                         train_losses[i] = train_loss
                         # Number of training data points for this fold.
                         # Used for weighting the average.
