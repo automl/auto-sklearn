@@ -3,11 +3,50 @@
 ..
     The following command allows to retrieve all commiters since a specified
     commit. From https://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
-    git log 3d53cd9b5011258c4fdcce9d02e252d0248e5f1d.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
+    git log 6cc8bb179fcb023d1c341cf33d2958a16a6935be.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
 ========
 Releases
 ========
+
+Version 0.15.0
+==============
+
+* ADD #1317: Initial support for multi-objective Auto-sklearn.
+* DOC #1304: This adds documentation for SMAC callbacks that can be used by Auto-sklearn.
+* MAINT #1364: Improve import time of Auto-sklearn 2 by moving the construction of the selector
+  model from import time to construction time.
+* MAINT #1474: remove left-overs of a "public test set" from the code. This has no influence on
+  any user-facing code.
+* MAINT #1506: Increase the time given to meta-learning-related unit tests to decrease the amount
+  of timeouts on github.
+* MAINT #1527: Relax MLPRegressor unit tests precision.
+* FIX #741: Disable hyperparameters for a special data modality if it is not present, for example
+  disable one hot encoding if no categorical features are present.
+* FIX #1365: Fix an issue with `ensemble_size == 0`.
+* FIX #1374: Pass random state to all components of a pipeline.
+* FIX #1430: Fixes an issue in which the `AutoSklearnClassifier.leaderboard()` or
+  `AutoSklearnRegressor.leaderboard()` could fail to display results.
+* FIX #1480: Properly terminate Auto-sklearn on an exception or a keyboard interrupt.
+* FIX #1532: Removes exception printing at shutdown for latest dask versions. The printed
+  exceptions did not impact performance at all and were only confusing as they suggested failures
+  of Auto-sklearn.
+* FIX #1547: Fixes a bug in Auto-sklearn 2 that could silently break it when passing in pandas
+  DataFrames.
+
+Contributors v0.15.0
+********************
+
+* Matthias Feurer
+* Eddie Bergman
+* Katharina Eggensperger
+* Sagar Kaushik
+* partev
+* Lukas Strack
+* Basavasagar K Patil
+* Eric Pedley
+* Aseem Kannal
+* SkBlaz
 
 Version 0.14.6
 ==============
