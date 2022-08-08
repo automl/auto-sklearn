@@ -90,8 +90,8 @@ accelerometer and gyroscope data collected by a phone. For more information see
 
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
-    Train score 0.9954285714285714
-    Test score 0.9806666666666667
+    Train score 0.9897142857142858
+    Test score 0.9753333333333334
 
 
 
@@ -146,11 +146,11 @@ in the `scikit-learn docs <https://scikit-learn.org/stable/modules/permutation_i
  .. code-block:: none
 
     gyro_y    : 0.000 +/- 0.001
-    gyro_x    : 0.017 +/- 0.002
-    gyro_z    : 0.030 +/- 0.003
-    acceleration_x: 0.047 +/- 0.007
-    acceleration_z: 0.135 +/- 0.005
-    acceleration_y: 0.293 +/- 0.007
+    gyro_x    : 0.010 +/- 0.003
+    gyro_z    : 0.028 +/- 0.004
+    acceleration_x: 0.081 +/- 0.007
+    acceleration_z: 0.148 +/- 0.006
+    acceleration_y: 0.260 +/- 0.006
 
 
 
@@ -240,7 +240,7 @@ these features. Again, we'll look at acceleration_y and acceleration_z.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  37.070 seconds)
+   **Total running time of the script:** ( 3 minutes  58.372 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_inspect_predictions.py:
