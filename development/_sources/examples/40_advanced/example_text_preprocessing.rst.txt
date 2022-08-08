@@ -160,8 +160,8 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1             0.82  random_forest  0.102041  5.418884
-    7            2             0.18  random_forest  0.127551  3.649055
+    2            1              0.9  random_forest  0.096939  5.103649
+    7            2              0.1  random_forest  0.127551  3.499393
 
 
 
@@ -187,21 +187,21 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fcaac2377f0>,
-               'cost': 0.10204081632653061,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fcaad10d7c0>,
-               'ensemble_weight': 0.82,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fcaac2375b0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9aa9d7edf0>,
+               'cost': 0.09693877551020413,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9aa9d7e370>,
+               'ensemble_weight': 0.9,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9aa9d7e130>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=10, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         7: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fcaadb96eb0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9aad253f40>,
                'cost': 0.12755102040816324,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fcaad138850>,
-               'ensemble_weight': 0.18,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fcaacf77850>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9aa9d7eac0>,
+               'ensemble_weight': 0.1,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9aaa52dbe0>,
                'model_id': 7,
                'rank': 2,
                'sklearn_classifier': RandomForestClassifier(criterion='entropy', max_features=1, min_samples_leaf=5,
@@ -231,7 +231,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.8910012674271229
+    Accuracy score: 0.8986058301647655
 
 
 
@@ -239,7 +239,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  7.806 seconds)
+   **Total running time of the script:** ( 1 minutes  3.607 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:

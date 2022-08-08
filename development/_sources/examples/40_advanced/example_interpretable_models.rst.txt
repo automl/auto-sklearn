@@ -229,18 +229,18 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   68: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fcaacf97970>,
+    {   33: {   'balancing': Balancing(random_state=1),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9ac0e11d60>,
                 'cost': 0.014184397163120588,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fcaabf337f0>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9aad7ecbe0>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fcaacf97580>,
-                'model_id': 68,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9ac0e11400>,
+                'model_id': 33,
                 'rank': 1,
-                'sklearn_classifier': SGDClassifier(alpha=7.0183773463060925e-06, eta0=0.011320210470081811,
-                  learning_rate='invscaling', loss='perceptron', max_iter=32,
-                  penalty='l1', power_t=0.5981597286715924, random_state=1,
-                  tol=0.00015372586194386747, warm_start=True)}}
+                'sklearn_classifier': SGDClassifier(alpha=4.26885387293763e-07, eta0=0.031179315624973124,
+                  learning_rate='constant', loss='perceptron', max_iter=64,
+                  penalty='l1', random_state=1, tol=0.0006596041444525658,
+                  warm_start=True)}}
 
 
 
@@ -273,7 +273,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.792 seconds)
+   **Total running time of the script:** ( 1 minutes  54.733 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:

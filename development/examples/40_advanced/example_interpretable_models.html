@@ -247,18 +247,18 @@ and can change from use case to use case.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   68: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fcaacf97970&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   33: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f9ac0e11d60&gt;,
             &#39;cost&#39;: 0.014184397163120588,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fcaabf337f0&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f9aad7ecbe0&gt;,
             &#39;ensemble_weight&#39;: 1.0,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fcaacf97580&gt;,
-            &#39;model_id&#39;: 68,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f9ac0e11400&gt;,
+            &#39;model_id&#39;: 33,
             &#39;rank&#39;: 1,
-            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=7.0183773463060925e-06, eta0=0.011320210470081811,
-              learning_rate=&#39;invscaling&#39;, loss=&#39;perceptron&#39;, max_iter=32,
-              penalty=&#39;l1&#39;, power_t=0.5981597286715924, random_state=1,
-              tol=0.00015372586194386747, warm_start=True)}}
+            &#39;sklearn_classifier&#39;: SGDClassifier(alpha=4.26885387293763e-07, eta0=0.031179315624973124,
+              learning_rate=&#39;constant&#39;, loss=&#39;perceptron&#39;, max_iter=64,
+              penalty=&#39;l1&#39;, random_state=1, tol=0.0006596041444525658,
+              warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -271,7 +271,7 @@ and can change from use case to use case.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score: 0.958041958041958
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  56.792 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  54.733 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-interpretable-models-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
