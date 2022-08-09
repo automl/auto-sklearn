@@ -3,6 +3,7 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from ConfigSpace.configuration_space import Configuration
+from ConfigSpace.util import deactivate_inactive_hyperparameters
 
 from ..input import aslib_simple
 from ..metafeatures.metafeature import DatasetMetafeatures
@@ -40,8 +41,8 @@ class MetaBase(object):
         self.logger = logger
 
         self.configuration_space = configuration_space
-        self.default_configuration_space_dict = dict(
-            configuration_space.get_default_configuration()
+        self.default_configuration_space_dict = (
+            configuration_space.get_default_configuration().get_dictionary()
         )
         self.aslib_directory = aslib_directory
 
@@ -61,11 +62,15 @@ class MetaBase(object):
                 for key in self.default_configuration_space_dict.keys():
                     if key not in configuration:
                         configuration[key] = self.default_configuration_space_dict[key]
-                configurations[str(algorithm_id)] = Configuration(
+                configuration = Configuration(
                     configuration_space,
                     values=configuration,
                     allow_inactive_with_values=True,
                 )
+                configuration = deactivate_inactive_hyperparameters(
+                    configuration, configuration_space
+                )
+                configurations[str(algorithm_id)] = configuration
             except (ValueError, KeyError) as e:
                 self.logger.debug("Error reading configurations: %s", e)
 
