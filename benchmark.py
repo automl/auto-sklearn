@@ -54,10 +54,33 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 
 cs = automl.get_configuration_space(X_train, y_train)
 text_hps = [hp for hp in dict(cs._hyperparameters).keys() if "text_encoding" in hp]
-# 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound'
-cs._hyperparameters[text_hps[0]].default_value = 2
 
-automl.configuration_space = cs
+hps = {
+    'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:binary': [True, False],
+    'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range': ["1,1", "1,2", "1,3",
+                                                                                                 "2,2", "2,3", "3,3"],
+    'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:norm': ["l2", "l1"],
+    'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:per_column': [True, False],
+    'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:sublinear_tf': [True, False]
+}
 
-# print(automl.get_configuration_space(X_train, y_train))
-print(text_hps)
+for binary in [True, False]:
+    for ngram_range in ["1,1", "1,2", "1,3", "2,2", "2,3", "3,3"]:
+        for norm in ["l2", "l1"]:
+            for per_column in [True, False]:
+                for sublinear_tf in [True, False]:
+                    cs._hyperparameters[
+                        'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:binary'].default_value = binary
+                    cs._hyperparameters[
+                        'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range'].default_value = ngram_range
+                    cs._hyperparameters[
+                        'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:norm'].default_value = norm
+                    cs._hyperparameters[
+                        'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:per_column'].default_value = per_column
+                    cs._hyperparameters[
+                        'data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:sublinear_tf'].default_value = sublinear_tf
+
+                    automl.configuration_space = cs
+
+                    print(automl.get_configuration_space(X_train, y_train).get_default_configuration())
+                    print()
