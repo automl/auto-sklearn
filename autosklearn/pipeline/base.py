@@ -223,24 +223,33 @@ class BasePipeline(Pipeline):
             sub_configuration_space = node.get_hyperparameter_search_space(
                 feat_type=feat_type, dataset_properties=self.dataset_properties
             )
-            sub_config_dict = {}
+            sub_configuration_space_default_dict = dict(
+                sub_configuration_space.get_default_configuration()
+            )
 
-            skip_default = False
-            if node_name in ["classifier", "regressor"]:
-                if configuration[f"{node_name}:__choice__"] != "random_forest":
-                    skip_default = True
+            sub_config_dict = {}
 
             for param in configuration:
                 if param.startswith("%s:" % node_name):
                     new_name = param.replace("%s:" % node_name, "", 1)
-                    if skip_default:
-                        if "random_forest" in new_name:  # skip default value
-                            continue
+                    # if cond is true skip defaults
                     value = configuration[param]
                     sub_config_dict[new_name] = value
 
+            if "__choice__" in sub_config_dict:
+                if (
+                    sub_config_dict["__choice__"]
+                    != sub_configuration_space_default_dict["__choice__"]
+                ):
+                    # delete default from sub_config_dict
+                    for key in list(sub_config_dict.keys()):
+                        if sub_configuration_space_default_dict["__choice__"] in key:
+                            del sub_config_dict[key]
+
             sub_configuration = Configuration(
-                sub_configuration_space, values=sub_config_dict
+                sub_configuration_space,
+                values=sub_config_dict,
+                allow_inactive_with_values=True,
             )
 
             if init_params is not None:
