@@ -133,7 +133,11 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         )
 
         hp_min_df = CSH.UniformFloatHyperparameter(
-            name="min_df", lower=0.0, upper=0.3, default_value=0.0
+            # Todo this can still result in building no vectorizer
+            name="min_df",
+            lower=0.0,
+            upper=0.3,
+            default_value=0.0,
         )
 
         hp_max_df = CSH.UniformFloatHyperparameter(

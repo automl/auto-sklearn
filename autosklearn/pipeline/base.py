@@ -231,7 +231,9 @@ class BasePipeline(Pipeline):
                     sub_config_dict[new_name] = value
 
             sub_configuration = Configuration(
-                sub_configuration_space, values=sub_config_dict
+                sub_configuration_space,
+                values=sub_config_dict,
+                allow_inactive_with_values=True,
             )
 
             if init_params is not None:
