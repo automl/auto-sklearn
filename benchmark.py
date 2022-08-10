@@ -1,7 +1,11 @@
-from pprint import pprint
-
+"""
+# print(list(vars(cs).keys()))
+# print(list(dict(cs._hyperparameters).keys()))
+# print([hp for hp in dict(cs._hyperparameters).keys() if "text" in hp])
+# print(cs._hyperparameters['data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound'])
+# print(cs._hyperparameters['data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound'].default_value)
+"""
 import pandas as pd
-import sklearn.metrics
 from sklearn.datasets import fetch_20newsgroups
 
 import autosklearn.classification
@@ -49,13 +53,11 @@ automl = autosklearn.classification.AutoSklearnClassifier(
 )
 
 cs = automl.get_configuration_space(X_train, y_train)
-# print(list(vars(cs).keys()))
-# print(list(dict(cs._hyperparameters).keys()))
-# print([hp for hp in dict(cs._hyperparameters).keys() if "text" in hp])
-# print(cs._hyperparameters['data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound'])
-# print(cs._hyperparameters['data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound'].default_value)
-cs._hyperparameters['data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound'].default_value = 2
+text_hps = [hp for hp in dict(cs._hyperparameters).keys() if "text_encoding" in hp]
+# 'data_preprocessor:feature_type:text_transformer:text_encoding:bag_of_word_encoding_distinct:ngram_upper_bound'
+cs._hyperparameters[text_hps[0]].default_value = 2
 
 automl.configuration_space = cs
 
-print(automl.get_configuration_space(X_train, y_train))
+# print(automl.get_configuration_space(X_train, y_train))
+print(text_hps)
