@@ -441,15 +441,11 @@ class AutoSklearnChoice(object):
 
         for param, value in params.items():
             param = param.replace(choice, "").replace(":", "")
-            if "random_forest" in param:
-                continue
             new_params[param] = value
 
         if init_params is not None:
             for param, value in init_params.items():
                 param = param.replace(choice, "").replace(":", "")
-                if "random_forest" in param:
-                    continue
                 new_params[param] = value
 
         new_params["random_state"] = self.random_state

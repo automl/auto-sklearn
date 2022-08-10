@@ -224,16 +224,23 @@ class BasePipeline(Pipeline):
                 feat_type=feat_type, dataset_properties=self.dataset_properties
             )
             sub_config_dict = {}
+
+            skip_default = False
+            if node_name in ["classifier", "regressor"]:
+                if configuration[f"{node_name}:__choice__"] != "random_forest":
+                    skip_default = True
+
             for param in configuration:
                 if param.startswith("%s:" % node_name):
-                    value = configuration[param]
                     new_name = param.replace("%s:" % node_name, "", 1)
+                    if skip_default:
+                        if "random_forest" in new_name:  # skip default value
+                            continue
+                    value = configuration[param]
                     sub_config_dict[new_name] = value
 
             sub_configuration = Configuration(
-                sub_configuration_space,
-                values=sub_config_dict,
-                allow_inactive_with_values=True,
+                sub_configuration_space, values=sub_config_dict
             )
 
             if init_params is not None:
