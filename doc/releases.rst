@@ -41,9 +41,8 @@ Version 0.15.0
   disable one hot encoding if no categorical features are present.
 * FIX #1365, #1369: Fix an issue with `ensemble_size == 0`.
 * FIX #1374: Pass random state to all components of a pipeline.
-* FIX #1430: Fixes an issue in which the `AutoSklearnClassifier.leaderboard()` or
+* FIX #1432: Fixes an issue in which the `AutoSklearnClassifier.leaderboard()` or
   `AutoSklearnRegressor.leaderboard()` could fail to display results.
-* FIX #1432: Fill the empty leaderboard slots with NaN.
 * FIX #1480: Properly terminate Auto-sklearn on an exception or a keyboard interrupt.
 * FIX #1532: Removes exception printing at shutdown for latest dask versions. The printed
   exceptions did not impact performance at all and were only confusing as they suggested failures
