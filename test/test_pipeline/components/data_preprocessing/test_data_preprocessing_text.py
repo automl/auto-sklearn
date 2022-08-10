@@ -1,11 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_word_encoding import (  # noqa: E501
-    BagOfWordEncoder as BOW,
-)
-from autosklearn.pipeline.components.data_preprocessing.text_encoding.bag_of_word_encoding_distinct import (  # noqa: E501
-    BagOfWordEncoder as BOW_distinct,
+from autosklearn.pipeline.components.data_preprocessing.text_encoding.tfidf_encoding import (  # noqa: E501
+    TfidfEncoder as Vectorizer,
 )
 
 import unittest
@@ -19,15 +16,11 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                 "col2": ["hello mars", "This is the second column"],
             }
         ).astype({"col1": "string", "col2": "string"})
-        BOW_fitted = BOW(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
+        Vectorizer_fitted = Vectorizer(
             random_state=1,
         ).fit(X.copy())
 
-        Yt = BOW_fitted.preprocessor.vocabulary_
+        Yt = Vectorizer_fitted.preprocessor.vocabulary_
         words = sorted(
             [
                 "hello",
@@ -45,20 +38,17 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
 
         np.testing.assert_array_equal(Yt, Y)
 
-        BOW_fitted = BOW_distinct(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
+        Vectorizer_fitted = Vectorizer(
+            per_column=False,
             random_state=1,
         ).fit(X.copy())
 
-        for key in BOW_fitted.preprocessor:
+        for key in Vectorizer_fitted.preprocessor:
             y = []
             for col in X[key]:
                 y += [word for word in col.lower().split(" ") if len(word) > 1]
             y = sorted(y)
-            yt = sorted(BOW_fitted.preprocessor[key].vocabulary_.keys())
+            yt = sorted(Vectorizer_fitted.preprocessor[key].vocabulary_.keys())
             np.testing.assert_array_equal(yt, y)
 
     def test_transform(self):
@@ -68,11 +58,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                 "col2": ["hello mars", "this is the second column"],
             }
         ).astype({"col1": "string", "col2": "string"})
-        X_t = BOW(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
+        X_t = Vectorizer(
             random_state=1,
         ).fit_transform(X.copy())
 
@@ -80,11 +66,8 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         y = np.array([[0, 2, 0, 1, 0, 0, 0, 0, 1], [1, 0, 2, 0, 1, 1, 1, 2, 0]])
         np.testing.assert_array_equal(X_t.toarray(), y)
 
-        X_t = BOW_distinct(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
+        X_t = Vectorizer(
+            per_column=False,
             random_state=1,
         ).fit_transform(X.copy())
 
@@ -102,21 +85,14 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                 "col2": ["test test", "test test"],
             }
         ).astype({"col1": "string", "col2": "string"})
-        X_t = BOW(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
+        X_t = Vectorizer(
             random_state=1,
         ).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (2, 5))
 
-        X_t = BOW_distinct(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
+        X_t = Vectorizer(
+            per_column=False,
             random_state=1,
         ).fit_transform(X.copy())
 
@@ -129,22 +105,12 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
                 "col2": ["test test", "test test", "test"],
             }
         ).astype({"col1": "string", "col2": "string"})
-        X_t = BOW(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
+        X_t = Vectorizer(
             random_state=1,
         ).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (3, 5))
 
-        X_t = BOW_distinct(
-            ngram_upper_bound=1,
-            min_df_choice="min_df_absolute",
-            min_df_absolute=0,
-            min_df_relative=0,
-            random_state=1,
-        ).fit_transform(X.copy())
+        X_t = Vectorizer(per_column=False, random_state=1).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (3, 6))
