@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Releases &#8212; AutoSklearn 0.14.6 documentation</title>
+    <title>Releases &#8212; AutoSklearn 0.15.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.6</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.15.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -107,6 +107,10 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-15-0">Version 0.15.0</a><ul>
+<li><a class="reference internal" href="#contributors-v0-15-0">Contributors v0.15.0</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#version-0-14-6">Version 0.14.6</a><ul>
 <li><a class="reference internal" href="#contributors-v0-14-6">Contributors v0.14.6</a></li>
 </ul>
@@ -253,6 +257,61 @@
       
   <div class="section" id="releases">
 <h1>Releases<a class="headerlink" href="#releases" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-15-0">
+<h2>Version 0.15.0<a class="headerlink" href="#version-0-15-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ADD #1317, #1455, #1485, #1501, #1518, #1523: Initial support for multi-objective Auto-sklearn.</p></li>
+<li><p>ADD #1300, #1410, #1414, #1415, #1420, #1468, #1500: Intial support for text features Auto-sklearn. You can now pass in columns identified as <cite>“string”</cite> columns which will be tokenized using pure sklearn methods.</p></li>
+<li><p>ADD #1475: Support for passing <cite>X</cite> data to metrics, as required by [<cite>fairlearn</cite>](<a class="reference external" href="https://github.com/fairlearn/fairlearn">https://github.com/fairlearn/fairlearn</a>) metrics</p></li>
+<li><p>ADD #1341, #1250: Expose interface to interact with how auto-sklearn performs dataset compression when required</p></li>
+<li><p>DOC #1304: This adds documentation for SMAC callbacks that can be used by Auto-sklearn.</p></li>
+<li><p>DOC #1476: Example on how to interupt autosklearn with a callback, implementing a very naive early stopping</p></li>
+<li><p>MAINT #1364, #1473: Improve import time of Auto-sklearn 2 by moving the construction of the selector
+model from import time to construction time.</p></li>
+<li><p>MAINT #1425: Update <cite>StopWatch</cite> to be context manager.</p></li>
+<li><p>MAINT #1454: Rename interal bool parameters <cite>categorical</cite> to <cite>feat_type</cite> to reflect the use of different feature types</p></li>
+<li><p>MAINT #1474: remove left-overs of a “public test set” from the code. This has no influence on
+any user-facing code.</p></li>
+<li><p>MAINT #1487: Replace deprecated of <cite>DataFrame.append</cite></p></li>
+<li><p>MAINT #1504: Rename <cite>rval</cite> to <cite>return_value</cite> or <cite>run_value</cite> to remove ambiguity</p></li>
+<li><p>MAINT #1506: Increase the time given to meta-learning-related unit tests to decrease the amount
+of timeouts on github.</p></li>
+<li><p>MAINT #1527: Relax MLPRegressor unit tests precision.</p></li>
+<li><p>MAINT #1545: Add explicit lower bound subsample check in the train evaluator</p></li>
+<li><p>MAINT #1551: Fix issue with updated scipy skew see [here](<a class="reference external" href="https://github.com/scipy/scipy/issues/16765">https://github.com/scipy/scipy/issues/16765</a>).</p></li>
+<li><p>MAINT #1434: Refactor the ensemble building process</p></li>
+<li><p>MAINT #1464: Improve testing, with caching (#1464), modularity (#1417)</p></li>
+<li><p>MAINT #1358: Add tooling Mypy, Flake8, isort, black</p></li>
+<li><p>FIX #741: Disable hyperparameters for a special data modality if it is not present, for example
+disable one hot encoding if no categorical features are present.</p></li>
+<li><p>FIX #1365, #1369: Fix an issue with <cite>ensemble_size == 0</cite>.</p></li>
+<li><p>FIX #1374: Pass random state to all components of a pipeline.</p></li>
+<li><p>FIX #1432: Fixes an issue in which the <cite>AutoSklearnClassifier.leaderboard()</cite> or
+<cite>AutoSklearnRegressor.leaderboard()</cite> could fail to display results.</p></li>
+<li><p>FIX #1480: Properly terminate Auto-sklearn on an exception or a keyboard interrupt.</p></li>
+<li><p>FIX #1532: Removes exception printing at shutdown for latest dask versions. The printed
+exceptions did not impact performance at all and were only confusing as they suggested failures
+of Auto-sklearn.</p></li>
+<li><p>FIX #1547: Fixes a bug in Auto-sklearn 2 that could silently break it when passing in pandas
+DataFrames.</p></li>
+<li><p>FIX #1550: Fix recent bug when performing evaluations with pandas Y.</p></li>
+</ul>
+<div class="section" id="contributors-v0-15-0">
+<h3>Contributors v0.15.0<a class="headerlink" href="#contributors-v0-15-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Matthias Feurer</p></li>
+<li><p>Eddie Bergman</p></li>
+<li><p>Katharina Eggensperger</p></li>
+<li><p>Sagar Kaushik</p></li>
+<li><p>partev</p></li>
+<li><p>Lukas Strack</p></li>
+<li><p>Basavasagar K Patil</p></li>
+<li><p>Eric Pedley</p></li>
+<li><p>Aseem Kannal</p></li>
+<li><p>SkBlaz</p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="version-0-14-6">
 <h2>Version 0.14.6<a class="headerlink" href="#version-0-14-6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
