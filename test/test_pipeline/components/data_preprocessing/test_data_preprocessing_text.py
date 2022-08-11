@@ -171,8 +171,6 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         vectorizer = Vectorizer(
             random_state=1,
         ).fit(X.copy())
-        print(vectorizer.preprocessor["col1"].vocabulary_)
-        print(vectorizer.preprocessor["col2"].vocabulary_)
         self.assertEqual(
             vectorizer.preprocessor["col1"].vocabulary_,
             {"hello": 0, "world": 4, "this": 3, "is": 1, "test": 2},
