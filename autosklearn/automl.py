@@ -239,6 +239,7 @@ class AutoML(BaseEstimator):
         get_trials_callback: SMACCallback | None = None,
         dataset_compression: bool | Mapping[str, Any] = True,
         allow_string_features: bool = True,
+        configuration_space=None,
     ):
         super().__init__()
 
@@ -510,6 +511,7 @@ class AutoML(BaseEstimator):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
         is_classification: bool = False,
+        configuration_space=None,
     ):
         """Fit AutoML to given training set (X, y).
 
@@ -748,13 +750,29 @@ class AutoML(BaseEstimator):
             # like this we can't use some of the preprocessing methods in case
             # the data became sparse)
             with self._stopwatch.time("Create Search space"):
-                self.configuration_space, configspace_path = self._create_search_space(
-                    self._backend.temporary_directory,
-                    self._backend,
-                    datamanager,
-                    include=self._include,
-                    exclude=self._exclude,
-                )
+                if configuration_space is None:
+                    (
+                        self.configuration_space,
+                        configspace_path,
+                    ) = self._create_search_space(
+                        self._backend.temporary_directory,
+                        self._backend,
+                        datamanager,
+                        include=self._include,
+                        exclude=self._exclude,
+                    )
+                else:
+                    (
+                        self.configuration_space,
+                        configspace_path,
+                    ) = self._create_search_space(
+                        self._backend.temporary_directory,
+                        self._backend,
+                        datamanager,
+                        include=self._include,
+                        exclude=self._exclude,
+                    )
+                    self.configuration_space = configuration_space
 
             if only_return_configuration_space:
                 return self.configuration_space
@@ -2300,6 +2318,7 @@ class AutoMLClassifier(AutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
+        configuration_space=None,
     ) -> AutoMLClassifier:
         return super().fit(
             X,
@@ -2311,6 +2330,7 @@ class AutoMLClassifier(AutoML):
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
             is_classification=True,
+            configuration_space=configuration_space,
         )
 
     def fit_pipeline(

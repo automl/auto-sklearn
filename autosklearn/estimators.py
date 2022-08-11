@@ -497,6 +497,7 @@ class AutoSklearnEstimator(BaseEstimator):
     def build_automl(self):
 
         initial_configs = self.initial_configurations_via_metalearning
+        print(self._get_automl_class())
         automl = self._get_automl_class()(
             temporary_directory=self.tmp_folder,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
@@ -525,6 +526,7 @@ class AutoSklearnEstimator(BaseEstimator):
             get_trials_callback=self.get_trials_callback,
             dataset_compression=self.dataset_compression,
             allow_string_features=self.allow_string_features,
+            configuration_space=None,
         )
 
         return automl
@@ -1384,7 +1386,16 @@ class AutoSklearnEstimator(BaseEstimator):
 class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
     """This class implements the classification task."""
 
-    def fit(self, X, y, X_test=None, y_test=None, feat_type=None, dataset_name=None):
+    def fit(
+        self,
+        X,
+        y,
+        X_test=None,
+        y_test=None,
+        feat_type=None,
+        dataset_name=None,
+        configuration_space=None,
+    ):
         """Fit *auto-sklearn* to given training set (X, y).
 
         Fit both optimizes the machine learning models and builds an ensemble
@@ -1452,6 +1463,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator, ClassifierMixin):
             y_test=y_test,
             feat_type=feat_type,
             dataset_name=dataset_name,
+            configuration_space=configuration_space,
         )
 
         # After fit, a classifier is expected to define classes_
