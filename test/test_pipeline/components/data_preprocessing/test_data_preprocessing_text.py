@@ -17,6 +17,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         Vectorizer_fitted = Vectorizer(
+            per_column=False,
             random_state=1,
         ).fit(X.copy())
 
@@ -39,7 +40,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         np.testing.assert_array_equal(Yt, Y)
 
         Vectorizer_fitted = Vectorizer(
-            per_column=False,
+            per_column=True,
             random_state=1,
         ).fit(X.copy())
 
@@ -63,8 +64,39 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         ).fit_transform(X.copy())
 
         # ['column', 'hello', 'is', 'mars', 'second', 'test', 'the', 'this', 'world']
-        y = np.array([[0, 2, 0, 1, 0, 0, 0, 0, 1], [1, 0, 2, 0, 1, 1, 1, 2, 0]])
-        np.testing.assert_array_equal(X_t.toarray(), y)
+        y = np.array(
+            [
+                [
+                    0.707107,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.707107,
+                    0.0,
+                    0.707107,
+                    0.0,
+                    0.707107,
+                    0.0,
+                    0.0,
+                    0.0,
+                ],
+                [
+                    0.0,
+                    0.57735,
+                    0.57735,
+                    0.57735,
+                    0.0,
+                    0.447214,
+                    0.0,
+                    0.447214,
+                    0.0,
+                    0.447214,
+                    0.447214,
+                    0.447214,
+                ],
+            ]
+        )
+        np.testing.assert_almost_equal(X_t.toarray(), y, decimal=5)
 
         X_t = Vectorizer(
             per_column=False,
@@ -74,9 +106,22 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         # 'hello', 'is', 'test', 'this', 'world',
         # 'column', 'hello', 'is', 'mars', 'second', 'the', 'this'
         y = np.array(
-            [[1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0], [0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1]]
+            [
+                [0.0, 1.238261, 0.0, 0.785288, 0.0, 0.0, 0.0, 0.0, 0.785288],
+                [
+                    0.485461,
+                    0.0,
+                    0.909148,
+                    0.0,
+                    0.485461,
+                    0.667679,
+                    0.485461,
+                    0.909148,
+                    0.0,
+                ],
+            ]
         )
-        np.testing.assert_array_equal(X_t.toarray(), y)
+        np.testing.assert_almost_equal(X_t.toarray(), y, decimal=5)
 
     def test_check_shape(self):
         X = pd.DataFrame(
@@ -89,14 +134,14 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             random_state=1,
         ).fit_transform(X.copy())
 
-        self.assertEqual(X_t.shape, (2, 5))
+        self.assertEqual(X_t.shape, (2, 6))
 
         X_t = Vectorizer(
             per_column=False,
             random_state=1,
         ).fit_transform(X.copy())
 
-        self.assertEqual(X_t.shape, (2, 6))
+        self.assertEqual(X_t.shape, (2, 5))
 
     def test_check_nan(self):
         X = pd.DataFrame(
@@ -108,9 +153,37 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         X_t = Vectorizer(
             random_state=1,
         ).fit_transform(X.copy())
+        self.assertEqual(X_t.shape, (3, 6))
 
+        X_t = Vectorizer(
+            per_column=False,
+            random_state=1,
+        ).fit_transform(X.copy())
         self.assertEqual(X_t.shape, (3, 5))
 
-        X_t = Vectorizer(per_column=False, random_state=1).fit_transform(X.copy())
+    def test_check_vocabulary(self):
+        X = pd.DataFrame(
+            {
+                "col1": ["hello world", "this is test", None],
+                "col2": ["test test", "test test", "test"],
+            }
+        ).astype({"col1": "string", "col2": "string"})
+        vectorizer = Vectorizer(
+            random_state=1,
+        ).fit(X.copy())
+        print(vectorizer.preprocessor["col1"].vocabulary_)
+        print(vectorizer.preprocessor["col2"].vocabulary_)
+        self.assertEqual(
+            vectorizer.preprocessor["col1"].vocabulary_,
+            {"hello": 0, "world": 4, "this": 3, "is": 1, "test": 2},
+        )
+        self.assertEqual(vectorizer.preprocessor["col2"].vocabulary_, {"test": 0})
 
-        self.assertEqual(X_t.shape, (3, 6))
+        vectorizer = Vectorizer(
+            per_column=False,
+            random_state=1,
+        ).fit(X.copy())
+        self.assertEqual(
+            vectorizer.preprocessor.vocabulary_,
+            {"hello": 0, "world": 4, "this": 3, "is": 1, "test": 2},
+        )
