@@ -3,11 +3,67 @@
 ..
     The following command allows to retrieve all commiters since a specified
     commit. From https://stackoverflow.com/questions/6482436/list-of-authors-in-git-since-a-given-commit
-    git log 3d53cd9b5011258c4fdcce9d02e252d0248e5f1d.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
+    git log 6cc8bb179fcb023d1c341cf33d2958a16a6935be.. --format="%aN <%aE>" --reverse | perl -e 'my %dedupe; while (<STDIN>) { print unless $dedupe{$_}++}'
 
 ========
 Releases
 ========
+
+Version 0.15.0
+==============
+
+* ADD #1317, #1455, #1485, #1501, #1518, #1523: Initial support for multi-objective Auto-sklearn.
+* ADD #1300, #1410, #1414, #1415, #1420, #1468, #1500: Intial support for text features Auto-sklearn. You can now pass in columns identified as `"string"` columns which will be tokenized using pure sklearn methods.
+* ADD #1475: Support for passing `X` data to metrics, as required by [`fairlearn`](https://github.com/fairlearn/fairlearn) metrics
+* ADD #1341, #1250: Expose interface to interact with how auto-sklearn performs dataset compression when required
+
+* DOC #1304: This adds documentation for SMAC callbacks that can be used by Auto-sklearn.
+* DOC #1476: Example on how to interupt autosklearn with a callback, implementing a very naive early stopping
+
+* MAINT #1364, #1473: Improve import time of Auto-sklearn 2 by moving the construction of the selector
+  model from import time to construction time.
+* MAINT #1425: Update `StopWatch` to be context manager.
+* MAINT #1454: Rename interal bool parameters `categorical` to `feat_type` to reflect the use of different feature types
+* MAINT #1474: remove left-overs of a "public test set" from the code. This has no influence on
+  any user-facing code.
+* MAINT #1487: Replace deprecated of `DataFrame.append`
+* MAINT #1504: Rename `rval` to `return_value` or `run_value` to remove ambiguity
+* MAINT #1506: Increase the time given to meta-learning-related unit tests to decrease the amount
+  of timeouts on github.
+* MAINT #1527: Relax MLPRegressor unit tests precision.
+* MAINT #1545: Add explicit lower bound subsample check in the train evaluator
+* MAINT #1551: Fix issue with updated scipy skew see [here](https://github.com/scipy/scipy/issues/16765).
+* MAINT #1434: Refactor the ensemble building process
+* MAINT #1464: Improve testing, with caching (#1464), modularity (#1417)
+* MAINT #1358: Add tooling Mypy, Flake8, isort, black
+
+* FIX #741: Disable hyperparameters for a special data modality if it is not present, for example
+  disable one hot encoding if no categorical features are present.
+* FIX #1365, #1369: Fix an issue with `ensemble_size == 0`.
+* FIX #1374: Pass random state to all components of a pipeline.
+* FIX #1432: Fixes an issue in which the `AutoSklearnClassifier.leaderboard()` or
+  `AutoSklearnRegressor.leaderboard()` could fail to display results.
+* FIX #1480: Properly terminate Auto-sklearn on an exception or a keyboard interrupt.
+* FIX #1532: Removes exception printing at shutdown for latest dask versions. The printed
+  exceptions did not impact performance at all and were only confusing as they suggested failures
+  of Auto-sklearn.
+* FIX #1547: Fixes a bug in Auto-sklearn 2 that could silently break it when passing in pandas
+  DataFrames.
+* FIX #1550: Fix recent bug when performing evaluations with pandas Y.
+
+Contributors v0.15.0
+********************
+
+* Matthias Feurer
+* Eddie Bergman
+* Katharina Eggensperger
+* Sagar Kaushik
+* partev
+* Lukas Strack
+* Basavasagar K Patil
+* Eric Pedley
+* Aseem Kannal
+* SkBlaz
 
 Version 0.14.6
 ==============
