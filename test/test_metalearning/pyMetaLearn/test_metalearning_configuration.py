@@ -20,11 +20,11 @@ class MetalearningConfiguration(unittest.TestCase):
         for feat_type, cs_size in [
             ({"A": "numerical"}, 165),
             ({"A": "categorical"}, 162),
-            ({"A": "string"}, 174 - 6),
+            ({"A": "string"}, 174 - 4),
             ({"A": "numerical", "B": "categorical"}, 168),
-            ({"A": "numerical", "B": "string"}, 180 - 6),
-            ({"A": "categorical", "B": "string"}, 177 - 6),
-            ({"A": "categorical", "B": "string", "C": "numerical"}, 183 - 6),
+            ({"A": "numerical", "B": "string"}, 180 - 4),
+            ({"A": "categorical", "B": "string"}, 177 - 4),
+            ({"A": "categorical", "B": "string", "C": "numerical"}, 183 - 4),
         ]:
             pipeline = autosklearn.pipeline.classification.SimpleClassificationPipeline(
                 feat_type=feat_type
