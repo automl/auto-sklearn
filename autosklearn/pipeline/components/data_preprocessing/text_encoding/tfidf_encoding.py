@@ -53,6 +53,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                         binary=self.binary,
                         norm=self.norm,
                         sublinear_tf=self.sublinear_tf,
+                        analyzer="char",
                     ).fit(X[feature])
                     self.preprocessor[feature] = vectorizer
             else:
@@ -63,6 +64,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                     binary=self.binary,
                     norm=self.norm,
                     sublinear_tf=self.sublinear_tf,
+                    analyzer="char",
                 )
                 all_text = itertools.chain.from_iterable(X[col] for col in X.columns)
                 self.preprocessor = self.preprocessor.fit(all_text)
@@ -128,8 +130,8 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
         hp_ngram_range = CSH.CategoricalHyperparameter(
             name="ngram_range",
-            choices=["1,1", "1,2", "1,3", "2,2", "2,3", "3,3"],
-            default_value="1,1",
+            choices=["2,2", "2,3", "2,4", "3,3", "3,4", "4,4"],
+            default_value="2,2",
         )
 
         hp_min_df = CSH.UniformFloatHyperparameter(
