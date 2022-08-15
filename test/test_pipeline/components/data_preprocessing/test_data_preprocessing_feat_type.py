@@ -56,7 +56,7 @@ class PreprocessingPipelineFeatTypeTest(unittest.TestCase):
         for key in cs.get_hyperparameters_dict().keys():
             self.assertNotIn("numerical", key.split(":")[0])
             self.assertNotIn("categorical", key.split(":")[0])
-        self.assertEqual(len(cs), 9)
+        self.assertEqual(len(cs), 11)
 
     def test_dual_type(self):
         DPP = FeatTypeSplit(feat_type={"A": "numerical", "B": "categorical"})
@@ -89,7 +89,7 @@ class PreprocessingPipelineFeatTypeTest(unittest.TestCase):
         )
         for key in cs.get_hyperparameters_dict().keys():
             self.assertNotIn("numerical", key.split(":")[0])
-        self.assertEqual(len(cs), 12)
+        self.assertEqual(len(cs), 14)
 
         DPP = FeatTypeSplit(feat_type={"A": "string", "B": "numerical"})
         cs = DPP.get_hyperparameter_search_space(
@@ -105,7 +105,7 @@ class PreprocessingPipelineFeatTypeTest(unittest.TestCase):
         )
         for key in cs.get_hyperparameters_dict().keys():
             self.assertNotIn("categorical", key.split(":")[0])
-        self.assertEqual(len(cs), 15)
+        self.assertEqual(len(cs), 17)
 
     def test_triple_type(self):
         DPP = FeatTypeSplit(
@@ -133,4 +133,4 @@ class PreprocessingPipelineFeatTypeTest(unittest.TestCase):
 
         self.assertEqual(sum(truth_table), 3)
         print(cs)
-        self.assertEqual(len(cs), 18)
+        self.assertEqual(len(cs), 20)

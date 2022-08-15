@@ -5,6 +5,7 @@ import itertools
 import ConfigSpace.hyperparameters as CSH
 import numpy as np
 import pandas as pd
+from ConfigSpace import EqualsCondition
 from ConfigSpace.configuration_space import ConfigurationSpace
 from scipy.sparse import hstack
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -18,16 +19,19 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        ngram_range: str = "1,1",
+        ngram_range_word: str = "1,1",
+        ngram_range_char: str = "2,3",
         min_df: float = 0.0,
         max_df: float = 1.0,
         binary: bool = False,
         norm: str = "l2",
         sublinear_tf: bool = False,
         per_column: bool = True,
+        analyzer: str = "word",
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
-        self.ngram_range = tuple(int(i) for i in ngram_range.split(","))
+        self.ngram_range_word = tuple(int(i) for i in ngram_range_word.split(","))
+        self.ngram_range_char = tuple(int(i) for i in ngram_range_char.split(","))
         self.random_state = random_state
         self.min_df = min_df
         self.max_df = max_df
@@ -35,10 +39,17 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         self.norm = norm
         self.sublinear_tf = sublinear_tf
         self.per_column = per_column
+        self.analyzer = analyzer
 
     def fit(
         self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
     ) -> "TfidfEncoder":
+        if self.analyzer == "word":
+            ngram_range = self.ngram_range_word
+        elif self.analyzer == "char":
+            ngram_range = self.ngram_range_char
+        else:
+            raise KeyError(f"Analyzer is not defined for {self.analyzer}")
 
         if isinstance(X, pd.DataFrame):
             X.fillna("", inplace=True)
@@ -47,24 +58,24 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
 
                 for feature in X.columns:
                     vectorizer = TfidfVectorizer(
-                        ngram_range=self.ngram_range,
+                        ngram_range=ngram_range,
                         min_df=self.min_df,
                         max_df=self.max_df,
                         binary=self.binary,
                         norm=self.norm,
                         sublinear_tf=self.sublinear_tf,
-                        analyzer="char",
+                        analyzer=self.analyzer,
                     ).fit(X[feature])
                     self.preprocessor[feature] = vectorizer
             else:
                 self.preprocessor = TfidfVectorizer(
-                    ngram_range=self.ngram_range,
+                    ngram_range=ngram_range,
                     min_df=self.min_df,
                     max_df=self.max_df,
                     binary=self.binary,
                     norm=self.norm,
                     sublinear_tf=self.sublinear_tf,
-                    analyzer="char",
+                    analyzer=self.analyzer,
                 )
                 all_text = itertools.chain.from_iterable(X[col] for col in X.columns)
                 self.preprocessor = self.preprocessor.fit(all_text)
@@ -128,10 +139,23 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         cs = ConfigurationSpace()
-        hp_ngram_range = CSH.CategoricalHyperparameter(
-            name="ngram_range",
+
+        hp_analyzer = CSH.CategoricalHyperparameter(
+            name="analyzer",
+            choices=["word", "char"],
+            default_value="word",
+        )
+
+        hp_ngram_range_char = CSH.CategoricalHyperparameter(
+            name="ngram_range_char",
             choices=["2,2", "2,3", "2,4", "3,3", "3,4", "4,4"],
             default_value="2,2",
+        )
+
+        hp_ngram_range_word = CSH.CategoricalHyperparameter(
+            name="ngram_range_word",
+            choices=["1,1", "1,2", "1,3", "2,2", "2,3", "3,3"],
+            default_value="3,3",
         )
 
         hp_min_df = CSH.UniformFloatHyperparameter(
@@ -164,7 +188,9 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
 
         cs.add_hyperparameters(
             [
-                hp_ngram_range,
+                hp_analyzer,
+                hp_ngram_range_char,
+                hp_ngram_range_word,
                 hp_max_df,
                 hp_min_df,
                 hp_binary,
@@ -173,5 +199,8 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                 hp_per_column,
             ]
         )
+        cond_char = EqualsCondition(hp_ngram_range_char, hp_analyzer, "char")
+        cond_word = EqualsCondition(hp_ngram_range_word, hp_analyzer, "word")
+        cs.add_conditions([cond_char, cond_word])
 
         return cs
