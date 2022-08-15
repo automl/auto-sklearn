@@ -1,7 +1,5 @@
 from typing import Container, Type
 
-import pytest
-
 import numpy as np
 import sklearn.metrics
 
@@ -14,10 +12,6 @@ import pytest
 import unittest
 
 from test.test_pipeline.ignored_warnings import ignore_warnings, regressor_warnings
-
-from autosklearn.pipeline.components.regression import _regressors, RegressorChoice
-
-from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
 
 
 class BaseRegressionComponentTest(unittest.TestCase):
