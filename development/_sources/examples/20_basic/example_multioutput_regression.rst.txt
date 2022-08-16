@@ -120,9 +120,9 @@ View the models found by auto-sklearn
 
  .. code-block:: none
 
-              rank  ensemble_weight              type          cost  duration
-    model_id                                                                 
-    11           1              1.0  gaussian_process  8.008021e-10  3.444668
+              rank  ensemble_weight              type          cost   duration
+    model_id                                                                  
+    21           1              1.0  gaussian_process  1.250504e-09  13.033763
 
 
 
@@ -147,14 +147,14 @@ Print the final ensemble constructed by auto-sklearn
 
  .. code-block:: none
 
-    {   11: {   'cost': 8.00802091305286e-10,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f3d6761d640>,
+    {   21: {   'cost': 1.2505040336563411e-09,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f8b12e4b760>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f3d699b8310>,
-                'model_id': 11,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f8b12f48fa0>,
+                'model_id': 21,
                 'rank': 1,
-                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f3d699b8610>,
-                'sklearn_regressor': GaussianProcessRegressor(alpha=1.5673750764715258e-12,
+                'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f8b1003c040>,
+                'sklearn_regressor': GaussianProcessRegressor(alpha=8.565199553521984e-11,
                              kernel=RBF(length_scale=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
                              n_restarts_optimizer=10, normalize_y=True,
                              random_state=1)}}
@@ -183,7 +183,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    R2 score: 0.9999999995663819
+    R2 score: 0.999999998366508
 
 
 
@@ -398,7 +398,7 @@ Get the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.467 seconds)
+   **Total running time of the script:** ( 1 minutes  58.175 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multioutput_regression.py:
