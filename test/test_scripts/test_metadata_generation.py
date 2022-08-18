@@ -252,7 +252,7 @@ class TestMetadataGeneration(unittest.TestCase):
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=90,
+            timeout=180,
         )
         self.assertEqual(return_value.returncode, 0, msg=f"{cmd}\n{str(return_value)}")
         for task_type in ("classification", "regression"):
