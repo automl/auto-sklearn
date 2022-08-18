@@ -275,12 +275,12 @@ class AutoSklearnEstimator(BaseEstimator):
 
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation <https://automl.github.io/SMAC3/main/api/smac.scenario.scenario.html#module-smac.scenario.scenario>`_
+            `SMAC documentation <https://automl.github.io/SMAC3/main/pages/details/scenario.html>`_
             for a list of available arguments.
 
         get_smac_object_callback : callable
             Callback function to create an object of class
-            `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/main/api/smac.optimizer.smbo.html>`_.
+            `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/main/apidoc/smac.optimizer.smbo.html>`_.
             The function must accept the arguments ``scenario_dict``,
             ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
             This is an advanced feature. Use only if you are familiar with
