@@ -46,7 +46,7 @@ Following that we'll tell you about how you can test your changes locally and th
     # If you missed the --recurse-submodules arg during clone or need to install the
     # submodule manually, then execute the following line:
     #
-    # git submodule update --init --recursive
+    # git submodule udate --init --recursive
 
     # ... Alternatively, if you would prefer a more manual method
     # Show all the available branches with a * beside your current one

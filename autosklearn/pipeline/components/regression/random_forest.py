@@ -107,6 +107,9 @@ class RandomForest(
         if y.ndim == 2 and y.shape[1] == 1:
             y = y.flatten()
 
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.flatten()
+
         self.estimator.fit(X, y)
         return self
 
