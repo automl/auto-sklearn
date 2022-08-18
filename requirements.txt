@@ -15,7 +15,6 @@ pandas>=1.0
 liac-arff
 threadpoolctl
 
-# Add upper bounds to our own packages to keep things stable
 ConfigSpace>=0.4.21,<0.5
 pynisher>=0.6.3,<0.7
 pyrfr>=0.8.1,<0.9
