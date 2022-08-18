@@ -13,7 +13,6 @@ from typing import (
 )
 
 import copy
-import distro
 import io
 import itertools
 import json

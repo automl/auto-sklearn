@@ -172,7 +172,6 @@ class AutoSklearnComponent(BaseEstimator):
 
 
 class IterativeComponent(AutoSklearnComponent):
-
     def fit(self, X, y, sample_weight=None):
         self.iterative_fit(X, y, n_iter=2, refit=True)
 
@@ -193,7 +192,6 @@ class IterativeComponent(AutoSklearnComponent):
 
 
 class IterativeComponentWithSampleWeight(AutoSklearnComponent):
-
     def fit(self, X, y, sample_weight=None):
         self.iterative_fit(X, y, n_iter=2, refit=True, sample_weight=sample_weight)
 

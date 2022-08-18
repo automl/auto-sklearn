@@ -19,7 +19,7 @@ if os.name != "posix":
         "/auto-sklearn/stable/installation.html#windows-osx-compability" % sys.platform
     )
 
-if sys.version_info < (3, 7):
+if sys.version_info < (3, 6):
     raise ValueError(
         "Unsupported python version %s found. Auto-sklearn requires Python "
         "3.6 or higher." % sys.version_info

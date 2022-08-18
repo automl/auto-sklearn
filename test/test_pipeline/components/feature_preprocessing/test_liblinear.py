@@ -15,11 +15,8 @@ from test.test_pipeline.ignored_warnings import (
     ignore_warnings,
 )
 
-from test.test_pipeline.ignored_warnings import ignore_warnings, feature_preprocessing_warnings
-
 
 class LiblinearComponentTest(PreprocessingTestCase):
-
     def test_default_configuration(self):
         with ignore_warnings(feature_preprocessing_warnings):
             transformation, original = _test_preprocessing(LibLinear_Preprocessor)
