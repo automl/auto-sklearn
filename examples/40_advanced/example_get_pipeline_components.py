@@ -87,7 +87,7 @@ print(automl.sprint_statistics())
 #
 # Auto-sklearn also keeps detailed statistics of the hyperparameter
 # optimization procedurce, which are stored in a so-called
-# `run history <https://automl.github.io/SMAC3/main/apidoc/smac.
+# `run history <https://automl.github.io/SMAC3/master/apidoc/smac.
 # runhistory.runhistory.html#smac.runhistory.runhistory.RunHistory>`_.
 
 print(automl.automl_.runhistory_)
