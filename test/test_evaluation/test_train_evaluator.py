@@ -30,6 +30,8 @@ from sklearn.model_selection import (
 )
 from smac.tae import StatusType, TAEAbortException
 
+from autosklearn.automl_common.common.utils import backend
+
 import autosklearn.evaluation.splitter
 from autosklearn.automl_common.common.utils import backend
 from autosklearn.constants import (

@@ -15,6 +15,8 @@ from sklearn.ensemble import VotingClassifier, VotingRegressor
 from smac.tae import StatusType
 from threadpoolctl import threadpool_limits
 
+from autosklearn.automl_common.common.utils.backend import Backend
+
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.askl_typing import FEAT_TYPE_TYPE

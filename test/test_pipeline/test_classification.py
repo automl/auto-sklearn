@@ -44,6 +44,8 @@ import unittest.mock
 
 from test.test_pipeline.ignored_warnings import classifier_warnings, ignore_warnings
 
+from test.test_pipeline.ignored_warnings import classifier_warnings, ignore_warnings
+
 
 class DummyClassifier(AutoSklearnClassificationAlgorithm):
     @staticmethod
@@ -572,7 +574,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             cls = SimpleClassificationPipeline(
                 feat_type=feat_type,
                 dataset_properties=dataset_properties,
-                init_params=init_params_,
+                init_params=init_params_
             )
             cls.set_hyperparameters(
                 config, init_params=init_params_, feat_type=feat_type

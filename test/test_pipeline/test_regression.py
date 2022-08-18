@@ -37,6 +37,8 @@ import unittest.mock
 
 from test.test_pipeline.ignored_warnings import ignore_warnings, regressor_warnings
 
+from test.test_pipeline.ignored_warnings import regressor_warnings, ignore_warnings
+
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
     _multiprocess_can_split_ = True
@@ -247,10 +249,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     "identity" in e.args[0]
                 ):
                     continue
-                elif (
-                    "zero-size array to reduction operation maximum which has no "
-                    "identity" in e.args[0]
-                ):
+                elif "zero-size array to reduction operation maximum which has no " \
+                     "identity" in e.args[0]:
                     continue
                 else:
                     e.args += (f"config={config}",)

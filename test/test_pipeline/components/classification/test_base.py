@@ -14,6 +14,8 @@ import unittest
 
 from test.test_pipeline.ignored_warnings import classifier_warnings, ignore_warnings
 
+from test.test_pipeline.ignored_warnings import ignore_warnings, classifier_warnings
+
 
 class BaseClassificationComponentTest(unittest.TestCase):
     # Magic command to not run tests on base class
