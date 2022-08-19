@@ -284,7 +284,7 @@ class AutoSklearnEstimator(BaseEstimator):
             The function must accept the arguments ``scenario_dict``,
             ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
             This is an advanced feature. Use only if you are familiar with
-            `SMAC <https://automl.github.io/SMAC3/master/index.html>`_.
+            `SMAC <https://automl.github.io/SMAC3/main/index.html>`_.
 
         logging_config : dict, optional (None)
             dictionary object specifying the logger configuration. If None,
