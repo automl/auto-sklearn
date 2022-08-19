@@ -31,11 +31,6 @@ the technology behind *auto-sklearn* by reading our paper published at
     :ref:`sphx_glr_examples_40_advanced_example_text_preprocessing.py`
 
 
-.. topic:: NEW: Material from tutorials and presentations
-
-    We provide slides and notebooks from talks and tutorials here: `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
-
-
 Example
 *******
 

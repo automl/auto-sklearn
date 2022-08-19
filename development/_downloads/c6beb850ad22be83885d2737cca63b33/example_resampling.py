@@ -115,8 +115,6 @@ automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 print(automl.sprint_statistics())
 
-print(automl.sprint_statistics())
-
 ############################################################################
 # For custom resampling strategies (i.e. resampling strategies that are not
 # defined as strings by Auto-sklearn) it is necessary to perform a refit:

@@ -32,8 +32,7 @@ efficient meta-learning.
 
 *auto-sklearn 2.0* has the same interface as regular *auto-sklearn* and you can use it via
 
-    Further guidelines can be found in
-    `auto-sklearn/issues/142 <https://github.com/automl/auto-sklearn/issues/142>`_.
+.. code:: python
 
     from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 
