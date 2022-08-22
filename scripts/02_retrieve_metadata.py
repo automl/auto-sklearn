@@ -11,6 +11,7 @@ import numpy as np
 from ConfigSpace.configuration_space import Configuration
 from ConfigSpace.util import deactivate_inactive_hyperparameters
 
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.constants import *
 from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
 from autosklearn.util import pipeline
@@ -188,9 +189,10 @@ def write_output(outputs, configurations, output_dir, configuration_space, metri
             fh.write("%s: %s\n" % (key, description[key]))
 
 
-class DummyDatamanager():
+class DummyDatamanager(AbstractDataManager):
     def __init__(self, info, feat_type=None):
-        self.info = info
+        super().__init__("Test")
+        self._info = info
         self.feat_type = feat_type
 
 def main():
