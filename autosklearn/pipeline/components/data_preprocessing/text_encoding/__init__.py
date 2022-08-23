@@ -63,7 +63,7 @@ class BagOfWordChoice(AutoSklearnChoice):
             )
 
         if default is None:
-            defaults = ["bag_of_words_encoding"]
+            defaults = ["tfidf_encoding"]
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_

@@ -26,12 +26,10 @@ class NumericalPreprocessingPipeline(BasePipeline):
         2 - VarianceThreshold: Removes low-variance features
         3 - Rescaling: rescale features according to a certain rule (e.g. normalization,
             standartization or min-max)
-
     Parameters
     ----------
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
-
     random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
@@ -94,10 +92,8 @@ class NumericalPreprocessingPipeline(BasePipeline):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         """Create the hyperparameter configuration space.
-
         Parameters
         ----------
-
         Returns
         -------
         cs : ConfigSpace.configuration_space.Configuration
