@@ -28,10 +28,24 @@ jobs:
           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
       - name: Login to Github
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
+          registry: docker.pkg.github.com
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -49,32 +63,13 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v3
-        with:
-          tags: ${{ steps.extract_branch.outputs.branch }}
-          push: true
-
-      - name: Login to Github
-        uses: docker/login-action@v2
-        with:
-          registry: docker.pkg.github.com
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Pull Docker image
-        run: docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/auto-sklearn:$BRANCH
+        run: docker pull ghcr.io/automl/auto-sklearn:$BRANCH
         env:
             BRANCH: ${{ steps.extract_branch.outputs.branch }}
 
       - name: Run image
-        run: docker run -i -d --name unittester -v $GITHUB_WORKSPACE:/workspace -w /workspace docker.pkg.github.com/$GITHUB_REPOSITORY/auto-sklearn:$BRANCH
+        run: docker run -i -d --name unittester -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/automl/auto-sklearn:$BRANCH
         env:
             BRANCH: ${{ steps.extract_branch.outputs.branch }}
 
