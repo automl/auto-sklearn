@@ -19,19 +19,17 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        ngram_range_word: str = "1,1",
-        ngram_range_char: str = "2,3",
+        ngram_range_word: int = 1,
+        ngram_range_char: int = 4,
         min_df: float = 0.0,
         max_df: float = 1.0,
         binary: bool = False,
         norm: str = "l2",
         sublinear_tf: bool = False,
-        per_column: bool = True,
-        analyzer: str = "word",
+        per_column: bool = False,
+        analyzer: str = "char",
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
-        self.ngram_range_word = tuple(int(i) for i in ngram_range_word.split(","))
-        self.ngram_range_char = tuple(int(i) for i in ngram_range_char.split(","))
         self.random_state = random_state
         self.min_df = min_df
         self.max_df = max_df
@@ -41,16 +39,16 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         self.per_column = per_column
         self.analyzer = analyzer
 
-    def fit(
-        self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
-    ) -> "TfidfEncoder":
-        if self.analyzer == "word":
-            ngram_range = self.ngram_range_word
-        elif self.analyzer == "char":
-            ngram_range = self.ngram_range_char
+        if analyzer == "word":
+            self.ngram_range = ngram_range_word
+        elif analyzer == "char":
+            self.ngram_range = ngram_range_char
         else:
             raise KeyError(f"Analyzer is not defined for {self.analyzer}")
 
+    def fit(
+        self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
+    ) -> "TfidfEncoder":
         if isinstance(X, pd.DataFrame):
             X.fillna("", inplace=True)
             if self.per_column:
@@ -58,7 +56,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
 
                 for feature in X.columns:
                     vectorizer = TfidfVectorizer(
-                        ngram_range=ngram_range,
+                        ngram_range=self.ngram_range,
                         min_df=self.min_df,
                         max_df=self.max_df,
                         binary=self.binary,
@@ -69,7 +67,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                     self.preprocessor[feature] = vectorizer
             else:
                 self.preprocessor = TfidfVectorizer(
-                    ngram_range=ngram_range,
+                    ngram_range=self.ngram_range,
                     min_df=self.min_df,
                     max_df=self.max_df,
                     binary=self.binary,
@@ -143,19 +141,21 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         hp_analyzer = CSH.CategoricalHyperparameter(
             name="analyzer",
             choices=["word", "char"],
-            default_value="word",
+            default_value="char",
         )
 
-        hp_ngram_range_char = CSH.CategoricalHyperparameter(
+        hp_ngram_range_char = CSH.UniformIntegerHyperparameter(
             name="ngram_range_char",
-            choices=["2,2", "2,3", "2,4", "3,3", "3,4", "4,4"],
-            default_value="2,2",
+            lower=2,
+            upper=4,
+            default_value=4,
         )
 
-        hp_ngram_range_word = CSH.CategoricalHyperparameter(
+        hp_ngram_range_word = CSH.UniformFloatHyperparameter(
             name="ngram_range_word",
-            choices=["1,1", "1,2", "1,3", "2,2", "2,3", "3,3"],
-            default_value="3,3",
+            lower=1,
+            upper=3,
+            default_value=1,
         )
 
         hp_min_df = CSH.UniformFloatHyperparameter(
@@ -170,20 +170,20 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             name="max_df", lower=0.7, upper=1.0, default_value=1.0
         )
 
-        hp_binary = CSH.CategoricalHyperparameter(
-            name="binary", choices=[True, False], default_value=False
-        )
+        # hp_binary = CSH.CategoricalHyperparameter(
+        #     name="binary", choices=[True, False], default_value=False
+        # )
 
-        hp_norm = CSH.CategoricalHyperparameter(
-            name="norm", choices=["l2", "l1"], default_value="l2"
-        )
+        # hp_norm = CSH.CategoricalHyperparameter(
+        #     name="norm", choices=["l2", "l1"], default_value="l2"
+        # )
 
-        hp_sublinear_tf = CSH.CategoricalHyperparameter(
-            name="sublinear_tf", choices=[True, False], default_value=False
-        )
+        # hp_sublinear_tf = CSH.CategoricalHyperparameter(
+        #     name="sublinear_tf", choices=[True, False], default_value=False
+        # )
 
         hp_per_column = CSH.CategoricalHyperparameter(
-            name="per_column", choices=[True, False], default_value=True
+            name="per_column", choices=[True, False], default_value=False
         )
 
         cs.add_hyperparameters(
@@ -193,9 +193,9 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                 hp_ngram_range_word,
                 hp_max_df,
                 hp_min_df,
-                hp_binary,
-                hp_norm,
-                hp_sublinear_tf,
+                # hp_binary,
+                # hp_norm,
+                # hp_sublinear_tf,
                 hp_per_column,
             ]
         )
