@@ -38,17 +38,19 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         self.sublinear_tf = sublinear_tf
         self.per_column = per_column
         self.analyzer = analyzer
-
-        if analyzer == "word":
-            self.ngram_range = ngram_range_word
-        elif analyzer == "char":
-            self.ngram_range = ngram_range_char
-        else:
-            raise KeyError(f"Analyzer is not defined for {self.analyzer}")
+        self.ngram_range_word = ngram_range_word
+        self.ngram_range_char = ngram_range_char
 
     def fit(
         self, X: PIPELINE_DATA_DTYPE, y: Optional[PIPELINE_DATA_DTYPE] = None
     ) -> "TfidfEncoder":
+        if self.analyzer == "word":
+            ngram_range = self.ngram_range_word
+        elif self.analyzer == "char":
+            ngram_range = self.ngram_range_char
+        else:
+            raise KeyError(f"Analyzer is not defined for {self.analyzer}")
+
         if isinstance(X, pd.DataFrame):
             X.fillna("", inplace=True)
             if self.per_column:
@@ -56,7 +58,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
 
                 for feature in X.columns:
                     vectorizer = TfidfVectorizer(
-                        ngram_range=(self.ngram_range, self.ngram_range),
+                        ngram_range=(ngram_range, ngram_range),
                         min_df=self.min_df,
                         max_df=self.max_df,
                         binary=self.binary,
@@ -67,7 +69,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                     self.preprocessor[feature] = vectorizer
             else:
                 self.preprocessor = TfidfVectorizer(
-                    ngram_range=(self.ngram_range, self.ngram_range),
+                    ngram_range=(ngram_range, ngram_range),
                     min_df=self.min_df,
                     max_df=self.max_df,
                     binary=self.binary,

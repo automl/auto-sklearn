@@ -17,6 +17,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         Vectorizer_fitted = Vectorizer(
+            analyzer="word",
             per_column=False,
             random_state=1,
         ).fit(X.copy())
@@ -40,6 +41,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         np.testing.assert_array_equal(Yt, Y)
 
         Vectorizer_fitted = Vectorizer(
+            analyzer="word",
             per_column=True,
             random_state=1,
         ).fit(X.copy())
@@ -60,6 +62,8 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         X_t = Vectorizer(
+            per_column=True,
+            analyzer="word",
             random_state=1,
         ).fit_transform(X.copy())
 
@@ -99,6 +103,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         np.testing.assert_almost_equal(X_t.toarray(), y, decimal=5)
 
         X_t = Vectorizer(
+            analyzer="word",
             per_column=False,
             random_state=1,
         ).fit_transform(X.copy())
@@ -131,12 +136,15 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         X_t = Vectorizer(
+            per_column=True,
+            analyzer="word",
             random_state=1,
         ).fit_transform(X.copy())
 
         self.assertEqual(X_t.shape, (2, 6))
 
         X_t = Vectorizer(
+            analyzer="word",
             per_column=False,
             random_state=1,
         ).fit_transform(X.copy())
@@ -151,11 +159,14 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         X_t = Vectorizer(
+            per_column=True,
+            analyzer="word",
             random_state=1,
         ).fit_transform(X.copy())
         self.assertEqual(X_t.shape, (3, 6))
 
         X_t = Vectorizer(
+            analyzer="word",
             per_column=False,
             random_state=1,
         ).fit_transform(X.copy())
@@ -169,6 +180,8 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
             }
         ).astype({"col1": "string", "col2": "string"})
         vectorizer = Vectorizer(
+            per_column=True,
+            analyzer="word",
             random_state=1,
         ).fit(X.copy())
         self.assertEqual(
@@ -178,6 +191,7 @@ class TextPreprocessingPipelineTest(unittest.TestCase):
         self.assertEqual(vectorizer.preprocessor["col2"].vocabulary_, {"test": 0})
 
         vectorizer = Vectorizer(
+            analyzer="word",
             per_column=False,
             random_state=1,
         ).fit(X.copy())
