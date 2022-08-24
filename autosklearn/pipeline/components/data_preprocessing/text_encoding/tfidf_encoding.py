@@ -56,7 +56,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
 
                 for feature in X.columns:
                     vectorizer = TfidfVectorizer(
-                        ngram_range=self.ngram_range,
+                        ngram_range=(self.ngram_range, self.ngram_range),
                         min_df=self.min_df,
                         max_df=self.max_df,
                         binary=self.binary,
@@ -67,7 +67,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                     self.preprocessor[feature] = vectorizer
             else:
                 self.preprocessor = TfidfVectorizer(
-                    ngram_range=self.ngram_range,
+                    ngram_range=(self.ngram_range, self.ngram_range),
                     min_df=self.min_df,
                     max_df=self.max_df,
                     binary=self.binary,
