@@ -9,6 +9,11 @@ on:
       - development
       - docker_workflow
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DOCKERHUB_IMAGE_NAME: mfeurer/auto-sklearn
+
 jobs:
 
   push_to_registry:
@@ -38,7 +43,7 @@ jobs:
         id: meta_dockerhub
         uses: docker/metadata-action@v4
         with:
-          images: mfeurer/auto-sklearn
+          images: ${{ env.DOCKERHUB_IMAGE_NAME }}
 
       - name: Push to Docker Hub
         uses: docker/build-push-action@v3
@@ -51,7 +56,7 @@ jobs:
       - name: Login to Github
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -59,7 +64,7 @@ jobs:
         id: meta_githubpackages
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v3
@@ -70,12 +75,12 @@ jobs:
           labels: ${{ steps.meta_githubpackages.outputs.labels }}
 
       - name: Pull Docker image from Github Packages
-        run: docker pull ghcr.io/automl/auto-sklearn:$BRANCH
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$BRANCH
         env:
             BRANCH: ${{ steps.extract_branch.outputs.branch }}
 
       - name: Run image
-        run: docker run -i -d --name unittester -v $GITHUB_WORKSPACE:/workspace -w /workspace ghcr.io/automl/auto-sklearn:$BRANCH
+        run: docker run -i -d --name unittester -v $GITHUB_WORKSPACE:/workspace -w /workspace ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$BRANCH
         env:
             BRANCH: ${{ steps.extract_branch.outputs.branch }}
 
