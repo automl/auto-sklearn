@@ -34,6 +34,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker Hub
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: mfeurer/auto-sklearn
+
       - name: Push to Docker Hub
         uses: docker/build-push-action@v3
         with:
@@ -49,7 +55,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata (tags, labels) for Docker on Github Packages
         id: meta
         uses: docker/metadata-action@v4
         with:
@@ -63,7 +69,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Pull Docker image
+      - name: Pull Docker image from Github Packages
         run: docker pull ghcr.io/automl/auto-sklearn:$BRANCH
         env:
             BRANCH: ${{ steps.extract_branch.outputs.branch }}
