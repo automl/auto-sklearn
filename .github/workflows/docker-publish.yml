@@ -31,15 +31,23 @@ jobs:
       - name: Login to Github
         uses: docker/login-action@v2
         with:
-          registry: docker.pkg.github.com
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository }}
 
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v3
         with:
-          tags: ${{ steps.extract_branch.outputs.branch }}
+          context: .
           push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
