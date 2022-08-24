@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker Hub
-        id: meta
+        id: meta_dockerhub
         uses: docker/metadata-action@v4
         with:
           images: mfeurer/auto-sklearn
@@ -45,8 +45,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_dockerhub.outputs.tags }}
+          labels: ${{ steps.meta_dockerhub.outputs.labels }}
 
       - name: Login to Github
         uses: docker/login-action@v2
@@ -56,7 +56,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker on Github Packages
-        id: meta
+        id: meta_githubpackages
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository }}
@@ -66,8 +66,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_githubpackages.outputs.tags }}
+          labels: ${{ steps.meta_githubpackages.outputs.labels }}
 
       - name: Pull Docker image from Github Packages
         run: docker pull ghcr.io/automl/auto-sklearn:$BRANCH
