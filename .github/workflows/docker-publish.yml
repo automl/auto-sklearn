@@ -28,21 +28,29 @@ jobs:
           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
+      - name: Login to Github
+        uses: docker/login-action@v2
+        with:
+          registry: docker.pkg.github.com
+          repository: automl/auto-sklearn/auto-sklearn
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v3
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: automl/auto-sklearn/auto-sklearn
           tag_with_ref: true
           tags: ${{ steps.extract_branch.outputs.branch }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Push to Docker Hub
         uses: docker/build-push-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
           repository: mfeurer/auto-sklearn
           tags: ${{ steps.extract_branch.outputs.branch }}
 
