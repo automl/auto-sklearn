@@ -39,7 +39,6 @@ jobs:
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v3
         with:
-          tag_with_ref: true
           tags: ${{ steps.extract_branch.outputs.branch }}
 
       - name: Login to Docker Hub
@@ -51,7 +50,6 @@ jobs:
       - name: Push to Docker Hub
         uses: docker/build-push-action@v3
         with:
-          repository: mfeurer/auto-sklearn
           tags: ${{ steps.extract_branch.outputs.branch }}
 
       - name: Docker Login
