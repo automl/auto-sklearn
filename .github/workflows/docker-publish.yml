@@ -32,7 +32,6 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: docker.pkg.github.com
-          repository: automl/auto-sklearn/auto-sklearn
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -40,6 +39,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           tags: ${{ steps.extract_branch.outputs.branch }}
+          push: true
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -51,11 +51,14 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           tags: ${{ steps.extract_branch.outputs.branch }}
+          push: true
 
-      - name: Docker Login
-        run: docker login docker.pkg.github.com -u $GITHUB_ACTOR -p $GITHUB_TOKEN
-        env:
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Login to Github
+        uses: docker/login-action@v2
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull Docker image
         run: docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/auto-sklearn:$BRANCH
