@@ -9,6 +9,11 @@ on:
       - development
       - docker_workflow
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DOCKERHUB_IMAGE_NAME: mfeurer/auto-sklearn
+
 jobs:
 
   push_to_registry:
@@ -23,39 +28,59 @@ jobs:
 
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: |
+          echo "Working on GITHUB_REF ${GITHUB_REF}"
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: automl/auto-sklearn/auto-sklearn
-          tag_with_ref: true
-          tags: ${{ steps.extract_branch.outputs.branch }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker Hub
+        id: meta_dockerhub
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.DOCKERHUB_IMAGE_NAME }}
 
       - name: Push to Docker Hub
         uses: docker/build-push-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-          repository: mfeurer/auto-sklearn
-          tags: ${{ steps.extract_branch.outputs.branch }}
+          context: .
+          push: true
+          tags: ${{ steps.meta_dockerhub.outputs.tags }}
+          labels: ${{ steps.meta_dockerhub.outputs.labels }}
 
-      - name: Docker Login
-        run: docker login docker.pkg.github.com -u $GITHUB_ACTOR -p $GITHUB_TOKEN
-        env:
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Login to Github
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull Docker image
-        run: docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/auto-sklearn:$BRANCH
+      - name: Extract metadata (tags, labels) for Docker on Github Packages
+        id: meta_githubpackages
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta_githubpackages.outputs.tags }}
+          labels: ${{ steps.meta_githubpackages.outputs.labels }}
+
+      - name: Pull Docker image from Github Packages
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$BRANCH
         env:
             BRANCH: ${{ steps.extract_branch.outputs.branch }}
 
       - name: Run image
-        run: docker run -i -d --name unittester -v $GITHUB_WORKSPACE:/workspace -w /workspace docker.pkg.github.com/$GITHUB_REPOSITORY/auto-sklearn:$BRANCH
+        run: docker run -i -d --name unittester -v $GITHUB_WORKSPACE:/workspace -w /workspace ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$BRANCH
         env:
             BRANCH: ${{ steps.extract_branch.outputs.branch }}
 
