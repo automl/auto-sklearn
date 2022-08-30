@@ -670,7 +670,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         * 16 classifier choices
         * 13 features preprocessor choices
         * 183 total hyperparameters
-        * (n_hyperparameters - 4) different conditionals for the pipeline
+        * (n_hyperparameters - 7) different conditionals for the pipeline
         * 53 forbidden combinations
         """
         pipeline = SimpleClassificationPipeline(
@@ -694,7 +694,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(n_preprocessors, 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(len(hyperparameters), 183)
+        self.assertEqual(len(hyperparameters), 183 - 7)
 
         # for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
