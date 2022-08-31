@@ -1,3 +1,5 @@
+from typing import Callable
+
 import warnings
 
 import numpy as np
@@ -45,256 +47,6 @@ class TestScorer(unittest.TestCase):
         )
         scorer_nox(y_true, y_pred, X_data=np.array([32]))
 
-    def test_predict_scorer_binary(self):
-        y_true = np.array([0, 0, 1, 1])
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "bac", sklearn.metrics.balanced_accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            name="accuracy",
-            score_func=sklearn.metrics.accuracy_score,
-            optimum=1,
-            worst_possible_result=0,
-            sign=-1,
-            kwargs={},
-        )
-
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_predict_scorer_multiclass(self):
-        y_true = np.array([0, 1, 2])
-        y_pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.333333333)
-
-        y_pred = np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.333333333)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "bac", sklearn.metrics.balanced_accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.333333333)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_predict_scorer_multilabel(self):
-        y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.25)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.25)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_predict_scorer_regression(self):
-        y_true = np.arange(0, 1.01, 0.1)
-        y_pred = y_true.copy()
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "r2", sklearn.metrics.r2_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.ones(y_true.shape) * np.mean(y_true)
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.0)
-
-    def test_proba_scorer_binary(self):
-        y_true = [0, 0, 1, 1]
-        y_pred = [[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.0)
-
-        y_pred = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        y_pred = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, -1, {}
-        )
-
-        y_pred = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -0.69314718055994529)
-
-    def test_proba_scorer_multiclass(self):
-        y_true = [0, 1, 2]
-        y_pred = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.0)
-
-        y_pred = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0986122886681098)
-
-        y_pred = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0986122886681096)
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, -1, {}
-        )
-
-        y_pred = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0986122886681096)
-
-    def test_proba_scorer_multilabel(self):
-        y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.34657359027997314)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, -1, {}
-        )
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -0.34657359027997314)
-
-    def test_threshold_scorer_binary(self):
-        y_true = [0, 0, 1, 1]
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_threshold_scorer_multilabel(self):
-        y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
     def test_sign_flip(self):
         y_true = np.arange(0, 1.01, 0.1)
         y_pred = y_true.copy()
@@ -324,6 +76,625 @@ class TestScorer(unittest.TestCase):
 
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, -1.0)
+
+
+# Trial changes for _PredictScorer, _ProbaScorer, and _TresholdScorer.
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            1.0,
+        ),
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            -1,
+            -1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "bac",
+            sklearn.metrics.balanced_accuracy_score,
+            1,
+            0,
+            1,
+            0.5,
+        ),
+    ],
+)
+def test_predict_scorer_binary(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of binary data when _PredictScorer is used.
+    """
+    y_true = np.array([0, 0, 1, 1])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            1.0,
+        ),
+        (
+            np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            -1,
+            -1.0,
+        ),
+        (
+            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            0.333333333,
+        ),
+        (
+            np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            0.333333333,
+        ),
+        (
+            np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
+            "bac",
+            sklearn.metrics.balanced_accuracy_score,
+            1,
+            0,
+            1,
+            0.333333333,
+        ),
+    ],
+)
+def test_predict_scorer_multiclass(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of multiclass data when _PredictScorer is used.
+    """
+    y_true = np.array([0, 1, 2])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            1.0,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            -1,
+            -1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            0.25,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "accuracy",
+            sklearn.metrics.accuracy_score,
+            1,
+            0,
+            1,
+            0.25,
+        ),
+    ],
+)
+def test_predict_scorer_multilabel(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of multilabel data when _PredictScorer is used.
+    """
+    y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (np.arange(0, 1.01, 0.1), "r2", sklearn.metrics.r2_score, 1, 0, 1, 1.0),
+        (
+            np.ones(np.arange(0, 1.01, 0.1).shape) * np.mean(np.arange(0, 1.01, 0.1)),
+            "r2",
+            sklearn.metrics.r2_score,
+            1,
+            0,
+            1,
+            0.0,
+        ),
+    ],
+)
+def test_predict_scorer_regression(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of regression when _PredictScorer is used.
+    """
+    y_true = np.arange(0, 1.01, 0.1)
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            0.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            0.69314718055994529,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            0.69314718055994529,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            -1,
+            -0.69314718055994529,
+        ),
+    ],
+)
+def test_proba_scorer_binary(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of binary true data when _ProbaScorer is used.
+    """
+    y_true = np.array([0, 0, 1, 1])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        needs_proba=True,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            0.0,
+        ),
+        (
+            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            1.0986122886681098,
+        ),
+        (
+            np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            -1,
+            -1.0986122886681096,
+        ),
+    ],
+)
+def test_proba_scorer_multiclass(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of multilclass data when _ProbaScorer is used.
+    """
+    y_true = np.array([0, 1, 2])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        needs_proba=True,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            0.34657359027997314,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            0.69314718055994529,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            1,
+            0.69314718055994529,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]),
+            "log_loss",
+            sklearn.metrics.log_loss,
+            0,
+            MAXINT,
+            -1,
+            -0.34657359027997314,
+        ),
+    ],
+)
+def test_proba_scorer_multilabel(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of multilabel data when _ProbaScorer is used.
+    """
+    y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        needs_proba=True,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            1,
+            1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            1,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            1,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            -1,
+            -1.0,
+        ),
+    ],
+)
+def test_threshold_scorer_binary(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of binary data when _ThresholdScorer is used.
+    """
+    y_true = np.array([0, 0, 1, 1])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        needs_threshold=True,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, name, score_func, optimum, worst_possible_result, sign, expected_score",
+    [
+        (
+            np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            1,
+            1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            1,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            1,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            "roc_auc",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            -1,
+            -1.0,
+        ),
+    ],
+)
+def test_threshold_scorer_multilabel(
+    y_pred: np.array,
+    name: str,
+    score_func: Callable,
+    optimum: float,
+    worst_possible_result: float,
+    sign: float,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Correct scores generated in case of multilabel data when _ThresholdScorer is used.
+    """
+    y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+
+    scorer = autosklearn.metrics.make_scorer(
+        name=name,
+        score_func=score_func,
+        optimum=optimum,
+        worst_possible_result=worst_possible_result,
+        sign=sign,
+        needs_threshold=True,
+        kwargs={},
+    )
+
+    result_score = scorer(y_true, y_pred)
+
+    assert expected_score == pytest.approx(result_score)
 
 
 class TestMetricsDoNotAlterInput(unittest.TestCase):
