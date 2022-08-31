@@ -31,22 +31,28 @@ class TextFeatureReduction(AutoSklearnPreprocessingAlgorithm):
             self.preprocessor = TruncatedSVD(
                 n_components=self.n_components, random_state=self.random_state
             )
+            self.preprocessor.fit(X)
         elif X.shape[1] <= self.n_components and X.shape[1] != 1:
             self.preprocessor = TruncatedSVD(
                 n_components=X.shape[1] - 1, random_state=self.random_state
             )
+            self.preprocessor.fit(X)
+        elif X.shape[1] == 1:
+            self.preprocessor = "passthrough"
         else:
             raise ValueError(
                 "The text embedding consists only of a single dimension.\n"
                 "Are you sure that your text data is necessary?"
             )
-        self.preprocessor.fit(X)
         return self
 
     def transform(self, X: PIPELINE_DATA_DTYPE) -> PIPELINE_DATA_DTYPE:
         if self.preprocessor is None:
             raise NotImplementedError()
-        return self.preprocessor.transform(X)
+        elif self.preprocessor == "passthrough":
+            return X
+        else:
+            return self.preprocessor.transform(X)
 
     @staticmethod
     def get_properties(

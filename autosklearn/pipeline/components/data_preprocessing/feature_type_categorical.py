@@ -33,12 +33,10 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         3 - Minority coalescence: Assign category 1 to all categories whose occurrence
             don't sum-up to a certain minimum fraction
         4 - One hot encoding: usual sklearn one hot encoding
-
     Parameters
     ----------
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
-
     random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
@@ -101,7 +99,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         """Create the hyperparameter configuration space.
-
         Returns
         -------
         cs : ConfigSpace.configuration_space.Configuration
