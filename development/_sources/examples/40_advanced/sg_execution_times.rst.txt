@@ -5,32 +5,32 @@
 
 Computation times
 =================
-**31:29.638** total execution time for **examples_40_advanced** files:
+**30:45.013** total execution time for **examples_40_advanced** files:
 
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_resampling.py` (``example_resampling.py``)                                     | 06:41.704 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_resampling.py` (``example_resampling.py``)                                     | 06:26.981 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_metrics.py` (``example_metrics.py``)                                           | 06:09.655 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_metrics.py` (``example_metrics.py``)                                           | 06:16.071 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_inspect_predictions.py` (``example_inspect_predictions.py``)                   | 04:07.151 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_inspect_predictions.py` (``example_inspect_predictions.py``)                   | 04:01.724 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_single_configuration.py` (``example_single_configuration.py``)                 | 02:17.238 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_multi_objective.py` (``example_multi_objective.py``)                           | 03:21.582 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_multi_objective.py` (``example_multi_objective.py``)                           | 02:06.085 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_single_configuration.py` (``example_single_configuration.py``)                 | 02:15.610 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py` (``example_pandas_train_test.py``)                       | 02:03.469 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_calc_multiple_metrics.py` (``example_calc_multiple_metrics.py``)               | 01:59.881 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_calc_multiple_metrics.py` (``example_calc_multiple_metrics.py``)               | 01:57.369 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py` (``example_pandas_train_test.py``)                       | 01:55.963 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py` (``example_interpretable_models.py``)                 | 01:55.231 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py` (``example_interpretable_models.py``)                 | 01:54.586 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_feature_types.py` (``example_feature_types.py``)                               | 01:51.038 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_text_preprocessing.py` (``example_text_preprocessing.py``)                     | 01:04.990 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_text_preprocessing.py` (``example_text_preprocessing.py``)                     | 01:12.898 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_feature_types.py` (``example_feature_types.py``)                               | 00:27.988 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py` (``example_get_pipeline_components.py``)           | 00:26.136 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py` (``example_get_pipeline_components.py``)           | 00:24.649 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_debug_logging.py` (``example_debug_logging.py``)                               | 00:22.055 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py` (``example_early_stopping_and_callbacks.py``) | 00:19.306 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py` (``example_early_stopping_and_callbacks.py``) | 00:19.610 | 0.0 MB |
+| :ref:`sphx_glr_examples_40_advanced_example_debug_logging.py` (``example_debug_logging.py``)                               | 00:15.681 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------------------+-----------+--------+

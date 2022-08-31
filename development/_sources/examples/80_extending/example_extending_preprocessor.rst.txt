@@ -256,32 +256,32 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.9300699300699301
+    accuracy:  0.951048951048951
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f26cb0939d0>,
-               'cost': 0.04255319148936165,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f26c688a4c0>,
-               'ensemble_weight': 0.7,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f26cf87d6d0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f162bfb9970>,
+               'cost': 0.049645390070921946,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f1625130df0>,
+               'ensemble_weight': 0.4,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f162bfb9040>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=1, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         4: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f26e2e06b20>,
-               'cost': 0.1063829787234043,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f26cb00fac0>,
-               'ensemble_weight': 0.1,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f26cd913880>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f161ffb1af0>,
+               'cost': 0.06382978723404253,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f163b918c40>,
+               'ensemble_weight': 0.4,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f162914f0d0>,
                'model_id': 4,
                'rank': 2,
-               'sklearn_classifier': BernoulliNB(alpha=23.955206843654683, fit_prior=False)},
+               'sklearn_classifier': BernoulliNB(alpha=23.95520684365466, fit_prior=False)},
         5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f26c7b241c0>,
-               'cost': 0.12056737588652477,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f26cb308370>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f16299c2460>,
+               'cost': 0.08510638297872342,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f1623fe5d60>,
                'ensemble_weight': 0.2,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f26c754e160>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f16299c2550>,
                'model_id': 5,
                'rank': 3,
                'sklearn_classifier': AdaBoostClassifier(algorithm='SAMME',
@@ -295,7 +295,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.680 seconds)
+   **Total running time of the script:** ( 0 minutes  21.175 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:
