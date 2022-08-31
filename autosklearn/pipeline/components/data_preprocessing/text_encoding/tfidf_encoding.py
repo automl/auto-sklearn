@@ -14,6 +14,7 @@ from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
+from autosklearn.util.common import check_for_bool
 
 
 class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
@@ -50,6 +51,9 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             ngram_range = self.ngram_range_char
         else:
             raise KeyError(f"Analyzer is not defined for {self.analyzer}")
+
+        self.sublinear_tf = check_for_bool(self.sublinear_tf)
+        self.binary = check_for_bool(self.binary)
 
         if isinstance(X, pd.DataFrame):
             X.fillna("", inplace=True)
@@ -120,8 +124,8 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
         return {
-            "shortname": "RBOW",
-            "name": "Relative Bag Of Word Encoder",
+            "shortname": "TF/IDF",
+            "name": "TF/IDF Encoder",
             "handles_regression": True,
             "handles_classification": True,
             "handles_multiclass": True,
@@ -153,7 +157,7 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             default_value=4,
         )
 
-        hp_ngram_range_word = CSH.UniformFloatHyperparameter(
+        hp_ngram_range_word = CSH.UniformIntegerHyperparameter(
             name="ngram_range_word",
             lower=1,
             upper=3,
@@ -161,7 +165,6 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
         )
 
         hp_min_df = CSH.UniformFloatHyperparameter(
-            # Todo this can still result in building no vectorizer
             name="min_df",
             lower=0.0,
             upper=0.3,
@@ -172,17 +175,15 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
             name="max_df", lower=0.7, upper=1.0, default_value=1.0
         )
 
-        # hp_binary = CSH.CategoricalHyperparameter(
-        #     name="binary", choices=[True, False], default_value=False
-        # )
+        hp_binary = CSH.UnParametrizedHyperparameter(name="binary", value="False")
 
-        # hp_norm = CSH.CategoricalHyperparameter(
-        #     name="norm", choices=["l2", "l1"], default_value="l2"
-        # )
+        hp_norm = CSH.CategoricalHyperparameter(
+            name="norm", choices=["l2", "l1"], default_value="l2"
+        )
 
-        # hp_sublinear_tf = CSH.CategoricalHyperparameter(
-        #     name="sublinear_tf", choices=[True, False], default_value=False
-        # )
+        hp_sublinear_tf = CSH.UnParametrizedHyperparameter(
+            name="sublinear_tf", value="False"
+        )
 
         hp_per_column = CSH.CategoricalHyperparameter(
             name="per_column", choices=[True, False], default_value=False
@@ -195,9 +196,9 @@ class TfidfEncoder(AutoSklearnPreprocessingAlgorithm):
                 hp_ngram_range_word,
                 hp_max_df,
                 hp_min_df,
-                # hp_binary,
-                # hp_norm,
-                # hp_sublinear_tf,
+                hp_binary,
+                hp_norm,
+                hp_sublinear_tf,
                 hp_per_column,
             ]
         )

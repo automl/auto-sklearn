@@ -320,7 +320,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
         forbiddens = cs.get_forbiddens()
-        self.assertEqual(171 - 7, len(hyperparameters))
+        self.assertEqual(167, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 3, len(conditions))
         self.assertEqual(len(forbiddens), 35)
 
