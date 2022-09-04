@@ -295,6 +295,63 @@ class TestScorer(unittest.TestCase):
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, -1.0)
 
+    def test_threshold_scorer_multi_class(self):
+        y_true = np.array([[0, 1], [1, 0], [1, 0], [0, 1]])
+        y_pred = np.array([[0.2, 0.8], [0.75, 0.25], [0.91, 0.09], [0.34, 0.66]])
+
+        scorer = autosklearn.metrics._ThresholdScorer(
+            "roc_auc_ovo_macro", sklearn.metrics.roc_auc_score, 1, 0, 1, {}
+        )
+
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 1.0)
+
+        y_pred = np.array([[0.1, 0.9], [0.15, 0.85], [0.2, 0.8], [0.25, 0.75]])
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 0.5)
+
+        y_pred = np.array([[0.75, 0.25], [0.8, 0.2], [0.85, 0.15], [0.9, 0.1]])
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 0.5)
+
+        scorer = autosklearn.metrics._ThresholdScorer(
+            "roc_auc_ovo_macro",
+            sklearn.metrics.roc_auc_score,
+            1,
+            0,
+            1,
+            {"average": "weighted"},
+        )
+        y_pred = np.array([[0.6, 0.4], [0.6, 0.4], [0.8, 0.2], [0.8, 0.2]])
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 0.5)
+
+    def test_threshold_scorer_multilabel_multiclass(self):
+        y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
+
+        scorer = autosklearn.metrics._ThresholdScorer(
+            "roc_auc_ovo_macro", sklearn.metrics.roc_auc_score, 1, 0, 1, {}
+        )
+
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 1.0)
+
+        y_pred = np.array([[0.3, 0.4], [0.3, 0.7], [0.9, 0.4], [0.8, 0.8]])
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 1.0)
+
+        y_pred = np.array([[0.7, 0.7], [0.7, 0.3], [0.9, 0.7], [0.9, 0.4]])
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 0.5)
+
+        scorer = autosklearn.metrics._ThresholdScorer(
+            "roc_auc_ovo_macro", sklearn.metrics.roc_auc_score, 1, 0, -1, {}
+        )
+        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, -1.0)
+
     def test_sign_flip(self):
         y_true = np.arange(0, 1.01, 0.1)
         y_pred = y_true.copy()
@@ -344,6 +401,13 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
 
     def test_classification_metrics(self):
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+            if scorer in [
+                autosklearn.metrics.roc_auc_ovo_macro_macro,
+                autosklearn.metrics.roc_auc_ovo_macro_micro,
+                autosklearn.metrics.roc_auc_ovo_macro_samples,
+                autosklearn.metrics.roc_auc_ovo_macro_weighted,
+            ]:
+                continue
             y_true = np.random.randint(0, 2, size=(100, 1))
             y_pred = np.random.random(200).reshape((-1, 2))
             y_pred = np.array([y_pred[i] / np.sum(y_pred[i]) for i in range(100)])
@@ -404,6 +468,11 @@ class TestMetric(unittest.TestCase):
                 "precision_samples",
                 "recall_samples",
                 "f1_samples",
+            ] or scorer in [
+                autosklearn.metrics.roc_auc_ovo_macro_macro,
+                autosklearn.metrics.roc_auc_ovo_macro_micro,
+                autosklearn.metrics.roc_auc_ovo_macro_samples,
+                autosklearn.metrics.roc_auc_ovo_macro_weighted,
             ]:
                 continue
 
@@ -451,6 +520,10 @@ class TestMetric(unittest.TestCase):
             # Skip functions not applicable for multiclass classification.
             if metric in [
                 "roc_auc",
+                "roc_auc_ovo_macro_macro",
+                "roc_auc_ovo_macro_micro",
+                "roc_auc_ovo_macro_samples",
+                "roc_auc_ovo_macro_weighted",
                 "average_precision",
                 "precision",
                 "recall",
@@ -531,11 +604,14 @@ class TestMetric(unittest.TestCase):
                 self.assertTrue(np.isfinite(score))
 
     def test_classification_multilabel(self):
-
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
             # Skip functions not applicable for multi-label classification.
             if metric in [
                 "roc_auc",
+                "roc_auc_ovo_macro_macro",
+                "roc_auc_ovo_macro_micro",
+                "roc_auc_ovo_macro_samples",
+                "roc_auc_ovo_macro_weighted",
                 "log_loss",
                 "precision",
                 "recall",
@@ -583,12 +659,29 @@ class TestCalculateScore(unittest.TestCase):
     def test_classification_scoring_functions(self):
 
         scoring_functions = list(autosklearn.metrics.CLASSIFICATION_METRICS.values())
-        scoring_functions.remove(autosklearn.metrics.accuracy)
-        fail_metrics = ["precision_samples", "recall_samples", "f1_samples"]
+        remove_scoring_functions = [
+            autosklearn.metrics.accuracy,
+            autosklearn.metrics.roc_auc_ovo_macro_macro,
+            autosklearn.metrics.roc_auc_ovo_macro_micro,
+            autosklearn.metrics.roc_auc_ovo_macro_samples,
+            autosklearn.metrics.roc_auc_ovo_macro_weighted,
+        ]
+        for scoring_function in remove_scoring_functions:
+            scoring_functions.remove(scoring_function)
+
+        fail_metrics = [
+            "precision_samples",
+            "recall_samples",
+            "f1_samples",
+            "roc_auc_ovo_macro_macro",
+            "roc_auc_ovo_macro_micro",
+            "roc_auc_ovo_macro_samples",
+            "roc_auc_ovo_macro_weighted",
+        ]
         success_metrics = list(autosklearn.metrics.CLASSIFICATION_METRICS.keys())
+
         for metric in fail_metrics:
             success_metrics.remove(metric)
-
         y_true = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         y_pred = np.array(
             [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]]
