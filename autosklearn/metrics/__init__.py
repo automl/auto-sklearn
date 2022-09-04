@@ -370,6 +370,17 @@ roc_auc = make_scorer(
     greater_is_better=True,
     needs_threshold=True,
 )
+
+roc_auc_ovo_macro = make_scorer(
+    "roc_auc_ovo_macro",
+    sklearn.metrics.roc_auc_score,
+    multi_class="ovo",
+    average="macro",
+    greater_is_better=True,
+    needs_proba=True,
+    needs_threshold=False,
+)
+
 average_precision = make_scorer(
     "average_precision", sklearn.metrics.average_precision_score, needs_threshold=True
 )
@@ -422,6 +433,7 @@ for (base_name, sklearn_metric), average in product(
         ("precision", sklearn.metrics.precision_score),
         ("recall", sklearn.metrics.recall_score),
         ("f1", sklearn.metrics.f1_score),
+        ("roc_auc_ovo_macro", sklearn.metrics.roc_auc_score),
     ],
     ["macro", "micro", "samples", "weighted"],
 ):
