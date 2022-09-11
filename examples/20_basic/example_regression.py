@@ -12,7 +12,7 @@ from pprint import pprint
 import sklearn.datasets
 import sklearn.metrics
 
-import autosklearn.regression
+import autosklearn.estimators
 import matplotlib.pyplot as plt
 
 ############################
@@ -29,7 +29,7 @@ X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
 # Build and fit a regressor
 # =========================
 
-automl = autosklearn.regression.AutoSklearnRegressor(
+automl = autosklearn.estimators.AutoSklearnRegressor(
     time_left_for_this_task=120,
     per_run_time_limit=30,
     tmp_folder="/tmp/autosklearn_regression_example_tmp",
