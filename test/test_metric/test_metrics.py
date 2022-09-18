@@ -152,7 +152,7 @@ class TestScorer(unittest.TestCase):
             0.0,
         ),
         (
-            np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
             np.array([0, 0, 1, 1]),
             autosklearn.metrics.log_loss,
             0.0,
@@ -182,7 +182,7 @@ class TestScorer(unittest.TestCase):
             1.0986122886681098,
         ),
         (
-            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+            np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
             np.array([0, 1, 2]),
             autosklearn.metrics.log_loss,
             1.0986122886681098,
