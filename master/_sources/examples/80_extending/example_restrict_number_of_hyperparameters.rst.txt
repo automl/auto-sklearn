@@ -26,21 +26,27 @@ The following example demonstrates how to replace an existing
 component with a new component, implementing the same classifier,
 but with different hyperparameters .
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-24
+.. GENERATED FROM PYTHON SOURCE LINES 10-30
 
 .. code-block:: default
 
+    from typing import Optional
 
     from ConfigSpace.configuration_space import ConfigurationSpace
-    from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, UniformFloatHyperparameter
+    from ConfigSpace.hyperparameters import (
+        UniformIntegerHyperparameter,
+        UniformFloatHyperparameter,
+    )
 
     from sklearn.datasets import load_breast_cancer
     from sklearn.model_selection import train_test_split
 
+    from autosklearn.askl_typing import FEAT_TYPE_TYPE
     import autosklearn.classification
     import autosklearn.pipeline.components.classification
-    from autosklearn.pipeline.components.classification \
-        import AutoSklearnClassificationAlgorithm
+    from autosklearn.pipeline.components.classification import (
+        AutoSklearnClassificationAlgorithm,
+    )
     from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 
 
@@ -51,12 +57,12 @@ but with different hyperparameters .
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-27
+.. GENERATED FROM PYTHON SOURCE LINES 31-33
 
 Subclass auto-sklearn's random forest classifier
 ================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-102
+.. GENERATED FROM PYTHON SOURCE LINES 33-114
 
 .. code-block:: default
 
@@ -65,8 +71,8 @@ Subclass auto-sklearn's random forest classifier
     # default parametrization (``max_features``). Instead, it also
     # tunes the number of estimators (``n_estimators``).
 
-    class CustomRandomForest(AutoSklearnClassificationAlgorithm):
 
+    class CustomRandomForest(AutoSklearnClassificationAlgorithm):
         def __init__(self, n_estimators, max_features, random_state=None):
             self.n_estimators = n_estimators
             self.max_features = max_features
@@ -103,28 +109,34 @@ Subclass auto-sklearn's random forest classifier
         @staticmethod
         def get_properties(dataset_properties=None):
             return {
-                'shortname': 'RF',
-                'name': 'Random Forest Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'handles_multioutput': False,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)
+                "shortname": "RF",
+                "name": "Random Forest Classifier",
+                "handles_regression": False,
+                "handles_classification": True,
+                "handles_multiclass": True,
+                "handles_multilabel": True,
+                "handles_multioutput": False,
+                "is_deterministic": True,
+                "input": (DENSE, SPARSE, UNSIGNED_DATA),
+                "output": (PREDICTIONS,),
             }
 
         @staticmethod
-        def get_hyperparameter_search_space(dataset_properties=None):
+        def get_hyperparameter_search_space(
+            feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+        ):
             cs = ConfigurationSpace()
 
             # The maximum number of features used in the forest is calculated as m^max_features, where
             # m is the total number of features, and max_features is the hyperparameter specified below.
             # The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This
             # corresponds with Geurts' heuristic.
-            max_features = UniformFloatHyperparameter("max_features", 0., 1., default_value=0.5)
-            n_estimators = UniformIntegerHyperparameter("n_estimators", 10, 1000, default_value=100)
+            max_features = UniformFloatHyperparameter(
+                "max_features", 0.0, 1.0, default_value=0.5
+            )
+            n_estimators = UniformIntegerHyperparameter(
+                "n_estimators", 10, 1000, default_value=100
+            )
 
             cs.add_hyperparameters([max_features, n_estimators])
             return cs
@@ -141,8 +153,6 @@ Subclass auto-sklearn's random forest classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Configuration space object:
@@ -154,12 +164,12 @@ Subclass auto-sklearn's random forest classifier
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-105
+.. GENERATED FROM PYTHON SOURCE LINES 115-117
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-109
+.. GENERATED FROM PYTHON SOURCE LINES 117-121
 
 .. code-block:: default
 
@@ -174,12 +184,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-112
+.. GENERATED FROM PYTHON SOURCE LINES 122-124
 
 Fit Random forest classifier to the data
 ========================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-127
+.. GENERATED FROM PYTHON SOURCE LINES 124-137
 
 .. code-block:: default
 
@@ -188,13 +198,11 @@ Fit Random forest classifier to the data
         time_left_for_this_task=30,
         per_run_time_limit=10,
         # Here we exclude auto-sklearn's default random forest component
-        exclude={
-            'classifier': ['random_forest']
-        },
+        exclude={"classifier": ["random_forest"]},
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 1},
+        smac_scenario_args={"runcount_limit": 1},
     )
     clf.fit(X_train, y_train)
 
@@ -204,12 +212,11 @@ Fit Random forest classifier to the data
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
-    AutoSklearnClassifier(exclude={'classifier': ['random_forest']},
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          exclude={'classifier': ['random_forest']},
                           initial_configurations_via_metalearning=0,
                           per_run_time_limit=10,
                           smac_scenario_args={'runcount_limit': 1},
@@ -217,12 +224,12 @@ Fit Random forest classifier to the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-130
+.. GENERATED FROM PYTHON SOURCE LINES 138-140
 
 Print the configuration space
 =============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-136
+.. GENERATED FROM PYTHON SOURCE LINES 140-146
 
 .. code-block:: default
 
@@ -230,15 +237,13 @@ Print the configuration space
     # Observe that this configuration space only contains our custom random
     # forest, but not auto-sklearn's ``random_forest``
     cs = clf.get_configuration_space(X_train, y_train)
-    assert 'random_forest' not in str(cs)
+    assert "random_forest" not in str(cs)
     print(cs)
 
 
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -340,13 +345,10 @@ Print the configuration space
         classifier:sgd:power_t, Type: UniformFloat, Range: [1e-05, 1.0], Default: 0.5
         classifier:sgd:tol, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.0001, on log-scale
         data_preprocessor:__choice__, Type: Categorical, Choices: {feature_type, NoPreprocessing}, Default: feature_type
-        data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__, Type: Categorical, Choices: {encoding, no_encoding, one_hot_encoding}, Default: one_hot_encoding
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__, Type: Categorical, Choices: {minority_coalescer, no_coalescense}, Default: minority_coalescer
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction, Type: UniformFloat, Range: [0.0001, 0.5], Default: 0.01, on log-scale
         data_preprocessor:feature_type:numerical_transformer:imputation:strategy, Type: Categorical, Choices: {mean, median, most_frequent}, Default: mean
         data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__, Type: Categorical, Choices: {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize}, Default: standardize
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles, Type: UniformInteger, Range: [10, 2000], Default: 1000
-        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {uniform, normal}, Default: uniform
+        data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution, Type: Categorical, Choices: {normal, uniform}, Default: normal
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max, Type: UniformFloat, Range: [0.7, 0.999], Default: 0.75
         data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min, Type: UniformFloat, Range: [0.001, 0.3], Default: 0.25
         feature_preprocessor:LDA:shrinkage, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.5
@@ -502,9 +504,6 @@ Print the configuration space
         classifier:sgd:penalty | classifier:__choice__ == 'sgd'
         classifier:sgd:power_t | classifier:sgd:learning_rate == 'invscaling'
         classifier:sgd:tol | classifier:__choice__ == 'sgd'
-        data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__ | data_preprocessor:__choice__ == 'feature_type'
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ | data_preprocessor:__choice__ == 'feature_type'
-        data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction | data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__ == 'minority_coalescer'
         data_preprocessor:feature_type:numerical_transformer:imputation:strategy | data_preprocessor:__choice__ == 'feature_type'
         data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ | data_preprocessor:__choice__ == 'feature_type'
         data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == 'quantile_transformer'
@@ -628,35 +627,30 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.935 seconds)
+   **Total running time of the script:** ( 0 minutes  9.951 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_restrict_number_of_hyperparameters.py <example_restrict_number_of_hyperparameters.py>`
 
-     :download:`Download Python source code: example_restrict_number_of_hyperparameters.py <example_restrict_number_of_hyperparameters.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_restrict_number_of_hyperparameters.ipynb <example_restrict_number_of_hyperparameters.ipynb>`
+      :download:`Download Jupyter notebook: example_restrict_number_of_hyperparameters.ipynb <example_restrict_number_of_hyperparameters.ipynb>`
 
 
 .. only:: html

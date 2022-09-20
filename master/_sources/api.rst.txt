@@ -111,4 +111,36 @@ Extension Interfaces
 .. autoclass:: autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm
     :members:
 
+.. _api_ensemble:
 
+=========
+Ensembles
+=========
+
+~~~~~~~~~~~~~~~~
+Single objective
+~~~~~~~~~~~~~~~~
+
+.. autoclass:: autosklearn.ensembles.EnsembleSelection
+    :members:
+
+Single model classes
+~~~~~~~~~~~~~~~~~~~~
+
+These classes wrap a single model to provide a unified interface in Auto-sklearn.
+
+.. autoclass:: autosklearn.ensembles.SingleBest
+    :members:
+
+.. autoclass:: autosklearn.ensembles.SingleModelEnsemble
+    :members:
+
+.. autoclass:: autosklearn.ensembles.SingleBestFromRunhistory
+    :members:
+
+~~~~~~~~~~~~~~~
+Multi-objective
+~~~~~~~~~~~~~~~
+
+.. autoclass:: autosklearn.ensembles.MultiObjectiveDummyEnsemble
+    :members:

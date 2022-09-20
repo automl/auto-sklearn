@@ -22,8 +22,9 @@ import autosklearn.classification
 # ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, random_state=1
+)
 
 ############################################################################
 # Holdout
@@ -32,15 +33,15 @@ X_train, X_test, y_train, y_test = \
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_resampling_example_tmp',
+    tmp_folder="/tmp/autosklearn_resampling_example_tmp",
     disable_evaluator_output=False,
     # 'holdout' with 'train_size'=0.67 is the default argument setting
     # for AutoSklearnClassifier. It is explicitly specified in this example
     # for demonstrational purpose.
-    resampling_strategy='holdout',
-    resampling_strategy_arguments={'train_size': 0.67},
+    resampling_strategy="holdout",
+    resampling_strategy_arguments={"train_size": 0.67},
 )
-automl.fit(X_train, y_train, dataset_name='breast_cancer')
+automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 ############################################################################
 # Get the Score of the final ensemble
@@ -57,18 +58,18 @@ print("Accuracy score holdout: ", sklearn.metrics.accuracy_score(y_test, predict
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_resampling_example_tmp',
+    tmp_folder="/tmp/autosklearn_resampling_example_tmp",
     disable_evaluator_output=False,
-    resampling_strategy='cv',
-    resampling_strategy_arguments={'folds': 5},
+    resampling_strategy="cv",
+    resampling_strategy_arguments={"folds": 5},
 )
-automl.fit(X_train, y_train, dataset_name='breast_cancer')
+automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 # One can use models trained during cross-validation directly to predict
 # for unseen data. For this, all k models trained during k-fold
 # cross-validation are considered as a single soft-voting ensemble inside
 # the ensemble constructed with ensemble selection.
-print('Before re-fit')
+print("Before re-fit")
 predictions = automl.predict(X_test)
 print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 
@@ -78,7 +79,7 @@ print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 # During fit(), models are fit on individual cross-validation folds. To use
 # all available data, we call refit() which trains all models in the
 # final ensemble on the whole dataset.
-print('After re-fit')
+print("After re-fit")
 automl.refit(X_train.copy(), y_train.copy())
 predictions = automl.predict(X_test)
 print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
@@ -106,11 +107,11 @@ resampling_strategy = sklearn.model_selection.PredefinedSplit(
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_resampling_example_tmp',
+    tmp_folder="/tmp/autosklearn_resampling_example_tmp",
     disable_evaluator_output=False,
     resampling_strategy=resampling_strategy,
 )
-automl.fit(X_train, y_train, dataset_name='breast_cancer')
+automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 print(automl.sprint_statistics())
 
@@ -126,4 +127,6 @@ automl.refit(X_train, y_train)
 # Obviously, this score is pretty bad as we "destroyed" the dataset by
 # splitting it on the first feature.
 predictions = automl.predict(X_test)
-print("Accuracy score custom split", sklearn.metrics.accuracy_score(y_test, predictions))
+print(
+    "Accuracy score custom split", sklearn.metrics.accuracy_score(y_test, predictions)
+)

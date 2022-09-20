@@ -52,14 +52,15 @@ settings for the ``AutoSklearnClassifier``.
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-28
+.. GENERATED FROM PYTHON SOURCE LINES 23-29
 
 .. code-block:: default
 
 
     X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
 
 
@@ -68,12 +69,12 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-31
+.. GENERATED FROM PYTHON SOURCE LINES 30-32
 
 Holdout
 =======
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-45
+.. GENERATED FROM PYTHON SOURCE LINES 32-46
 
 .. code-block:: default
 
@@ -81,15 +82,15 @@ Holdout
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_resampling_example_tmp',
+        tmp_folder="/tmp/autosklearn_resampling_example_tmp",
         disable_evaluator_output=False,
         # 'holdout' with 'train_size'=0.67 is the default argument setting
         # for AutoSklearnClassifier. It is explicitly specified in this example
         # for demonstrational purpose.
-        resampling_strategy='holdout',
-        resampling_strategy_arguments={'train_size': 0.67},
+        resampling_strategy="holdout",
+        resampling_strategy_arguments={"train_size": 0.67},
     )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+    automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 
 
@@ -97,28 +98,23 @@ Holdout
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
 
-    AutoSklearnClassifier(per_run_time_limit=30,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          per_run_time_limit=30,
                           resampling_strategy_arguments={'train_size': 0.67},
                           time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-48
+.. GENERATED FROM PYTHON SOURCE LINES 47-49
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-53
+.. GENERATED FROM PYTHON SOURCE LINES 49-54
 
 .. code-block:: default
 
@@ -133,8 +129,6 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Accuracy score holdout:  0.958041958041958
@@ -142,12 +136,12 @@ Get the Score of the final ensemble
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-56
+.. GENERATED FROM PYTHON SOURCE LINES 55-57
 
 Cross-validation
 ================
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-75
+.. GENERATED FROM PYTHON SOURCE LINES 57-76
 
 .. code-block:: default
 
@@ -155,18 +149,18 @@ Cross-validation
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_resampling_example_tmp',
+        tmp_folder="/tmp/autosklearn_resampling_example_tmp",
         disable_evaluator_output=False,
-        resampling_strategy='cv',
-        resampling_strategy_arguments={'folds': 5},
+        resampling_strategy="cv",
+        resampling_strategy_arguments={"folds": 5},
     )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+    automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
     # One can use models trained during cross-validation directly to predict
     # for unseen data. For this, all k models trained during k-fold
     # cross-validation are considered as a single soft-voting ensemble inside
     # the ensemble constructed with ensemble selection.
-    print('Before re-fit')
+    print("Before re-fit")
     predictions = automl.predict(X_test)
     print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
 
@@ -176,21 +170,15 @@ Cross-validation
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
     Before re-fit
     Accuracy score CV 0.965034965034965
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-81
+.. GENERATED FROM PYTHON SOURCE LINES 77-82
 
 Perform a refit
 ===============
@@ -198,11 +186,11 @@ During fit(), models are fit on individual cross-validation folds. To use
 all available data, we call refit() which trains all models in the
 final ensemble on the whole dataset.
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-86
+.. GENERATED FROM PYTHON SOURCE LINES 82-87
 
 .. code-block:: default
 
-    print('After re-fit')
+    print("After re-fit")
     automl.refit(X_train.copy(), y_train.copy())
     predictions = automl.predict(X_test)
     print("Accuracy score CV", sklearn.metrics.accuracy_score(y_test, predictions))
@@ -213,17 +201,15 @@ final ensemble on the whole dataset.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     After re-fit
-    Accuracy score CV 0.965034965034965
+    Accuracy score CV 0.958041958041958
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-95
+.. GENERATED FROM PYTHON SOURCE LINES 88-96
 
 scikit-learn splitter objects
 =============================
@@ -234,13 +220,13 @@ splitting, it is possible to use
 `scikit-learn's PredefinedSplit <https://scikit-learn.org/stable/modules/generated/
 sklearn.model_selection.PredefinedSplit.html>`_.
 
-.. GENERATED FROM PYTHON SOURCE LINES 97-100
+.. GENERATED FROM PYTHON SOURCE LINES 98-101
 
 Below is an example of using a predefined split. We split the training
 data by the first feature. In practice, one would use a splitting according
 to the use case at hand.
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-117
+.. GENERATED FROM PYTHON SOURCE LINES 101-118
 
 .. code-block:: default
 
@@ -253,11 +239,11 @@ to the use case at hand.
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_resampling_example_tmp',
+        tmp_folder="/tmp/autosklearn_resampling_example_tmp",
         disable_evaluator_output=False,
         resampling_strategy=resampling_strategy,
     )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+    automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
     print(automl.sprint_statistics())
 
@@ -267,20 +253,14 @@ to the use case at hand.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
     auto-sklearn results:
       Dataset name: breast_cancer
       Metric: accuracy
       Best validation score: 0.964789
-      Number of target algorithm runs: 29
-      Number of successful target algorithm runs: 29
+      Number of target algorithm runs: 25
+      Number of successful target algorithm runs: 25
       Number of crashed target algorithm runs: 0
       Number of target algorithms that exceeded the time limit: 0
       Number of target algorithms that exceeded the memory limit: 0
@@ -289,12 +269,12 @@ to the use case at hand.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-120
+.. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 For custom resampling strategies (i.e. resampling strategies that are not
 defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-122
+.. GENERATED FROM PYTHON SOURCE LINES 121-123
 
 .. code-block:: default
 
@@ -306,19 +286,18 @@ defined as strings by Auto-sklearn) it is necessary to perform a refit:
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
-    AutoSklearnClassifier(per_run_time_limit=30,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          per_run_time_limit=30,
                           resampling_strategy=PredefinedSplit(test_fold=array([0, 0, ..., 1, 1])),
                           time_left_for_this_task=120,
                           tmp_folder='/tmp/autosklearn_resampling_example_tmp')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-128
+.. GENERATED FROM PYTHON SOURCE LINES 124-129
 
 Get the Score of the final ensemble (again)
 ===========================================
@@ -326,23 +305,23 @@ Get the Score of the final ensemble (again)
 Obviously, this score is pretty bad as we "destroyed" the dataset by
 splitting it on the first feature.
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-130
+.. GENERATED FROM PYTHON SOURCE LINES 129-133
 
 .. code-block:: default
 
     predictions = automl.predict(X_test)
-    print("Accuracy score custom split", sklearn.metrics.accuracy_score(y_test, predictions))
+    print(
+        "Accuracy score custom split", sklearn.metrics.accuracy_score(y_test, predictions)
+    )
 
 
 
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Accuracy score custom split 0.951048951048951
+    Accuracy score custom split 0.958041958041958
 
 
 
@@ -350,35 +329,30 @@ splitting it on the first feature.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 6 minutes  42.991 seconds)
+   **Total running time of the script:** ( 6 minutes  35.274 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_resampling.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_resampling.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_resampling.py <example_resampling.py>`
 
-     :download:`Download Python source code: example_resampling.py <example_resampling.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_resampling.ipynb <example_resampling.ipynb>`
+      :download:`Download Jupyter notebook: example_resampling.ipynb <example_resampling.ipynb>`
 
 
 .. only:: html

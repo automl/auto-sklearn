@@ -82,7 +82,7 @@ Data Loading
 Define an estimator
 ============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-55
+.. GENERATED FROM PYTHON SOURCE LINES 41-53
 
 .. code-block:: default
 
@@ -94,9 +94,7 @@ Define an estimator
         # We will limit the configuration space only to
         # have RandomForest as a valid model. We recommend enabling all
         # possible models to get a better performance.
-        include={
-            'classifier': ['random_forest']
-        },
+        include={"classifier": ["random_forest"]},
         delete_tmp_folder_after_terminate=False,
     )
 
@@ -107,12 +105,12 @@ Define an estimator
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-58
+.. GENERATED FROM PYTHON SOURCE LINES 54-56
 
 Fit an user provided configuration
 ==================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-93
+.. GENERATED FROM PYTHON SOURCE LINES 56-95
 
 .. code-block:: default
 
@@ -121,17 +119,21 @@ Fit an user provided configuration
     # min_samples_split in the Random Forest. We recommend you to look into
     # how the ConfigSpace package works here:
     # https://automl.github.io/ConfigSpace/master/
-    cs = cls.get_configuration_space(X, y, dataset_name='kr-vs-kp')
+    cs = cls.get_configuration_space(X, y, dataset_name="kr-vs-kp")
     config = cs.sample_configuration()
-    config._values['classifier:random_forest:min_samples_split'] = 11
+    config._values["classifier:random_forest:min_samples_split"] = 11
 
     # Make sure that your changed configuration complies with the configuration space
     config.is_valid_configuration()
 
-    pipeline, run_info, run_value = cls.fit_pipeline(X=X_train, y=y_train,
-                                                     dataset_name='kr-vs-kp',
-                                                     config=config,
-                                                     X_test=X_test, y_test=y_test)
+    pipeline, run_info, run_value = cls.fit_pipeline(
+        X=X_train,
+        y=y_train,
+        dataset_name="kr-vs-kp",
+        config=config,
+        X_test=X_test,
+        y_test=y_test,
+    )
 
     # This object complies with Scikit-Learn Pipeline API.
     # https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html
@@ -145,77 +147,73 @@ Fit an user provided configuration
 
     # We can make sure that our pipeline configuration was honored as follows
     print("Passed Configuration:", pipeline.config)
-    print("Random Forest:", pipeline.named_steps['classifier'].choice.estimator)
+    print("Random Forest:", pipeline.named_steps["classifier"].choice.estimator)
 
     # We can also search for new configurations using the fit() method
     # Any configurations found by Auto-Sklearn -- even the ones created using
     # fit_pipeline() are stored to disk and can be used for Ensemble Selection
-    cs = cls.fit(X, y, dataset_name='kr-vs-kp')
+    cs = cls.fit(X, y, dataset_name="kr-vs-kp")
 
 
 
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ef7242e0>, 'balancing': Balancing(random_state=1, strategy='weighting'), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0eaac1df0>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0eaac1bb0>}
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+      warnings.warn(
+    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d3f33b50>, 'balancing': Balancing(random_state=1, strategy='weighting'), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d24aed00>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d3f6f6d0>}
     RunInfo(config=Configuration(values={
       'balancing:strategy': 'weighting',
       'classifier:__choice__': 'random_forest',
       'classifier:random_forest:bootstrap': 'True',
       'classifier:random_forest:criterion': 'gini',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.6597789256362435,
+      'classifier:random_forest:max_features': 0.9678506216566037,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 5,
+      'classifier:random_forest:min_samples_leaf': 4,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense',
-      'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean',
-      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax',
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.003464940795376728,
       'feature_preprocessor:__choice__': 'fast_ica',
       'feature_preprocessor:fast_ica:algorithm': 'deflation',
       'feature_preprocessor:fast_ica:fun': 'cube',
       'feature_preprocessor:fast_ica:whiten': 'False',
     })
     , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.04454976303317537, time=7.83920431137085, status=<StatusType.SUCCESS: 1>, starttime=1650810458.8305318, endtime=1650810466.688679, additional_info={'duration': 7.76308798789978, 'num_run': 2, 'train_loss': 0.00420364315740307, 'configuration_origin': None})
+    RunValue(cost=0.06161137440758291, time=32.43082547187805, status=<StatusType.SUCCESS: 1>, starttime=1663663980.6781428, endtime=1663664013.1358533, additional_info={'duration': 32.330575466156006, 'num_run': 2, 'train_loss': 0.004670714619336769, 'configuration_origin': None})
     Passed Configuration: Configuration(values={
       'balancing:strategy': 'weighting',
       'classifier:__choice__': 'random_forest',
       'classifier:random_forest:bootstrap': 'True',
       'classifier:random_forest:criterion': 'gini',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.6597789256362435,
+      'classifier:random_forest:max_features': 0.9678506216566037,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 5,
+      'classifier:random_forest:min_samples_leaf': 4,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense',
-      'data_preprocessor:feature_type:numerical_transformer:imputation:strategy': 'mean',
-      'data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__': 'minmax',
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.003464940795376728,
       'feature_preprocessor:__choice__': 'fast_ica',
       'feature_preprocessor:fast_ica:algorithm': 'deflation',
       'feature_preprocessor:fast_ica:fun': 'cube',
       'feature_preprocessor:fast_ica:whiten': 'False',
     })
 
-    Random Forest: RandomForestClassifier(max_features=10, min_samples_leaf=5,
+    Random Forest: RandomForestClassifier(max_features=62, min_samples_leaf=4,
                            min_samples_split=11, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+      warnings.warn(
 
 
 
@@ -223,35 +221,30 @@ Fit an user provided configuration
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  11.373 seconds)
+   **Total running time of the script:** ( 2 minutes  46.876 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_single_configuration.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_single_configuration.py <example_single_configuration.py>`
 
-     :download:`Download Python source code: example_single_configuration.py <example_single_configuration.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_single_configuration.ipynb <example_single_configuration.ipynb>`
+      :download:`Download Jupyter notebook: example_single_configuration.ipynb <example_single_configuration.ipynb>`
 
 
 .. only:: html

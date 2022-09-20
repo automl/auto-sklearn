@@ -57,14 +57,15 @@ Data Loading
 ============
 Load kr-vs-kp dataset from https://www.openml.org/d/3
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-35
+.. GENERATED FROM PYTHON SOURCE LINES 29-36
 
 .. code-block:: default
 
     X, y = data = sklearn.datasets.fetch_openml(data_id=3, return_X_y=True, as_frame=True)
 
-    X_train, X_test, y_train, y_test = \
-         sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
 
 
@@ -74,7 +75,7 @@ Load kr-vs-kp dataset from https://www.openml.org/d/3
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-41
+.. GENERATED FROM PYTHON SOURCE LINES 37-42
 
 Create a logging config
 =======================
@@ -82,39 +83,37 @@ Create a logging config
 `logging config <https://github.com/automl/auto-sklearn/blob/master/autosklearn/util/logging.yaml>`_
 We will instead create a custom one as follows:
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-75
+.. GENERATED FROM PYTHON SOURCE LINES 42-74
 
 .. code-block:: default
 
 
     logging_config = {
-        'version': 1,
-        'disable_existing_loggers': True,
-        'formatters': {
-            'custom': {
+        "version": 1,
+        "disable_existing_loggers": True,
+        "formatters": {
+            "custom": {
                 # More format options are available in the official
                 # `documentation <https://docs.python.org/3/howto/logging-cookbook.html>`_
-                'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             }
         },
-
         # Any INFO level msg will be printed to the console
-        'handlers': {
-            'console': {
-                'level': 'INFO',
-                'formatter': 'custom',
-                'class': 'logging.StreamHandler',
-                'stream': 'ext://sys.stdout',
+        "handlers": {
+            "console": {
+                "level": "INFO",
+                "formatter": "custom",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
             },
         },
-
-        'loggers': {
-            '': {  # root logger
-                'level': 'DEBUG',
+        "loggers": {
+            "": {  # root logger
+                "level": "DEBUG",
             },
-            'Client-EnsembleBuilder': {
-                'level': 'DEBUG',
-                'handlers': ['console'],
+            "Client-EnsembleBuilder": {
+                "level": "DEBUG",
+                "handlers": ["console"],
             },
         },
     }
@@ -127,12 +126,12 @@ We will instead create a custom one as follows:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-78
+.. GENERATED FROM PYTHON SOURCE LINES 75-77
 
 Build and fit a classifier
 ==========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-106
+.. GENERATED FROM PYTHON SOURCE LINES 77-105
 
 .. code-block:: default
 
@@ -141,11 +140,11 @@ Build and fit a classifier
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 2},
+        smac_scenario_args={"runcount_limit": 2},
         # Pass the config file we created
         logging_config=logging_config,
         # *auto-sklearn* generates temporal files under tmp_folder
-        tmp_folder='./tmp_folder',
+        tmp_folder="./tmp_folder",
         # By default tmp_folder is deleted. We will preserve it
         # for debug purposes
         delete_tmp_folder_after_terminate=False,
@@ -162,7 +161,7 @@ Build and fit a classifier
     #   * tmp_folder/smac3-output
     # Auto-sklearn always outputs to this log file
     # tmp_folder/AutoML*.log
-    for filename in pathlib.Path('./tmp_folder').glob('*'):
+    for filename in pathlib.Path("./tmp_folder").glob("*"):
         print(filename)
 
 
@@ -170,17 +169,17 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    2022-04-24 14:27:21,946 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-04-24 14:27:21.933853'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.04.24-14.27.21 for iteration 0.
-    2022-04-24 14:27:26,087 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-04-24 14:27:26.073505'), 'ensemble_optimization_score': 0.9911616161616161, 'ensemble_test_score': 0.9899874843554443}], 50, None, None, None)/SingleThreadedClient() Started Ensemble builder job at 2022.04.24-14.27.26 for iteration 1.
+    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+      warnings.warn(
+    2022-09-20 08:55:45,145 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-09-20 08:55:45.128931'), 'ensemble_optimization_score': 0.9886363636363636, 'ensemble_test_score': 0.9899874843554443}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.09.20-08.55.45 for iteration 0.
+    2022-09-20 08:55:48,103 - Client-EnsembleBuilder - INFO - DummyFuture: ([{'Timestamp': Timestamp('2022-09-20 08:55:48.084418'), 'ensemble_optimization_score': 0.9911616161616161, 'ensemble_test_score': 0.9887359198998749}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.09.20-08.55.48 for iteration 1.
     tmp_folder/distributed.log
+    tmp_folder/smac3-output
+    tmp_folder/AutoML(1):fa2baf03-38c1-11ed-8830-892d16569fbe.log
     tmp_folder/.auto-sklearn
     tmp_folder/space.json
-    tmp_folder/AutoML(1):a4ac39ac-c3da-11ec-8876-93d4b98a61f7.log
-    tmp_folder/smac3-output
 
 
 
@@ -188,35 +187,30 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.448 seconds)
+   **Total running time of the script:** ( 0 minutes  23.992 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_debug_logging.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_debug_logging.py <example_debug_logging.py>`
 
-     :download:`Download Python source code: example_debug_logging.py <example_debug_logging.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_debug_logging.ipynb <example_debug_logging.ipynb>`
+      :download:`Download Jupyter notebook: example_debug_logging.ipynb <example_debug_logging.ipynb>`
 
 
 .. only:: html

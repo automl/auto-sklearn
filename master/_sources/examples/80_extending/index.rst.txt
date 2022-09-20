@@ -1,0 +1,118 @@
+
+
+.. _sphx_glr_examples_80_extending:
+
+.. _extension_examples:
+
+==================
+Extension Examples
+==================
+
+Examples of extending Auto-sklearn with custom components.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to turn off data preprocessing step in auto-skearn.">
+
+.. only:: html
+
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_data_preprocessor_thumb.png
+    :alt: Extending Auto-Sklearn with Data Preprocessor Component
+
+  :ref:`sphx_glr_examples_80_extending_example_extending_data_preprocessor.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Data Preprocessor Component</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a wrapper around the linear discriminant analy...">
+
+.. only:: html
+
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_preprocessor_thumb.png
+    :alt: Extending Auto-Sklearn with Preprocessor Component
+
+  :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Preprocessor Component</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to replace an existing component with a new component, i...">
+
+.. only:: html
+
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_restrict_number_of_hyperparameters_thumb.png
+    :alt: Restricting the number of hyperparameters for an existing component
+
+  :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Restricting the number of hyperparameters for an existing component</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new regression component for using in auto-s...">
+
+.. only:: html
+
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_regression_thumb.png
+    :alt: Extending Auto-Sklearn with Regression Component
+
+  :ref:`sphx_glr_examples_80_extending_example_extending_regression.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Regression Component</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new classification component for using in au...">
+
+.. only:: html
+
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_classification_thumb.png
+    :alt: Extending Auto-Sklearn with Classification Component
+
+  :ref:`sphx_glr_examples_80_extending_example_extending_classification.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Classification Component</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/80_extending/example_extending_data_preprocessor
+   /examples/80_extending/example_extending_preprocessor
+   /examples/80_extending/example_restrict_number_of_hyperparameters
+   /examples/80_extending/example_extending_regression
+   /examples/80_extending/example_extending_classification
+

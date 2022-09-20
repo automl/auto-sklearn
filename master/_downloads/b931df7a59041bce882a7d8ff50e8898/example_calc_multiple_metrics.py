@@ -25,9 +25,9 @@ def error(solution, prediction):
 
 def get_metric_result(cv_results):
     results = pd.DataFrame.from_dict(cv_results)
-    results = results[results['status'] == "Success"]
-    cols = ['rank_test_scores', 'param_classifier:__choice__', 'mean_test_score']
-    cols.extend([key for key in cv_results.keys() if key.startswith('metric_')])
+    results = results[results["status"] == "Success"]
+    cols = ["rank_test_scores", "param_classifier:__choice__", "mean_test_score"]
+    cols.extend([key for key in cv_results.keys() if key.startswith("metric_")])
     return results[cols]
 
 
@@ -36,25 +36,26 @@ def get_metric_result(cv_results):
 # ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, random_state=1
+)
 
 ############################################################################
 # Build and fit a classifier
 # ==========================
 
 error_rate = autosklearn.metrics.make_scorer(
-    name='custom_error',
+    name="custom_error",
     score_func=error,
     optimum=0,
     greater_is_better=False,
     needs_proba=False,
-    needs_threshold=False
+    needs_threshold=False,
 )
 cls = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    scoring_functions=[balanced_accuracy, precision, recall, f1, error_rate]
+    scoring_functions=[balanced_accuracy, precision, recall, f1, error_rate],
 )
 cls.fit(X_train, y_train, X_test, y_test)
 

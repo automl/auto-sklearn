@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.pipeline.components.regression &#8212; AutoSklearn 0.14.7 documentation</title>
+    <title>autosklearn.pipeline.components.regression &#8212; AutoSklearn 0.15.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.7</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.15.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -111,21 +111,30 @@
     <div class="body col-md-9 content" role="main">
       
   <h1>Source code for autosklearn.pipeline.components.regression</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
 
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">,</span> <span class="n">find_components</span><span class="p">,</span> \
-    <span class="n">ThirdPartyComponents</span><span class="p">,</span> <span class="n">AutoSklearnChoice</span><span class="p">,</span> <span class="n">_addons</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
 <span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="kn">import</span> <span class="n">ConfigurationSpace</span>
 <span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="kn">import</span> <span class="n">CategoricalHyperparameter</span>
 
+<span class="kn">from</span> <span class="nn">autosklearn.askl_typing</span> <span class="kn">import</span> <span class="n">FEAT_TYPE_TYPE</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AutoSklearnChoice</span><span class="p">,</span>
+    <span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">,</span>
+    <span class="n">ThirdPartyComponents</span><span class="p">,</span>
+    <span class="n">_addons</span><span class="p">,</span>
+    <span class="n">find_components</span><span class="p">,</span>
+<span class="p">)</span>
+
 <span class="n">regressor_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">_regressors</span> <span class="o">=</span> <span class="n">find_components</span><span class="p">(</span><span class="n">__package__</span><span class="p">,</span>
-                              <span class="n">regressor_directory</span><span class="p">,</span>
-                              <span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">)</span>
+<span class="n">_regressors</span> <span class="o">=</span> <span class="n">find_components</span><span class="p">(</span>
+    <span class="n">__package__</span><span class="p">,</span> <span class="n">regressor_directory</span><span class="p">,</span> <span class="n">AutoSklearnRegressionAlgorithm</span>
+<span class="p">)</span>
 <span class="n">additional_components</span> <span class="o">=</span> <span class="n">ThirdPartyComponents</span><span class="p">(</span><span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">)</span>
-<span class="n">_addons</span><span class="p">[</span><span class="s1">&#39;regression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_components</span>
+<span class="n">_addons</span><span class="p">[</span><span class="s2">&quot;regression&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_components</span>
 
 
 <div class="viewcode-block" id="add_regressor"><a class="viewcode-back" href="../../../../extending.html#autosklearn.pipeline.components.regression.add_regressor">[docs]</a><span class="k">def</span> <span class="nf">add_regressor</span><span class="p">(</span><span class="n">regressor</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -133,7 +142,6 @@
 
 
 <span class="k">class</span> <span class="nc">RegressorChoice</span><span class="p">(</span><span class="n">AutoSklearnChoice</span><span class="p">):</span>
-
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="n">components</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
@@ -142,10 +150,9 @@
         <span class="k">return</span> <span class="n">components</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">get_available_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
-                                 <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                 <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_available_components</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
         <span class="n">available_comp</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_components</span><span class="p">()</span>
         <span class="n">components_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">dataset_properties</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -153,13 +160,15 @@
 
         <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The argument include and exclude cannot be used together.&quot;</span><span class="p">)</span>
+                <span class="s2">&quot;The argument include and exclude cannot be used together.&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">incl</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">incl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_comp</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Trying to include unknown component: &quot;</span>
-                                     <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">incl</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Trying to include unknown component: &quot;</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">incl</span>
+                    <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">available_comp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
@@ -173,36 +182,44 @@
             <span class="k">if</span> <span class="n">entry</span> <span class="o">==</span> <span class="n">RegressorChoice</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_regression&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s2">&quot;handles_regression&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;multioutput&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> \
-               <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_multioutput&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">dataset_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;multioutput&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span>
+                <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s2">&quot;handles_multioutput&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="p">):</span>
                 <span class="k">continue</span>
             <span class="n">components_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
 
         <span class="k">return</span> <span class="n">components_dict</span>
 
-    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feat_type</span><span class="p">:</span> <span class="n">FEAT_TYPE_TYPE</span><span class="p">,</span>
+        <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The argument include and exclude cannot be used together.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The argument include and exclude cannot be used together.&quot;</span>
+            <span class="p">)</span>
 
         <span class="n">cs</span> <span class="o">=</span> <span class="n">ConfigurationSpace</span><span class="p">()</span>
 
         <span class="c1"># Compile a list of all estimator objects for this problem</span>
         <span class="n">available_estimators</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_components</span><span class="p">(</span>
-            <span class="n">dataset_properties</span><span class="o">=</span><span class="n">dataset_properties</span><span class="p">,</span>
-            <span class="n">include</span><span class="o">=</span><span class="n">include</span><span class="p">,</span>
-            <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
+            <span class="n">dataset_properties</span><span class="o">=</span><span class="n">dataset_properties</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="n">include</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">available_estimators</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No regressors found&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">defaults</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">,</span> <span class="s1">&#39;support_vector_regression&#39;</span><span class="p">]</span> <span class="o">+</span> \
-                <span class="nb">list</span><span class="p">(</span><span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">defaults</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;random_forest&quot;</span><span class="p">,</span> <span class="s2">&quot;support_vector_regression&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">default_</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">default_</span> <span class="ow">in</span> <span class="n">available_estimators</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">default_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
@@ -212,21 +229,27 @@
                     <span class="n">default</span> <span class="o">=</span> <span class="n">default_</span>
                     <span class="k">break</span>
 
-        <span class="n">estimator</span> <span class="o">=</span> <span class="n">CategoricalHyperparameter</span><span class="p">(</span><span class="s1">&#39;__choice__&#39;</span><span class="p">,</span>
-                                              <span class="nb">list</span><span class="p">(</span><span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-                                              <span class="n">default_value</span><span class="o">=</span><span class="n">default</span><span class="p">)</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">CategoricalHyperparameter</span><span class="p">(</span>
+            <span class="s2">&quot;__choice__&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">default_value</span><span class="o">=</span><span class="n">default</span>
+        <span class="p">)</span>
         <span class="n">cs</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">estimator_name</span> <span class="ow">in</span> <span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">estimator_configuration_space</span> <span class="o">=</span> <span class="n">available_estimators</span><span class="p">[</span><span class="n">estimator_name</span><span class="p">]</span><span class="o">.</span>\
-                <span class="n">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="p">)</span>
-            <span class="n">parent_hyperparameter</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="n">estimator</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">estimator_name</span><span class="p">}</span>
-            <span class="n">cs</span><span class="o">.</span><span class="n">add_configuration_space</span><span class="p">(</span><span class="n">estimator_name</span><span class="p">,</span> <span class="n">estimator_configuration_space</span><span class="p">,</span>
-                                       <span class="n">parent_hyperparameter</span><span class="o">=</span><span class="n">parent_hyperparameter</span><span class="p">)</span>
+            <span class="n">estimator_configuration_space</span> <span class="o">=</span> <span class="n">available_estimators</span><span class="p">[</span>
+                <span class="n">estimator_name</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">get_hyperparameter_search_space</span><span class="p">(</span>
+                <span class="n">feat_type</span><span class="o">=</span><span class="n">feat_type</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="n">dataset_properties</span>
+            <span class="p">)</span>
+            <span class="n">parent_hyperparameter</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">estimator</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">estimator_name</span><span class="p">}</span>
+            <span class="n">cs</span><span class="o">.</span><span class="n">add_configuration_space</span><span class="p">(</span>
+                <span class="n">estimator_name</span><span class="p">,</span>
+                <span class="n">estimator_configuration_space</span><span class="p">,</span>
+                <span class="n">parent_hyperparameter</span><span class="o">=</span><span class="n">parent_hyperparameter</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">cs</span>
 
     <span class="k">def</span> <span class="nf">estimator_supports_iterative_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="p">,</span> <span class="s1">&#39;iterative_fit&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="p">,</span> <span class="s2">&quot;iterative_fit&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_max_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_supports_iterative_fit</span><span class="p">():</span>

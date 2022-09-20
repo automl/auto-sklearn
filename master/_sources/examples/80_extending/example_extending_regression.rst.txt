@@ -25,23 +25,34 @@ Extending Auto-Sklearn with Regression Component
 The following example demonstrates how to create a new regression
 component for using in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-27
+.. GENERATED FROM PYTHON SOURCE LINES 9-38
 
 .. code-block:: default
 
+    from typing import Optional
     from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
-    from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-        UniformIntegerHyperparameter, CategoricalHyperparameter
+    from ConfigSpace.hyperparameters import (
+        UniformFloatHyperparameter,
+        UniformIntegerHyperparameter,
+        CategoricalHyperparameter,
+    )
     from ConfigSpace.conditions import EqualsCondition
 
     import sklearn.metrics
+
+    from autosklearn.askl_typing import FEAT_TYPE_TYPE
     import autosklearn.regression
     import autosklearn.pipeline.components.regression
     from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-    from autosklearn.pipeline.constants import SPARSE, DENSE, \
-        SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS
+    from autosklearn.pipeline.constants import (
+        SPARSE,
+        DENSE,
+        SIGNED_DATA,
+        UNSIGNED_DATA,
+        PREDICTIONS,
+    )
 
     from sklearn.datasets import load_diabetes
     from sklearn.model_selection import train_test_split
@@ -54,18 +65,18 @@ component for using in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-30
+.. GENERATED FROM PYTHON SOURCE LINES 39-41
 
 Implement kernel ridge regression component for auto-sklearn
 ============================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-112
+.. GENERATED FROM PYTHON SOURCE LINES 41-130
 
 .. code-block:: default
 
 
-    class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
 
+    class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
         def __init__(self, alpha, kernel, gamma, degree, coef0, random_state=None):
             self.alpha = alpha
             self.kernel = kernel
@@ -82,12 +93,13 @@ Implement kernel ridge regression component for auto-sklearn
             self.coef0 = float(self.coef0)
 
             import sklearn.kernel_ridge
+
             self.estimator = sklearn.kernel_ridge.KernelRidge(
                 alpha=self.alpha,
                 kernel=self.kernel,
                 gamma=self.gamma,
                 degree=self.degree,
-                coef0=self.coef0
+                coef0=self.coef0,
             )
             self.estimator.fit(X, y)
             return self
@@ -100,42 +112,48 @@ Implement kernel ridge regression component for auto-sklearn
         @staticmethod
         def get_properties(dataset_properties=None):
             return {
-                'shortname': 'KRR',
-                'name': 'Kernel Ridge Regression',
-                'handles_regression': True,
-                'handles_classification': False,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'handles_multioutput': True,
-                'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA),
-                'output': (PREDICTIONS,)
+                "shortname": "KRR",
+                "name": "Kernel Ridge Regression",
+                "handles_regression": True,
+                "handles_classification": False,
+                "handles_multiclass": False,
+                "handles_multilabel": False,
+                "handles_multioutput": True,
+                "is_deterministic": True,
+                "input": (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA),
+                "output": (PREDICTIONS,),
             }
 
         @staticmethod
-        def get_hyperparameter_search_space(dataset_properties=None):
+        def get_hyperparameter_search_space(
+            feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+        ):
             cs = ConfigurationSpace()
             alpha = UniformFloatHyperparameter(
-                name='alpha', lower=10 ** -5, upper=1, log=True, default_value=1.0
+                name="alpha", lower=10**-5, upper=1, log=True, default_value=1.0
             )
             kernel = CategoricalHyperparameter(
-                name='kernel',
+                name="kernel",
                 # We restrict ourselves to two possible kernels for this example
-                choices=['polynomial', 'rbf'],
-                default_value='polynomial'
+                choices=["polynomial", "rbf"],
+                default_value="polynomial",
             )
             gamma = UniformFloatHyperparameter(
-                name='gamma', lower=0.00001, upper=1, default_value=0.1, log=True
+                name="gamma", lower=0.00001, upper=1, default_value=0.1, log=True
             )
             degree = UniformIntegerHyperparameter(
-                name='degree', lower=2, upper=5, default_value=3
+                name="degree", lower=2, upper=5, default_value=3
             )
             coef0 = UniformFloatHyperparameter(
-                name='coef0', lower=1e-2, upper=1e2, log=True, default_value=1,
+                name="coef0",
+                lower=1e-2,
+                upper=1e2,
+                log=True,
+                default_value=1,
             )
             cs.add_hyperparameters([alpha, kernel, gamma, degree, coef0])
-            degree_condition = EqualsCondition(degree, kernel, 'polynomial')
-            coef0_condition = EqualsCondition(coef0, kernel, 'polynomial')
+            degree_condition = EqualsCondition(degree, kernel, "polynomial")
+            coef0_condition = EqualsCondition(coef0, kernel, "polynomial")
             cs.add_conditions([degree_condition, coef0_condition])
             return cs
 
@@ -150,8 +168,6 @@ Implement kernel ridge regression component for auto-sklearn
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -170,12 +186,12 @@ Implement kernel ridge regression component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-115
+.. GENERATED FROM PYTHON SOURCE LINES 131-133
 
 Generate data
 =============
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-119
+.. GENERATED FROM PYTHON SOURCE LINES 133-137
 
 .. code-block:: default
 
@@ -190,12 +206,12 @@ Generate data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-122
+.. GENERATED FROM PYTHON SOURCE LINES 138-140
 
 Fit the model using KRR
 =======================
 
-.. GENERATED FROM PYTHON SOURCE LINES 122-136
+.. GENERATED FROM PYTHON SOURCE LINES 140-152
 
 .. code-block:: default
 
@@ -203,13 +219,11 @@ Fit the model using KRR
     reg = autosklearn.regression.AutoSklearnRegressor(
         time_left_for_this_task=30,
         per_run_time_limit=10,
-        include={
-            'regressor': ['KernelRidgeRegression']
-        },
+        include={"regressor": ["KernelRidgeRegression"]},
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 5},
+        smac_scenario_args={"runcount_limit": 5},
     )
     reg.fit(X_train, y_train)
 
@@ -219,12 +233,11 @@ Fit the model using KRR
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
-    AutoSklearnRegressor(include={'regressor': ['KernelRidgeRegression']},
+    AutoSklearnRegressor(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                         include={'regressor': ['KernelRidgeRegression']},
                          initial_configurations_via_metalearning=0,
                          per_run_time_limit=10,
                          smac_scenario_args={'runcount_limit': 5},
@@ -232,12 +245,12 @@ Fit the model using KRR
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 137-139
+.. GENERATED FROM PYTHON SOURCE LINES 153-155
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-142
+.. GENERATED FROM PYTHON SOURCE LINES 155-158
 
 .. code-block:: default
 
@@ -250,19 +263,18 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    r2 score:  -0.1315129813359761
-    {   2: {   'cost': 0.7495509981579604,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ea8d89d0>,
+    r2 score:  -1.2119940941318412
+    {   5: {   'cost': 0.5316320422975496,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d20441c0>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0eb3c4040>,
-               'model_id': 2,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d1bf63d0>,
+               'model_id': 5,
                'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fb0eb3c4760>,
-               'sklearn_regressor': KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel='polynomial')}}
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f05d1bf69d0>,
+               'sklearn_regressor': KernelRidge(alpha=0.12092279509584172, coef0=0.8084604056638888, degree=2,
+                gamma=0.0005846787584894724, kernel='polynomial')}}
 
 
 
@@ -270,35 +282,30 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  25.258 seconds)
+   **Total running time of the script:** ( 0 minutes  11.587 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_extending_regression.py <example_extending_regression.py>`
 
-     :download:`Download Python source code: example_extending_regression.py <example_extending_regression.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_extending_regression.ipynb <example_extending_regression.ipynb>`
+      :download:`Download Jupyter notebook: example_extending_regression.ipynb <example_extending_regression.ipynb>`
 
 
 .. only:: html

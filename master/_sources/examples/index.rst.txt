@@ -1,9 +1,5 @@
 :orphan:
 
-
-
-.. _sphx_glr_examples:
-
 .. _examples:
 
 ========
@@ -13,15 +9,16 @@ Examples
 Practical examples for using *auto-sklearn*.
 
 
+
 .. raw:: html
 
-    <div class="sphx-glr-clear"></div>
+    <div class="sphx-glr-thumbnails">
 
 
+.. raw:: html
 
-.. _sphx_glr_examples_20_basic:
+    </div>
 
-.. _basic_examples:
 
 ==============
 Basic Examples
@@ -33,24 +30,25 @@ Examples for basic classification, regression, multi-output regression, and mult
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple classification model with *auto-sklearn*.">
 
 .. only:: html
 
- .. figure:: /examples/20_basic/images/thumb/sphx_glr_example_classification_thumb.png
-     :alt: Classification
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_classification_thumb.png
+    :alt: Classification
 
-     :ref:`sphx_glr_examples_20_basic_example_classification.py`
+  :ref:`sphx_glr_examples_20_basic_example_classification.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Classification</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/20_basic/example_classification
 
 .. raw:: html
 
@@ -58,20 +56,16 @@ Examples for basic classification, regression, multi-output regression, and mult
 
 .. only:: html
 
- .. figure:: /examples/20_basic/images/thumb/sphx_glr_example_multioutput_regression_thumb.png
-     :alt: Multi-output Regression
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_multioutput_regression_thumb.png
+    :alt: Multi-output Regression
 
-     :ref:`sphx_glr_examples_20_basic_example_multioutput_regression.py`
+  :ref:`sphx_glr_examples_20_basic_example_multioutput_regression.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Multi-output Regression</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/20_basic/example_multioutput_regression
 
 .. raw:: html
 
@@ -79,20 +73,16 @@ Examples for basic classification, regression, multi-output regression, and mult
 
 .. only:: html
 
- .. figure:: /examples/20_basic/images/thumb/sphx_glr_example_regression_thumb.png
-     :alt: Regression
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_regression_thumb.png
+    :alt: Regression
 
-     :ref:`sphx_glr_examples_20_basic_example_regression.py`
+  :ref:`sphx_glr_examples_20_basic_example_regression.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Regression</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/20_basic/example_regression
 
 .. raw:: html
 
@@ -100,29 +90,21 @@ Examples for basic classification, regression, multi-output regression, and mult
 
 .. only:: html
 
- .. figure:: /examples/20_basic/images/thumb/sphx_glr_example_multilabel_classification_thumb.png
-     :alt: Multi-label Classification
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_multilabel_classification_thumb.png
+    :alt: Multi-label Classification
 
-     :ref:`sphx_glr_examples_20_basic_example_multilabel_classification.py`
+  :ref:`sphx_glr_examples_20_basic_example_multilabel_classification.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi-label Classification</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/20_basic/example_multilabel_classification
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_40_advanced:
-
-.. _advanced_examples:
 
 =================
 Advanced Examples
@@ -137,24 +119,25 @@ procedure.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to inspect the models which *auto-sklearn* optimizes over and h...">
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_interpretable_models_thumb.png
-     :alt: Interpretable models
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_interpretable_models_thumb.png
+    :alt: Interpretable models
 
-     :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`
+  :ref:`sphx_glr_examples_40_advanced_example_interpretable_models.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Interpretable models</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_interpretable_models
 
 .. raw:: html
 
@@ -162,20 +145,33 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_feature_types_thumb.png
-     :alt: Feature Types
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_feature_types_thumb.png
+    :alt: Feature Types
 
-     :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`
+  :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Feature Types</div>
     </div>
 
 
-.. toctree::
-   :hidden:
+.. raw:: html
 
-   /examples/40_advanced/example_feature_types
+    <div class="sphx-glr-thumbcontainer" tooltip="The example below shows how we can use the get_trials_callback parameter of auto-sklearn to imp...">
+
+.. only:: html
+
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_early_stopping_and_callbacks_thumb.png
+    :alt: Early stopping and Callbacks
+
+  :ref:`sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Early stopping and Callbacks</div>
+    </div>
+
 
 .. raw:: html
 
@@ -183,20 +179,50 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_calc_multiple_metrics_thumb.png
-     :alt: Metrics
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_calc_multiple_metrics_thumb.png
+    :alt: Metrics
 
-     :ref:`sphx_glr_examples_40_advanced_example_calc_multiple_metrics.py`
+  :ref:`sphx_glr_examples_40_advanced_example_calc_multiple_metrics.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Metrics</div>
     </div>
 
 
-.. toctree::
-   :hidden:
+.. raw:: html
 
-   /examples/40_advanced/example_calc_multiple_metrics
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit *auto-sklearn* to optimize for two competing metrics: pr...">
+
+.. only:: html
+
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_multi_objective_thumb.png
+    :alt: Classification
+
+  :ref:`sphx_glr_examples_40_advanced_example_multi_objective.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Classification</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple NLP problem with *auto-sklearn*.">
+
+.. only:: html
+
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_text_preprocessing_thumb.png
+    :alt: Text preprocessing
+
+  :ref:`sphx_glr_examples_40_advanced_example_text_preprocessing.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Text preprocessing</div>
+    </div>
+
 
 .. raw:: html
 
@@ -204,20 +230,16 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_inspect_predictions_thumb.png
-     :alt: Model Explanation
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_inspect_predictions_thumb.png
+    :alt: Model Explanation
 
-     :ref:`sphx_glr_examples_40_advanced_example_inspect_predictions.py`
+  :ref:`sphx_glr_examples_40_advanced_example_inspect_predictions.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Model Explanation</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_inspect_predictions
 
 .. raw:: html
 
@@ -225,41 +247,16 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_pandas_train_test_thumb.png
-     :alt: Performance-over-time plot
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_pandas_train_test_thumb.png
+    :alt: Performance-over-time plot
 
-     :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`
+  :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Performance-over-time plot</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_pandas_train_test
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to provide a custom logging configuration to *auto-sklearn*. We will be ...">
-
-.. only:: html
-
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_debug_logging_thumb.png
-     :alt: Logging and debugging
-
-     :ref:`sphx_glr_examples_40_advanced_example_debug_logging.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_debug_logging
 
 .. raw:: html
 
@@ -267,20 +264,33 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_single_configuration_thumb.png
-     :alt: Fit a single configuration
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_single_configuration_thumb.png
+    :alt: Fit a single configuration
 
-     :ref:`sphx_glr_examples_40_advanced_example_single_configuration.py`
+  :ref:`sphx_glr_examples_40_advanced_example_single_configuration.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Fit a single configuration</div>
     </div>
 
 
-.. toctree::
-   :hidden:
+.. raw:: html
 
-   /examples/40_advanced/example_single_configuration
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to provide a custom logging configuration to *auto-sklearn*. We will be ...">
+
+.. only:: html
+
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_debug_logging_thumb.png
+    :alt: Logging and debugging
+
+  :ref:`sphx_glr_examples_40_advanced_example_debug_logging.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Logging and debugging</div>
+    </div>
+
 
 .. raw:: html
 
@@ -288,20 +298,16 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_resampling_thumb.png
-     :alt: Resampling Strategies
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_resampling_thumb.png
+    :alt: Resampling Strategies
 
-     :ref:`sphx_glr_examples_40_advanced_example_resampling.py`
+  :ref:`sphx_glr_examples_40_advanced_example_resampling.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Resampling Strategies</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_resampling
 
 .. raw:: html
 
@@ -309,20 +315,16 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_get_pipeline_components_thumb.png
-     :alt: Obtain run information
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_get_pipeline_components_thumb.png
+    :alt: Obtain run information
 
-     :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`
+  :ref:`sphx_glr_examples_40_advanced_example_get_pipeline_components.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Obtain run information</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_get_pipeline_components
 
 .. raw:: html
 
@@ -330,29 +332,21 @@ procedure.
 
 .. only:: html
 
- .. figure:: /examples/40_advanced/images/thumb/sphx_glr_example_metrics_thumb.png
-     :alt: Metrics
+  .. image:: /examples/40_advanced/images/thumb/sphx_glr_example_metrics_thumb.png
+    :alt: Metrics
 
-     :ref:`sphx_glr_examples_40_advanced_example_metrics.py`
+  :ref:`sphx_glr_examples_40_advanced_example_metrics.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Metrics</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/40_advanced/example_metrics
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_60_search:
-
-.. _search_examples:
 
 ===============
 Search Examples
@@ -364,24 +358,25 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses dask.distributed &lt;https://distributed.dask.org/en/latest/index.html&gt;_ for p...">
 
 .. only:: html
 
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_n_jobs_thumb.png
-     :alt: Parallel Usage  on a single machine
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_parallel_n_jobs_thumb.png
+    :alt: Parallel Usage  on a single machine
 
-     :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`
+  :ref:`sphx_glr_examples_60_search_example_parallel_n_jobs.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Parallel Usage  on a single machine</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_parallel_n_jobs
 
 .. raw:: html
 
@@ -389,20 +384,16 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. only:: html
 
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_sequential_thumb.png
-     :alt: Sequential Usage
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_sequential_thumb.png
+    :alt: Sequential Usage
 
-     :ref:`sphx_glr_examples_60_search_example_sequential.py`
+  :ref:`sphx_glr_examples_60_search_example_sequential.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Sequential Usage</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_sequential
 
 .. raw:: html
 
@@ -410,20 +401,16 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. only:: html
 
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_parallel_manual_spawning_cli_thumb.png
-     :alt: Parallel Usage: Spawning workers from the command line
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_parallel_manual_spawning_cli_thumb.png
+    :alt: Parallel Usage: Spawning workers from the command line
 
-     :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`
+  :ref:`sphx_glr_examples_60_search_example_parallel_manual_spawning_cli.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Parallel Usage: Spawning workers from the command line</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_parallel_manual_spawning_cli
 
 .. raw:: html
 
@@ -431,20 +418,16 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. only:: html
 
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_random_search_thumb.png
-     :alt: Random Search
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_random_search_thumb.png
+    :alt: Random Search
 
-     :ref:`sphx_glr_examples_60_search_example_random_search.py`
+  :ref:`sphx_glr_examples_60_search_example_random_search.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Random Search</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_random_search
 
 .. raw:: html
 
@@ -452,29 +435,21 @@ Examples of changing the search procedure of Auto-sklearn.
 
 .. only:: html
 
- .. figure:: /examples/60_search/images/thumb/sphx_glr_example_successive_halving_thumb.png
-     :alt: Successive Halving
+  .. image:: /examples/60_search/images/thumb/sphx_glr_example_successive_halving_thumb.png
+    :alt: Successive Halving
 
-     :ref:`sphx_glr_examples_60_search_example_successive_halving.py`
+  :ref:`sphx_glr_examples_60_search_example_successive_halving.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Successive Halving</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/60_search/example_successive_halving
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_80_extending:
-
-.. _extension_examples:
 
 ==================
 Extension Examples
@@ -486,24 +461,25 @@ Examples of extending Auto-sklearn with custom components.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to turn off data preprocessing step in auto-skearn.">
 
 .. only:: html
 
- .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_extending_data_preprocessor_thumb.png
-     :alt: Extending Auto-Sklearn with Data Preprocessor Component
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_data_preprocessor_thumb.png
+    :alt: Extending Auto-Sklearn with Data Preprocessor Component
 
-     :ref:`sphx_glr_examples_80_extending_example_extending_data_preprocessor.py`
+  :ref:`sphx_glr_examples_80_extending_example_extending_data_preprocessor.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Data Preprocessor Component</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/80_extending/example_extending_data_preprocessor
 
 .. raw:: html
 
@@ -511,20 +487,16 @@ Examples of extending Auto-sklearn with custom components.
 
 .. only:: html
 
- .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_extending_preprocessor_thumb.png
-     :alt: Extending Auto-Sklearn with Preprocessor Component
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_preprocessor_thumb.png
+    :alt: Extending Auto-Sklearn with Preprocessor Component
 
-     :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py`
+  :ref:`sphx_glr_examples_80_extending_example_extending_preprocessor.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Preprocessor Component</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/80_extending/example_extending_preprocessor
 
 .. raw:: html
 
@@ -532,20 +504,16 @@ Examples of extending Auto-sklearn with custom components.
 
 .. only:: html
 
- .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_restrict_number_of_hyperparameters_thumb.png
-     :alt: Restricting the number of hyperparameters for an existing component
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_restrict_number_of_hyperparameters_thumb.png
+    :alt: Restricting the number of hyperparameters for an existing component
 
-     :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py`
+  :ref:`sphx_glr_examples_80_extending_example_restrict_number_of_hyperparameters.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Restricting the number of hyperparameters for an existing component</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/80_extending/example_restrict_number_of_hyperparameters
 
 .. raw:: html
 
@@ -553,20 +521,16 @@ Examples of extending Auto-sklearn with custom components.
 
 .. only:: html
 
- .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_extending_regression_thumb.png
-     :alt: Extending Auto-Sklearn with Regression Component
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_regression_thumb.png
+    :alt: Extending Auto-Sklearn with Regression Component
 
-     :ref:`sphx_glr_examples_80_extending_example_extending_regression.py`
+  :ref:`sphx_glr_examples_80_extending_example_extending_regression.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Regression Component</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/80_extending/example_extending_regression
 
 .. raw:: html
 
@@ -574,10 +538,16 @@ Examples of extending Auto-sklearn with custom components.
 
 .. only:: html
 
- .. figure:: /examples/80_extending/images/thumb/sphx_glr_example_extending_classification_thumb.png
-     :alt: Extending Auto-Sklearn with Classification Component
+  .. image:: /examples/80_extending/images/thumb/sphx_glr_example_extending_classification_thumb.png
+    :alt: Extending Auto-Sklearn with Classification Component
 
-     :ref:`sphx_glr_examples_80_extending_example_extending_classification.py`
+  :ref:`sphx_glr_examples_80_extending_example_extending_classification.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Extending Auto-Sklearn with Classification Component</div>
+    </div>
+
 
 .. raw:: html
 
@@ -586,29 +556,25 @@ Examples of extending Auto-sklearn with custom components.
 
 .. toctree::
    :hidden:
+   :includehidden:
 
-   /examples/80_extending/example_extending_classification
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-gallery
+   /examples/20_basic/index.rst
+   /examples/40_advanced/index.rst
+   /examples/60_search/index.rst
+   /examples/80_extending/index.rst
 
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+.. only:: html
 
-    :download:`Download all examples in Python source code: examples_python.zip </examples/examples_python.zip>`
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
+      :download:`Download all examples in Python source code: examples_python.zip </examples/examples_python.zip>`
 
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-    :download:`Download all examples in Jupyter notebooks: examples_jupyter.zip </examples/examples_jupyter.zip>`
+      :download:`Download all examples in Jupyter notebooks: examples_jupyter.zip </examples/examples_jupyter.zip>`
 
 
 .. only:: html

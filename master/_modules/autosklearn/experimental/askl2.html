@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autosklearn.experimental.askl2 &#8212; AutoSklearn 0.14.7 documentation</title>
+    <title>autosklearn.experimental.askl2 &#8212; AutoSklearn 0.15.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.7</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.15.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -111,78 +111,31 @@
     <div class="body col-md-9 content" role="main">
       
   <h1>Source code for autosklearn.experimental.askl2</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">hashlib</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
-<span class="kn">import</span> <span class="nn">scipy.sparse</span>
-
-<span class="kn">from</span> <span class="nn">ConfigSpace</span> <span class="kn">import</span> <span class="n">Configuration</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span>
 <span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="kn">from</span> <span class="nn">ConfigSpace</span> <span class="kn">import</span> <span class="n">Configuration</span>
 
 <span class="kn">import</span> <span class="nn">autosklearn</span>
-<span class="kn">from</span> <span class="nn">autosklearn.classification</span> <span class="kn">import</span> <span class="n">AutoSklearnClassifier</span>
 <span class="kn">import</span> <span class="nn">autosklearn.experimental.selector</span>
-<span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">accuracy</span>
+<span class="kn">from</span> <span class="nn">autosklearn.classification</span> <span class="kn">import</span> <span class="n">AutoSklearnClassifier</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.abstract_ensemble</span> <span class="kn">import</span> <span class="n">AbstractEnsemble</span>
+<span class="kn">from</span> <span class="nn">autosklearn.ensembles.ensemble_selection</span> <span class="kn">import</span> <span class="n">EnsembleSelection</span>
+<span class="kn">from</span> <span class="nn">autosklearn.metrics</span> <span class="kn">import</span> <span class="n">Scorer</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">roc_auc</span>
 
-<span class="n">metrics</span> <span class="o">=</span> <span class="p">(</span><span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">)</span>
-<span class="n">selector_files</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="n">this_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
-<span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
-    <span class="n">training_data_file</span> <span class="o">=</span> <span class="n">this_directory</span> <span class="o">/</span> <span class="n">metric</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="s1">&#39;askl2_training_data.json&#39;</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">training_data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-        <span class="n">training_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
-        <span class="n">fh</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
-        <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span>
-    <span class="n">training_data_hash</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
-    <span class="n">selector_filename</span> <span class="o">=</span> <span class="s2">&quot;askl2_selector_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">autosklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
-        <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
-        <span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="n">training_data_hash</span>
-    <span class="p">)</span>
-    <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;XDG_CACHE_HOME&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">selector_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
-    <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">selector_directory</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;auto-sklearn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
-    <span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">selector_directory</span> <span class="o">/</span> <span class="n">selector_filename</span>
-    <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;metafeatures&#39;</span><span class="p">])</span>
-    <span class="n">strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;strategies&#39;</span><span class="p">]</span>
-    <span class="n">y_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;y_values&#39;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">strategies</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">metafeatures</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-    <span class="n">minima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;minima_for_methods&#39;</span><span class="p">]</span>
-    <span class="n">maxima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;maxima_for_methods&#39;</span><span class="p">]</span>
-    <span class="n">default_strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;tie_break_order&#39;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">selector</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">OVORF</span><span class="p">(</span>
-            <span class="n">configuration</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;configuration&#39;</span><span class="p">],</span>
-            <span class="n">random_state</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-            <span class="n">tie_break_order</span><span class="o">=</span><span class="n">default_strategies</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">selector</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">FallbackWrapper</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">default_strategies</span><span class="p">)</span>
-        <span class="n">selector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-            <span class="n">X</span><span class="o">=</span><span class="n">metafeatures</span><span class="p">,</span>
-            <span class="n">y</span><span class="o">=</span><span class="n">y_values</span><span class="p">,</span>
-            <span class="n">minima</span><span class="o">=</span><span class="n">minima_for_methods</span><span class="p">,</span>
-            <span class="n">maxima</span><span class="o">=</span><span class="n">maxima_for_methods</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AutoSklearn2Classifier needs to create a selector file under &quot;</span>
-                  <span class="s2">&quot;the user&#39;s home directory or XDG_CACHE_HOME. Nevertheless &quot;</span>
-                  <span class="s2">&quot;the path </span><span class="si">{}</span><span class="s2"> is not writable.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span>
-            <span class="k">raise</span> <span class="n">e</span>
+<span class="n">selector_metrics</span> <span class="o">=</span> <span class="p">(</span><span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">SmacObjectCallback</span><span class="p">:</span>
@@ -198,19 +151,23 @@
         <span class="n">metalearning_configurations</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">,</span>
         <span class="n">dask_client</span><span class="p">,</span>
+        <span class="n">multi_objective_algorithm</span><span class="p">,</span>
+        <span class="n">multi_objective_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
+        <span class="kn">from</span> <span class="nn">smac.intensification.simple_intensifier</span> <span class="kn">import</span> <span class="n">SimpleIntensifier</span>
         <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory2epm</span> <span class="kn">import</span> <span class="n">RunHistory2EPM4LogCost</span>
         <span class="kn">from</span> <span class="nn">smac.scenario.scenario</span> <span class="kn">import</span> <span class="n">Scenario</span>
-        <span class="kn">from</span> <span class="nn">smac.intensification.simple_intensifier</span> <span class="kn">import</span> <span class="n">SimpleIntensifier</span>
 
         <span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">scenario_dict</span><span class="p">)</span>
 
         <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="n">hp_names</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameter_names</span><span class="p">()</span>
+                <span class="n">_member</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">member</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">member</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hp_names</span><span class="p">}</span>
                 <span class="n">initial_configurations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">_member</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">pass</span>
@@ -227,6 +184,8 @@
             <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
             <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span>
+            <span class="n">multi_objective_algorithm</span><span class="o">=</span><span class="n">multi_objective_algorithm</span><span class="p">,</span>
+            <span class="n">multi_objective_kwargs</span><span class="o">=</span><span class="n">multi_objective_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
 
@@ -246,6 +205,8 @@
         <span class="n">metalearning_configurations</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="p">,</span>
         <span class="n">dask_client</span><span class="p">,</span>
+        <span class="n">multi_objective_algorithm</span><span class="p">,</span>
+        <span class="n">multi_objective_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
         <span class="kn">from</span> <span class="nn">smac.intensification.successive_halving</span> <span class="kn">import</span> <span class="n">SuccessiveHalving</span>
@@ -257,14 +218,16 @@
         <span class="n">initial_configurations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="n">hp_names</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameter_names</span><span class="p">()</span>
+                <span class="n">_member</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">member</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">member</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hp_names</span><span class="p">}</span>
                 <span class="n">initial_configurations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">member</span><span class="p">)</span>
+                    <span class="n">Configuration</span><span class="p">(</span><span class="n">configuration_space</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">_member</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">pass</span>
 
         <span class="n">rh2EPM</span> <span class="o">=</span> <span class="n">RunHistory2EPM4LogCost</span>
-        <span class="n">ta_kwargs</span><span class="p">[</span><span class="s1">&#39;budget_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">budget_type</span>
+        <span class="n">ta_kwargs</span><span class="p">[</span><span class="s2">&quot;budget_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">budget_type</span>
 
         <span class="n">smac4ac</span> <span class="o">=</span> <span class="n">SMAC4AC</span><span class="p">(</span>
             <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
@@ -276,13 +239,15 @@
             <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">intensifier</span><span class="o">=</span><span class="n">SuccessiveHalving</span><span class="p">,</span>
             <span class="n">intensifier_kwargs</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;initial_budget&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_budget</span><span class="p">,</span>
-                <span class="s1">&#39;max_budget&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-                <span class="s1">&#39;eta&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="p">,</span>
-                <span class="s1">&#39;min_chall&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;initial_budget&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_budget</span><span class="p">,</span>
+                <span class="s2">&quot;max_budget&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="s2">&quot;eta&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="p">,</span>
+                <span class="s2">&quot;min_chall&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span>
             <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">multi_objective_algorithm</span><span class="o">=</span><span class="n">multi_objective_algorithm</span><span class="p">,</span>
+            <span class="n">multi_objective_kwargs</span><span class="o">=</span><span class="n">multi_objective_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">smac4ac</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">epm_chooser</span><span class="o">.</span><span class="n">min_samples_model</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameters</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span>
@@ -291,12 +256,13 @@
 
 
 <div class="viewcode-block" id="AutoSklearn2Classifier"><a class="viewcode-back" href="../../../api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearn2Classifier</span><span class="p">(</span><span class="n">AutoSklearnClassifier</span><span class="p">):</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">time_left_for_this_task</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>
         <span class="n">per_run_time_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">ensemble_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ensemble_class</span><span class="p">:</span> <span class="n">AbstractEnsemble</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">EnsembleSelection</span><span class="p">,</span>
+        <span class="n">ensemble_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ensemble_nbest</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">max_models_on_disc</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -311,6 +277,8 @@
         <span class="n">metric</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">scoring_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Scorer</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">dataset_compression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">allow_string_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
@@ -328,14 +296,24 @@
 <span class="sd">            that typical machine learning algorithms can be fit on the</span>
 <span class="sd">            training data.</span>
 
-<span class="sd">        ensemble_size : int, optional (default=50)</span>
+<span class="sd">        ensemble_size : int, optional</span>
 <span class="sd">            Number of models added to the ensemble built by *Ensemble</span>
 <span class="sd">            selection from libraries of models*. Models are drawn with</span>
 <span class="sd">            replacement. If set to ``0`` no ensemble is fit.</span>
 
-<span class="sd">        ensemble_nbest : int, optional (default=50)</span>
-<span class="sd">            Only consider the ``ensemble_nbest`` models when building an</span>
+<span class="sd">            Deprecated - will be removed in Auto-sklearn 0.16. Please pass</span>
+<span class="sd">            this argument via ``ensemble_kwargs={&quot;ensemble_size&quot;: int}``</span>
+<span class="sd">            if you want to change the ensemble size for ensemble selection.</span>
+
+<span class="sd">        ensemble_class : Type[AbstractEnsemble], optional (default=EnsembleSelection)</span>
+<span class="sd">            Class implementing the post-hoc ensemble algorithm. Set to</span>
+<span class="sd">            ``None`` to disable ensemble building or use ``SingleBest``</span>
+<span class="sd">            to obtain only use the single best model instead of an</span>
 <span class="sd">            ensemble.</span>
+
+<span class="sd">        ensemble_kwargs : Dict, optional</span>
+<span class="sd">            Keyword arguments that are passed to the ensemble class upon</span>
+<span class="sd">            initialization.</span>
 
 <span class="sd">        max_models_on_disc: int, optional (default=50),</span>
 <span class="sd">            Defines the maximum number of models that are kept in the disc.</span>
@@ -352,11 +330,11 @@
 <span class="sd">            Memory limit in MB for the machine learning algorithm.</span>
 <span class="sd">            `auto-sklearn` will stop fitting the machine learning algorithm if</span>
 <span class="sd">            it tries to allocate more than ``memory_limit`` MB.</span>
-<span class="sd">            </span>
-<span class="sd">            **Important notes:** </span>
-<span class="sd">            </span>
+
+<span class="sd">            **Important notes:**</span>
+
 <span class="sd">            * If ``None`` is provided, no memory limit is set.</span>
-<span class="sd">            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is </span>
+<span class="sd">            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is</span>
 <span class="sd">              ``n_jobs x memory_limit``.</span>
 <span class="sd">            * The memory limit also applies to the ensemble creation process.</span>
 
@@ -370,12 +348,12 @@
 
 <span class="sd">        n_jobs : int, optional, experimental</span>
 <span class="sd">            The number of jobs to run in parallel for ``fit()``. ``-1`` means</span>
-<span class="sd">            using all processors. </span>
-<span class="sd">            </span>
-<span class="sd">            **Important notes**: </span>
-<span class="sd">            </span>
-<span class="sd">            * By default, Auto-sklearn uses one core. </span>
-<span class="sd">            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number </span>
+<span class="sd">            using all processors.</span>
+
+<span class="sd">            **Important notes**:</span>
+
+<span class="sd">            * By default, Auto-sklearn uses one core.</span>
+<span class="sd">            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number</span>
 <span class="sd">              of models in the ensemble.</span>
 <span class="sd">            * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)</span>
 <span class="sd">            * If ``dask_client`` is ``None``, a new dask client is created.</span>
@@ -398,7 +376,7 @@
 
 <span class="sd">        smac_scenario_args : dict, optional (None)</span>
 <span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
-<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/master/pages/details/scenario.html&gt;`_</span>
+<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/main/api/smac.scenario.scenario.html#module-smac.scenario.scenario&gt;`_</span>
 <span class="sd">            for a list of available arguments.</span>
 
 <span class="sd">        logging_config : dict, optional (None)</span>
@@ -429,18 +407,28 @@
 <span class="sd">            Not all keys returned by scikit-learn are supported yet.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa (links are too long)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">required_training</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Boolean to indicate if selectors were trained.</span>
         <span class="n">include_estimators</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">&#39;extra_trees&#39;</span><span class="p">,</span> <span class="s1">&#39;passive_aggressive&#39;</span><span class="p">,</span> <span class="s1">&#39;random_forest&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="s1">&#39;gradient_boosting&#39;</span><span class="p">,</span> <span class="s1">&#39;mlp&#39;</span><span class="p">,</span>
+            <span class="s2">&quot;extra_trees&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;passive_aggressive&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;random_forest&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sgd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gradient_boosting&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mlp&quot;</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">include_preprocessors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">]</span>
-        <span class="n">include</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="n">include_estimators</span><span class="p">,</span>
-                   <span class="s1">&#39;feature_preprocessor&#39;</span><span class="p">:</span> <span class="n">include_preprocessors</span><span class="p">}</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;classifier&quot;</span><span class="p">:</span> <span class="n">include_estimators</span><span class="p">,</span>
+            <span class="s2">&quot;feature_preprocessor&quot;</span><span class="p">:</span> <span class="n">include_preprocessors</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_selectors</span><span class="p">(</span><span class="n">selected_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="n">time_left_for_this_task</span><span class="p">,</span>
             <span class="n">per_run_time_limit</span><span class="o">=</span><span class="n">per_run_time_limit</span><span class="p">,</span>
             <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">ensemble_size</span><span class="o">=</span><span class="n">ensemble_size</span><span class="p">,</span>
+            <span class="n">ensemble_class</span><span class="o">=</span><span class="n">ensemble_class</span><span class="p">,</span>
+            <span class="n">ensemble_kwargs</span><span class="o">=</span><span class="n">ensemble_kwargs</span><span class="p">,</span>
             <span class="n">ensemble_nbest</span><span class="o">=</span><span class="n">ensemble_nbest</span><span class="p">,</span>
             <span class="n">max_models_on_disc</span><span class="o">=</span><span class="n">max_models_on_disc</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
@@ -461,33 +449,120 @@
             <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
             <span class="n">scoring_functions</span><span class="o">=</span><span class="n">scoring_functions</span><span class="p">,</span>
             <span class="n">load_models</span><span class="o">=</span><span class="n">load_models</span><span class="p">,</span>
+            <span class="n">allow_string_features</span><span class="o">=</span><span class="n">allow_string_features</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="AutoSklearn2Classifier.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
-            <span class="n">X_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">y_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">feat_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">train_selectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected_metric</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector_metrics</span> <span class="o">=</span> <span class="p">(</span><span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">this_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
+
+        <span class="k">if</span> <span class="n">selected_metric</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">selected_metric</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector_metrics</span>
+
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metric_list</span><span class="p">:</span>
+            <span class="n">training_data_file</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">this_directory</span> <span class="o">/</span> <span class="n">metric</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="s2">&quot;askl2_training_data.json&quot;</span>
+            <span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">training_data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                <span class="n">training_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+                <span class="n">fh</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span>
+            <span class="n">training_data_hash</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
+            <span class="n">selector_filename</span> <span class="o">=</span> <span class="s2">&quot;askl2_selector_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">autosklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+                <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">training_data_hash</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;XDG_CACHE_HOME&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">selector_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">selector_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+            <span class="n">selector_directory</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">selector_directory</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;auto-sklearn&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">selector_directory</span> <span class="o">/</span> <span class="n">selector_filename</span>
+            <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;metafeatures&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;strategies&quot;</span><span class="p">]</span>
+            <span class="n">y_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;y_values&quot;</span><span class="p">],</span>
+                <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">strategies</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">metafeatures</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">minima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;minima_for_methods&quot;</span><span class="p">]</span>
+            <span class="n">maxima_for_methods</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;maxima_for_methods&quot;</span><span class="p">]</span>
+            <span class="n">default_strategies</span> <span class="o">=</span> <span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;tie_break_order&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">required_training</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">OVORF</span><span class="p">(</span>
+                    <span class="n">configuration</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;configuration&quot;</span><span class="p">],</span>
+                    <span class="n">random_state</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                    <span class="n">tie_break_order</span><span class="o">=</span><span class="n">default_strategies</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">FallbackWrapper</span><span class="p">(</span>
+                    <span class="n">selector</span><span class="p">,</span> <span class="n">default_strategies</span>
+                <span class="p">)</span>
+                <span class="n">selector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                    <span class="n">X</span><span class="o">=</span><span class="n">metafeatures</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">y_values</span><span class="p">,</span>
+                    <span class="n">minima</span><span class="o">=</span><span class="n">minima_for_methods</span><span class="p">,</span>
+                    <span class="n">maxima</span><span class="o">=</span><span class="n">maxima_for_methods</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+                    <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">fh</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s2">&quot;AutoSklearn2Classifier needs to create a selector file under &quot;</span>
+                        <span class="s2">&quot;the user&#39;s home directory or XDG_CACHE_HOME. Nevertheless &quot;</span>
+                        <span class="s2">&quot;the path </span><span class="si">{}</span><span class="s2"> is not writable.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">e</span>
+
+<div class="viewcode-block" id="AutoSklearn2Classifier.fit"><a class="viewcode-back" href="../../../api.html#autosklearn.experimental.askl2.AutoSklearn2Classifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">feat_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 
         <span class="c1"># TODO</span>
-        <span class="c1"># regularly check https://github.com/scikit-learn/scikit-learn/issues/15336 whether</span>
-        <span class="c1"># histogram gradient boosting in scikit-learn finally support sparse data</span>
+        <span class="c1"># regularly check https://github.com/scikit-learn/scikit-learn/issues/15336</span>
+        <span class="c1"># whether histogram gradient boosting in scikit-learn finally support</span>
+        <span class="c1"># sparse data</span>
         <span class="n">is_sparse</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">is_sparse</span><span class="p">:</span>
             <span class="n">include_estimators</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="s1">&#39;extra_trees&#39;</span><span class="p">,</span> <span class="s1">&#39;passive_aggressive&#39;</span><span class="p">,</span> <span class="s1">&#39;random_forest&#39;</span><span class="p">,</span> <span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="s1">&#39;mlp&#39;</span><span class="p">,</span>
+                <span class="s2">&quot;extra_trees&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;passive_aggressive&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;random_forest&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sgd&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mlp&quot;</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">include_estimators</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="s1">&#39;extra_trees&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;passive_aggressive&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;random_forest&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;sgd&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;gradient_boosting&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;mlp&#39;</span><span class="p">,</span>
+                <span class="s2">&quot;extra_trees&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;passive_aggressive&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;random_forest&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sgd&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;gradient_boosting&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mlp&quot;</span><span class="p">,</span>
             <span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">include</span><span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">include_estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include</span><span class="p">[</span><span class="s2">&quot;classifier&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">include_estimators</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -495,75 +570,80 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">log_loss</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector_metrics</span><span class="p">:</span>
             <span class="n">metric_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span>
-            <span class="n">selector_file</span> <span class="o">=</span> <span class="n">selector_files</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+            <span class="n">selector_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;balanced_accuracy&#39;</span>
-            <span class="n">selector_file</span> <span class="o">=</span> <span class="n">selector_files</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="s2">&quot;balanced_accuracy&quot;</span>
+            <span class="n">selector_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector_files</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">selector_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="n">selector</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
 
-        <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">dataset_name</span><span class="p">:</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]})</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">metafeatures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">dataset_name</span><span class="p">:</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]}</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">metafeatures</span><span class="p">))</span>
-        <span class="n">automl_policy</span> <span class="o">=</span> <span class="n">strategies</span><span class="p">[</span><span class="n">selection</span><span class="p">]</span>
+        <span class="n">automl_policy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategies</span><span class="p">[</span><span class="n">selection</span><span class="p">]</span>
 
         <span class="n">setting</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;RF_None_holdout_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;holdout-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;RF_None_holdout_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;holdout-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;RF_None_3CV_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;cv-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;RF_None_3CV_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;cv-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;RF_None_5CV_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;cv-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;RF_None_5CV_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;cv-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;RF_None_10CV_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;cv-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;RF_None_10CV_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;cv-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;RF_SH-eta4-i_holdout_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;holdout-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="s1">&#39;SH&#39;</span><span class="p">,</span>
+            <span class="s2">&quot;RF_SH-eta4-i_holdout_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;holdout-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="s2">&quot;SH&quot;</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;RF_SH-eta4-i_3CV_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;cv-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="s1">&#39;SH&#39;</span><span class="p">,</span>
+            <span class="s2">&quot;RF_SH-eta4-i_3CV_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;cv-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="s2">&quot;SH&quot;</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;RF_SH-eta4-i_5CV_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;cv-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="s1">&#39;SH&#39;</span><span class="p">,</span>
+            <span class="s2">&quot;RF_SH-eta4-i_5CV_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;cv-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="s2">&quot;SH&quot;</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s1">&#39;RF_SH-eta4-i_10CV_iterative_es_if&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">&#39;resampling_strategy&#39;</span><span class="p">:</span> <span class="s1">&#39;cv-iterative-fit&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-                <span class="s1">&#39;fidelity&#39;</span><span class="p">:</span> <span class="s1">&#39;SH&#39;</span><span class="p">,</span>
-            <span class="p">}</span>
+            <span class="s2">&quot;RF_SH-eta4-i_10CV_iterative_es_if&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;resampling_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;cv-iterative-fit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;fidelity&quot;</span><span class="p">:</span> <span class="s2">&quot;SH&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
         <span class="p">}[</span><span class="n">automl_policy</span><span class="p">]</span>
 
-        <span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;resampling_strategy&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">resampling_strategy</span> <span class="o">==</span> <span class="s1">&#39;cv-iterative-fit&#39;</span><span class="p">:</span>
-            <span class="n">resampling_strategy_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;folds&#39;</span><span class="p">:</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;folds&#39;</span><span class="p">]}</span>
+        <span class="n">resampling_strategy</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s2">&quot;resampling_strategy&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">resampling_strategy</span> <span class="o">==</span> <span class="s2">&quot;cv-iterative-fit&quot;</span><span class="p">:</span>
+            <span class="n">resampling_strategy_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;folds&quot;</span><span class="p">:</span> <span class="n">setting</span><span class="p">[</span><span class="s2">&quot;folds&quot;</span><span class="p">]}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">resampling_strategy_kwargs</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">portfolio_file</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">this_directory</span> <span class="o">/</span> <span class="n">metric_name</span> <span class="o">/</span> <span class="s1">&#39;askl2_portfolios&#39;</span> <span class="o">/</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">automl_policy</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">this_directory</span>
+            <span class="o">/</span> <span class="n">metric_name</span>
+            <span class="o">/</span> <span class="s2">&quot;askl2_portfolios&quot;</span>
+            <span class="o">/</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.json&quot;</span> <span class="o">%</span> <span class="n">automl_policy</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">portfolio_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="n">portfolio_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
-        <span class="n">portfolio</span> <span class="o">=</span> <span class="n">portfolio_json</span><span class="p">[</span><span class="s1">&#39;portfolio&#39;</span><span class="p">]</span>
+        <span class="n">portfolio</span> <span class="o">=</span> <span class="n">portfolio_json</span><span class="p">[</span><span class="s2">&quot;portfolio&quot;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;fidelity&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SH&#39;</span><span class="p">:</span>
-            <span class="n">smac_callback</span> <span class="o">=</span> <span class="n">SHObjectCallback</span><span class="p">(</span><span class="s1">&#39;iterations&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">portfolio</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">setting</span><span class="p">[</span><span class="s2">&quot;fidelity&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SH&quot;</span><span class="p">:</span>
+            <span class="n">smac_callback</span> <span class="o">=</span> <span class="n">SHObjectCallback</span><span class="p">(</span><span class="s2">&quot;iterations&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">portfolio</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">smac_callback</span> <span class="o">=</span> <span class="n">SmacObjectCallback</span><span class="p">(</span><span class="n">portfolio</span><span class="p">)</span>
 

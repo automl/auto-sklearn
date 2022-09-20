@@ -66,8 +66,6 @@ as well.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     adaboost
@@ -95,12 +93,14 @@ as well.
 Show available preprocessors
 ============================
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-37
+.. GENERATED FROM PYTHON SOURCE LINES 31-39
 
 .. code-block:: default
 
 
-    from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
+    from autosklearn.pipeline.components.feature_preprocessing import (
+        FeaturePreprocessorChoice,
+    )
 
     for name in FeaturePreprocessorChoice.get_components():
         print(name)
@@ -110,8 +110,6 @@ Show available preprocessors
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -137,19 +135,20 @@ Show available preprocessors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-40
+.. GENERATED FROM PYTHON SOURCE LINES 40-42
 
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-45
+.. GENERATED FROM PYTHON SOURCE LINES 42-48
 
 .. code-block:: default
 
 
     X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
 
 
@@ -158,7 +157,7 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-54
+.. GENERATED FROM PYTHON SOURCE LINES 49-57
 
 Build and fit a classifier
 ==========================
@@ -169,7 +168,7 @@ single best model in the end. However, we would like to note that the
 choice of which models is deemed interpretable is very much up to the user
 and can change from use case to use case.
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-71
+.. GENERATED FROM PYTHON SOURCE LINES 57-74
 
 .. code-block:: default
 
@@ -177,18 +176,18 @@ and can change from use case to use case.
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_interpretable_models_example_tmp',
+        tmp_folder="/tmp/autosklearn_interpretable_models_example_tmp",
         include={
-            'classifier': [
-                'decision_tree', 'lda', 'sgd'
+            "classifier": ["decision_tree", "lda", "sgd"],
+            "feature_preprocessor": [
+                "no_preprocessing",
+                "polynomial",
+                "select_percentile_classification",
             ],
-            'feature_preprocessor': [
-                'no_preprocessing', 'polynomial', 'select_percentile_classification'
-            ]
         },
-        ensemble_size=1,
+        ensemble_kwargs={"ensemble_size": 1},
     )
-    automl.fit(X_train, y_train, dataset_name='breast_cancer')
+    automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 
 
@@ -196,16 +195,11 @@ and can change from use case to use case.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
 
-    AutoSklearnClassifier(ensemble_size=1,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          ensemble_kwargs={'ensemble_size': 1},
                           include={'classifier': ['decision_tree', 'lda', 'sgd'],
                                    'feature_preprocessor': ['no_preprocessing',
                                                             'polynomial',
@@ -215,12 +209,12 @@ and can change from use case to use case.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 72-74
+.. GENERATED FROM PYTHON SOURCE LINES 75-77
 
 Print the final ensemble constructed by auto-sklearn
 ====================================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-77
+.. GENERATED FROM PYTHON SOURCE LINES 77-80
 
 .. code-block:: default
 
@@ -233,30 +227,31 @@ Print the final ensemble constructed by auto-sklearn
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    {   73: {   'balancing': Balancing(random_state=1),
-                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0eab3c0d0>,
+    {   28: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+                'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d0c22910>,
                 'cost': 0.007092198581560294,
-                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ea2742b0>,
+                'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d6264250>,
                 'ensemble_weight': 1.0,
-                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0eab3cb50>,
-                'model_id': 73,
+                'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d0c22490>,
+                'model_id': 28,
                 'rank': 1,
-                'sklearn_classifier': SGDClassifier(alpha=0.00021011529264557935, eta0=0.01, loss='log', max_iter=32,
-                  random_state=1, tol=1.3873010009898928e-05, warm_start=True)}}
+                'sklearn_classifier': SGDClassifier(alpha=0.0003272354910051561, average=True,
+                  eta0=2.9976399065090562e-05, l1_ratio=0.14999999999999974,
+                  learning_rate='invscaling', loss='squared_hinge', max_iter=1024,
+                  penalty='elasticnet', power_t=0.5037491320052959, random_state=1,
+                  tol=2.59922433981394e-05, warm_start=True)}}
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-80
+.. GENERATED FROM PYTHON SOURCE LINES 81-83
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-83
+.. GENERATED FROM PYTHON SOURCE LINES 83-86
 
 .. code-block:: default
 
@@ -269,11 +264,9 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Accuracy score: 0.972027972027972
+    Accuracy score: 0.9440559440559441
 
 
 
@@ -281,35 +274,30 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  58.013 seconds)
+   **Total running time of the script:** ( 1 minutes  54.458 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_interpretable_models.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_interpretable_models.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_interpretable_models.py <example_interpretable_models.py>`
 
-     :download:`Download Python source code: example_interpretable_models.py <example_interpretable_models.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_interpretable_models.ipynb <example_interpretable_models.ipynb>`
+      :download:`Download Jupyter notebook: example_interpretable_models.ipynb <example_interpretable_models.ipynb>`
 
 
 .. only:: html

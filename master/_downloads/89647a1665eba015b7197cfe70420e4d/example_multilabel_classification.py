@@ -29,8 +29,8 @@ X, y = sklearn.datasets.fetch_openml(data_id=40594, return_X_y=True, as_frame=Fa
 # This is to comply with Scikit-learn requirement:
 # "Positive classes are indicated with 1 and negative classes with 0 or -1."
 # More information on: https://scikit-learn.org/stable/modules/multiclass.html
-y[y == 'TRUE'] = 1
-y[y == 'FALSE'] = 0
+y[y == "TRUE"] = 1
+y[y == "FALSE"] = 0
 y = y.astype(int)
 
 # Using type of target is a good way to make sure your data
@@ -51,9 +51,9 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     # Bellow two flags are provided to speed up calculations
     # Not recommended for a real implementation
     initial_configurations_via_metalearning=0,
-    smac_scenario_args={'runcount_limit': 1},
+    smac_scenario_args={"runcount_limit": 1},
 )
-automl.fit(X_train, y_train, dataset_name='reuters')
+automl.fit(X_train, y_train, dataset_name="reuters")
 
 ############################################################################
 # View the models found by auto-sklearn

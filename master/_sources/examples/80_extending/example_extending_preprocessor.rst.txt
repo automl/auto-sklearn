@@ -26,23 +26,27 @@ The following example demonstrates how to create a wrapper around the linear
 discriminant analysis (LDA) algorithm from sklearn and use it as a preprocessor
 in auto-sklearn.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-29
+.. GENERATED FROM PYTHON SOURCE LINES 10-33
 
 .. code-block:: default
 
+    from typing import Optional
     from pprint import pprint
 
     from ConfigSpace.configuration_space import ConfigurationSpace
-    from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
+    from ConfigSpace.hyperparameters import (
+        UniformFloatHyperparameter,
+        CategoricalHyperparameter,
+    )
     from ConfigSpace.conditions import InCondition
 
     import sklearn.metrics
+
+    from autosklearn.askl_typing import FEAT_TYPE_TYPE
     import autosklearn.classification
     import autosklearn.pipeline.components.feature_preprocessing
-    from autosklearn.pipeline.components.base \
-        import AutoSklearnPreprocessingAlgorithm
-    from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, \
-        UNSIGNED_DATA
+    from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+    from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, UNSIGNED_DATA
     from autosklearn.util.common import check_none
 
     from sklearn.datasets import load_breast_cancer
@@ -56,17 +60,16 @@ in auto-sklearn.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-32
+.. GENERATED FROM PYTHON SOURCE LINES 34-36
 
 Create LDA component for auto-sklearn
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-98
+.. GENERATED FROM PYTHON SOURCE LINES 36-104
 
 .. code-block:: default
 
     class LDA(AutoSklearnPreprocessingAlgorithm):
-
         def __init__(self, solver, tol, shrinkage=None, random_state=None):
             self.solver = solver
             self.shrinkage = shrinkage
@@ -82,6 +85,7 @@ Create LDA component for auto-sklearn
             self.tol = float(self.tol)
 
             import sklearn.discriminant_analysis
+
             self.preprocessor = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
                 shrinkage=self.shrinkage,
                 solver=self.solver,
@@ -98,23 +102,25 @@ Create LDA component for auto-sklearn
         @staticmethod
         def get_properties(dataset_properties=None):
             return {
-                'shortname': 'LDA',
-                'name': 'Linear Discriminant Analysis',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'handles_multioutput': False,
-                'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA, SIGNED_DATA),
-                'output': (DENSE, UNSIGNED_DATA, SIGNED_DATA)
+                "shortname": "LDA",
+                "name": "Linear Discriminant Analysis",
+                "handles_regression": False,
+                "handles_classification": True,
+                "handles_multiclass": False,
+                "handles_multilabel": False,
+                "handles_multioutput": False,
+                "is_deterministic": True,
+                "input": (DENSE, UNSIGNED_DATA, SIGNED_DATA),
+                "output": (DENSE, UNSIGNED_DATA, SIGNED_DATA),
             }
 
         @staticmethod
-        def get_hyperparameter_search_space(dataset_properties=None):
+        def get_hyperparameter_search_space(
+            feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+        ):
             cs = ConfigurationSpace()
             solver = CategoricalHyperparameter(
-                name="solver", choices=['svd', 'lsqr', 'eigen'], default_value='svd'
+                name="solver", choices=["svd", "lsqr", "eigen"], default_value="svd"
             )
             shrinkage = UniformFloatHyperparameter(
                 name="shrinkage", lower=0.0, upper=1.0, default_value=0.5
@@ -123,7 +129,7 @@ Create LDA component for auto-sklearn
                 name="tol", lower=0.0001, upper=1, default_value=0.0001
             )
             cs.add_hyperparameters([solver, shrinkage, tol])
-            shrinkage_condition = InCondition(shrinkage, solver, ['lsqr', 'eigen'])
+            shrinkage_condition = InCondition(shrinkage, solver, ["lsqr", "eigen"])
             cs.add_condition(shrinkage_condition)
             return cs
 
@@ -138,12 +144,12 @@ Create LDA component for auto-sklearn
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-101
+.. GENERATED FROM PYTHON SOURCE LINES 105-107
 
 Create dataset
 ==============
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-105
+.. GENERATED FROM PYTHON SOURCE LINES 107-111
 
 .. code-block:: default
 
@@ -158,12 +164,12 @@ Create dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-108
+.. GENERATED FROM PYTHON SOURCE LINES 112-114
 
 Configuration space
 ===================
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-112
+.. GENERATED FROM PYTHON SOURCE LINES 114-118
 
 .. code-block:: default
 
@@ -176,8 +182,6 @@ Configuration space
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -193,25 +197,23 @@ Configuration space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-115
+.. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 Fit the model using LDA as preprocessor
 =======================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-128
+.. GENERATED FROM PYTHON SOURCE LINES 121-132
 
 .. code-block:: default
 
 
     clf = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=30,
-        include={
-            'feature_preprocessor': ['LDA']
-        },
+        include={"feature_preprocessor": ["LDA"]},
         # Bellow two flags are provided to speed up calculations
         # Not recommended for a real implementation
         initial_configurations_via_metalearning=0,
-        smac_scenario_args={'runcount_limit': 5},
+        smac_scenario_args={"runcount_limit": 5},
     )
     clf.fit(X_train, y_train)
 
@@ -221,12 +223,11 @@ Fit the model using LDA as preprocessor
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
-    AutoSklearnClassifier(include={'feature_preprocessor': ['LDA']},
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          include={'feature_preprocessor': ['LDA']},
                           initial_configurations_via_metalearning=0,
                           per_run_time_limit=3,
                           smac_scenario_args={'runcount_limit': 5},
@@ -234,12 +235,12 @@ Fit the model using LDA as preprocessor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 129-131
+.. GENERATED FROM PYTHON SOURCE LINES 133-135
 
 Print prediction score and statistics
 =====================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-135
+.. GENERATED FROM PYTHON SOURCE LINES 135-139
 
 .. code-block:: default
 
@@ -253,21 +254,40 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    accuracy:  0.951048951048951
+    accuracy:  0.9440559440559441
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e68e1880>,
-               'cost': 0.06382978723404253,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e68e1160>,
-               'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ea200ca0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05ce64b280>,
+               'cost': 0.049645390070921946,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d45bd250>,
+               'ensemble_weight': 0.28,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d237ec40>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=1, n_estimators=512, n_jobs=1,
-                           random_state=1, warm_start=True)}}
+                           random_state=1, warm_start=True)},
+        4: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d3ff3fd0>,
+               'cost': 0.049645390070921946,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05ccb9f4c0>,
+               'ensemble_weight': 0.32,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d3ff35b0>,
+               'model_id': 4,
+               'rank': 2,
+               'sklearn_classifier': BernoulliNB(alpha=23.955206843654683, fit_prior=False)},
+        5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d1ad46d0>,
+               'cost': 0.12056737588652477,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05cc27dc40>,
+               'ensemble_weight': 0.4,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d0fc0d60>,
+               'model_id': 5,
+               'rank': 3,
+               'sklearn_classifier': AdaBoostClassifier(algorithm='SAMME',
+                       base_estimator=DecisionTreeClassifier(max_depth=7),
+                       learning_rate=1.371412136822841, n_estimators=135,
+                       random_state=1)}}
 
 
 
@@ -275,35 +295,30 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.457 seconds)
+   **Total running time of the script:** ( 0 minutes  20.324 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_preprocessor.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_preprocessor.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_extending_preprocessor.py <example_extending_preprocessor.py>`
 
-     :download:`Download Python source code: example_extending_preprocessor.py <example_extending_preprocessor.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_extending_preprocessor.ipynb <example_extending_preprocessor.ipynb>`
+      :download:`Download Jupyter notebook: example_extending_preprocessor.ipynb <example_extending_preprocessor.ipynb>`
 
 
 .. only:: html

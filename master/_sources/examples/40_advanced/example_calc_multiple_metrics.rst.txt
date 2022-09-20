@@ -47,9 +47,9 @@ and self-defined metrics for a classification problem.
 
     def get_metric_result(cv_results):
         results = pd.DataFrame.from_dict(cv_results)
-        results = results[results['status'] == "Success"]
-        cols = ['rank_test_scores', 'param_classifier:__choice__', 'mean_test_score']
-        cols.extend([key for key in cv_results.keys() if key.startswith('metric_')])
+        results = results[results["status"] == "Success"]
+        cols = ["rank_test_scores", "param_classifier:__choice__", "mean_test_score"]
+        cols.extend([key for key in cv_results.keys() if key.startswith("metric_")])
         return results[cols]
 
 
@@ -65,14 +65,15 @@ and self-defined metrics for a classification problem.
 Data Loading
 ============
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-42
+.. GENERATED FROM PYTHON SOURCE LINES 37-43
 
 .. code-block:: default
 
 
     X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
 
 
@@ -81,28 +82,28 @@ Data Loading
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-45
+.. GENERATED FROM PYTHON SOURCE LINES 44-46
 
 Build and fit a classifier
 ==========================
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-61
+.. GENERATED FROM PYTHON SOURCE LINES 46-62
 
 .. code-block:: default
 
 
     error_rate = autosklearn.metrics.make_scorer(
-        name='custom_error',
+        name="custom_error",
         score_func=error,
         optimum=0,
         greater_is_better=False,
         needs_proba=False,
-        needs_threshold=False
+        needs_threshold=False,
     )
     cls = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        scoring_functions=[balanced_accuracy, precision, recall, f1, error_rate]
+        scoring_functions=[balanced_accuracy, precision, recall, f1, error_rate],
     )
     cls.fit(X_train, y_train, X_test, y_test)
 
@@ -112,28 +113,23 @@ Build and fit a classifier
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.metafeatures = self.metafeatures.append(metafeatures)
-    /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-      self.algorithm_runs[metric].append(runs)
 
-    AutoSklearnClassifier(per_run_time_limit=30,
+    AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
+                          per_run_time_limit=30,
                           scoring_functions=[balanced_accuracy, precision, recall,
                                              f1, custom_error],
                           time_left_for_this_task=120)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-64
+.. GENERATED FROM PYTHON SOURCE LINES 63-65
 
 Get the Score of the final ensemble
 ===================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-71
+.. GENERATED FROM PYTHON SOURCE LINES 65-72
 
 .. code-block:: default
 
@@ -150,47 +146,45 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Accuracy score 0.958041958041958
     ################################################################################
     Metric results
      rank_test_scores param_classifier:__choice__  mean_test_score  metric_balanced_accuracy  metric_precision  metric_recall  metric_f1  metric_custom_error
-                    4               random_forest         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
-                    4                         mlp         0.971631                  0.961538          0.956989       1.000000   0.978022             0.028369
+                    6               random_forest         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
+                    6                         mlp         0.971631                  0.961538          0.956989       1.000000   0.978022             0.028369
                    26                         mlp         0.943262                  0.935069          0.945055       0.966292   0.955556             0.056738
-                   15               random_forest         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
-                    4                         mlp         0.971631                  0.961538          0.956989       1.000000   0.978022             0.028369
+                   16               random_forest         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
+                    6                         mlp         0.971631                  0.961538          0.956989       1.000000   0.978022             0.028369
                     1                 extra_trees         0.985816                  0.984767          0.988764       0.988764   0.988764             0.014184
-                   15               random_forest         0.964539                  0.963915          0.977273       0.966292   0.971751             0.035461
-                   20                 extra_trees         0.957447                  0.954300          0.966292       0.966292   0.966292             0.042553
-                    4               random_forest         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
-                    4               random_forest         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
-                   15           gradient_boosting         0.964539                  0.963915          0.977273       0.966292   0.971751             0.035461
-                    4           gradient_boosting         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
-                    4                         mlp         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
-                   22                         mlp         0.950355                  0.948682          0.965909       0.955056   0.960452             0.049645
-                    2           gradient_boosting         0.978723                  0.975151          0.977778       0.988764   0.983240             0.021277
-                   15           gradient_boosting         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
-                   15               random_forest         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
-                    4                 extra_trees         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
-                   30          passive_aggressive         0.921986                  0.894231          0.890000       1.000000   0.941799             0.078014
-                    2                 extra_trees         0.978723                  0.975151          0.977778       0.988764   0.983240             0.021277
-                    4           gradient_boosting         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
-                   22                         mlp         0.950355                  0.940687          0.945652       0.977528   0.961326             0.049645
-                   29               random_forest         0.929078                  0.923833          0.943820       0.943820   0.943820             0.070922
-                   20                    adaboost         0.957447                  0.950303          0.956044       0.977528   0.966667             0.042553
-                    4                 extra_trees         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
-                    4                 extra_trees         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
-                   33                         lda         0.794326                  0.749136          0.788462       0.921348   0.849741             0.205674
-                   32                 gaussian_nb         0.858156                  0.871651          0.948052       0.820225   0.879518             0.141844
-                   22                    adaboost         0.950355                  0.952679          0.976744       0.943820   0.960000             0.049645
-                   26                 gaussian_nb         0.943262                  0.927074          0.926316       0.988764   0.956522             0.056738
-                   31         k_nearest_neighbors         0.907801                  0.882995          0.887755       0.977528   0.930481             0.092199
-                   26               decision_tree         0.943262                  0.947061          0.976471       0.932584   0.954023             0.056738
-                   22                 extra_trees         0.950355                  0.936690          0.936170       0.988764   0.961749             0.049645
+                   16               random_forest         0.964539                  0.963915          0.977273       0.966292   0.971751             0.035461
+                   22                 extra_trees         0.957447                  0.954300          0.966292       0.966292   0.966292             0.042553
+                    6               random_forest         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
+                    6               random_forest         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
+                   16           gradient_boosting         0.964539                  0.963915          0.977273       0.966292   0.971751             0.035461
+                    6           gradient_boosting         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
+                    6                         mlp         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
+                   24                         mlp         0.950355                  0.948682          0.965909       0.955056   0.960452             0.049645
+                    3           gradient_boosting         0.978723                  0.975151          0.977778       0.988764   0.983240             0.021277
+                   16           gradient_boosting         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
+                   16               random_forest         0.964539                  0.959918          0.966667       0.977528   0.972067             0.035461
+                    6                 extra_trees         0.971631                  0.969533          0.977528       0.977528   0.977528             0.028369
+                   31          passive_aggressive         0.921986                  0.894231          0.890000       1.000000   0.941799             0.078014
+                    3                 extra_trees         0.978723                  0.975151          0.977778       0.988764   0.983240             0.021277
+                    6           gradient_boosting         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
+                   24                         mlp         0.950355                  0.940687          0.945652       0.977528   0.961326             0.049645
+                   27               random_forest         0.929078                  0.923833          0.943820       0.943820   0.943820             0.070922
+                   22                    adaboost         0.957447                  0.950303          0.956044       0.977528   0.966667             0.042553
+                    6                 extra_trees         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
+                    1                 extra_trees         0.985816                  0.984767          0.988764       0.988764   0.988764             0.014184
+                   27                bernoulli_nb         0.929078                  0.927831          0.954023       0.932584   0.943182             0.070922
+                   33                         mlp         0.865248                  0.817308          0.824074       1.000000   0.903553             0.134752
+                    3                 extra_trees         0.978723                  0.975151          0.977778       0.988764   0.983240             0.021277
+                   16               random_forest         0.964539                  0.963915          0.977273       0.966292   0.971751             0.035461
+                   31           gradient_boosting         0.921986                  0.930207          0.975610       0.898876   0.935673             0.078014
+                   27               decision_tree         0.929078                  0.931828          0.964706       0.921348   0.942529             0.070922
+                   27         k_nearest_neighbors         0.929078                  0.911841          0.915789       0.977528   0.945652             0.070922
 
 
 
@@ -198,35 +192,30 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  57.127 seconds)
+   **Total running time of the script:** ( 2 minutes  0.007 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
-  .. container:: binder-badge
+    .. container:: binder-badge
 
-    .. image:: images/binder_badge_logo.svg
-      :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
-      :alt: Launch binder
-      :width: 150 px
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_calc_multiple_metrics.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: example_calc_multiple_metrics.py <example_calc_multiple_metrics.py>`
 
-     :download:`Download Python source code: example_calc_multiple_metrics.py <example_calc_multiple_metrics.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: example_calc_multiple_metrics.ipynb <example_calc_multiple_metrics.ipynb>`
+      :download:`Download Jupyter notebook: example_calc_multiple_metrics.ipynb <example_calc_multiple_metrics.ipynb>`
 
 
 .. only:: html

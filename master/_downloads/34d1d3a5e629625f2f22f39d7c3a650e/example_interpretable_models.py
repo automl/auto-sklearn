@@ -29,7 +29,9 @@ for name in ClassifierChoice.get_components():
 # Show available preprocessors
 # ============================
 
-from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
+from autosklearn.pipeline.components.feature_preprocessing import (
+    FeaturePreprocessorChoice,
+)
 
 for name in FeaturePreprocessorChoice.get_components():
     print(name)
@@ -39,8 +41,9 @@ for name in FeaturePreprocessorChoice.get_components():
 # ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, random_state=1
+)
 
 ############################################################################
 # Build and fit a classifier
@@ -55,18 +58,18 @@ X_train, X_test, y_train, y_test = \
 automl = autosklearn.classification.AutoSklearnClassifier(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_interpretable_models_example_tmp',
+    tmp_folder="/tmp/autosklearn_interpretable_models_example_tmp",
     include={
-        'classifier': [
-            'decision_tree', 'lda', 'sgd'
+        "classifier": ["decision_tree", "lda", "sgd"],
+        "feature_preprocessor": [
+            "no_preprocessing",
+            "polynomial",
+            "select_percentile_classification",
         ],
-        'feature_preprocessor': [
-            'no_preprocessing', 'polynomial', 'select_percentile_classification'
-        ]
     },
-    ensemble_size=1,
+    ensemble_kwargs={"ensemble_size": 1},
 )
-automl.fit(X_train, y_train, dataset_name='breast_cancer')
+automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 ############################################################################
 # Print the final ensemble constructed by auto-sklearn

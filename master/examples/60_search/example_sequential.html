@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sequential Usage &#8212; AutoSklearn 0.14.7 documentation</title>
+    <title>Sequential Usage &#8212; AutoSklearn 0.15.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.7</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.15.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -141,39 +141,60 @@ ensembles afterwards.</p>
 </div>
 <div class="section" id="data-loading">
 <h2>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
-    <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.ensembles.ensemble_selection</span> <span class="kn">import</span> <span class="n">EnsembleSelection</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="build-and-fit-the-classifier">
 <h2>Build and fit the classifier<a class="headerlink" href="#build-and-fit-the-classifier" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
-    <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">tmp_folder</span><span class="o">=</span><span class="s1">&#39;/tmp/autosklearn_sequential_example_tmp&#39;</span><span class="p">,</span>
+    <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">tmp_folder</span><span class="o">=</span><span class="s2">&quot;/tmp/autosklearn_sequential_example_tmp&quot;</span><span class="p">,</span>
     <span class="c1"># Do not construct ensembles in parallel to avoid using more than one</span>
     <span class="c1"># core at a time. The ensemble will be constructed after auto-sklearn</span>
     <span class="c1"># finished fitting all machine learning models.</span>
-    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">ensemble_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s1">&#39;breast_cancer&#39;</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;breast_cancer&quot;</span><span class="p">)</span>
 
 <span class="c1"># This call to fit_ensemble uses all models trained in the previous call</span>
 <span class="c1"># to fit to build an ensemble which can be used with automl.predict()</span>
-<span class="n">automl</span><span class="o">.</span><span class="n">fit_ensemble</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit_ensemble</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">ensemble_class</span><span class="o">=</span><span class="n">EnsembleSelection</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:68: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.metafeatures = self.metafeatures.append(metafeatures)
-/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/metalearning/metalearning/meta_base.py:72: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
-  self.algorithm_runs[metric].append(runs)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>RunKey(config_id=1, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=2.138148307800293, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665046.729183, endtime=1663665048.8936107, additional_info={&#39;duration&#39;: 2.025052070617676, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=2, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=1.1886756420135498, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665048.8985617, endtime=1663665050.113383, additional_info={&#39;duration&#39;: 1.0999813079833984, &#39;num_run&#39;: 3, &#39;train_loss&#39;: 0.01754385964912286, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=3, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.05673758865248224, time=1.8330206871032715, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665050.1179628, endtime=1663665051.9798045, additional_info={&#39;duration&#39;: 1.750197410583496, &#39;num_run&#39;: 4, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=4, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.03546099290780147, time=2.5171611309051514, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665051.984322, endtime=1663665054.5282989, additional_info={&#39;duration&#39;: 2.3936502933502197, &#39;num_run&#39;: 5, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=5, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=1.2775936126708984, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665054.5333724, endtime=1663665055.84306, additional_info={&#39;duration&#39;: 1.198927640914917, &#39;num_run&#39;: 6, &#39;train_loss&#39;: 0.024561403508771895, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=6, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.014184397163120588, time=1.840346336364746, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665055.8481805, endtime=1663665057.716139, additional_info={&#39;duration&#39;: 1.7313201427459717, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=7, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.03546099290780147, time=2.512295961380005, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665057.7238793, endtime=1663665060.265423, additional_info={&#39;duration&#39;: 2.364440441131592, &#39;num_run&#39;: 8, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=8, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.04255319148936165, time=2.1315276622772217, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665060.271228, endtime=1663665062.429951, additional_info={&#39;duration&#39;: 2.0131988525390625, &#39;num_run&#39;: 9, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=9, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=2.4673690795898438, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665062.4357092, endtime=1663665064.9292157, additional_info={&#39;duration&#39;: 2.3498237133026123, &#39;num_run&#39;: 10, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=10, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=2.5794708728790283, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665064.934585, endtime=1663665067.5437174, additional_info={&#39;duration&#39;: 2.4640066623687744, &#39;num_run&#39;: 11, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=11, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.03546099290780147, time=1.5726971626281738, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665067.5497928, endtime=1663665069.1497045, additional_info={&#39;duration&#39;: 1.4734737873077393, &#39;num_run&#39;: 12, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=12, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=1.610743522644043, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665069.156014, endtime=1663665070.7938027, additional_info={&#39;duration&#39;: 1.5205156803131104, &#39;num_run&#39;: 13, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=13, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=2.3221628665924072, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665070.8001842, endtime=1663665073.1480403, additional_info={&#39;duration&#39;: 2.2304294109344482, &#39;num_run&#39;: 14, &#39;train_loss&#39;: 0.010526315789473717, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=14, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.049645390070921946, time=5.315098762512207, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665073.1545255, endtime=1663665078.4978535, additional_info={&#39;duration&#39;: 5.217244863510132, &#39;num_run&#39;: 15, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=15, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.021276595744680882, time=1.2758090496063232, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665078.505013, endtime=1663665079.8135793, additional_info={&#39;duration&#39;: 1.1897251605987549, &#39;num_run&#39;: 16, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=16, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.03546099290780147, time=2.031766176223755, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665079.820808, endtime=1663665081.878261, additional_info={&#39;duration&#39;: 1.929640769958496, &#39;num_run&#39;: 17, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=17, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.03546099290780147, time=2.4669880867004395, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665081.8850935, endtime=1663665084.380212, additional_info={&#39;duration&#39;: 2.343514919281006, &#39;num_run&#39;: 18, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=18, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=3.1608927249908447, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665084.3869042, endtime=1663665087.5789628, additional_info={&#39;duration&#39;: 3.045881748199463, &#39;num_run&#39;: 19, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=19, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.07801418439716312, time=0.8530073165893555, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665087.5859113, endtime=1663665088.4659152, additional_info={&#39;duration&#39;: 0.7710719108581543, &#39;num_run&#39;: 20, &#39;train_loss&#39;: 0.10526315789473684, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=20, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.021276595744680882, time=1.751319169998169, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665088.4732761, endtime=1663665090.2543724, additional_info={&#39;duration&#39;: 1.6337840557098389, &#39;num_run&#39;: 21, &#39;train_loss&#39;: 0.007017543859649145, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=21, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=0.028368794326241176, time=1.2900927066802979, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663665090.261764, endtime=1663665091.5791755, additional_info={&#39;duration&#39;: 1.198190450668335, &#39;num_run&#39;: 22, &#39;train_loss&#39;: 0.0035087719298245723, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=22, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=1.0, time=2.0078036785125732, status=&lt;StatusType.TIMEOUT: 2&gt;, starttime=1663665091.5878708, endtime=1663665094.6180243, additional_info={&#39;error&#39;: &#39;Timeout&#39;, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunKey(config_id=23, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0) RunValue(cost=1.0, time=0.0, status=&lt;StatusType.STOP: 8&gt;, starttime=1663665094.6260393, endtime=1663665094.6260395, additional_info={})
 
-AutoSklearnClassifier(delete_tmp_folder_after_terminate=False, ensemble_size=0,
-                      per_run_time_limit=30, time_left_for_this_task=120,
+AutoSklearnClassifier(delete_tmp_folder_after_terminate=False,
+                      ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
+                      per_run_time_limit=6, time_left_for_this_task=60,
                       tmp_folder=&#39;/tmp/autosklearn_sequential_example_tmp&#39;)
 </pre></div>
 </div>
@@ -183,118 +204,180 @@ AutoSklearnClassifier(delete_tmp_folder_after_terminate=False, ensemble_size=0,
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pprint</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e73597c0&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05ca44a700&gt;,
            &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e5956e80&gt;,
-           &#39;ensemble_weight&#39;: 0.04,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e7359610&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05cb155220&gt;,
+           &#39;ensemble_weight&#39;: 0.1,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05ca44ac40&gt;,
            &#39;model_id&#39;: 2,
-           &#39;rank&#39;: 4,
+           &#39;rank&#39;: 1,
            &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)},
     3: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ebb8ee80&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d62efdf0&gt;,
            &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e3596700&gt;,
-           &#39;ensemble_weight&#39;: 0.06,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ebb8e5b0&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d1a8ddf0&gt;,
+           &#39;ensemble_weight&#39;: 0.08,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05cb9ac4c0&gt;,
            &#39;model_id&#39;: 3,
-           &#39;rank&#39;: 5,
+           &#39;rank&#39;: 2,
            &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=0.0001363185819149026, beta_1=0.999,
               beta_2=0.9, early_stopping=True,
               hidden_layer_sizes=(115, 115, 115),
               learning_rate_init=0.00018009776276177523, max_iter=32,
               n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
+    4: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d237e820&gt;,
+           &#39;cost&#39;: 0.05673758865248224,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05ccc37160&gt;,
+           &#39;ensemble_weight&#39;: 0.06,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d237ed60&gt;,
+           &#39;model_id&#39;: 4,
+           &#39;rank&#39;: 3,
+           &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=0.00021148999718383549, beta_1=0.999,
+              beta_2=0.9, hidden_layer_sizes=(113, 113, 113),
+              learning_rate_init=0.0007452270241186694, max_iter=64,
+              n_iter_no_change=32, random_state=1, validation_fraction=0.0,
+              verbose=0, warm_start=True)},
+    5: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d248cca0&gt;,
+           &#39;cost&#39;: 0.03546099290780147,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05cac0c130&gt;,
+           &#39;ensemble_weight&#39;: 0.1,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d62b91c0&gt;,
+           &#39;model_id&#39;: 5,
+           &#39;rank&#39;: 4,
+           &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=3, min_samples_leaf=2,
+                       n_estimators=512, n_jobs=1, random_state=1,
+                       warm_start=True)},
+    6: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d3c54be0&gt;,
+           &#39;cost&#39;: 0.028368794326241176,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d61c9460&gt;,
+           &#39;ensemble_weight&#39;: 0.04,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d3c54340&gt;,
+           &#39;model_id&#39;: 6,
+           &#39;rank&#39;: 5,
+           &#39;sklearn_classifier&#39;: MLPClassifier(alpha=0.0017940473175767063, beta_1=0.999, beta_2=0.9,
+              early_stopping=True, hidden_layer_sizes=(101, 101),
+              learning_rate_init=0.0004684917334431039, max_iter=32,
+              n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
     7: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ec151c70&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05ccb9f0a0&gt;,
            &#39;cost&#39;: 0.014184397163120588,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ef3fba60&gt;,
-           &#39;ensemble_weight&#39;: 0.08,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ec151160&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d611d7c0&gt;,
+           &#39;ensemble_weight&#39;: 0.06,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05ccb9f220&gt;,
            &#39;model_id&#39;: 7,
-           &#39;rank&#39;: 1,
+           &#39;rank&#39;: 6,
            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(max_features=34, min_samples_leaf=3, min_samples_split=11,
                      n_estimators=512, n_jobs=1, random_state=1,
                      warm_start=True)},
     8: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb1028f8ac0&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05ce5b4910&gt;,
            &#39;cost&#39;: 0.03546099290780147,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e516d160&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d19ad430&gt;,
            &#39;ensemble_weight&#39;: 0.02,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0eda89670&gt;,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d1c36700&gt;,
            &#39;model_id&#39;: 8,
-           &#39;rank&#39;: 13,
+           &#39;rank&#39;: 7,
            &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=2, min_samples_leaf=2, n_estimators=512,
                        n_jobs=1, random_state=1, warm_start=True)},
     9: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e7089460&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05ca268e20&gt;,
            &#39;cost&#39;: 0.04255319148936165,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ec021b80&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d1c0ef10&gt;,
            &#39;ensemble_weight&#39;: 0.02,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ef7a5b50&gt;,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d41a25e0&gt;,
            &#39;model_id&#39;: 9,
-           &#39;rank&#39;: 15,
+           &#39;rank&#39;: 8,
            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(max_features=9, min_samples_split=10, n_estimators=512,
                      n_jobs=1, random_state=1, warm_start=True)},
     10: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e33190d0&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05cc79aa60&gt;,
             &#39;cost&#39;: 0.028368794326241176,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ea5aa8b0&gt;,
-            &#39;ensemble_weight&#39;: 0.06,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e3319dc0&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d3b377f0&gt;,
+            &#39;ensemble_weight&#39;: 0.02,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05cc79ab80&gt;,
             &#39;model_id&#39;: 10,
-            &#39;rank&#39;: 6,
+            &#39;rank&#39;: 9,
             &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=4, min_samples_split=6,
                        n_estimators=512, n_jobs=1, random_state=1,
                        warm_start=True)},
     11: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e988c340&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d3d35640&gt;,
             &#39;cost&#39;: 0.028368794326241176,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0edb94a30&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05ca2753a0&gt;,
             &#39;ensemble_weight&#39;: 0.04,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e988c5e0&gt;,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d3d351f0&gt;,
             &#39;model_id&#39;: 11,
-            &#39;rank&#39;: 7,
+            &#39;rank&#39;: 10,
             &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=23, min_samples_leaf=7,
                        n_estimators=512, n_jobs=1, random_state=1,
                        warm_start=True)},
+    12: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d25bf4c0&gt;,
+            &#39;cost&#39;: 0.03546099290780147,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05cd0af160&gt;,
+            &#39;ensemble_weight&#39;: 0.1,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d25bffa0&gt;,
+            &#39;model_id&#39;: 12,
+            &#39;rank&#39;: 11,
+            &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=True,
+                               l2_regularization=0.005326508887463406,
+                               learning_rate=0.060800813211425456, max_iter=512,
+                               max_leaf_nodes=6, min_samples_leaf=5,
+                               n_iter_no_change=5, random_state=1,
+                               validation_fraction=None, warm_start=True)},
     13: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0eda78550&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d245a3a0&gt;,
             &#39;cost&#39;: 0.028368794326241176,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ef339640&gt;,
-            &#39;ensemble_weight&#39;: 0.04,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0eac71c10&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05ca5617c0&gt;,
+            &#39;ensemble_weight&#39;: 0.02,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d3dfde50&gt;,
             &#39;model_id&#39;: 13,
-            &#39;rank&#39;: 8,
+            &#39;rank&#39;: 12,
             &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=False,
                                l2_regularization=1.0647401999412075e-10,
                                learning_rate=0.08291320147381159, max_iter=512,
                                max_leaf_nodes=39, n_iter_no_change=0,
                                random_state=1, validation_fraction=None,
                                warm_start=True)},
+    14: {   &#39;balancing&#39;: Balancing(random_state=1),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d1c1d640&gt;,
+            &#39;cost&#39;: 0.028368794326241176,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d626b100&gt;,
+            &#39;ensemble_weight&#39;: 0.02,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05cdc3a790&gt;,
+            &#39;model_id&#39;: 14,
+            &#39;rank&#39;: 13,
+            &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=2.5550223982458062e-06, beta_1=0.999,
+              beta_2=0.9, hidden_layer_sizes=(54, 54, 54),
+              learning_rate_init=0.00027271287919467994, max_iter=256,
+              n_iter_no_change=32, random_state=1, validation_fraction=0.0,
+              verbose=0, warm_start=True)},
     15: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ebf9fd90&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05cb9ac5b0&gt;,
             &#39;cost&#39;: 0.049645390070921946,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ea1d38b0&gt;,
-            &#39;ensemble_weight&#39;: 0.04,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ebf9f970&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d684e130&gt;,
+            &#39;ensemble_weight&#39;: 0.02,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d47b13d0&gt;,
             &#39;model_id&#39;: 15,
-            &#39;rank&#39;: 17,
+            &#39;rank&#39;: 14,
             &#39;sklearn_classifier&#39;: MLPClassifier(alpha=4.2841884333778574e-06, beta_1=0.999, beta_2=0.9,
               hidden_layer_sizes=(263, 263, 263),
               learning_rate_init=0.0011804284312897009, max_iter=128,
               n_iter_no_change=32, random_state=1, validation_fraction=0.0,
               verbose=0, warm_start=True)},
     16: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e98aa670&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d3e68760&gt;,
             &#39;cost&#39;: 0.021276595744680882,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ec151940&gt;,
-            &#39;ensemble_weight&#39;: 0.06,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e98aa490&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05ca44a310&gt;,
+            &#39;ensemble_weight&#39;: 0.08,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d3e68d30&gt;,
             &#39;model_id&#39;: 16,
-            &#39;rank&#39;: 2,
+            &#39;rank&#39;: 15,
             &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=True,
                                l2_regularization=3.387912939529945e-10,
                                learning_rate=0.30755227194768237, max_iter=128,
@@ -302,173 +385,76 @@ AutoSklearnClassifier(delete_tmp_folder_after_terminate=False, ensemble_size=0,
                                n_iter_no_change=18, random_state=1,
                                validation_fraction=None, warm_start=True)},
     17: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0eb41a3d0&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d3b7c880&gt;,
             &#39;cost&#39;: 0.03546099290780147,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0eaa0b760&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05cdc31c10&gt;,
             &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0edc49790&gt;,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d6403670&gt;,
             &#39;model_id&#39;: 17,
-            &#39;rank&#39;: 14,
+            &#39;rank&#39;: 16,
             &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=True,
                                l2_regularization=0.4635442279519353,
                                learning_rate=0.09809681787962342, max_iter=512,
                                max_leaf_nodes=328, min_samples_leaf=2,
                                n_iter_no_change=2, random_state=1,
                                validation_fraction=None, warm_start=True)},
+    18: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05cc61fdc0&gt;,
+            &#39;cost&#39;: 0.03546099290780147,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d62ef2b0&gt;,
+            &#39;ensemble_weight&#39;: 0.04,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d1035610&gt;,
+            &#39;model_id&#39;: 18,
+            &#39;rank&#39;: 17,
+            &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=3, n_estimators=512,
+                       n_jobs=1, random_state=1, warm_start=True)},
     19: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0edb9d250&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d179c040&gt;,
             &#39;cost&#39;: 0.028368794326241176,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0eb0edbe0&gt;,
-            &#39;ensemble_weight&#39;: 0.08,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0edb9d460&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d4831760&gt;,
+            &#39;ensemble_weight&#39;: 0.06,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05cc636d60&gt;,
             &#39;model_id&#39;: 19,
-            &#39;rank&#39;: 9,
+            &#39;rank&#39;: 18,
             &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=448, min_samples_leaf=2,
                      min_samples_split=20, n_estimators=512, n_jobs=1,
                      random_state=1, warm_start=True)},
     20: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ea121100&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d474c9d0&gt;,
             &#39;cost&#39;: 0.07801418439716312,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ebff5c40&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d0f2eb80&gt;,
             &#39;ensemble_weight&#39;: 0.04,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e5988430&gt;,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d474c250&gt;,
             &#39;model_id&#39;: 20,
-            &#39;rank&#39;: 24,
+            &#39;rank&#39;: 19,
             &#39;sklearn_classifier&#39;: PassiveAggressiveClassifier(C=0.14268277711454813, max_iter=32, random_state=1,
                             tol=0.0002600768160857831, warm_start=True)},
     21: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ebff5fa0&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05cd03d2e0&gt;,
             &#39;cost&#39;: 0.021276595744680882,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e58da760&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ebff5fd0&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d103b250&gt;,
+            &#39;ensemble_weight&#39;: 0.04,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05cd040e50&gt;,
             &#39;model_id&#39;: 21,
-            &#39;rank&#39;: 3,
+            &#39;rank&#39;: 20,
             &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=4, min_samples_leaf=2,
                      min_samples_split=15, n_estimators=512, n_jobs=1,
                      random_state=1, warm_start=True)},
     22: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e5956fd0&gt;,
+            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f05d400fa30&gt;,
             &#39;cost&#39;: 0.028368794326241176,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e58bc760&gt;,
+            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f05d1fa2190&gt;,
             &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0eb892d30&gt;,
+            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f05d1fbf820&gt;,
             &#39;model_id&#39;: 22,
-            &#39;rank&#39;: 10,
+            &#39;rank&#39;: 21,
             &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=True,
                                l2_regularization=8.057778875694463e-05,
                                learning_rate=0.09179220974965213, max_iter=256,
                                max_leaf_nodes=200, n_iter_no_change=18,
                                random_state=1,
                                validation_fraction=0.14295295806077554,
-                               warm_start=True)},
-    23: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ed9a5610&gt;,
-            &#39;cost&#39;: 0.049645390070921946,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0eb708fd0&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ed9a55b0&gt;,
-            &#39;model_id&#39;: 23,
-            &#39;rank&#39;: 18,
-            &#39;sklearn_classifier&#39;: MLPClassifier(alpha=0.02847755502162456, beta_1=0.999, beta_2=0.9,
-              hidden_layer_sizes=(123, 123),
-              learning_rate_init=0.000421568792103947, max_iter=256,
-              n_iter_no_change=32, random_state=1, validation_fraction=0.0,
-              verbose=0, warm_start=True)},
-    24: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e73b2940&gt;,
-            &#39;cost&#39;: 0.07092198581560283,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e5938250&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e3b55c70&gt;,
-            &#39;model_id&#39;: 24,
-            &#39;rank&#39;: 23,
-            &#39;sklearn_classifier&#39;: RandomForestClassifier(criterion=&#39;entropy&#39;, max_features=16, n_estimators=512,
-                       n_jobs=1, random_state=1, warm_start=True)},
-    25: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ebf9f4f0&gt;,
-            &#39;cost&#39;: 0.04255319148936165,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0eb0bd700&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e70892e0&gt;,
-            &#39;model_id&#39;: 25,
-            &#39;rank&#39;: 16,
-            &#39;sklearn_classifier&#39;: AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3),
-                   learning_rate=0.046269426995092074, n_estimators=406,
-                   random_state=1)},
-    26: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ebce1220&gt;,
-            &#39;cost&#39;: 0.028368794326241176,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ed970b80&gt;,
-            &#39;ensemble_weight&#39;: 0.06,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ebce1400&gt;,
-            &#39;model_id&#39;: 26,
-            &#39;rank&#39;: 11,
-            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=414, min_samples_leaf=2,
-                     min_samples_split=19, n_estimators=512, n_jobs=1,
-                     random_state=1, warm_start=True)},
-    27: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e364cd30&gt;,
-            &#39;cost&#39;: 0.028368794326241176,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ebff54c0&gt;,
-            &#39;ensemble_weight&#39;: 0.06,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e6436b80&gt;,
-            &#39;model_id&#39;: 27,
-            &#39;rank&#39;: 12,
-            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(bootstrap=True, criterion=&#39;entropy&#39;, max_features=4126,
-                     min_samples_leaf=7, min_samples_split=13, n_estimators=512,
-                     n_jobs=1, random_state=1, warm_start=True)},
-    30: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ef38ac40&gt;,
-            &#39;cost&#39;: 0.049645390070921946,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e9ba21c0&gt;,
-            &#39;ensemble_weight&#39;: 0.04,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ef38a1f0&gt;,
-            &#39;model_id&#39;: 30,
-            &#39;rank&#39;: 19,
-            &#39;sklearn_classifier&#39;: AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=10),
-                   learning_rate=0.021459464491641638, n_estimators=374,
-                   random_state=1)},
-    31: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e516dac0&gt;,
-            &#39;cost&#39;: 0.05673758865248224,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0eaabed00&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e974af40&gt;,
-            &#39;model_id&#39;: 31,
-            &#39;rank&#39;: 21,
-            &#39;sklearn_classifier&#39;: GaussianNB()},
-    32: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0e3e3ceb0&gt;,
-            &#39;cost&#39;: 0.09219858156028371,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0ea9453d0&gt;,
-            &#39;ensemble_weight&#39;: 0.02,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0e3e3cac0&gt;,
-            &#39;model_id&#39;: 32,
-            &#39;rank&#39;: 25,
-            &#39;sklearn_classifier&#39;: KNeighborsClassifier(n_neighbors=6)},
-    33: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0ebe11d30&gt;,
-            &#39;cost&#39;: 0.05673758865248224,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e9bd1f40&gt;,
-            &#39;ensemble_weight&#39;: 0.06,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0ec174130&gt;,
-            &#39;model_id&#39;: 33,
-            &#39;rank&#39;: 22,
-            &#39;sklearn_classifier&#39;: DecisionTreeClassifier(class_weight=&#39;balanced&#39;, criterion=&#39;entropy&#39;,
-                       max_depth=465, min_samples_leaf=16, min_samples_split=10,
-                       random_state=1)},
-    34: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb0eb6deb80&gt;,
-            &#39;cost&#39;: 0.049645390070921946,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb0e9fa65b0&gt;,
-            &#39;ensemble_weight&#39;: 0.04,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb0eb6deac0&gt;,
-            &#39;model_id&#39;: 34,
-            &#39;rank&#39;: 20,
-            &#39;sklearn_classifier&#39;: ExtraTreesClassifier(criterion=&#39;entropy&#39;, max_features=3, min_samples_leaf=7,
-                     min_samples_split=14, n_estimators=512, n_jobs=1,
-                     random_state=1, warm_start=True)}}
+                               warm_start=True)}}
 </pre></div>
 </div>
 </div>
@@ -479,22 +465,21 @@ AutoSklearnClassifier(delete_tmp_folder_after_terminate=False, ensemble_size=0,
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
   Dataset name: breast_cancer
   Metric: accuracy
   Best validation score: 0.985816
-  Number of target algorithm runs: 34
-  Number of successful target algorithm runs: 33
+  Number of target algorithm runs: 22
+  Number of successful target algorithm runs: 21
   Number of crashed target algorithm runs: 0
   Number of target algorithms that exceeded the time limit: 1
   Number of target algorithms that exceeded the memory limit: 0
 
-Accuracy score 0.958041958041958
+Accuracy score 0.9440559440559441
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  3.305 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-sequential-py">
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  58.297 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-sequential-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/60_search/example_sequential.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>
 </div>

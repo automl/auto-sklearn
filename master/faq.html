@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FAQ &#8212; AutoSklearn 0.14.7 documentation</title>
+    <title>FAQ &#8212; AutoSklearn 0.15.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.7</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.15.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -131,7 +131,7 @@
 <details class="summary-b-where-can-i-find-examples-on-how-to-use-auto-sklearn-b">
 <summary><b>Where can I find examples on how to use auto-sklearn?</b></summary><p>We provide examples on using <em>auto-sklearn</em> for multiple use cases ranging from
 simple classification to advanced uses such as feature importance, parallel runs
-and customization. They can be found in the <a class="reference internal" href="examples/index.html#sphx-glr-examples"><span class="std std-ref">Examples</span></a>.</p>
+and customization. They can be found in the <a class="reference internal" href="examples/index.html#examples"><span class="std std-ref">Examples</span></a>.</p>
 </details><details class="summary-b-what-type-of-tasks-can-auto-sklearn-tackle-b">
 <summary><b>What type of tasks can auto-sklearn tackle?</b></summary><p><em>auto-sklearn</em> can accept targets for the following tasks (more details on <a class="reference external" href="https://scikit-learn.org/stable/modules/multiclass.html">Sklearn algorithms</a>):</p>
 <ul class="simple">
@@ -146,26 +146,30 @@ ensemble of pipelines as described in the next section. This X_train/y_train dat
 to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 Optionally, you can measure the ability of this fitted model to generalize to unseen data by
 providing an optional testing pair (X_test/Y_test). For further details, please refer to the
-Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.
-Supported formats for these training and testing pairs are: np.ndarray,
-pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
-<p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your
-data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>
-for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a>
-for multidimensional data.</p>
-<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:</p>
+Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.</p>
+<p>Regarding the features, there are multiple things to consider:</p>
 <ul class="simple">
 <li><p>Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
 can check the Example <a class="reference internal" href="examples/40_advanced/example_feature_types.html#sphx-glr-examples-40-advanced-example-feature-types-py"><span class="std std-ref">Feature Types</span></a>.</p></li>
-<li><p>You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
-dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the
-column has a categorical/boolean class, it will be encoded. If the column is of any other type
-(Object or Timeseries), an error will be raised. For further details on how to properly encode
-your data, you can check the Pandas Example
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>).
-If you are working with time series, it is recommended that you follow this approach
+<li><p>You can provide a pandas DataFrame with properly formatted columns. If a column has numerical
+dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. <em>auto-sklearn</em>
+supports both categorical or string as column type. Please ensure that you are using the correct
+dtype for your task. By default <em>auto-sklearn</em> treats object and string columns as strings and
+encodes the data using <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">sklearn.feature_extraction.text.CountVectorizer</a></p></li>
+<li><p>If your data contains categorical values (in the features or targets), ensure that you explicitly label them as categorical.
+Data labeled as categorical is encoded by using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>
+for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprodcessing.OrdinalEncoder</a> for multidimensional data.</p></li>
+<li><p>For further details on how to properly encode your data, you can check the Pandas Example
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>). If you are working with time series, it is recommended that you follow this approach
 <a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p></li>
+<li><p>If you prefer not using the string option at all you can disable this option. In this case
+objects, strings and categorical columns are encoded as categorical.</p></li>
 </ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span><span class="n">allow_string_features</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be
 automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding
 is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able
@@ -434,10 +438,17 @@ interpretable.</p>
 <details class="summary-b-what-can-i-configure-wrt-the-ensemble-building-process-b">
 <summary><b>What can I configure wrt the ensemble building process?</b></summary><p>The following hyperparameters control how the ensemble is constructed:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code> determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> class object implementing <code class="xref py py-class docutils literal notranslate"><span class="pre">autosklearn.ensembles.AbstractEnsemble</span></code>,
+will be instantiated by <em>auto-sklearn</em>’s ensemble builder.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble_kwargs</span></code> are keyword arguments that are passed to the <code class="docutils literal notranslate"><span class="pre">ensemble_class</span></code> upon
+instantiation. See below for an example argument.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer <em>n</em>, such that only the best <em>n</em> models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in <a class="reference external" href="https://dl.acm.org/doi/10.1109/ICDM.2006.76">Caruana et al. (2006)</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by <em>auto-sklearn</em>. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>, <code class="docutils literal notranslate"><span class="pre">ensemble_nbest</span></code> and <code class="docutils literal notranslate"><span class="pre">max_models_on_disc</span></code> determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.</p></li>
 </ul>
+<p>The default method for Auto-sklearn is <a class="reference internal" href="api.html#autosklearn.ensembles.EnsembleSelection" title="autosklearn.ensembles.EnsembleSelection"><code class="xref py py-class docutils literal notranslate"><span class="pre">autosklearn.ensembles.EnsembleSelection</span></code></a>,
+which features the argument <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>. that determines the maximal size of the
+ensemble. Models can be added repeatedly, so the number of different models is usually
+less than the <code class="docutils literal notranslate"><span class="pre">ensemble_size</span></code>.</p>
 </details><details class="summary-b-which-models-are-in-the-final-ensemble-b">
 <summary><b>Which models are in the final ensemble?</b></summary><p>The results obtained from the final ensemble can be printed by calling <code class="docutils literal notranslate"><span class="pre">show_models()</span></code> or  <code class="docutils literal notranslate"><span class="pre">leaderboard()</span></code>.
 The <em>auto-sklearn</em> ensemble is composed of scikit-learn models that can be inspected as exemplified
@@ -449,6 +460,11 @@ in the Example <a class="reference internal" href="examples/40_advanced/example_
 <h2>Configuring the Search Procedure<a class="headerlink" href="#configuring-the-search-procedure" title="Permalink to this headline">¶</a></h2>
 <details class="summary-b-can-i-change-the-resampling-strategy-b">
 <summary><b>Can I change the resampling strategy?</b></summary><p>Examples for using holdout and cross-validation can be found in <a class="reference internal" href="examples/40_advanced/example_resampling.html#sphx-glr-examples-40-advanced-example-resampling-py"><span class="std std-ref">example</span></a></p>
+<p>If using a custom resampling strategy with predefined splits, you may need to disable
+the subsampling performed with particularly large datasets or if using a small <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>.
+Please see the manual section on <a class="reference internal" href="manual.html#limits"><span class="std std-ref">Resource limits</span></a>
+<a class="reference internal" href="api.html#autosklearn.classification.AutoSklearnClassifier" title="autosklearn.classification.AutoSklearnClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoSklearnClassifier(dataset_compression=...)</span></code></a>.
+for more details.</p>
 </details><details class="summary-b-can-i-use-a-custom-metric-b">
 <summary><b>Can I use a custom metric</b></summary><p>Examples for using a custom metric can be found in <a class="reference internal" href="examples/40_advanced/example_metrics.html#sphx-glr-examples-40-advanced-example-metrics-py"><span class="std std-ref">example</span></a></p>
 </details></div>
@@ -522,18 +538,19 @@ possible to follow the
 from scikit-learn.</p>
 </details><details class="summary-b-vanilla-auto-sklearn-b">
 <summary><b>Vanilla auto-sklearn</b></summary><p>In order to obtain <em>vanilla auto-sklearn</em> as used in <a class="reference external" href="https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning">Efficient and Robust Automated Machine Learning</a>
-set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
+set <code class="docutils literal notranslate"><span class="pre">ensemble_class=autosklearn.ensembles.SingleBest</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="kn">import</span> <span class="nn">autosklearn.ensembles</span>
 <span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
-    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ensemble_class</span><span class="o">=</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">ensembles</span><span class="o">.</span><span class="n">SingleBest</span><span class="p">,</span>
     <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>An ensemble of size one will result in always choosing the current best model
-according to its performance on the validation set. Setting the initial
-configurations found by meta-learning to zero makes <em>auto-sklearn</em> use the
-regular SMAC algorithm for suggesting new hyperparameter configurations.</p>
+<p>This will always choose the best model according to the validation set.
+Setting the initial configurations found by meta-learning to zero makes
+<em>auto-sklearn</em> use the regular SMAC algorithm for suggesting new
+hyperparameter configurations.</p>
 </details></div>
 </div>
 

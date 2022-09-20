@@ -1,0 +1,100 @@
+
+
+.. _sphx_glr_examples_20_basic:
+
+.. _basic_examples:
+
+==============
+Basic Examples
+==============
+
+Examples for basic classification, regression, multi-output regression, and multi-label classification datasets.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple classification model with *auto-sklearn*.">
+
+.. only:: html
+
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_classification_thumb.png
+    :alt: Classification
+
+  :ref:`sphx_glr_examples_20_basic_example_classification.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Classification</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a multioutput regression model with *auto-sklearn*.">
+
+.. only:: html
+
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_multioutput_regression_thumb.png
+    :alt: Multi-output Regression
+
+  :ref:`sphx_glr_examples_20_basic_example_multioutput_regression.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi-output Regression</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple regression model with *auto-sklearn*.">
+
+.. only:: html
+
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_regression_thumb.png
+    :alt: Regression
+
+  :ref:`sphx_glr_examples_20_basic_example_regression.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Regression</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples shows how to format the targets for a multilabel classification problem. Details ...">
+
+.. only:: html
+
+  .. image:: /examples/20_basic/images/thumb/sphx_glr_example_multilabel_classification_thumb.png
+    :alt: Multi-label Classification
+
+  :ref:`sphx_glr_examples_20_basic_example_multilabel_classification.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi-label Classification</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/20_basic/example_classification
+   /examples/20_basic/example_multioutput_regression
+   /examples/20_basic/example_regression
+   /examples/20_basic/example_multilabel_classification
+

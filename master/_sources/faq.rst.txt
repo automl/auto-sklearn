@@ -13,7 +13,7 @@ General
 
     We provide examples on using *auto-sklearn* for multiple use cases ranging from
     simple classification to advanced uses such as feature importance, parallel runs
-    and customization. They can be found in the :ref:`sphx_glr_examples`.
+    and customization. They can be found in the :ref:`examples`.
 
 .. collapse:: <b>What type of tasks can auto-sklearn tackle?</b>
 
@@ -31,26 +31,30 @@ General
     Optionally, you can measure the ability of this fitted model to generalize to unseen data by
     providing an optional testing pair (X_test/Y_test). For further details, please refer to the
     Example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
-    Supported formats for these training and testing pairs are: np.ndarray,
-    pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 
-    If your data contains categorical values (in the features or targets), autosklearn will automatically encode your
-    data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
-    for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_
-    for multidimensional data.
-
-    Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
+    Regarding the features, there are multiple things to consider:
 
     * Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
       can check the Example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
-    * You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
-      dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the
-      column has a categorical/boolean class, it will be encoded. If the column is of any other type
-      (Object or Timeseries), an error will be raised. For further details on how to properly encode
-      your data, you can check the Pandas Example
-      `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_).
-      If you are working with time series, it is recommended that you follow this approach
+    * You can provide a pandas DataFrame with properly formatted columns. If a column has numerical
+      dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. *auto-sklearn*
+      supports both categorical or string as column type. Please ensure that you are using the correct
+      dtype for your task. By default *auto-sklearn* treats object and string columns as strings and
+      encodes the data using `sklearn.feature_extraction.text.CountVectorizer <https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html>`_
+    * If your data contains categorical values (in the features or targets), ensure that you explicitly label them as categorical.
+      Data labeled as categorical is encoded by using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
+      for unidimensional data and a `sklearn.preprodcessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
+    * For further details on how to properly encode your data, you can check the Pandas Example
+      `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach
       `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
+    * If you prefer not using the string option at all you can disable this option. In this case
+      objects, strings and categorical columns are encoded as categorical.
+
+    .. code:: python
+
+        import autosklearn.classification
+        automl = autosklearn.classification.AutoSklearnClassifier(allow_string_features=False)
+        automl.fit(X_train, y_train)
 
     Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be
     automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding
@@ -388,9 +392,17 @@ Ensembling
 
     The following hyperparameters control how the ensemble is constructed:
 
-    * ``ensemble_size`` determines the maximal size of the ensemble. If it is set to zero, no ensemble will be constructed.
+    * ``ensemble_class`` class object implementing :class:`autosklearn.ensembles.AbstractEnsemble`,
+      will be instantiated by *auto-sklearn*'s ensemble builder.
+    * ``ensemble_kwargs`` are keyword arguments that are passed to the ``ensemble_class`` upon
+      instantiation. See below for an example argument.
     * ``ensemble_nbest`` allows the user to directly specify the number of models considered for the ensemble.  This hyperparameter can be an integer *n*, such that only the best *n* models are used in the final ensemble. If a float between 0.0 and 1.0 is provided, ``ensemble_nbest`` would be interpreted as a fraction suggesting the percentage of models to use in the ensemble building process (namely, if ensemble_nbest is a float, library pruning is implemented as described in `Caruana et al. (2006) <https://dl.acm.org/doi/10.1109/ICDM.2006.76>`_).
     * ``max_models_on_disc`` defines the maximum number of models that are kept on the disc, as a mechanism to control the amount of disc space consumed by *auto-sklearn*. Throughout the automl process, different individual models are optimized, and their predictions (and other metadata) is stored on disc. The user can set the upper bound on how many models are acceptable to keep on disc, yet this variable takes priority in the definition of the number of models used by the ensemble builder (that is, the minimum of ``ensemble_size``, ``ensemble_nbest`` and ``max_models_on_disc`` determines the maximal amount of models used in the ensemble). If set to None, this feature is disabled.
+
+    The default method for Auto-sklearn is :class:`autosklearn.ensembles.EnsembleSelection`,
+    which features the argument ``ensemble_size``. that determines the maximal size of the
+    ensemble. Models can be added repeatedly, so the number of different models is usually
+    less than the ``ensemble_size``.
 
 .. collapse:: <b>Which models are in the final ensemble?</b>
 
@@ -408,6 +420,12 @@ Configuring the Search Procedure
 .. collapse:: <b>Can I change the resampling strategy?</b>
 
     Examples for using holdout and cross-validation can be found in :ref:`example <sphx_glr_examples_40_advanced_example_resampling.py>`
+
+    If using a custom resampling strategy with predefined splits, you may need to disable
+    the subsampling performed with particularly large datasets or if using a small ``memory_limit``.
+    Please see the manual section on :ref:`limits`
+    :class:`AutoSklearnClassifier(dataset_compression=...) <autosklearn.classification.AutoSklearnClassifier>`.
+    for more details.
 
 .. collapse:: <b>Can I use a custom metric</b>
 
@@ -507,17 +525,18 @@ Other
 
     In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Automated Machine Learning
     <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning>`_
-    set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
+    set ``ensemble_class=autosklearn.ensembles.SingleBest`` and ``initial_configurations_via_metalearning=0``:
 
     .. code:: python
 
         import autosklearn.classification
+        import autosklearn.ensembles
         automl = autosklearn.classification.AutoSklearnClassifier(
-            ensemble_size=1,
+            ensemble_class=autosklearn.ensembles.SingleBest,
             initial_configurations_via_metalearning=0
         )
 
-    An ensemble of size one will result in always choosing the current best model
-    according to its performance on the validation set. Setting the initial
-    configurations found by meta-learning to zero makes *auto-sklearn* use the
-    regular SMAC algorithm for suggesting new hyperparameter configurations.
+    This will always choose the best model according to the validation set.
+    Setting the initial configurations found by meta-learning to zero makes
+    *auto-sklearn* use the regular SMAC algorithm for suggesting new
+    hyperparameter configurations.

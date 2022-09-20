@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manual &#8212; AutoSklearn 0.14.7 documentation</title>
+    <title>Manual &#8212; AutoSklearn 0.15.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.14.7</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.15.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -107,6 +107,7 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
 <li><a class="reference internal" href="#">Manual</a><ul>
+<li><a class="reference internal" href="#auto-sklearn-2-0">Auto-sklearn 2.0</a></li>
 <li><a class="reference internal" href="#resource-limits">Resource limits</a></li>
 <li><a class="reference internal" href="#the-search-space">The search space</a></li>
 <li><a class="reference internal" href="#model-selection">Model selection</a></li>
@@ -129,10 +130,23 @@ give short explanations (click the title to expand text), e.g.</p>
 <details class="summary-b-code-examples-b">
 <summary><b>Code examples</b></summary><p>We provide examples on using <em>auto-sklearn</em> for multiple use cases ranging from
 simple classification to advanced uses such as feature importance, parallel runs
-and customization. They can be found in the <a class="reference internal" href="examples/index.html#sphx-glr-examples"><span class="std std-ref">Examples</span></a>.</p>
+and customization. They can be found in the <a class="reference internal" href="examples/index.html#examples"><span class="std std-ref">Examples</span></a>.</p>
 </details><details class="summary-b-material-from-talks-and-presentations-b">
 <summary><b>Material from talks and presentations</b></summary><p>We provide resources for talks, tutorials and presentations on <em>auto-sklearn</em> under <a class="reference external" href="https://github.com/automl/auto-sklearn-talks">auto-sklearn-talks</a></p>
-</details><div class="section" id="resource-limits">
+</details><div class="section" id="auto-sklearn-2-0">
+<span id="askl2"></span><h2>Auto-sklearn 2.0<a class="headerlink" href="#auto-sklearn-2-0" title="Permalink to this headline">¶</a></h2>
+<p>Auto-sklearn 2.0 includes latest research on automatically configuring the AutoML system itself
+and contains a multitude of improvements which speed up the fitting the AutoML system.
+Concretely, Auto-sklearn 2.0 automatically sets the <a class="reference internal" href="#bestmodel"><span class="std std-ref">Model selection</span></a>, decides whether it can use
+the efficient bandit strategy <em>Successive Halving</em> and uses meta-feature free <em>Portfolios</em> for
+efficient meta-learning.</p>
+<p><em>auto-sklearn 2.0</em> has the same interface as regular <em>auto-sklearn</em> and you can use it via</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">autosklearn.experimental.askl2</span> <span class="kn">import</span> <span class="n">AutoSklearn2Classifier</span>
+</pre></div>
+</div>
+<p>A paper describing our advances is available on <a class="reference external" href="https://arxiv.org/abs/2007.04074">arXiv</a>.</p>
+</div>
+<div class="section" id="resource-limits">
 <span id="limits"></span><h2>Resource limits<a class="headerlink" href="#resource-limits" title="Permalink to this headline">¶</a></h2>
 <p>A crucial feature of <em>auto-sklearn</em> is limiting the resources (memory and time) which the scikit-learn algorithms are
 allowed to use. Especially for large datasets, on which algorithms can take several hours and make the machine swap,
@@ -149,6 +163,40 @@ time limit of one day, and a time limit of 30 minutes for a single run.</p>
 <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/142">auto-sklearn/issues/142</a>.</p>
 </details><details class="summary-b-cpu-cores-b">
 <summary><b>CPU cores</b></summary><p>By default, <em>auto-sklearn</em> uses <strong>one core</strong>. See also <a class="reference internal" href="#parallel"><span class="std std-ref">Parallel computation</span></a> on how to configure this.</p>
+</details><details class="summary-b-managing-data-compression-b">
+<summary><b>Managing data compression</b></summary><p id="manual-managing-data-compression">Auto-sklearn will attempt to fit the dataset into 1/10th of the <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>.
+This won’t happen unless your dataset is quite large or you have small a
+<code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>. This is done using two methods, reducing <strong>precision</strong> and
+to <strong>subsample</strong>. One reason you may want to control this is if you require high
+precision or you rely on predefined splits for which subsampling does not account
+for.</p>
+<p>To turn off data preprocessing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">dataset_compression</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can specify which of the methods are performed using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">dataset_compression</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="s2">&quot;subsample&quot;</span><span class="p">]</span> <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can change the memory allocation for the dataset to a percentage of <code class="docutils literal notranslate"><span class="pre">memory_limit</span></code>
+or an absolute amount using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+    <span class="n">dataset_compression</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;memory_allocation&quot;</span><span class="p">:</span> <span class="mf">0.2</span> <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The default arguments are used when <code class="docutils literal notranslate"><span class="pre">dataset_compression</span> <span class="pre">=</span> <span class="pre">True</span></code> are:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;memory_allocation&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="s2">&quot;subsample&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The full description is given at <a class="reference internal" href="api.html#autosklearn.classification.AutoSklearnClassifier" title="autosklearn.classification.AutoSklearnClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoSklearnClassifier(dataset_compression=...)</span></code></a>.</p>
 </details></div>
 <div class="section" id="the-search-space">
 <span id="space"></span><h2>The search space<a class="headerlink" href="#the-search-space" title="Permalink to this headline">¶</a></h2>
@@ -298,26 +346,30 @@ ensemble of pipelines as described in the next section. This X_train/y_train dat
 to one of the supported formats: np.ndarray, pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 Optionally, you can measure the ability of this fitted model to generalize to unseen data by
 providing an optional testing pair (X_test/Y_test). For further details, please refer to the
-Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.
-Supported formats for these training and testing pairs are: np.ndarray,
-pd.DataFrame, scipy.sparse.csr_matrix and python lists.</p>
-<p>If your data contains categorical values (in the features or targets), autosklearn will automatically encode your
-data using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>
-for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprocessing.OrdinalEncoder</a>
-for multidimensional data.</p>
-<p>Regarding the features, there are two methods to guide <em>auto-sklearn</em> to properly encode categorical columns:</p>
+Example <a class="reference internal" href="examples/40_advanced/example_pandas_train_test.html#sphx-glr-examples-40-advanced-example-pandas-train-test-py"><span class="std std-ref">Performance-over-time plot</span></a>.</p>
+<p>Regarding the features, there are multiple things to consider:</p>
 <ul class="simple">
 <li><p>Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
 can check the Example <a class="reference internal" href="examples/40_advanced/example_feature_types.html#sphx-glr-examples-40-advanced-example-feature-types-py"><span class="std std-ref">Feature Types</span></a>.</p></li>
-<li><p>You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
-dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. If the
-column has a categorical/boolean class, it will be encoded. If the column is of any other type
-(Object or Timeseries), an error will be raised. For further details on how to properly encode
-your data, you can check the Pandas Example
-<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>).
-If you are working with time series, it is recommended that you follow this approach
+<li><p>You can provide a pandas DataFrame with properly formatted columns. If a column has numerical
+dtype, <em>auto-sklearn</em> will not encode it and it will be passed directly to scikit-learn. <em>auto-sklearn</em>
+supports both categorical or string as column type. Please ensure that you are using the correct
+dtype for your task. By default <em>auto-sklearn</em> treats object and string columns as strings and
+encodes the data using <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">sklearn.feature_extraction.text.CountVectorizer</a></p></li>
+<li><p>If your data contains categorical values (in the features or targets), ensure that you explicitly label them as categorical.
+Data labeled as categorical is encoded by using a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>
+for unidimensional data and a <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html">sklearn.preprodcessing.OrdinalEncoder</a> for multidimensional data.</p></li>
+<li><p>For further details on how to properly encode your data, you can check the Pandas Example
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html">Working with categorical data</a>). If you are working with time series, it is recommended that you follow this approach
 <a class="reference external" href="https://stats.stackexchange.com/questions/311494/">Working with time data</a>.</p></li>
+<li><p>If you prefer not using the string option at all you can disable this option. In this case
+objects, strings and categorical columns are encoded as categorical.</p></li>
 </ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span><span class="n">allow_string_features</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be
 automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding
 is created between these splits (if only y_train is provided during fit, the categorical encoder will not be able
@@ -330,11 +382,12 @@ possible to follow the
 from scikit-learn.</p>
 </details><details class="summary-b-vanilla-auto-sklearn-b">
 <summary><b>Vanilla auto-sklearn</b></summary><p>In order to obtain <em>vanilla auto-sklearn</em> as used in <a class="reference external" href="https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning">Efficient and Robust Automated Machine Learning</a>
-set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
+set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1</span></code>, <code class="docutils literal notranslate"><span class="pre">initial_configurations_via_metalearning=0</span></code> and <code class="docutils literal notranslate"><span class="pre">allow_string_features=False</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 <span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
     <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">allow_string_features</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -342,6 +395,9 @@ set <code class="docutils literal notranslate"><span class="pre">ensemble_size=1
 according to its performance on the validation set. Setting the initial
 configurations found by meta-learning to zero makes <em>auto-sklearn</em> use the
 regular SMAC algorithm for suggesting new hyperparameter configurations.</p>
+</details><details class="summary-b-early-stopping-and-callbacks-b">
+<summary><b>Early stopping and Callbacks</b></summary><p>By using the parameter <code class="docutils literal notranslate"><span class="pre">get_trials_callback</span></code>, we can get access to the results
+of runs as they occur. See this example <a class="reference internal" href="examples/40_advanced/example_early_stopping_and_callbacks.html#sphx-glr-examples-40-advanced-example-early-stopping-and-callbacks-py"><span class="std std-ref">Early Stopping And Callbacks</span></a> for more!</p>
 </details></div>
 </div>
 
