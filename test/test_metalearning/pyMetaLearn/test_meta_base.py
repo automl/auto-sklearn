@@ -1,11 +1,12 @@
 import logging
 import os
-import unittest
 
 import pandas as pd
 
 import autosklearn.pipeline.classification
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
+
+import unittest
 
 
 class MetaBaseTest(unittest.TestCase):
@@ -14,7 +15,7 @@ class MetaBaseTest(unittest.TestCase):
     def setUp(self):
         self.cwd = os.getcwd()
         data_dir = os.path.dirname(__file__)
-        data_dir = os.path.join(data_dir, 'test_meta_base_data')
+        data_dir = os.path.join(data_dir, "test_meta_base_data")
         os.chdir(data_dir)
 
         pipeline = autosklearn.pipeline.classification.SimpleClassificationPipeline()
@@ -33,33 +34,34 @@ class MetaBaseTest(unittest.TestCase):
         self.assertEqual((125, 125), runs.shape)
 
     def test_get_runs(self):
-        runs = self.base.get_runs('233')
+        runs = self.base.get_runs("233")
         # TODO update this ASAP
         self.assertEqual(125, len(runs))
         self.assertIsInstance(runs, pd.Series)
 
     def test_get_metafeatures_single_dataset(self):
-        mf = self.base.get_metafeatures('233')
+        mf = self.base.get_metafeatures("233")
         self.assertIsInstance(mf, pd.Series)
-        self.assertEqual(mf.name, '233')
-        self.assertEqual(mf.loc['NumberOfInstances'], 2142.0)
+        self.assertEqual(mf.name, "233")
+        self.assertEqual(mf.loc["NumberOfInstances"], 2142.0)
 
     def test_get_metafeatures_single_feature(self):
-        mf = self.base.get_metafeatures(features='NumberOfInstances')
+        mf = self.base.get_metafeatures(features="NumberOfInstances")
         self.assertIsInstance(mf, pd.Series)
-        self.assertEqual(mf.shape, (132, ))
+        self.assertEqual(mf.shape, (132,))
 
     def test_get_metafeatures_single_dataset_and_single_feature(self):
-        mf = self.base.get_metafeatures('233', features='NumberOfInstances')
+        mf = self.base.get_metafeatures("233", features="NumberOfInstances")
         self.assertEqual(mf.shape, ())
 
     def test_get_metafeatures_multiple_datasets(self):
-        mf = self.base.get_metafeatures(['233', '236'])
+        mf = self.base.get_metafeatures(["233", "236"])
         self.assertIsInstance(mf, pd.DataFrame)
         self.assertEqual(mf.shape, (2, 46))
 
     def test_get_metafeatures_multiple_features(self):
-        mf = self.base.get_metafeatures(features=['NumberOfInstances',
-                                                  'NumberOfClasses'])
+        mf = self.base.get_metafeatures(
+            features=["NumberOfInstances", "NumberOfClasses"]
+        )
         self.assertIsInstance(mf, pd.DataFrame)
         self.assertEqual(mf.shape, (132, 2))

@@ -27,8 +27,9 @@ import autosklearn.classification
 # ============
 
 X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = \
-    sklearn.model_selection.train_test_split(X, y, random_state=1)
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, random_state=1
+)
 
 ############################################################################
 # Build and fit the classifier
@@ -40,20 +41,16 @@ automl = autosklearn.classification.AutoSklearnClassifier(
     disable_evaluator_output=False,
     # To simplify querying the models in the final ensemble, we
     # restrict auto-sklearn to use only pca as a preprocessor
-    include={
-        'feature_preprocessor': ['pca']
-    },
+    include={"feature_preprocessor": ["pca"]},
 )
-automl.fit(X_train, y_train, dataset_name='breast_cancer')
+automl.fit(X_train, y_train, dataset_name="breast_cancer")
 
 ############################################################################
 # Predict using the model
 # =======================
 
 predictions = automl.predict(X_test)
-print("Accuracy score:{}".format(
-    sklearn.metrics.accuracy_score(y_test, predictions))
-)
+print("Accuracy score:{}".format(sklearn.metrics.accuracy_score(y_test, predictions)))
 
 
 ############################################################################
@@ -90,8 +87,7 @@ print(automl.sprint_statistics())
 #
 # Auto-sklearn also keeps detailed statistics of the hyperparameter
 # optimization procedurce, which are stored in a so-called
-# `run history <https://automl.github.io/SMAC3/master/apidoc/smac.
-# runhistory.runhistory.html#smac.runhistory.runhistory.RunHistory>`_.
+# `run history <https://automl.github.io/SMAC3/main/api/smac.runhistory.runhistory.html#smac.runhistory.runhistory.RunHistory>`_.
 
 print(automl.automl_.runhistory_)
 
@@ -104,7 +100,7 @@ print(len(automl.automl_.runhistory_.data))
 # Let's iterative over all entries
 
 for run_key in automl.automl_.runhistory_.data:
-    print('#########')
+    print("#########")
     print(run_key)
     print(automl.automl_.runhistory_.data[run_key])
 
@@ -166,7 +162,7 @@ losses_and_configurations.sort()
 print("Lowest loss:", losses_and_configurations[0][0])
 print(
     "Best configuration:",
-    automl.automl_.runhistory_.ids_config[losses_and_configurations[0][1]]
+    automl.automl_.runhistory_.ids_config[losses_and_configurations[0][1]],
 )
 
 ############################################################################
@@ -188,7 +184,7 @@ print(automl.cv_results_)
 # The explained variance ratio per stage
 for i, (weight, pipeline) in enumerate(automl.get_models_with_weights()):
     for stage_name, component in pipeline.named_steps.items():
-        if 'feature_preprocessor' in stage_name:
+        if "feature_preprocessor" in stage_name:
             print(
                 "The {}th pipeline has a explained variance of {}".format(
                     i,
@@ -196,6 +192,6 @@ for i, (weight, pipeline) in enumerate(automl.get_models_with_weights()):
                     # Access the sklearn object via the choice attribute
                     # We want the explained variance attributed of
                     # each principal component
-                    component.choice.preprocessor.explained_variance_ratio_
+                    component.choice.preprocessor.explained_variance_ratio_,
                 )
             )

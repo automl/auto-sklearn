@@ -1,27 +1,46 @@
+from typing import Optional
+
 import numpy as np
-
-from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
-    CategoricalHyperparameter
 from ConfigSpace.conditions import InCondition
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import (
+    CategoricalHyperparameter,
+    Constant,
+    UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
+    UnParametrizedHyperparameter,
+)
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
     IterativeComponent,
 )
-from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, PREDICTIONS
+from autosklearn.pipeline.constants import DENSE, PREDICTIONS, SPARSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool
 
 
-class MLPRegressor(
-    IterativeComponent,
-    AutoSklearnRegressionAlgorithm
-):
-    def __init__(self, hidden_layer_depth, num_nodes_per_layer, activation, alpha,
-                 learning_rate_init, early_stopping, solver, batch_size,
-                 n_iter_no_change, tol, shuffle, beta_1, beta_2, epsilon,
-                 validation_fraction=None, random_state=None, verbose=0):
+class MLPRegressor(IterativeComponent, AutoSklearnRegressionAlgorithm):
+    def __init__(
+        self,
+        hidden_layer_depth,
+        num_nodes_per_layer,
+        activation,
+        alpha,
+        learning_rate_init,
+        early_stopping,
+        solver,
+        batch_size,
+        n_iter_no_change,
+        tol,
+        shuffle,
+        beta_1,
+        beta_2,
+        epsilon,
+        validation_fraction=None,
+        random_state=None,
+        verbose=0,
+    ):
         self.hidden_layer_depth = hidden_layer_depth
         self.num_nodes_per_layer = num_nodes_per_layer
         self.max_iter = self.get_max_iter()
@@ -52,11 +71,10 @@ class MLPRegressor(
         return self.estimator.n_iter_
 
     def iterative_fit(self, X, y, n_iter=2, refit=False):
-        """
-        Set n_iter=2 for the same reason as for SGD
-        """
-        from sklearn.neural_network import MLPRegressor
+        """Set n_iter=2 for the same reason as for SGD"""
         import sklearn.preprocessing
+        from sklearn.neural_network import MLPRegressor
+
         n_iter = max(n_iter, 2)
 
         if refit:
@@ -69,8 +87,9 @@ class MLPRegressor(
             self.max_iter = int(self.max_iter)
             self.hidden_layer_depth = int(self.hidden_layer_depth)
             self.num_nodes_per_layer = int(self.num_nodes_per_layer)
-            self.hidden_layer_sizes = tuple(self.num_nodes_per_layer
-                                            for i in range(self.hidden_layer_depth))
+            self.hidden_layer_sizes = tuple(
+                self.num_nodes_per_layer for i in range(self.hidden_layer_depth)
+            )
             self.activation = str(self.activation)
             self.alpha = float(self.alpha)
             self.learning_rate_init = float(self.learning_rate_init)
@@ -86,7 +105,9 @@ class MLPRegressor(
                 self.n_iter_no_change = int(self.n_iter_no_change)
                 self.early_stopping_val = True
             else:
-                raise ValueError("Set early stopping to unknown value %s" % self.early_stopping)
+                raise ValueError(
+                    "Set early stopping to unknown value %s" % self.early_stopping
+                )
             # elif self.early_stopping == "off":
             #     self.validation_fraction = 0
             #     self.tol = 10000
@@ -172,7 +193,7 @@ class MLPRegressor(
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        elif not hasattr(self, '_fully_fit'):
+        elif not hasattr(self, "_fully_fit"):
             return False
         else:
             return self._fully_fit
@@ -193,43 +214,58 @@ class MLPRegressor(
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'MLP',
-                'name': 'Multilayer Percepton',
-                'handles_regression': True,
-                'handles_classification': False,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'handles_multioutput': False,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)}
+        return {
+            "shortname": "MLP",
+            "name": "Multilayer Percepton",
+            "handles_regression": True,
+            "handles_classification": False,
+            "handles_multiclass": False,
+            "handles_multilabel": False,
+            "handles_multioutput": False,
+            "is_deterministic": True,
+            "input": (DENSE, SPARSE, UNSIGNED_DATA),
+            "output": (PREDICTIONS,),
+        }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         cs = ConfigurationSpace()
-        hidden_layer_depth = UniformIntegerHyperparameter(name="hidden_layer_depth",
-                                                          lower=1, upper=3, default_value=1)
-        num_nodes_per_layer = UniformIntegerHyperparameter(name="num_nodes_per_layer",
-                                                           lower=16, upper=264, default_value=32,
-                                                           log=True)
-        activation = CategoricalHyperparameter(name="activation", choices=['tanh', 'relu'],
-                                               default_value='tanh')
-        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-7, upper=1e-1, default_value=1e-4,
-                                           log=True)
+        hidden_layer_depth = UniformIntegerHyperparameter(
+            name="hidden_layer_depth", lower=1, upper=3, default_value=1
+        )
+        num_nodes_per_layer = UniformIntegerHyperparameter(
+            name="num_nodes_per_layer", lower=16, upper=264, default_value=32, log=True
+        )
+        activation = CategoricalHyperparameter(
+            name="activation", choices=["tanh", "relu"], default_value="tanh"
+        )
+        alpha = UniformFloatHyperparameter(
+            name="alpha", lower=1e-7, upper=1e-1, default_value=1e-4, log=True
+        )
 
-        learning_rate_init = UniformFloatHyperparameter(name="learning_rate_init",
-                                                        lower=1e-4, upper=0.5, default_value=1e-3,
-                                                        log=True)
+        learning_rate_init = UniformFloatHyperparameter(
+            name="learning_rate_init",
+            lower=1e-4,
+            upper=0.5,
+            default_value=1e-3,
+            log=True,
+        )
 
         # Not allowing to turn off early stopping
-        early_stopping = CategoricalHyperparameter(name="early_stopping",
-                                                   choices=["valid", "train"],  # , "off"],
-                                                   default_value="valid")
+        early_stopping = CategoricalHyperparameter(
+            name="early_stopping",
+            choices=["valid", "train"],  # , "off"],
+            default_value="valid",
+        )
         # Constants
-        n_iter_no_change = Constant(name="n_iter_no_change", value=32)  # default=10 is too low
+        n_iter_no_change = Constant(
+            name="n_iter_no_change", value=32
+        )  # default=10 is too low
         validation_fraction = Constant(name="validation_fraction", value=0.1)
         tol = UnParametrizedHyperparameter(name="tol", value=1e-4)
-        solver = Constant(name="solver", value='adam')
+        solver = Constant(name="solver", value="adam")
 
         # Relying on sklearn defaults for now
         batch_size = UnParametrizedHyperparameter(name="batch_size", value="auto")
@@ -247,17 +283,33 @@ class MLPRegressor(
         # max_fun --> only used when solver=lbfgs
         # activation=["identity", "logistic"] --> not useful for classification
 
-        cs.add_hyperparameters([hidden_layer_depth, num_nodes_per_layer,
-                                activation, alpha,
-                                learning_rate_init, early_stopping,
-                                n_iter_no_change, validation_fraction, tol,
-                                solver, batch_size, shuffle,
-                                beta_1, beta_2, epsilon])
+        cs.add_hyperparameters(
+            [
+                hidden_layer_depth,
+                num_nodes_per_layer,
+                activation,
+                alpha,
+                learning_rate_init,
+                early_stopping,
+                n_iter_no_change,
+                validation_fraction,
+                tol,
+                solver,
+                batch_size,
+                shuffle,
+                beta_1,
+                beta_2,
+                epsilon,
+            ]
+        )
 
-        validation_fraction_cond = InCondition(validation_fraction, early_stopping, ["valid"])
+        validation_fraction_cond = InCondition(
+            validation_fraction, early_stopping, ["valid"]
+        )
         cs.add_conditions([validation_fraction_cond])
         # We always use early stopping
-        # n_iter_no_change_cond = InCondition(n_iter_no_change, early_stopping, ["valid", "train"])
+        # n_iter_no_change_cond = \
+        #   InCondition(n_iter_no_change, early_stopping, ["valid", "train"])
         # tol_cond = InCondition(n_iter_no_change, early_stopping, ["valid", "train"])
         # cs.add_conditions([n_iter_no_change_cond, tol_cond])
 

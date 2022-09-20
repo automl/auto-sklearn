@@ -58,7 +58,7 @@ import sklearn.metrics
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
-tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
+tmp_folder = "/tmp/autosklearn_parallel_2_example_tmp"
 
 
 ############################################################################
@@ -73,8 +73,9 @@ tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
 # https://docs.dask.org/en/latest/setup/python-advanced.html for further
 # information.
 
+
 def start_python_worker(scheduler_address):
-    dask.config.set({'distributed.worker.daemon': False})
+    dask.config.set({"distributed.worker.daemon": False})
 
     async def do_work():
         async with dask.distributed.Nanny(
@@ -97,14 +98,17 @@ def start_python_worker(scheduler_address):
 # To use auto-sklearn in parallel we must guard the code with
 # ``if __name__ == '__main__'``. We then start a dask cluster as a context,
 # which means that it is automatically stopped once all computation is done.
-if __name__ == '__main__':
+if __name__ == "__main__":
     X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
     # 1. Create a dask scheduler (LocalCluster)
     with dask.distributed.LocalCluster(
-        n_workers=0, processes=True, threads_per_worker=1,
+        n_workers=0,
+        processes=True,
+        threads_per_worker=1,
     ) as cluster:
 
         # 2. Start the workers
@@ -114,7 +118,7 @@ if __name__ == '__main__':
         for _ in range(2):
             process_python_worker = multiprocessing.Process(
                 target=start_python_worker,
-                args=(cluster.scheduler_address, ),
+                args=(cluster.scheduler_address,),
             )
             process_python_worker.start()
             worker_processes.append(process_python_worker)
@@ -141,8 +145,8 @@ if __name__ == '__main__':
             automl.fit_ensemble(
                 y_train,
                 task=MULTICLASS_CLASSIFICATION,
-                dataset_name='digits',
-                ensemble_size=20,
+                dataset_name="digits",
+                ensemble_kwargs={"ensemble_size": 20},
                 ensemble_nbest=50,
             )
 

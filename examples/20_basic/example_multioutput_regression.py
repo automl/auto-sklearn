@@ -32,9 +32,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
 automl = AutoSklearnRegressor(
     time_left_for_this_task=120,
     per_run_time_limit=30,
-    tmp_folder='/tmp/autosklearn_multioutput_regression_example_tmp',
+    tmp_folder="/tmp/autosklearn_multioutput_regression_example_tmp",
 )
-automl.fit(X_train, y_train, dataset_name='synthetic')
+automl.fit(X_train, y_train, dataset_name="synthetic")
 
 ############################################################################
 # View the models found by auto-sklearn

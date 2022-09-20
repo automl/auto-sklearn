@@ -68,7 +68,7 @@ import sklearn.metrics
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
-tmp_folder = '/tmp/autosklearn_parallel_3_example_tmp'
+tmp_folder = "/tmp/autosklearn_parallel_3_example_tmp"
 
 worker_processes = []
 
@@ -83,7 +83,7 @@ worker_processes = []
 # location. This filename is also given to the worker so they can find all
 # relevant information to connect to the scheduler.
 
-scheduler_file_name = 'scheduler-file.json'
+scheduler_file_name = "scheduler-file.json"
 
 
 ############################################################################
@@ -99,12 +99,16 @@ scheduler_file_name = 'scheduler-file.json'
 # We will now execute this bash command from within Python to have a
 # self-contained example:
 
+
 def cli_start_scheduler(scheduler_file_name):
-    command = (
-        f"dask-scheduler --scheduler-file {scheduler_file_name} --idle-timeout 10"
+    command = f"dask-scheduler --scheduler-file {scheduler_file_name} --idle-timeout 10"
+    proc = subprocess.run(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        shell=True,
+        check=True,
     )
-    proc = subprocess.run(command, stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT, shell=True, check=True)
     while proc.returncode is None:
         time.sleep(1)
 
@@ -112,7 +116,7 @@ def cli_start_scheduler(scheduler_file_name):
 if __name__ == "__main__":
     process_python_worker = multiprocessing.Process(
         target=cli_start_scheduler,
-        args=(scheduler_file_name, ),
+        args=(scheduler_file_name,),
     )
     process_python_worker.start()
     worker_processes.append(process_python_worker)
@@ -141,22 +145,25 @@ if __name__ == "__main__":
 # We disable dask's memory management by passing ``--memory-limit`` as
 # Auto-sklearn does the memory management itself.
 
+
 def cli_start_worker(scheduler_file_name):
     command = (
         "DASK_DISTRIBUTED__WORKER__DAEMON=False "
         "dask-worker --nthreads 1 --lifetime 35 --memory-limit 0 "
         f"--scheduler-file {scheduler_file_name}"
     )
-    proc = subprocess.run(command, stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT, shell=True)
+    proc = subprocess.run(
+        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
+    )
     while proc.returncode is None:
         time.sleep(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     for _ in range(2):
         process_cli_worker = multiprocessing.Process(
             target=cli_start_worker,
-            args=(scheduler_file_name, ),
+            args=(scheduler_file_name,),
         )
         process_cli_worker.start()
         worker_processes.append(process_cli_worker)
@@ -178,14 +185,15 @@ client = dask.distributed.Client(scheduler_file=scheduler_file_name)
 # ~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
     X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
-    X_train, X_test, y_train, y_test = \
-        sklearn.model_selection.train_test_split(X, y, random_state=1)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, random_state=1
+    )
 
     automl = AutoSklearnClassifier(
         delete_tmp_folder_after_terminate=False,
         time_left_for_this_task=30,
         per_run_time_limit=10,
-        memory_limit=1024,
+        memory_limit=2048,
         tmp_folder=tmp_folder,
         seed=777,
         # n_jobs is ignored internally as we pass a dask client.
@@ -198,8 +206,8 @@ if __name__ == "__main__":
     automl.fit_ensemble(
         y_train,
         task=MULTICLASS_CLASSIFICATION,
-        dataset_name='digits',
-        ensemble_size=20,
+        dataset_name="digits",
+        ensemble_kwargs={"ensemble_size": 20},
         ensemble_nbest=50,
     )
 
@@ -215,7 +223,7 @@ if __name__ == "__main__":
 # This is only necessary if the workers are started from within this python
 # script. In a real application one would start them directly from the command
 # line.
-if __name__ == '__main__':
+if __name__ == "__main__":
     process_python_worker.join()
     for process in worker_processes:
         process.join()

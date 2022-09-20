@@ -25,15 +25,15 @@ authors:
     affiliation: "University of Freiburg, Germany"
 
   - family-names: "Eggensperger"
-    given-names: "Katharina" 
+    given-names: "Katharina"
     orcid: "https://orcid.org/0000-0002-0309-401X"
     affiliation: "University of Freiburg, Germany"
 
-  - family-name: "Bergman"
+  - family-names: "Bergman"
     given-names: "Edward"
     affiliation: "University of Freiburg, Germany"
 
-  - family-name: "Rivera Valverde"
+  - family-names: "Rivera Valverde"
     given-names: "Francisco"
     affiliation: "University of Freiburg, Germany"
 
@@ -81,7 +81,7 @@ preferred-citation:
   authors:
 
     - family-names: "Feurer"
-      given-names: "Matthias" 
+      given-names: "Matthias"
       orcid: "https://orcid.org/0000-0001-9611-8588"
       affiliation: "University of Freiburg, Germany"
 
@@ -90,7 +90,7 @@ preferred-citation:
       affiliation: "University of Freiburg, Germany"
 
     - family-names: "Eggensperger"
-      given-names: "Katharina" 
+      given-names: "Katharina"
       orcid: "https://orcid.org/0000-0002-0309-401X"
       affiliation: "University of Freiburg, Germany"
 

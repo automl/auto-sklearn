@@ -1,30 +1,32 @@
-import unittest
-import pkg_resources
 import re
 
-from unittest.mock import patch, Mock
-
 import numpy as np
+import pkg_resources
 
-from autosklearn.util.dependencies import verify_packages, MissingPackageError, \
-    IncorrectPackageVersionError
+from autosklearn.util.dependencies import (
+    IncorrectPackageVersionError,
+    MissingPackageError,
+    verify_packages,
+)
+
+import unittest
+from unittest.mock import Mock, patch
 
 
-@patch('pkg_resources.get_distribution')
+@patch("pkg_resources.get_distribution")
 class VerifyPackagesTests(unittest.TestCase):
-
     def test_existing_package(self, getDistributionMock):
-        requirement = 'package'
+        requirement = "package"
         distribution_mock = unittest.mock.Mock()
         getDistributionMock.return_value = distribution_mock
-        distribution_mock.version = '1.0.0'
+        distribution_mock.version = "1.0.0"
 
         verify_packages(requirement)
 
-        getDistributionMock.assert_called_once_with('package')
+        getDistributionMock.assert_called_once_with("package")
 
     def test_missing_package(self, getDistributionMock):
-        requirement = 'package'
+        requirement = "package"
 
         getDistributionMock.side_effect = pkg_resources.DistributionNotFound()
 
@@ -35,7 +37,7 @@ class VerifyPackagesTests(unittest.TestCase):
             requirement,
         )
 
-    @patch('importlib.import_module')
+    @patch("importlib.import_module")
     def test_package_can_only_be_imported(self, import_mock, getDistributionMock):
 
         getDistributionMock.side_effect = pkg_resources.DistributionNotFound()
@@ -43,60 +45,64 @@ class VerifyPackagesTests(unittest.TestCase):
         package.__version__ = np.__version__
         import_mock.return_value = package
 
-        verify_packages('numpy')
+        verify_packages("numpy")
 
     def test_correct_package_versions(self, getDistributionMock):
-        requirement = 'package==0.1.2\n' \
-                      'package>0.1\n' \
-                      'package>=0.1'
+        requirement = "package==0.1.2\n" "package>0.1\n" "package>=0.1"
 
         moduleMock = Mock()
-        moduleMock.version = '0.1.2'
+        moduleMock.version = "0.1.2"
         getDistributionMock.return_value = moduleMock
 
         verify_packages(requirement)
 
-        getDistributionMock.assert_called_with('package')
+        getDistributionMock.assert_called_with("package")
         self.assertEqual(3, len(getDistributionMock.call_args_list))
 
     def test_wrong_package_version(self, getDistributionMock):
-        requirement = 'package>0.1.2'
+        requirement = "package>0.1.2"
 
         moduleMock = Mock()
-        moduleMock.version = '0.1.2'
+        moduleMock.version = "0.1.2"
         getDistributionMock.return_value = moduleMock
 
         self.assertRaisesRegex(
             IncorrectPackageVersionError,
-            re.escape("found 'package' version 0.1.2 but requires package version >0.1.2"),
+            re.escape(
+                "found 'package' version 0.1.2 but requires package version >0.1.2"
+            ),
             verify_packages,
             requirement,
-            )
+        )
 
     def test_outdated_requirement(self, getDistributionMock):
-        requirement = 'package>=0.1'
+        requirement = "package>=0.1"
 
         moduleMock = Mock()
-        moduleMock.version = '0.0.9'
+        moduleMock.version = "0.0.9"
         getDistributionMock.return_value = moduleMock
 
         self.assertRaisesRegex(
             IncorrectPackageVersionError,
-            re.escape("found 'package' version 0.0.9 but requires package version >=0.1"),
+            re.escape(
+                "found 'package' version 0.0.9 but requires package version >=0.1"
+            ),
             verify_packages,
             requirement,
-            )
+        )
 
     def test_too_fresh_requirement(self, getDistributionMock):
-        requirement = 'package==0.1.2'
+        requirement = "package==0.1.2"
 
         moduleMock = Mock()
-        moduleMock.version = '0.1.3'
+        moduleMock.version = "0.1.3"
         getDistributionMock.return_value = moduleMock
 
         self.assertRaisesRegex(
             IncorrectPackageVersionError,
-            re.escape("found 'package' version 0.1.3 but requires package version ==0.1.2"),
+            re.escape(
+                "found 'package' version 0.1.3 but requires package version ==0.1.2"
+            ),
             verify_packages,
             requirement,
-            )
+        )

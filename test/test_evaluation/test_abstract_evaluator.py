@@ -3,19 +3,19 @@ import logging.handlers
 import os
 import shutil
 import sys
-import unittest
-import unittest.mock
 import tempfile
 
 import numpy as np
 import sklearn.dummy
+from smac.tae import StatusType
 
 from autosklearn.automl_common.common.utils.backend import Backend, BackendContext
-
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
-from autosklearn.pipeline.components.base import _addons
 from autosklearn.metrics import accuracy
-from smac.tae import StatusType
+from autosklearn.pipeline.components.base import _addons
+
+import unittest
+import unittest.mock
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -29,7 +29,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         """
         Creates a backend mock
         """
-        self.ev_path = os.path.join(this_directory, '.tmp_evaluations')
+        self.ev_path = os.path.join(this_directory, ".tmp_evaluations")
         if not os.path.exists(self.ev_path):
             os.mkdir(self.ev_path)
         dummy_model_files = [os.path.join(self.ev_path, str(n)) for n in range(100)]
@@ -46,7 +46,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
-        self.working_directory = os.path.join(this_directory, '.tmp_%s' % self.id())
+        self.working_directory = os.path.join(this_directory, ".tmp_%s" % self.id())
 
     def tearDown(self):
         if os.path.exists(self.ev_path):
@@ -56,20 +56,21 @@ class AbstractEvaluatorTest(unittest.TestCase):
                 pass
 
     def test_finish_up_model_predicts_NaN(self):
-        '''Tests by handing in predictions which contain NaNs'''
+        """Tests by handing in predictions which contain NaNs"""
         rs = np.random.RandomState(1)
 
         queue_mock = unittest.mock.Mock()
-        ae = AbstractEvaluator(backend=self.backend_mock,
-                               port=self.port,
-                               output_y_hat_optimization=False,
-                               queue=queue_mock, metric=accuracy,
-                               additional_components=dict(),
-                               )
+        ae = AbstractEvaluator(
+            backend=self.backend_mock,
+            port=self.port,
+            output_y_hat_optimization=False,
+            queue=queue_mock,
+            metrics=[accuracy],
+            additional_components=dict(),
+        )
         ae.Y_optimization = rs.rand(33, 3)
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
-        predictions_valid = rs.rand(25, 3)
 
         # NaNs in prediction ensemble
         predictions_ensemble[5, 2] = np.NaN
@@ -77,7 +78,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
             loss=0.1,
             train_loss=0.1,
             opt_pred=predictions_ensemble,
-            valid_pred=predictions_valid,
             test_pred=predictions_test,
             additional_run_info=None,
             final_call=True,
@@ -85,37 +85,17 @@ class AbstractEvaluatorTest(unittest.TestCase):
             status=StatusType.SUCCESS,
         )
         self.assertEqual(loss, 1.0)
-        self.assertEqual(additional_run_info,
-                         {'error': 'Model predictions for optimization set '
-                                   'contains NaNs.'})
-
-        # NaNs in prediction validation
-        predictions_ensemble[5, 2] = 0.5
-        predictions_valid[5, 2] = np.NaN
-        _, loss, _, additional_run_info = ae.finish_up(
-            loss=0.1,
-            train_loss=0.1,
-            opt_pred=predictions_ensemble,
-            valid_pred=predictions_valid,
-            test_pred=predictions_test,
-            additional_run_info=None,
-            final_call=True,
-            file_output=True,
-            status=StatusType.SUCCESS,
+        self.assertEqual(
+            additional_run_info,
+            {"error": "Model predictions for optimization set contains NaNs."},
         )
-        self.assertEqual(loss, 1.0)
-        self.assertEqual(additional_run_info,
-                         {'error': 'Model predictions for validation set '
-                                   'contains NaNs.'})
 
-        # NaNs in prediction test
-        predictions_valid[5, 2] = 0.5
+        predictions_ensemble = rs.rand(33, 3)
         predictions_test[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
             loss=0.1,
             train_loss=0.1,
             opt_pred=predictions_ensemble,
-            valid_pred=predictions_valid,
             test_pred=predictions_test,
             additional_run_info=None,
             final_call=True,
@@ -123,10 +103,10 @@ class AbstractEvaluatorTest(unittest.TestCase):
             status=StatusType.SUCCESS,
         )
         self.assertEqual(loss, 1.0)
-        self.assertEqual(additional_run_info,
-                         {'error': 'Model predictions for test set contains '
-                                   'NaNs.'})
-
+        self.assertEqual(
+            additional_run_info,
+            {"error": "Model predictions for test set contains NaNs."},
+        )
         self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 0)
 
     def test_disable_file_output(self):
@@ -138,21 +118,17 @@ class AbstractEvaluatorTest(unittest.TestCase):
             backend=self.backend_mock,
             queue=queue_mock,
             disable_file_output=True,
-            metric=accuracy,
+            metrics=[accuracy],
             port=self.port,
             additional_components=dict(),
         )
 
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
-        predictions_valid = rs.rand(25, 3)
 
-        loss_, additional_run_info_ = (
-            ae.file_output(
-                predictions_ensemble,
-                predictions_valid,
-                predictions_test,
-            )
+        loss_, additional_run_info_ = ae.file_output(
+            predictions_ensemble,
+            predictions_test,
         )
 
         self.assertIsNone(loss_)
@@ -160,13 +136,13 @@ class AbstractEvaluatorTest(unittest.TestCase):
         # This function is never called as there is a return before
         self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, 0)
 
-        for call_count, disable in enumerate(['model', 'cv_model'], start=1):
+        for call_count, disable in enumerate(["model", "cv_model"], start=1):
             ae = AbstractEvaluator(
                 backend=self.backend_mock,
                 output_y_hat_optimization=False,
                 queue=queue_mock,
                 disable_file_output=[disable],
-                metric=accuracy,
+                metrics=[accuracy],
                 port=self.port,
                 additional_components=dict(),
             )
@@ -174,59 +150,61 @@ class AbstractEvaluatorTest(unittest.TestCase):
             ae.model = unittest.mock.Mock()
             ae.models = [unittest.mock.Mock()]
 
-            loss_, additional_run_info_ = (
-                ae.file_output(
-                    predictions_ensemble,
-                    predictions_valid,
-                    predictions_test,
-                )
+            loss_, additional_run_info_ = ae.file_output(
+                predictions_ensemble,
+                predictions_test,
             )
 
             self.assertIsNone(loss_)
             self.assertEqual(additional_run_info_, {})
-            self.assertEqual(self.backend_mock.save_numrun_to_dir.call_count, call_count)
-            if disable == 'model':
+            self.assertEqual(
+                self.backend_mock.save_numrun_to_dir.call_count, call_count
+            )
+            if disable == "model":
                 self.assertIsNone(
-                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['model'])
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]["model"]
+                )
                 self.assertIsNotNone(
-                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['cv_model'])
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                        "cv_model"
+                    ]
+                )
             else:
                 self.assertIsNotNone(
-                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['model'])
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]["model"]
+                )
                 self.assertIsNone(
-                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1]['cv_model'])
+                    self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
+                        "cv_model"
+                    ]
+                )
             self.assertIsNotNone(
                 self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                    'ensemble_predictions']
+                    "ensemble_predictions"
+                ]
             )
             self.assertIsNotNone(
                 self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                    'valid_predictions']
-            )
-            self.assertIsNotNone(
-                self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                    'test_predictions']
+                    "test_predictions"
+                ]
             )
 
         ae = AbstractEvaluator(
             backend=self.backend_mock,
             output_y_hat_optimization=False,
             queue=queue_mock,
-            metric=accuracy,
-            disable_file_output=['y_optimization'],
+            metrics=[accuracy],
+            disable_file_output=["y_optimization"],
             port=self.port,
             additional_components=dict(),
         )
         ae.Y_optimization = predictions_ensemble
-        ae.model = 'model'
+        ae.model = "model"
         ae.models = [unittest.mock.Mock()]
 
-        loss_, additional_run_info_ = (
-            ae.file_output(
-                predictions_ensemble,
-                predictions_valid,
-                predictions_test,
-            )
+        loss_, additional_run_info_ = ae.file_output(
+            predictions_ensemble,
+            predictions_test,
         )
 
         self.assertIsNone(loss_)
@@ -234,15 +212,13 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.assertIsNone(
             self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                'ensemble_predictions']
+                "ensemble_predictions"
+            ]
         )
         self.assertIsNotNone(
             self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                'valid_predictions']
-        )
-        self.assertIsNotNone(
-            self.backend_mock.save_numrun_to_dir.call_args_list[-1][1][
-                'test_predictions']
+                "test_predictions"
+            ]
         )
 
     def test_file_output(self):
@@ -252,14 +228,18 @@ class AbstractEvaluatorTest(unittest.TestCase):
         queue_mock = unittest.mock.Mock()
 
         context = BackendContext(
-            temporary_directory=os.path.join(self.working_directory, 'tmp'),
-            output_directory=os.path.join(self.working_directory, 'tmp_output'),
+            temporary_directory=os.path.join(self.working_directory, "tmp"),
+            output_directory=os.path.join(self.working_directory, "tmp_output"),
             delete_tmp_folder_after_terminate=True,
             delete_output_folder_after_terminate=True,
-            prefix="auto-sklearn"
+            prefix="auto-sklearn",
         )
-        with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
-            load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
+        with unittest.mock.patch.object(
+            Backend, "load_datamanager"
+        ) as load_datamanager_mock:
+            load_datamanager_mock.return_value = (
+                get_multiclass_classification_datamanager()
+            )
 
             backend = Backend(context, prefix="auto-sklearn")
 
@@ -267,7 +247,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                 backend=backend,
                 output_y_hat_optimization=False,
                 queue=queue_mock,
-                metric=accuracy,
+                metrics=[accuracy],
                 port=self.port,
                 additional_components=dict(),
             )
@@ -277,16 +257,23 @@ class AbstractEvaluatorTest(unittest.TestCase):
             ae.Y_optimization = rs.rand(33, 3)
             predictions_ensemble = rs.rand(33, 3)
             predictions_test = rs.rand(25, 3)
-            predictions_valid = rs.rand(25, 3)
 
             ae.file_output(
                 Y_optimization_pred=predictions_ensemble,
-                Y_valid_pred=predictions_valid,
                 Y_test_pred=predictions_test,
             )
 
-            self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'tmp',
-                                                        '.auto-sklearn', 'runs', '1_0_None')))
+            self.assertTrue(
+                os.path.exists(
+                    os.path.join(
+                        self.working_directory,
+                        "tmp",
+                        ".auto-sklearn",
+                        "runs",
+                        "1_0_None",
+                    )
+                )
+            )
 
             shutil.rmtree(self.working_directory, ignore_errors=True)
 
@@ -297,32 +284,42 @@ class AbstractEvaluatorTest(unittest.TestCase):
         queue_mock = unittest.mock.Mock()
 
         context = BackendContext(
-            temporary_directory=os.path.join(self.working_directory, 'tmp'),
-            output_directory=os.path.join(self.working_directory, 'tmp_output'),
+            temporary_directory=os.path.join(self.working_directory, "tmp"),
+            output_directory=os.path.join(self.working_directory, "tmp_output"),
             delete_tmp_folder_after_terminate=True,
             delete_output_folder_after_terminate=True,
-            prefix="auto-sklearn"
+            prefix="auto-sklearn",
         )
-        with unittest.mock.patch.object(Backend, 'load_datamanager') as load_datamanager_mock:
-            load_datamanager_mock.return_value = get_multiclass_classification_datamanager()
+        with unittest.mock.patch.object(
+            Backend, "load_datamanager"
+        ) as load_datamanager_mock:
+            load_datamanager_mock.return_value = (
+                get_multiclass_classification_datamanager()
+            )
             backend = Backend(context, prefix="auto-sklearn")
 
-            with unittest.mock.patch.object(_addons['classification'], 'add_component') as _:
+            with unittest.mock.patch.object(
+                _addons["classification"], "add_component"
+            ) as _:
 
-                # If the components in the argument `additional_components` are an empty dict
-                # there is no call to `add_component`, if there's something in it, `add_component
-                # is called (2nd case)
-                for fixture, case in ((0, dict()), (1, dict(abc='def'))):
+                # If the components in the argument `additional_components` are an
+                # empty dict there is no call to `add_component`,
+                # if there's something in it, `add_component is called (2nd case)
+                for fixture, case in ((0, dict()), (1, dict(abc="def"))):
 
                     thirdparty_components_patch = unittest.mock.Mock()
                     thirdparty_components_patch.components = case
-                    additional_components = dict(classification=thirdparty_components_patch)
+                    additional_components = dict(
+                        classification=thirdparty_components_patch
+                    )
                     AbstractEvaluator(
                         backend=backend,
                         output_y_hat_optimization=False,
                         queue=queue_mock,
-                        metric=accuracy,
+                        metrics=[accuracy],
                         port=self.port,
                         additional_components=additional_components,
                     )
-                    self.assertEqual(_addons['classification'].add_component.call_count, fixture)
+                    self.assertEqual(
+                        _addons["classification"].add_component.call_count, fixture
+                    )

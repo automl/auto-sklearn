@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from io import StringIO
+
 import time
+from io import StringIO
 
 import arff
 import scipy.sparse
@@ -14,27 +15,33 @@ class AbstractMetaFeature(object):
         pass
 
     @abstractmethod
-    def _calculate(cls, X, y, logger, categorical):
+    def _calculate(cls, X, y, logger, feat_type):
         pass
 
-    def __call__(self, X, y, logger, categorical=None):
-        if categorical is None:
-            categorical = [False for i in range(X.shape[1])]
+    def __call__(self, X, y, logger, feat_type=None):
+        if feat_type is None:
+            feat_type = {i: "numerical" for i in range(X.shape[1])}
         starttime = time.time()
-
         try:
             if scipy.sparse.issparse(X) and hasattr(self, "_calculate_sparse"):
-                value = self._calculate_sparse(X, y, logger, categorical)
+                value = self._calculate_sparse(X, y, logger, feat_type)
             else:
-                value = self._calculate(X, y, logger, categorical)
+                value = self._calculate(X, y, logger, feat_type)
             comment = ""
         except MemoryError:
             value = None
             comment = "Memory Error"
 
         endtime = time.time()
-        return MetaFeatureValue(self.__class__.__name__, self.type_,
-                                0, 0, value, endtime-starttime, comment=comment)
+        return MetaFeatureValue(
+            self.__class__.__name__,
+            self.type_,
+            0,
+            0,
+            value,
+            endtime - starttime,
+            comment=comment,
+        )
 
 
 class MetaFeature(AbstractMetaFeature):
@@ -65,15 +72,26 @@ class MetaFeatureValue(object):
         else:
             value = "?"
 
-        return [self.name, self.type_, self.fold,
-                self.repeat, value, self.time, self.comment]
+        return [
+            self.name,
+            self.type_,
+            self.fold,
+            self.repeat,
+            value,
+            self.time,
+            self.comment,
+        ]
 
     def __repr__(self):
-        repr = "%s (type: %s, fold: %d, repeat: %d, value: %s, time: %3.3f, " \
-               "comment: %s)"
-        repr = repr % tuple(self.to_arff_row()[:4] +
-                            [str(self.to_arff_row()[4])] +
-                            self.to_arff_row()[5:])
+        repr = (
+            "%s (type: %s, fold: %d, repeat: %d, value: %s, time: %3.3f, "
+            "comment: %s)"
+        )
+        repr = repr % tuple(
+            self.to_arff_row()[:4]
+            + [str(self.to_arff_row()[4])]
+            + self.to_arff_row()[5:]
+        )
         return repr
 
 
@@ -84,19 +102,21 @@ class DatasetMetafeatures(object):
 
     def _get_arff(self):
         output = dict()
-        output['relation'] = "metafeatures_%s" % (self.dataset_name)
-        output['description'] = ""
-        output['attributes'] = [('name', 'STRING'),
-                                ('type', 'STRING'),
-                                ('fold', 'NUMERIC'),
-                                ('repeat', 'NUMERIC'),
-                                ('value', 'NUMERIC'),
-                                ('time', 'NUMERIC'),
-                                ('comment', 'STRING')]
-        output['data'] = []
+        output["relation"] = "metafeatures_%s" % (self.dataset_name)
+        output["description"] = ""
+        output["attributes"] = [
+            ("name", "STRING"),
+            ("type", "STRING"),
+            ("fold", "NUMERIC"),
+            ("repeat", "NUMERIC"),
+            ("value", "NUMERIC"),
+            ("time", "NUMERIC"),
+            ("comment", "STRING"),
+        ]
+        output["data"] = []
 
         for key in sorted(self.metafeature_values):
-            output['data'].append(self.metafeature_values[key].to_arff_row())
+            output["data"].append(self.metafeature_values[key].to_arff_row())
         return output
 
     def dumps(self):
@@ -120,9 +140,9 @@ class DatasetMetafeatures(object):
         else:
             input = arff.load(path_or_filehandle)
 
-        dataset_name = input['relation'].replace('metafeatures_', '')
+        dataset_name = input["relation"].replace("metafeatures_", "")
         metafeature_values = []
-        for item in input['data']:
+        for item in input["data"]:
             mf = MetaFeatureValue(*item)
             metafeature_values.append(mf)
 
@@ -135,13 +155,18 @@ class DatasetMetafeatures(object):
             if verbosity == 0 and self.metafeature_values[name].type_ != "METAFEATURE":
                 continue
             if verbosity == 0:
-                repr.write("  %s: %s\n" %
-                           (str(name), str(self.metafeature_values[name].value)))
+                repr.write(
+                    "  %s: %s\n" % (str(name), str(self.metafeature_values[name].value))
+                )
             elif verbosity >= 1:
-                repr.write("  %s: %10s  (%10fs)\n" %
-                           (str(name), str(self.metafeature_values[
-                                               name].value)[:10],
-                            self.metafeature_values[name].time))
+                repr.write(
+                    "  %s: %10s  (%10fs)\n"
+                    % (
+                        str(name),
+                        str(self.metafeature_values[name].value)[:10],
+                        self.metafeature_values[name].time,
+                    )
+                )
 
             # Add the reason for a crash if one happened!
             if verbosity > 1 and self.metafeature_values[name].comment:

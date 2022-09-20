@@ -1,21 +1,38 @@
+from typing import Optional
+
 import resource
 import sys
 
-from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.conditions import EqualsCondition, InCondition
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import (
+    CategoricalHyperparameter,
+    UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
+    UnParametrizedHyperparameter,
+)
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
+from autosklearn.pipeline.constants import DENSE, PREDICTIONS, SPARSE, UNSIGNED_DATA
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool, check_none
 
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
-    def __init__(self, C, kernel, gamma, shrinking, tol, max_iter,
-                 class_weight=None, degree=3, coef0=0, random_state=None):
+    def __init__(
+        self,
+        C,
+        kernel,
+        gamma,
+        shrinking,
+        tol,
+        max_iter,
+        class_weight=None,
+        degree=3,
+        coef0=0,
+        random_state=None,
+    ):
         self.C = C
         self.kernel = kernel
         self.degree = degree
@@ -31,9 +48,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     def fit(self, X, Y):
         import sklearn.svm
 
-        # Calculate the size of the kernel cache (in MB) for sklearn's LibSVM. The cache size is
-        # calculated as 2/3 of the available memory (which is calculated as the memory limit minus
-        # the used memory)
+        # Calculate the size of the kernel cache (in MB) for sklearn's LibSVM.
+        # The cache size is calculated as 2/3 of the available memory
+        # (which is calculated as the memory limit minus the used memory)
         try:
             # Retrieve memory limits imposed on the process
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
@@ -45,9 +62,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                 # Retrieve memory used by this process
                 maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
 
-                # In MacOS, the MaxRSS output of resource.getrusage in bytes; on other platforms,
-                # it's in kilobytes
-                if sys.platform == 'darwin':
+                # In MacOS, the MaxRSS output of resource.getrusage in bytes;
+                # on other platforms, it's in kilobytes
+                if sys.platform == "darwin":
                     maxrss = maxrss / 1024
 
                 cache_size = (soft - maxrss) / 1.5
@@ -80,18 +97,20 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         if check_none(self.class_weight):
             self.class_weight = None
 
-        self.estimator = sklearn.svm.SVC(C=self.C,
-                                         kernel=self.kernel,
-                                         degree=self.degree,
-                                         gamma=self.gamma,
-                                         coef0=self.coef0,
-                                         shrinking=self.shrinking,
-                                         tol=self.tol,
-                                         class_weight=self.class_weight,
-                                         max_iter=self.max_iter,
-                                         random_state=self.random_state,
-                                         cache_size=cache_size,
-                                         decision_function_shape='ovr')
+        self.estimator = sklearn.svm.SVC(
+            C=self.C,
+            kernel=self.kernel,
+            degree=self.degree,
+            gamma=self.gamma,
+            coef0=self.coef0,
+            shrinking=self.shrinking,
+            tol=self.tol,
+            class_weight=self.class_weight,
+            max_iter=self.max_iter,
+            random_state=self.random_state,
+            cache_size=cache_size,
+            decision_function_shape="ovr",
+        )
         self.estimator.fit(X, Y)
         return self
 
@@ -109,41 +128,47 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_properties(dataset_properties=None):
         return {
-            'shortname': 'LibSVM-SVC',
-            'name': 'LibSVM Support Vector Classification',
-            'handles_regression': False,
-            'handles_classification': True,
-            'handles_multiclass': True,
-            'handles_multilabel': False,
-            'handles_multioutput': False,
-            'is_deterministic': True,
-            'input': (DENSE, SPARSE, UNSIGNED_DATA),
-            'output': (PREDICTIONS,)}
+            "shortname": "LibSVM-SVC",
+            "name": "LibSVM Support Vector Classification",
+            "handles_regression": False,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": False,
+            "handles_multioutput": False,
+            "is_deterministic": True,
+            "input": (DENSE, SPARSE, UNSIGNED_DATA),
+            "output": (PREDICTIONS,),
+        }
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
-                                       default_value=1.0)
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
+        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True, default_value=1.0)
         # No linear kernel here, because we have liblinear
-        kernel = CategoricalHyperparameter(name="kernel",
-                                           choices=["rbf", "poly", "sigmoid"],
-                                           default_value="rbf")
+        kernel = CategoricalHyperparameter(
+            name="kernel", choices=["rbf", "poly", "sigmoid"], default_value="rbf"
+        )
         degree = UniformIntegerHyperparameter("degree", 2, 5, default_value=3)
-        gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
-                                           log=True, default_value=0.1)
+        gamma = UniformFloatHyperparameter(
+            "gamma", 3.0517578125e-05, 8, log=True, default_value=0.1
+        )
         # TODO this is totally ad-hoc
         coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)
         # probability is no hyperparameter, but an argument to the SVM algo
-        shrinking = CategoricalHyperparameter("shrinking", ["True", "False"],
-                                              default_value="True")
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-3,
-                                         log=True)
+        shrinking = CategoricalHyperparameter(
+            "shrinking", ["True", "False"], default_value="True"
+        )
+        tol = UniformFloatHyperparameter(
+            "tol", 1e-5, 1e-1, default_value=1e-3, log=True
+        )
         # cache size is not a hyperparameter, but an argument to the program!
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
-                                tol, max_iter])
+        cs.add_hyperparameters(
+            [C, kernel, degree, gamma, coef0, shrinking, tol, max_iter]
+        )
 
         degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
         coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])

@@ -1,83 +1,129 @@
-# -*- encoding: utf-8 -*-
+from __future__ import annotations
+
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+)
+
 import copy
-import distro
 import io
+import itertools
 import json
-import platform
 import logging.handlers
 import multiprocessing
 import os
+import platform
 import sys
 import time
-from typing import Any, Dict, Optional, List, Tuple, Union
+import types
 import uuid
-import unittest.mock
-import tempfile
+import warnings
 
-from ConfigSpace.configuration_space import Configuration
-from ConfigSpace.read_and_write import json as cs_json
-import dask
-import dask.distributed
+import distro
+import joblib
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
 import pkg_resources
 import scipy.stats
-from sklearn.base import BaseEstimator
-from sklearn.ensemble import VotingRegressor
-from sklearn.model_selection._split import _RepeatedSplits, \
-    BaseShuffleSplit, BaseCrossValidator
-from smac.runhistory.runhistory import RunInfo, RunValue
-from smac.tae import StatusType
-from smac.stats.stats import Stats
-import joblib
 import sklearn.utils
+from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
+from ConfigSpace.read_and_write import json as cs_json
+from dask.distributed import Client
 from scipy.sparse import spmatrix
+from sklearn.base import BaseEstimator
+from sklearn.dummy import DummyClassifier, DummyRegressor
+from sklearn.ensemble import VotingClassifier, VotingRegressor
+from sklearn.metrics._classification import type_of_target
+from sklearn.model_selection._split import (
+    BaseCrossValidator,
+    BaseShuffleSplit,
+    _RepeatedSplits,
+)
+from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
-from sklearn.metrics._classification import type_of_target
-from sklearn.dummy import DummyClassifier, DummyRegressor
+from smac.callbacks import IncorporateRunResultCallback
+from smac.runhistory.runhistory import RunInfo, RunValue
+from smac.stats.stats import Stats
+from smac.tae import StatusType
+from typing_extensions import Literal
 
 from autosklearn.automl_common.common.utils.backend import Backend, create
-
-from autosklearn.metrics import Scorer, default_metric_for_task
-from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.constants import (
+    BINARY_CLASSIFICATION,
+    CLASSIFICATION_TASKS,
+    MULTICLASS_CLASSIFICATION,
+    MULTILABEL_CLASSIFICATION,
+    MULTIOUTPUT_REGRESSION,
+    REGRESSION,
+    REGRESSION_TASKS,
+)
 from autosklearn.data.validation import (
-    convert_if_sparse,
-    InputValidator,
     SUPPORTED_FEAT_TYPES,
     SUPPORTED_TARGET_TYPES,
+    InputValidator,
+    convert_if_sparse,
 )
+from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.ensemble_building import EnsembleBuilderManager
+from autosklearn.ensembles.abstract_ensemble import (
+    AbstractEnsemble,
+    AbstractMultiObjectiveEnsemble,
+)
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
+from autosklearn.ensembles.singlebest_ensemble import SingleBestFromRunhistory
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
-from autosklearn.metrics import calculate_metric
-from autosklearn.util.stopwatch import StopWatch
-from autosklearn.util.logging_ import (
-    setup_logger,
-    start_log_server,
-    get_named_client_logger,
-    warnings_to,
-    PicklableClientLogger,
+from autosklearn.metrics import (
+    Scorer,
+    _validate_metrics,
+    compute_single_metric,
+    default_metric_for_task,
 )
-from autosklearn.util import pipeline, RE_PATTERN
-from autosklearn.util.parallel import preload_modules
-from autosklearn.ensemble_builder import EnsembleBuilderManager
-from autosklearn.ensembles.singlebest_ensemble import SingleBest
-from autosklearn.smbo import AutoMLSMBO
-from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION, MULTIOUTPUT_REGRESSION, \
-    CLASSIFICATION_TASKS
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
-from autosklearn.pipeline.components.regression import RegressorChoice
-from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
-from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import OHEChoice
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (
+    OHEChoice,
+)
 from autosklearn.pipeline.components.data_preprocessing.minority_coalescense import (
-    CoalescenseChoice
+    CoalescenseChoice,
 )
 from autosklearn.pipeline.components.data_preprocessing.rescaling import RescalingChoice
-from autosklearn.util.single_thread_client import SingleThreadedClient
+from autosklearn.pipeline.components.feature_preprocessing import (
+    FeaturePreprocessorChoice,
+)
+from autosklearn.pipeline.components.regression import RegressorChoice
+from autosklearn.smbo import AutoMLSMBO
+from autosklearn.util import RE_PATTERN, pipeline
+from autosklearn.util.dask import Dask, LocalDask, UserDask
+from autosklearn.util.data import (
+    DatasetCompressionSpec,
+    default_dataset_compression_arg,
+    reduce_dataset_size_if_too_large,
+    supported_precision_reductions,
+    validate_dataset_compression_arg,
+)
+from autosklearn.util.logging_ import (
+    PicklableClientLogger,
+    get_named_client_logger,
+    setup_logger,
+    start_log_server,
+    warnings_to,
+)
+from autosklearn.util.parallel import preload_modules
+from autosklearn.util.smac_wrap import SMACCallback, SmacRunCallback
+from autosklearn.util.stopwatch import StopWatch
+
+import unittest.mock
 
 
 def _model_predict(
@@ -87,7 +133,7 @@ def _model_predict(
     batch_size: Optional[int] = None,
     logger: Optional[PicklableClientLogger] = None,
 ) -> np.ndarray:
-    """ Generates the predictions from a model.
+    """Generates the predictions from a model.
 
     This is seperated out into a seperate function to allow for multiprocessing
     and perform parallel predictions.
@@ -142,193 +188,176 @@ def _model_predict(
             else:
                 predict_func = model.predict
 
-            if batch_size is not None and hasattr(model, 'batch_size'):
+            if batch_size is not None and hasattr(model, "batch_size"):
                 prediction = predict_func(X_, batch_size=batch_size)
             else:
                 prediction = predict_func(X_)
 
     # Check that probability values lie between 0 and 1.
     if task in CLASSIFICATION_TASKS:
-        assert (prediction >= 0).all() and (prediction <= 1).all(), \
-            f"For {model}, prediction probability not within [0, 1]!"
+        assert (prediction >= 0).all() and (
+            prediction <= 1
+        ).all(), f"For {model}, prediction probability not within [0, 1]!"
 
-    assert prediction.shape[0] == X_.shape[0], \
-        f"Prediction shape {model} is {prediction.shape} while X_.shape is {X_.shape}"
+    assert (
+        prediction.shape[0] == X_.shape[0]
+    ), f"Prediction shape {model} is {prediction.shape} while X_.shape is {X_.shape}"
 
     return prediction
 
 
 class AutoML(BaseEstimator):
+    """Base class for handling the AutoML procedure"""
 
-    def __init__(self,
-                 time_left_for_this_task,
-                 per_run_time_limit,
-                 temporary_directory: Optional[str] = None,
-                 delete_tmp_folder_after_terminate: bool = True,
-                 initial_configurations_via_metalearning=25,
-                 ensemble_size=1,
-                 ensemble_nbest=1,
-                 max_models_on_disc=1,
-                 seed=1,
-                 memory_limit=3072,
-                 metadata_directory=None,
-                 debug_mode=False,
-                 include: Optional[Dict[str, List[str]]] = None,
-                 exclude: Optional[Dict[str, List[str]]] = None,
-                 resampling_strategy='holdout-iterative-fit',
-                 resampling_strategy_arguments=None,
-                 n_jobs=None,
-                 dask_client: Optional[dask.distributed.Client] = None,
-                 precision=32,
-                 disable_evaluator_output=False,
-                 get_smac_object_callback=None,
-                 smac_scenario_args=None,
-                 logging_config=None,
-                 metric=None,
-                 scoring_functions=None,
-                 get_trials_callback=None
-                 ):
-        super(AutoML, self).__init__()
-        self.configuration_space = None
-        self._backend: Optional[Backend] = None
-        self._temporary_directory = temporary_directory
+    def __init__(
+        self,
+        time_left_for_this_task: int,
+        per_run_time_limit: int,
+        temporary_directory: Optional[str] = None,
+        delete_tmp_folder_after_terminate: bool = True,
+        initial_configurations_via_metalearning: int = 25,
+        ensemble_class: Type[AbstractEnsemble] | None = EnsembleSelection,
+        ensemble_kwargs: Dict[str, Any] | None = None,
+        ensemble_nbest: int = 1,
+        max_models_on_disc: int = 1,
+        seed: int = 1,
+        memory_limit: int = 3072,
+        metadata_directory: Optional[str] = None,
+        include: Optional[dict[str, list[str]]] = None,
+        exclude: Optional[dict[str, list[str]]] = None,
+        resampling_strategy: str | Any = "holdout-iterative-fit",
+        resampling_strategy_arguments: Mapping[str, Any] = None,
+        n_jobs: Optional[int] = None,
+        dask_client: Optional[Client] = None,
+        precision: Literal[16, 32, 64] = 32,
+        disable_evaluator_output: bool | Iterable[str] = False,
+        get_smac_object_callback: Optional[Callable] = None,
+        smac_scenario_args: Optional[Mapping] = None,
+        logging_config: Optional[Mapping] = None,
+        metrics: Sequence[Scorer] | None = None,
+        scoring_functions: Optional[list[Scorer]] = None,
+        get_trials_callback: SMACCallback | None = None,
+        dataset_compression: bool | Mapping[str, Any] = True,
+        allow_string_features: bool = True,
+    ):
+        super().__init__()
+
+        if isinstance(disable_evaluator_output, Iterable):
+            disable_evaluator_output = list(disable_evaluator_output)  # Incase iterator
+            allowed = set(["model", "cv_model", "y_optimization", "y_test"])
+            unknown = allowed - set(disable_evaluator_output)
+            if any(unknown):
+                raise ValueError(
+                    f"Unknown arg {unknown} for '_disable_evaluator_output',"
+                    f" must be one of {allowed}"
+                )
+
+        # Validate dataset_compression and set its values
+        self._dataset_compression: Optional[DatasetCompressionSpec]
+        if isinstance(dataset_compression, bool):
+            if dataset_compression is True:
+                self._dataset_compression = default_dataset_compression_arg
+            else:
+                self._dataset_compression = None
+        else:
+            self._dataset_compression = validate_dataset_compression_arg(
+                dataset_compression,
+                memory_limit=memory_limit,
+            )
+
+        # If we got something callable for `get_trials_callback`, wrap it so SMAC
+        # will accept it.
+        if (
+            get_trials_callback is not None
+            and callable(get_trials_callback)
+            and not isinstance(get_trials_callback, IncorporateRunResultCallback)
+        ):
+            get_trials_callback = SmacRunCallback(get_trials_callback)
+
         self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
-        # self._tmp_dir = tmp_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
-        self._initial_configurations_via_metalearning = \
-            initial_configurations_via_metalearning
-        self._ensemble_size = ensemble_size
+        self._metrics = metrics
+        self._ensemble_class = ensemble_class
+        self._ensemble_kwargs = ensemble_kwargs
         self._ensemble_nbest = ensemble_nbest
         self._max_models_on_disc = max_models_on_disc
         self._seed = seed
         self._memory_limit = memory_limit
-        self._data_memory_limit = None
         self._metadata_directory = metadata_directory
         self._include = include
         self._exclude = exclude
         self._resampling_strategy = resampling_strategy
-        self._scoring_functions = scoring_functions if scoring_functions is not None else []
-        self._resampling_strategy_arguments = resampling_strategy_arguments \
-            if resampling_strategy_arguments is not None else {}
-        self._n_jobs = n_jobs
-        self._dask_client = dask_client
-
-        self.precision = precision
         self._disable_evaluator_output = disable_evaluator_output
-        # Check arguments prior to doing anything!
-        if not isinstance(self._disable_evaluator_output, (bool, list)):
-            raise ValueError('disable_evaluator_output must be of type bool '
-                             'or list.')
-        if isinstance(self._disable_evaluator_output, list):
-            allowed_elements = ['model', 'cv_model', 'y_optimization', 'y_test', 'y_valid']
-            for element in self._disable_evaluator_output:
-                if element not in allowed_elements:
-                    raise ValueError("List member '%s' for argument "
-                                     "'disable_evaluator_output' must be one "
-                                     "of " + str(allowed_elements))
         self._get_smac_object_callback = get_smac_object_callback
         self._get_trials_callback = get_trials_callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
+        self.precision = precision
+        self.allow_string_features = allow_string_features
+        self._initial_configurations_via_metalearning = (
+            initial_configurations_via_metalearning
+        )
+        self._n_jobs = n_jobs
 
+        self._scoring_functions = scoring_functions or []
+        self._resampling_strategy_arguments = resampling_strategy_arguments or {}
+        self._multiprocessing_context = "forkserver"
+
+        # Single core, local runs should use fork to prevent the __main__ requirements
+        # in examples. Nevertheless, multi-process runs have spawn as requirement to
+        # reduce the possibility of a deadlock
+        self._dask: Dask
+        if dask_client is not None:
+            self._dask = UserDask(client=dask_client)
+        else:
+            self._dask = LocalDask(n_jobs=n_jobs)
+            if n_jobs == 1:
+                self._multiprocessing_context = "fork"
+
+        # Create the backend
+        self._backend: Backend = create(
+            temporary_directory=temporary_directory,
+            output_directory=None,
+            prefix="auto-sklearn",
+            delete_output_folder_after_terminate=delete_tmp_folder_after_terminate,
+        )
+
+        self._data_memory_limit = None  # TODO: dead variable? Always None
         self._datamanager = None
         self._dataset_name = None
         self._feat_type = None
-        self._stopwatch = StopWatch()
-        self._logger = None
+        self._logger: Optional[PicklableClientLogger] = None
         self._task = None
-
-        self._metric = metric
-
         self._label_num = None
         self._parser = None
-        self.models_ = None
-        self.cv_models_ = None
-        self.ensemble_ = None
         self._can_predict = False
-        self._debug_mode = debug_mode
-
-        self.InputValidator = None  # type: Optional[InputValidator]
+        self._read_at_most = None
+        self._max_ensemble_build_iterations = None
+        self.models_: Optional[dict] = None
+        self.cv_models_: Optional[dict] = None
+        self.ensemble_ = None
+        self.InputValidator: Optional[InputValidator] = None
+        self.configuration_space = None
 
         # The ensemble performance history through time
+        self._stopwatch = StopWatch()
+        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
         self.ensemble_performance_history = []
 
-        # Single core, local runs should use fork
-        # to prevent the __main__ requirements in
-        # examples. Nevertheless, multi-process runs
-        # have spawn as requirement to reduce the
-        # possibility of a deadlock
-        self._multiprocessing_context = 'forkserver'
-        if self._n_jobs == 1 and self._dask_client is None:
-            self._multiprocessing_context = 'fork'
-            self._dask_client = SingleThreadedClient()
-
-        if not isinstance(self._time_for_task, int):
-            raise ValueError("time_left_for_this_task not of type integer, "
-                             "but %s" % str(type(self._time_for_task)))
-        if not isinstance(self._per_run_time_limit, int):
-            raise ValueError("per_run_time_limit not of type integer, but %s" %
-                             str(type(self._per_run_time_limit)))
-
-        # By default try to use the TCP logging port or get a new port
-        self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-
-        # Num_run tell us how many runs have been launched
-        # It can be seen as an identifier for each configuration
-        # saved to disk
+        # Num_run tell us how many runs have been launched. It can be seen as an
+        # identifier for each configuration saved to disk
         self.num_run = 0
+        self.fitted = False
 
-    def _create_backend(self) -> Backend:
-        return create(
-            temporary_directory=self._temporary_directory,
-            output_directory=None,
-            prefix="auto-sklearn",
-            delete_tmp_folder_after_terminate=self._delete_tmp_folder_after_terminate,
-        )
-
-    def _create_dask_client(self):
-        self._is_dask_client_internally_created = True
-        self._dask_client = dask.distributed.Client(
-            dask.distributed.LocalCluster(
-                n_workers=self._n_jobs,
-                processes=False,
-                threads_per_worker=1,
-                # We use the temporal directory to save the
-                # dask workers, because deleting workers
-                # more time than deleting backend directories
-                # This prevent an error saying that the worker
-                # file was deleted, so the client could not close
-                # the worker properly
-                local_directory=tempfile.gettempdir(),
-                # Memory is handled by the pynisher, not by the dask worker/nanny
-                memory_limit=0,
-            ),
-            # Heartbeat every 10s
-            heartbeat_interval=10000,
-        )
-
-    def _close_dask_client(self):
-        if (
-            hasattr(self, '_is_dask_client_internally_created')
-            and self._is_dask_client_internally_created
-            and self._dask_client
-        ):
-            self._dask_client.shutdown()
-            self._dask_client.close()
-            del self._dask_client
-            self._dask_client = None
-            self._is_dask_client_internally_created = False
-            del self._is_dask_client_internally_created
-
-    def _get_logger(self, name):
-        logger_name = 'AutoML(%d):%s' % (self._seed, name)
+    def _get_logger(self, name: str) -> PicklableClientLogger:
+        logger_name = "AutoML(%d):%s" % (self._seed, name)
 
         # Setup the configuration for the logger
         # This is gonna be honored by the server
         # Which is created below
         setup_logger(
-            filename='%s.log' % str(logger_name),
+            filename="%s.log" % str(logger_name),
             logging_config=self.logging_config,
             output_dir=self._backend.temporary_directory,
         )
@@ -342,17 +371,17 @@ class AutoML(BaseEstimator):
         context = multiprocessing.get_context(self._multiprocessing_context)
         preload_modules(context)
         self.stop_logging_server = context.Event()
-        port = context.Value('l')  # be safe by using a long
+        port = context.Value("l")  # be safe by using a long
         port.value = -1
 
         self.logging_server = context.Process(
             target=start_log_server,
             kwargs=dict(
-                host='localhost',
+                host="localhost",
                 logname=logger_name,
                 event=self.stop_logging_server,
                 port=port,
-                filename='%s.log' % str(logger_name),
+                filename="%s.log" % str(logger_name),
                 logging_config=self.logging_config,
                 output_dir=self._backend.temporary_directory,
             ),
@@ -371,12 +400,12 @@ class AutoML(BaseEstimator):
 
         return get_named_client_logger(
             name=logger_name,
-            host='localhost',
+            host="localhost",
             port=self._logger_port,
         )
 
-    def _clean_logger(self):
-        if not hasattr(self, 'stop_logging_server') or self.stop_logging_server is None:
+    def _clean_logger(self) -> None:
+        if not hasattr(self, "stop_logging_server") or self.stop_logging_server is None:
             return
 
         # Clean up the logger
@@ -393,30 +422,16 @@ class AutoML(BaseEstimator):
             self.logging_server.terminate()
             del self.stop_logging_server
 
-    @staticmethod
-    def _start_task(watcher, task_name):
-        watcher.start_task(task_name)
-
-    @staticmethod
-    def _stop_task(watcher, task_name):
-        watcher.stop_task(task_name)
-
-    @staticmethod
-    def _print_load_time(basename, time_left_for_this_task,
-                         time_for_load_data, logger):
-
-        time_left_after_reading = max(
-            0, time_left_for_this_task - time_for_load_data)
-        logger.info('Remaining time after reading %s %5.2f sec' %
-                    (basename, time_left_after_reading))
-        return time_for_load_data
-
-    def _do_dummy_prediction(self, datamanager: XYDataManager, num_run: int) -> int:
-
+    def _do_dummy_prediction(self) -> None:
         # When using partial-cv it makes no sense to do dummy predictions
-        if self._resampling_strategy in ['partial-cv',
-                                         'partial-cv-iterative-fit']:
-            return num_run
+        if self._resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
+            return
+
+        if self._metrics is None:
+            raise ValueError("Metric/Metrics was/were not set")
+
+        # Dummy prediction always have num_run set to 1
+        dummy_run_num = 1
 
         self._logger.info("Starting to create dummy predictions.")
 
@@ -430,54 +445,50 @@ class AutoML(BaseEstimator):
         # already be generated here!
         stats = Stats(scenario_mock)
         stats.start_timing()
-        ta = ExecuteTaFuncWithQueue(backend=self._backend,
-                                    autosklearn_seed=self._seed,
-                                    resampling_strategy=self._resampling_strategy,
-                                    initial_num_run=num_run,
-                                    stats=stats,
-                                    metric=self._metric,
-                                    memory_limit=memory_limit,
-                                    disable_file_output=self._disable_evaluator_output,
-                                    abort_on_first_run_crash=False,
-                                    cost_for_crash=get_cost_of_crash(self._metric),
-                                    port=self._logger_port,
-                                    pynisher_context=self._multiprocessing_context,
-                                    **self._resampling_strategy_arguments)
+        ta = ExecuteTaFuncWithQueue(
+            backend=self._backend,
+            autosklearn_seed=self._seed,
+            multi_objectives=[metric.name for metric in self._metrics],
+            resampling_strategy=self._resampling_strategy,
+            initial_num_run=dummy_run_num,
+            stats=stats,
+            metrics=self._metrics,
+            memory_limit=memory_limit,
+            disable_file_output=self._disable_evaluator_output,
+            abort_on_first_run_crash=False,
+            cost_for_crash=get_cost_of_crash(self._metrics),
+            port=self._logger_port,
+            pynisher_context=self._multiprocessing_context,
+            **self._resampling_strategy_arguments,
+        )
 
-        status, cost, runtime, additional_info = ta.run(num_run, cutoff=self._time_for_task)
+        status, cost, runtime, additional_info = ta.run(
+            config=dummy_run_num,
+            cutoff=self._time_for_task,
+        )
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
+
+        # Fail if dummy prediction fails.
         else:
-            if additional_info.get('exitcode') == -6:
-                self._logger.error(
-                    "Dummy prediction failed with run state %s. "
-                    "The error suggests that the provided memory limits were too tight. Please "
-                    "increase the 'memory_limit' and try again. If this does not solve your "
-                    "problem, please open an issue and paste the additional output. "
-                    "Additional output: %s.",
-                    str(status), str(additional_info),
+            if additional_info.get("exitcode") == -6:
+                msg = (
+                    f"Dummy prediction failed with run state {status}."
+                    " The error suggests that the provided memory limits are too tight."
+                    " Please increase the 'memory_limit' and try again. If this does"
+                    " not solve your problem, please open an issue and paste the"
+                    f" additional output. Additional output: {additional_info}"
                 )
-                # Fail if dummy prediction fails.
-                raise ValueError(
-                    "Dummy prediction failed with run state %s. "
-                    "The error suggests that the provided memory limits were too tight. Please "
-                    "increase the 'memory_limit' and try again. If this does not solve your "
-                    "problem, please open an issue and paste the additional output. "
-                    "Additional output: %s." %
-                    (str(status), str(additional_info)),
+            else:
+                msg = (
+                    f" Dummy prediction failed with run state {status} and"
+                    f" additional output: {additional_info}.",
                 )
 
-            else:
-                self._logger.error(
-                    "Dummy prediction failed with run state %s and additional output: %s.",
-                    str(status), str(additional_info),
-                )
-                # Fail if dummy prediction fails.
-                raise ValueError(
-                    "Dummy prediction failed with run state %s and additional output: %s."
-                    % (str(status), str(additional_info))
-                )
-        return num_run
+            self._logger.error(msg)
+            raise ValueError(msg)
+
+        return
 
     @classmethod
     def _task_type_id(cls, task_type: str) -> int:
@@ -490,11 +501,11 @@ class AutoML(BaseEstimator):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES,
         task: Optional[int] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[str]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES] = None,
+        feat_type: Optional[list[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
@@ -503,20 +514,20 @@ class AutoML(BaseEstimator):
         """Fit AutoML to given training set (X, y).
 
         Fit both optimizes the machine learning models and builds an ensemble
-        out of them. To disable ensembling, set ``ensemble_size==0``.
+        out of them.
 
         # TODO PR1213
         #
         #   `task: Optional[int]` and `is_classification`
         #
-        #   `AutoML` tries to identify the task itself with
-        #   `sklearn.type_of_target`, leaving little for the subclasses to do.
+        #   `AutoML` tries to identify the task itself with `sklearn.type_of_target`,
+        #   leaving little for the subclasses to do.
         #   Except this failes when type_of_target(y) == "multiclass".
         #
         #   "multiclass" be mean either REGRESSION or MULTICLASS_CLASSIFICATION,
         #   and so this is where the subclasses are used to determine which.
         #   However, this could also be deduced from the `is_classification`
-        #   paramaeter.
+        #   parameter.
         #
         #   In the future, there is little need for the subclasses of `AutoML`
         #   and no need for the `task` parameter. The extra functionality
@@ -539,7 +550,6 @@ class AutoML(BaseEstimator):
 
         Parameters
         ----------
-
         X : {array-like, sparse matrix}, shape (n_samples, n_features)
             The training input samples.
 
@@ -559,7 +569,7 @@ class AutoML(BaseEstimator):
             of all models. This allows to evaluate the performance of
             Auto-sklearn over time.
 
-        feat_type : Optional[List],
+        feat_type : Optional[list],
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
             attributes will be automatically One-Hot encoded. The values
@@ -586,8 +596,9 @@ class AutoML(BaseEstimator):
         Returns
         -------
         self
-
         """
+        if (X_test is not None) ^ (y_test is not None):
+            raise ValueError("Must provide both X_test and y_test together")
 
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
@@ -597,383 +608,460 @@ class AutoML(BaseEstimator):
         if task is None:
             y_task = type_of_target(y)
             if not self._supports_task_type(y_task):
-                raise ValueError(f"{self.__class__.__name__} does not support"
-                                 f" task {y_task}")
+                raise ValueError(
+                    f"{self.__class__.__name__} does not support" f" task {y_task}"
+                )
             self._task = self._task_type_id(y_task)
         else:
             self._task = task
 
         # Assign a metric if it doesnt exist
-        if self._metric is None:
-            self._metric = default_metric_for_task[self._task]
+        if self._metrics is None:
+            self._metrics = [default_metric_for_task[self._task]]
+        _validate_metrics(self._metrics, self._scoring_functions)
 
         if dataset_name is None:
             dataset_name = str(uuid.uuid1(clock_seq=os.getpid()))
 
-        # Create the backend
-        self._backend = self._create_backend()
-
         # By default try to use the TCP logging port or get a new port
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
-        self._logger = self._get_logger(dataset_name)
 
-        # The first thing we have to do is create the logger to update the backend
-        self._backend.setup_logger(self._logger_port)
-
-        if not only_return_configuration_space:
-            # If only querying the configuration space, we do not save the start time
-            # The start time internally checks for the fit() method to execute only once
-            # But this does not apply when only querying the configuration space
-            self._backend.save_start_time(self._seed)
-
-        self._stopwatch = StopWatch()
-
-        # Make sure that input is valid
-        # Performs Ordinal one hot encoding to the target
-        # both for train and test data
-        self.InputValidator = InputValidator(
-            is_classification=is_classification,
-            feat_type=feat_type,
-            logger_port=self._logger_port,
-        )
-        self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
-        X, y = self.InputValidator.transform(X, y)
-
-        if X_test is not None:
-            X_test, y_test = self.InputValidator.transform(X_test, y_test)
-
-        X, y = self.subsample_if_too_large(
-            X=X,
-            y=y,
-            logger=self._logger,
-            seed=self._seed,
-            memory_limit=self._memory_limit,
-            task=self._task,
-        )
-
-        # Check the re-sampling strategy
+        # Once we start the logging server, it starts in a new process
+        # If an error occurs then we want to make sure that we exit cleanly
+        # and shut it down, else it might hang
+        # https://github.com/automl/auto-sklearn/issues/1480
         try:
-            self._check_resampling_strategy(
-                X=X, y=y, task=self._task,
+            self._logger = self._get_logger(dataset_name)
+
+            # The first thing we have to do is create the logger to update the backend
+            self._backend.setup_logger(self._logger_port)
+
+            if not only_return_configuration_space:
+                # If only querying the configuration space, we do not save the start
+                # time The start time internally checks for the fit() method to execute
+                # only once but this does not apply when only querying the configuration
+                # space
+                self._backend.save_start_time(self._seed)
+
+            self._stopwatch = StopWatch()
+
+            # Make sure that input is valid
+            # Performs Ordinal one hot encoding to the target
+            # both for train and test data
+            self.InputValidator = InputValidator(
+                is_classification=is_classification,
+                feat_type=feat_type,
+                logger_port=self._logger_port,
+                allow_string_features=self.allow_string_features,
             )
+            self.InputValidator.fit(X_train=X, y_train=y, X_test=X_test, y_test=y_test)
+            X, y = self.InputValidator.transform(X, y)
+
+            if X_test is not None and y_test is not None:
+                X_test, y_test = self.InputValidator.transform(X_test, y_test)
+
+            # We don't support size reduction on pandas type object yet
+            if (
+                self._dataset_compression is not None
+                and not isinstance(X, pd.DataFrame)
+                and not (isinstance(y, pd.Series) or isinstance(y, pd.DataFrame))
+            ):
+                methods = self._dataset_compression["methods"]
+                memory_allocation = self._dataset_compression["memory_allocation"]
+
+                # Remove precision reduction if we can't perform it
+                if (
+                    "precision" in methods
+                    and X.dtype not in supported_precision_reductions
+                ):
+                    methods = [method for method in methods if method != "precision"]
+
+                with warnings_to(self._logger):
+                    X, y = reduce_dataset_size_if_too_large(
+                        X=X,
+                        y=y,
+                        memory_limit=self._memory_limit,
+                        is_classification=is_classification,
+                        random_state=self._seed,
+                        operations=methods,
+                        memory_allocation=memory_allocation,
+                    )
+
+            # Check the re-sampling strategy
+            self._check_resampling_strategy(
+                X=X,
+                y=y,
+                task=self._task,
+            )
+
+            # Reset learnt stuff
+            self.models_ = None
+            self.cv_models_ = None
+            self.ensemble_ = None
+
+            # The metric must exist as of this point
+            # It can be provided in the constructor, or automatically
+            # defined in the estimator fit call
+            if isinstance(self._metrics, Sequence):
+                for entry in self._metrics:
+                    if not isinstance(entry, Scorer):
+                        raise ValueError(
+                            f"Metric {entry} must be instance of"
+                            " autosklearn.metrics.Scorer."
+                        )
+            else:
+                raise ValueError(
+                    "Metric must be a sequence of instances of "
+                    "autosklearn.metrics.Scorer."
+                )
+
+            self._dataset_name = dataset_name
+            self._stopwatch.start(self._dataset_name)
+
+            # Take the feature types from the validator
+            self._feat_type = self.InputValidator.feature_validator.feat_type
+
+            self._log_fit_setup()
+
+            # == Pickle the data manager to speed up loading
+            with self._stopwatch.time("Save Datamanager"):
+                datamanager = XYDataManager(
+                    X,
+                    y,
+                    X_test=X_test,
+                    y_test=y_test,
+                    task=self._task,
+                    feat_type=self._feat_type,
+                    dataset_name=dataset_name,
+                )
+
+                self._backend._make_internals_directory()
+                self._label_num = datamanager.info["label_num"]
+
+                self._backend.save_datamanager(datamanager)
+
+            # = Create a searchspace
+            # Do this before One Hot Encoding to make sure that it creates a
+            # search space for a dense classifier even if one hot encoding would
+            # make it sparse (tradeoff; if one hot encoding would make it sparse,
+            #  densifier and truncatedSVD would probably lead to a MemoryError,
+            # like this we can't use some of the preprocessing methods in case
+            # the data became sparse)
+            with self._stopwatch.time("Create Search space"):
+                self.configuration_space, configspace_path = self._create_search_space(
+                    self._backend.temporary_directory,
+                    self._backend,
+                    datamanager,
+                    include=self._include,
+                    exclude=self._exclude,
+                )
+
+            if only_return_configuration_space:
+                return self.configuration_space
+
+            # == Perform dummy predictions
+            with self._stopwatch.time("Dummy predictions"):
+                self.num_run += 1
+                self._do_dummy_prediction()
+
+            # == RUN ensemble builder
+            # Do this before calculating the meta-features to make sure that the
+            # dummy predictions are actually included in the ensemble even if
+            # calculating the meta-features takes very long
+            with self._stopwatch.time("Run Ensemble Builder"):
+
+                elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
+
+                time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
+                proc_ensemble = None
+                if time_left_for_ensembles <= 0:
+                    # Fit only raises error when an ensemble class is given but
+                    # time_left_for_ensembles is zero.
+                    if self._ensemble_class is not None:
+                        raise ValueError(
+                            "Not starting ensemble builder because there "
+                            "is no time left. Try increasing the value "
+                            "of time_left_for_this_task."
+                        )
+                elif self._ensemble_class is None:
+                    self._logger.info(
+                        "No ensemble buildin because no ensemble class was given."
+                    )
+                else:
+                    self._logger.info(
+                        "Start Ensemble with %5.2fsec time left"
+                        % time_left_for_ensembles
+                    )
+
+                    proc_ensemble = EnsembleBuilderManager(
+                        start_time=time.time(),
+                        time_left_for_ensembles=time_left_for_ensembles,
+                        backend=copy.deepcopy(self._backend),
+                        dataset_name=dataset_name,
+                        task=self._task,
+                        metrics=self._metrics,
+                        ensemble_class=self._ensemble_class,
+                        ensemble_kwargs=self._ensemble_kwargs,
+                        ensemble_nbest=self._ensemble_nbest,
+                        max_models_on_disc=self._max_models_on_disc,
+                        seed=self._seed,
+                        precision=self.precision,
+                        max_iterations=self._max_ensemble_build_iterations,
+                        read_at_most=self._read_at_most,
+                        memory_limit=self._memory_limit,
+                        random_state=self._seed,
+                        logger_port=self._logger_port,
+                        pynisher_context=self._multiprocessing_context,
+                    )
+
+            # kill the datamanager as it will be re-loaded anyways from sub processes
+            try:
+                del self._datamanager
+            except Exception:
+                pass
+
+            # => RUN SMAC
+            with self._stopwatch.time("Run SMAC"):
+                elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
+                time_left = self._time_for_task - elapsed_time
+
+                if self._logger:
+                    self._logger.info("Start SMAC with %5.2fsec time left" % time_left)
+                if time_left <= 0:
+                    self._logger.warning(
+                        "Not starting SMAC because there is no time left."
+                    )
+                    _proc_smac = None
+                    self._budget_type = None
+                else:
+                    if (
+                        self._per_run_time_limit is None
+                        or self._per_run_time_limit > time_left
+                    ):
+                        self._logger.warning(
+                            "Time limit for a single run is higher than total time "
+                            "limit. Capping the limit for a single run to the total "
+                            "time given to SMAC (%f)" % time_left
+                        )
+                        per_run_time_limit = time_left
+                    else:
+                        per_run_time_limit = self._per_run_time_limit
+
+                    # At least 2 models are created for the ensemble process
+                    num_models = time_left // per_run_time_limit
+                    if num_models < 2:
+                        per_run_time_limit = time_left // 2
+                        self._logger.warning(
+                            "Capping the per_run_time_limit to {} to have "
+                            "time for a least 2 models in each process.".format(
+                                per_run_time_limit
+                            )
+                        )
+
+                    n_meta_configs = self._initial_configurations_via_metalearning
+                    with self._dask as dask_client:
+                        resamp_args = self._resampling_strategy_arguments
+                        _proc_smac = AutoMLSMBO(
+                            config_space=self.configuration_space,
+                            dataset_name=self._dataset_name,
+                            backend=self._backend,
+                            total_walltime_limit=time_left,
+                            func_eval_time_limit=per_run_time_limit,
+                            memory_limit=self._memory_limit,
+                            data_memory_limit=self._data_memory_limit,
+                            stopwatch=self._stopwatch,
+                            n_jobs=self._n_jobs,
+                            dask_client=dask_client,
+                            start_num_run=self.num_run,
+                            num_metalearning_cfgs=n_meta_configs,
+                            config_file=configspace_path,
+                            seed=self._seed,
+                            metadata_directory=self._metadata_directory,
+                            metrics=self._metrics,
+                            resampling_strategy=self._resampling_strategy,
+                            resampling_strategy_args=resamp_args,
+                            include=self._include,
+                            exclude=self._exclude,
+                            disable_file_output=self._disable_evaluator_output,
+                            get_smac_object_callback=self._get_smac_object_callback,
+                            smac_scenario_args=self._smac_scenario_args,
+                            scoring_functions=self._scoring_functions,
+                            port=self._logger_port,
+                            pynisher_context=self._multiprocessing_context,
+                            ensemble_callback=proc_ensemble,
+                            trials_callback=self._get_trials_callback,
+                        )
+
+                        (
+                            self.runhistory_,
+                            self.trajectory_,
+                            self._budget_type,
+                        ) = _proc_smac.run_smbo()
+
+                        trajectory_filename = os.path.join(
+                            self._backend.get_smac_output_directory_for_run(self._seed),
+                            "trajectory.json",
+                        )
+                        saveable_trajectory = [
+                            list(entry[:2])
+                            + [entry[2].get_dictionary()]
+                            + list(entry[3:])
+                            for entry in self.trajectory_
+                        ]
+                        with open(trajectory_filename, "w") as fh:
+                            json.dump(saveable_trajectory, fh)
+
+                        self._logger.info("Starting shutdown...")
+                        # Wait until the ensemble process is finished to avoid shutting
+                        # down while the ensemble builder tries to access the data
+                        if proc_ensemble is not None:
+                            self.ensemble_performance_history = list(
+                                proc_ensemble.history
+                            )
+
+                            if len(proc_ensemble.futures) > 0:
+                                # Now we wait for the future to return as it cannot be
+                                # cancelled while it is running
+                                # * https://stackoverflow.com/a/49203129
+                                self._logger.info(
+                                    "Ensemble script still running,"
+                                    " waiting for it to finish."
+                                )
+                                result = proc_ensemble.futures.pop().result()
+
+                            if result:
+                                ensemble_history, _ = result
+                                self.ensemble_performance_history.extend(
+                                    ensemble_history
+                                )
+
+                            self._logger.info(
+                                "Ensemble script finished, continue shutdown."
+                            )
+
+                # save the ensemble performance history file
+                if len(self.ensemble_performance_history) > 0:
+                    pd.DataFrame(self.ensemble_performance_history).to_json(
+                        os.path.join(
+                            self._backend.internals_directory, "ensemble_history.json"
+                        )
+                    )
+
+            if load_models:
+                self._logger.info("Loading models...")
+                self._load_models()
+                self._logger.info("Finished loading models...")
+
+        # The whole logic above from where we begin the logging server is capture
+        # in a try: finally: so that if something goes wrong, we at least close
+        # down the logging server, preventing it from hanging and not closing
+        # until ctrl+c is pressed
         except Exception as e:
-            self._fit_cleanup()
+            # This will be called before the _fit_cleanup
+            self._logger.exception(e)
             raise e
+        finally:
+            self._fit_cleanup()
 
-        # Reset learnt stuff
-        self.models_ = None
-        self.cv_models_ = None
-        self.ensemble_ = None
+        self.fitted = True
 
-        # The metric must exist as of this point
-        # It can be provided in the constructor, or automatically
-        # defined in the estimator fit call
-        if self._metric is None:
-            raise ValueError('No metric given.')
-        if not isinstance(self._metric, Scorer):
-            raise ValueError('Metric must be instance of '
-                             'autosklearn.metrics.Scorer.')
+        return self
 
-        # If no dask client was provided, we create one, so that we can
-        # start a ensemble process in parallel to smbo optimize
-        if (
-            self._dask_client is None and
-            (self._ensemble_size > 0 or self._n_jobs is not None and self._n_jobs > 1)
-        ):
-            self._create_dask_client()
-        else:
-            self._is_dask_client_internally_created = False
-
-        self._dataset_name = dataset_name
-        self._stopwatch.start_task(self._dataset_name)
-
-        # Take the feature types from the validator
-        self._feat_type = self.InputValidator.feature_validator.feat_type
-
+    def _log_fit_setup(self) -> None:
         # Produce debug information to the logfile
-        self._logger.debug('Starting to print environment information')
-        self._logger.debug('  Python version: %s', sys.version.split('\n'))
+        self._logger.debug("Starting to print environment information")
+        self._logger.debug("  Python version: %s", sys.version.split("\n"))
         try:
-            self._logger.debug(f'\tDistribution: {distro.id()}-{distro.version()}-{distro.name()}')
+            self._logger.debug(
+                f"\tDistribution: {distro.id()}-{distro.version()}-{distro.name()}"
+            )
         except AttributeError:
             pass
 
-        self._logger.debug('  System: %s', platform.system())
-        self._logger.debug('  Machine: %s', platform.machine())
-        self._logger.debug('  Platform: %s', platform.platform())
+        self._logger.debug("  System: %s", platform.system())
+        self._logger.debug("  Machine: %s", platform.machine())
+        self._logger.debug("  Platform: %s", platform.platform())
         # UNAME appears to leak sensible information
         # self._logger.debug('  uname: %s', platform.uname())
-        self._logger.debug('  Version: %s', platform.version())
-        self._logger.debug('  Mac version: %s', platform.mac_ver())
-        requirements = pkg_resources.resource_string('autosklearn', 'requirements.txt')
-        requirements = requirements.decode('utf-8')
-        requirements = [requirement for requirement in requirements.split('\n')]
+        self._logger.debug("  Version: %s", platform.version())
+        self._logger.debug("  Mac version: %s", platform.mac_ver())
+        requirements = pkg_resources.resource_string("autosklearn", "requirements.txt")
+        requirements = requirements.decode("utf-8")
+        requirements = [requirement for requirement in requirements.split("\n")]
         for requirement in requirements:
             if not requirement:
                 continue
             match = RE_PATTERN.match(requirement)
             if match:
-                name = match.group('name')
+                name = match.group("name")
                 module_dist = pkg_resources.get_distribution(name)
-                self._logger.debug('  %s', module_dist)
+                self._logger.debug("  %s", module_dist)
             else:
-                raise ValueError('Unable to read requirement: %s' % requirement)
-        self._logger.debug('Done printing environment information')
-        self._logger.debug('Starting to print arguments to auto-sklearn')
-        self._logger.debug('  tmp_folder: %s', self._backend.context._temporary_directory)
-        self._logger.debug('  time_left_for_this_task: %f', self._time_for_task)
-        self._logger.debug('  per_run_time_limit: %f', self._per_run_time_limit)
+                raise ValueError("Unable to read requirement: %s" % requirement)
+
+        self._logger.debug("Done printing environment information")
+        self._logger.debug("Starting to print arguments to auto-sklearn")
+        self._logger.debug("  tmp_folder: %s", self._backend.temporary_directory)
+        self._logger.debug("   time_left_for_this_task: %f", self._time_for_task)
+        self._logger.debug("  per_run_time_limit: %f", self._per_run_time_limit)
         self._logger.debug(
-            '  initial_configurations_via_metalearning: %d',
+            "  initial_configurations_via_metalearning: %d",
             self._initial_configurations_via_metalearning,
         )
-        self._logger.debug('  ensemble_size: %d', self._ensemble_size)
-        self._logger.debug('  ensemble_nbest: %f', self._ensemble_nbest)
-        self._logger.debug('  max_models_on_disc: %s', str(self._max_models_on_disc))
-        self._logger.debug('  seed: %d', self._seed)
-        self._logger.debug('  memory_limit: %s', str(self._memory_limit))
-        self._logger.debug('  metadata_directory: %s', self._metadata_directory)
-        self._logger.debug('  debug_mode: %s', self._debug_mode)
-        self._logger.debug('  include: %s', str(self._include))
-        self._logger.debug('  exclude: %s', str(self._exclude))
-        self._logger.debug('  resampling_strategy: %s', str(self._resampling_strategy))
-        self._logger.debug('  resampling_strategy_arguments: %s',
-                           str(self._resampling_strategy_arguments))
-        self._logger.debug('  n_jobs: %s', str(self._n_jobs))
-        self._logger.debug('  multiprocessing_context: %s', str(self._multiprocessing_context))
-        self._logger.debug('  dask_client: %s', str(self._dask_client))
-        self._logger.debug('  precision: %s', str(self.precision))
-        self._logger.debug('  disable_evaluator_output: %s', str(self._disable_evaluator_output))
-        self._logger.debug('  get_smac_objective_callback: %s', str(self._get_smac_object_callback))
-        self._logger.debug('  smac_scenario_args: %s', str(self._smac_scenario_args))
-        self._logger.debug('  logging_config: %s', str(self.logging_config))
-        self._logger.debug('  metric: %s', str(self._metric))
-        self._logger.debug('Done printing arguments to auto-sklearn')
-        self._logger.debug('Starting to print available components')
+        self._logger.debug("  ensemble_class: %s", self._ensemble_class)
+        self._logger.debug("  ensemble_kwargs: %s", self._ensemble_kwargs)
+        self._logger.debug("  ensemble_nbest: %f", self._ensemble_nbest)
+        self._logger.debug("  max_models_on_disc: %s", str(self._max_models_on_disc))
+        self._logger.debug("  seed: %d", self._seed)
+        self._logger.debug("  memory_limit: %s", str(self._memory_limit))
+        self._logger.debug("  metadata_directory: %s", self._metadata_directory)
+        self._logger.debug("  include: %s", str(self._include))
+        self._logger.debug("  exclude: %s", str(self._exclude))
+        self._logger.debug("  resampling_strategy: %s", str(self._resampling_strategy))
+        self._logger.debug(
+            "  resampling_strategy_arguments: %s",
+            str(self._resampling_strategy_arguments),
+        )
+        self._logger.debug("  n_jobs: %s", str(self._n_jobs))
+        self._logger.debug(
+            "  multiprocessing_context: %s", str(self._multiprocessing_context)
+        )
+        self._logger.debug("  dask_client: %s", str(self._dask))
+        self._logger.debug("  precision: %s", str(self.precision))
+        self._logger.debug(
+            "  disable_evaluator_output: %s", str(self._disable_evaluator_output)
+        )
+        self._logger.debug(
+            "  get_smac_objective_callback: %s", str(self._get_smac_object_callback)
+        )
+        self._logger.debug("  smac_scenario_args: %s", str(self._smac_scenario_args))
+        self._logger.debug("  logging_config: %s", str(self.logging_config))
+        if len(self._metrics) == 1:
+            self._logger.debug("  metric: %s", str(self._metrics[0]))
+        else:
+            self._logger.debug("  metrics: %s", str(self._metrics))
+        self._logger.debug("Done printing arguments to auto-sklearn")
+        self._logger.debug("Starting to print available components")
         for choice in (
-            ClassifierChoice, RegressorChoice, FeaturePreprocessorChoice,
-            OHEChoice, RescalingChoice, CoalescenseChoice,
+            ClassifierChoice,
+            RegressorChoice,
+            FeaturePreprocessorChoice,
+            OHEChoice,
+            RescalingChoice,
+            CoalescenseChoice,
         ):
             self._logger.debug(
-                '%s: %s',
+                "%s: %s",
                 choice.__name__,
                 choice.get_components(),
             )
-        self._logger.debug('Done printing available components')
+        self._logger.debug("Done printing available components")
 
-        datamanager = XYDataManager(
-            X, y,
-            X_test=X_test,
-            y_test=y_test,
-            task=self._task,
-            feat_type=self._feat_type,
-            dataset_name=dataset_name,
-        )
+    def __sklearn_is_fitted__(self) -> bool:
+        return self.fitted
 
-        self._backend._make_internals_directory()
-        self._label_num = datamanager.info['label_num']
-
-        # == Pickle the data manager to speed up loading
-        self._backend.save_datamanager(datamanager)
-
-        time_for_load_data = self._stopwatch.wall_elapsed(self._dataset_name)
-
-        if self._debug_mode:
-            self._print_load_time(
-                self._dataset_name,
-                self._time_for_task,
-                time_for_load_data,
-                self._logger)
-
-        # = Create a searchspace
-        # Do this before One Hot Encoding to make sure that it creates a
-        # search space for a dense classifier even if one hot encoding would
-        # make it sparse (tradeoff; if one hot encoding would make it sparse,
-        #  densifier and truncatedSVD would probably lead to a MemoryError,
-        # like this we can't use some of the preprocessing methods in case
-        # the data became sparse)
-        self.configuration_space, configspace_path = self._create_search_space(
-            self._backend.temporary_directory,
-            self._backend,
-            datamanager,
-            include=self._include,
-            exclude=self._exclude,
-        )
-        if only_return_configuration_space:
-            self._fit_cleanup()
-            return self.configuration_space
-
-        # == Perform dummy predictions
-        # Dummy prediction always have num_run set to 1
-        self.num_run += self._do_dummy_prediction(datamanager, num_run=1)
-
-        # == RUN ensemble builder
-        # Do this before calculating the meta-features to make sure that the
-        # dummy predictions are actually included in the ensemble even if
-        # calculating the meta-features takes very long
-        ensemble_task_name = 'runEnsemble'
-        self._stopwatch.start_task(ensemble_task_name)
-        elapsed_time = self._stopwatch.wall_elapsed(self._dataset_name)
-        time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
-        proc_ensemble = None
-        if time_left_for_ensembles <= 0:
-            # Fit only raises error when ensemble_size is not zero but
-            # time_left_for_ensembles is zero.
-            if self._ensemble_size > 0:
-                raise ValueError("Not starting ensemble builder because there "
-                                 "is no time left. Try increasing the value "
-                                 "of time_left_for_this_task.")
-        elif self._ensemble_size <= 0:
-            self._logger.info('Not starting ensemble builder because '
-                              'ensemble size is <= 0.')
-        else:
-            self._logger.info(
-                'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
-
-            proc_ensemble = EnsembleBuilderManager(
-                start_time=time.time(),
-                time_left_for_ensembles=time_left_for_ensembles,
-                backend=copy.deepcopy(self._backend),
-                dataset_name=dataset_name,
-                task=self._task,
-                metric=self._metric,
-                ensemble_size=self._ensemble_size,
-                ensemble_nbest=self._ensemble_nbest,
-                max_models_on_disc=self._max_models_on_disc,
-                seed=self._seed,
-                precision=self.precision,
-                max_iterations=None,
-                read_at_most=np.inf,
-                ensemble_memory_limit=self._memory_limit,
-                random_state=self._seed,
-                logger_port=self._logger_port,
-                pynisher_context=self._multiprocessing_context,
-            )
-
-        self._stopwatch.stop_task(ensemble_task_name)
-
-        # kill the datamanager as it will be re-loaded anyways from sub processes
-        try:
-            del self._datamanager
-        except Exception:
-            pass
-
-        # => RUN SMAC
-        smac_task_name = 'runSMAC'
-        self._stopwatch.start_task(smac_task_name)
-        elapsed_time = self._stopwatch.wall_elapsed(self._dataset_name)
-        time_left_for_smac = max(0, self._time_for_task - elapsed_time)
-
-        if self._logger:
-            self._logger.info(
-                'Start SMAC with %5.2fsec time left' % time_left_for_smac)
-        if time_left_for_smac <= 0:
-            self._logger.warning("Not starting SMAC because there is no time "
-                                 "left.")
-            _proc_smac = None
-            self._budget_type = None
-        else:
-            if self._per_run_time_limit is None or \
-                    self._per_run_time_limit > time_left_for_smac:
-                self._logger.warning(
-                    'Time limit for a single run is higher than total time '
-                    'limit. Capping the limit for a single run to the total '
-                    'time given to SMAC (%f)' % time_left_for_smac
-                )
-                per_run_time_limit = time_left_for_smac
-            else:
-                per_run_time_limit = self._per_run_time_limit
-
-            # Make sure that at least 2 models are created for the ensemble process
-            num_models = time_left_for_smac // per_run_time_limit
-            if num_models < 2:
-                per_run_time_limit = time_left_for_smac//2
-                self._logger.warning(
-                    "Capping the per_run_time_limit to {} to have "
-                    "time for a least 2 models in each process.".format(
-                        per_run_time_limit
-                    )
-                )
-
-            _proc_smac = AutoMLSMBO(
-                config_space=self.configuration_space,
-                dataset_name=self._dataset_name,
-                backend=self._backend,
-                total_walltime_limit=time_left_for_smac,
-                func_eval_time_limit=per_run_time_limit,
-                memory_limit=self._memory_limit,
-                data_memory_limit=self._data_memory_limit,
-                watcher=self._stopwatch,
-                n_jobs=self._n_jobs,
-                dask_client=self._dask_client,
-                start_num_run=self.num_run,
-                num_metalearning_cfgs=self._initial_configurations_via_metalearning,
-                config_file=configspace_path,
-                seed=self._seed,
-                metadata_directory=self._metadata_directory,
-                metric=self._metric,
-                resampling_strategy=self._resampling_strategy,
-                resampling_strategy_args=self._resampling_strategy_arguments,
-                include=self._include,
-                exclude=self._exclude,
-                disable_file_output=self._disable_evaluator_output,
-                get_smac_object_callback=self._get_smac_object_callback,
-                smac_scenario_args=self._smac_scenario_args,
-                scoring_functions=self._scoring_functions,
-                port=self._logger_port,
-                pynisher_context=self._multiprocessing_context,
-                ensemble_callback=proc_ensemble,
-                trials_callback=self._get_trials_callback
-            )
-
-            try:
-                self.runhistory_, self.trajectory_, self._budget_type = \
-                    _proc_smac.run_smbo()
-                trajectory_filename = os.path.join(
-                    self._backend.get_smac_output_directory_for_run(self._seed),
-                    'trajectory.json')
-                saveable_trajectory = \
-                    [list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
-                     for entry in self.trajectory_]
-                with open(trajectory_filename, 'w') as fh:
-                    json.dump(saveable_trajectory, fh)
-            except Exception as e:
-                self._logger.exception(e)
-                raise
-
-        self._logger.info("Starting shutdown...")
-        # Wait until the ensemble process is finished to avoid shutting down
-        # while the ensemble builder tries to access the data
-        if proc_ensemble is not None:
-            self.ensemble_performance_history = list(proc_ensemble.history)
-
-            if len(proc_ensemble.futures) > 0:
-                # Now we need to wait for the future to return as it cannot be cancelled while it
-                # is running: https://stackoverflow.com/a/49203129
-                self._logger.info("Ensemble script still running, waiting for it to finish.")
-                result = proc_ensemble.futures.pop().result()
-                if result:
-                    ensemble_history, _, _, _, _ = result
-                    self.ensemble_performance_history.extend(ensemble_history)
-                self._logger.info("Ensemble script finished, continue shutdown.")
-
-            # save the ensemble performance history file
-            if len(self.ensemble_performance_history) > 0:
-                pd.DataFrame(self.ensemble_performance_history).to_json(
-                        os.path.join(self._backend.internals_directory, 'ensemble_history.json'))
-
-        if load_models:
-            self._logger.info("Loading models...")
-            self._load_models()
-            self._logger.info("Finished loading models...")
-
-        self._fit_cleanup()
-
-        return self
-
-    def _fit_cleanup(self):
+    def _fit_cleanup(self) -> None:
         self._logger.info("Closing the dask infrastructure")
-        self._close_dask_client()
         self._logger.info("Finished closing the dask infrastructure")
 
         # Clean up the logger
@@ -1005,181 +1093,104 @@ class AutoML(BaseEstimator):
         """
         is_split_object = isinstance(
             self._resampling_strategy,
-            (BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit)
+            (BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit),
         )
 
-        if self._resampling_strategy not in [
-                'holdout',
-                'holdout-iterative-fit',
-                'cv',
-                'cv-iterative-fit',
-                'partial-cv',
-                'partial-cv-iterative-fit',
-        ] and not is_split_object:
-            raise ValueError('Illegal resampling strategy: %s' % self._resampling_strategy)
+        if (
+            self._resampling_strategy
+            not in [
+                "holdout",
+                "holdout-iterative-fit",
+                "cv",
+                "cv-iterative-fit",
+                "partial-cv",
+                "partial-cv-iterative-fit",
+            ]
+            and not is_split_object
+        ):
+            raise ValueError(
+                "Illegal resampling strategy: %s" % self._resampling_strategy
+            )
 
         elif is_split_object:
             TrainEvaluator.check_splitter_resampling_strategy(
-                X=X, y=y, task=task,
-                groups=self._resampling_strategy_arguments.get('groups', None),
+                X=X,
+                y=y,
+                task=task,
+                groups=self._resampling_strategy_arguments.get("groups", None),
                 resampling_strategy=self._resampling_strategy,
             )
 
-        elif self._resampling_strategy in [
-            'partial-cv',
-            'partial-cv-iterative-fit',
-        ] and self._ensemble_size != 0:
-            raise ValueError("Resampling strategy %s cannot be used "
-                             "together with ensembles." % self._resampling_strategy)
+        elif (
+            self._resampling_strategy
+            in [
+                "partial-cv",
+                "partial-cv-iterative-fit",
+            ]
+            and self._ensemble_class is not None
+        ):
+            raise ValueError(
+                "Resampling strategy %s cannot be used "
+                "together with ensembles." % self._resampling_strategy
+            )
 
-        elif self._resampling_strategy in [
-            'partial-cv',
-            'cv',
-            'cv-iterative-fit',
-            'partial-cv-iterative-fit',
-        ] and 'folds' not in self._resampling_strategy_arguments:
-            self._resampling_strategy_arguments['folds'] = 5
+        elif (
+            self._resampling_strategy
+            in [
+                "partial-cv",
+                "cv",
+                "cv-iterative-fit",
+                "partial-cv-iterative-fit",
+            ]
+            and "folds" not in self._resampling_strategy_arguments
+        ):
+            self._resampling_strategy_arguments["folds"] = 5
 
         return
 
-    @staticmethod
-    def subsample_if_too_large(
+    def refit(
+        self,
         X: SUPPORTED_FEAT_TYPES,
         y: SUPPORTED_TARGET_TYPES,
-        logger,
-        seed: int,
-        memory_limit: int,
-        task: int,
-    ):
-        if memory_limit and isinstance(X, np.ndarray):
+        max_reshuffles: int = 10,
+    ) -> AutoML:
+        """Refit the models to a new given set of data
 
-            if X.dtype == np.float32:
-                multiplier = 4
-            elif X.dtype in (np.float64, float):
-                multiplier = 8
-            elif (
-                # In spite of the names, np.float96 and np.float128
-                # provide only as much precision as np.longdouble,
-                # that is, 80 bits on most x86 machines and 64 bits
-                # in standard Windows builds.
-                (hasattr(np, 'float128') and X.dtype == np.float128)
-                or (hasattr(np, 'float96') and X.dtype == np.float96)
-            ):
-                multiplier = 16
-            else:
-                # Just assuming some value - very unlikely
-                multiplier = 8
-                logger.warning('Unknown dtype for X: %s, assuming it takes 8 bit/number',
-                               str(X.dtype))
+        Parameters
+        ----------
+        X : SUPPORTED_FEAT_TYPES
+            The data to dit to
 
-            megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
-            if memory_limit <= megabytes * 10 and X.dtype != np.float32:
-                cast_to = {
-                    8: np.float32,
-                    16: np.float64,
-                }.get(multiplier, np.float32)
-                logger.warning(
-                    'Dataset too large for memory limit %dMB, reducing the precision from %s to %s',
-                    memory_limit,
-                    X.dtype,
-                    cast_to,
-                )
-                X = X.astype(cast_to)
+        y : SUPPORTED_TARGET_TYPES
+            The targets to fit to
 
-            megabytes = X.shape[0] * X.shape[1] * multiplier / 1024 / 1024
-            if memory_limit <= megabytes * 10:
-                new_num_samples = int(
-                    memory_limit / (10 * X.shape[1] * multiplier / 1024 / 1024)
-                )
-                logger.warning(
-                    'Dataset too large for memory limit %dMB, reducing number of samples from '
-                    '%d to %d.',
-                    memory_limit,
-                    X.shape[0],
-                    new_num_samples,
-                )
-                if task in CLASSIFICATION_TASKS:
-                    # Identify if it has unique labels and allow for
-                    # stratification, with unique labels in training set
-                    values, idxs, counts = np.unique(y, axis=0,
-                                                     return_index=True,
-                                                     return_counts=True)
-                    unique_labels = {
-                        idx: value
-                        for value, idx, count in zip(values, idxs, counts)
-                        if count == 1
-                    }
+        max_reshuffles : int = 10
+            How many times to try reshuffle the data. If fitting fails, shuffle the
+            data. This can alleviate the problem in algorithms that depend on the
+            ordering of the data.
 
-                    # If there are unique labeled elements, remove them and
-                    # place them back in later
-                    if len(unique_labels) > 0:
-                        idxs_of_unique = np.asarray(list(unique_labels.keys()))
-                        unique_X = X[idxs_of_unique]
-                        unique_y = y[idxs_of_unique]
-
-                        # NOTE optimization
-                        #   If this ever turns out to be slow, this actually
-                        #   copies the entire array. There might be a better
-                        #   solution but it will probably require a lot more
-                        #   manual work in how splitting is done.
-                        X = np.delete(X, idxs_of_unique, axis=0)
-                        y = np.delete(y, idxs_of_unique, axis=0)
-
-                        X, _, y, _ = sklearn.model_selection.train_test_split(
-                            X, y,
-                            train_size=new_num_samples - len(unique_y),
-                            random_state=seed,
-                            stratify=y,
-                        )
-
-                        X = np.append(X, unique_X, axis=0)
-                        y = np.append(y, unique_y, axis=0)
-
-                    # Otherwise we should be able to stratify as normal
-                    else:
-                        X, _, y, _ = sklearn.model_selection.train_test_split(
-                            X, y,
-                            train_size=new_num_samples,
-                            random_state=seed,
-                            stratify=y,
-                        )
-                elif task in REGRESSION_TASKS:
-                    X, _, y, _ = sklearn.model_selection.train_test_split(
-                        X, y,
-                        train_size=new_num_samples,
-                        random_state=seed,
-                    )
-                else:
-                    raise ValueError(task)
-        return X, y
-
-    def refit(self, X, y):
-        # AutoSklearn does not handle sparse y for now
-        y = convert_if_sparse(y)
+        Returns
+        -------
+        AutoML
+            Self
+        """
+        check_is_fitted(self)
+        y = convert_if_sparse(y)  # AutoSklearn does not handle sparse y for now
 
         # Make sure input data is valid
-        if self.InputValidator is None or not self.InputValidator._is_fitted:
-            raise ValueError("refit() is only supported after calling fit. Kindly call first "
-                             "the estimator fit() method.")
         X, y = self.InputValidator.transform(X, y)
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
-        # Refit is not applicable when ensemble_size is set to zero.
+        # Refit is not applicable when no ensemble class is provided
         if self.ensemble_ is None:
-            raise ValueError("Refit can only be called if 'ensemble_size != 0'")
+            raise ValueError("Refit can only be called if an ensemble class is given")
 
         random_state = check_random_state(self._seed)
-        for identifier in self.models_:
-            model = self.models_[identifier]
-            # this updates the model inplace, it can then later be used in
-            # predict method
 
-            # try to fit the model. If it fails, shuffle the data. This
-            # could alleviate the problem in algorithms that depend on
-            # the ordering of the data.
-            for i in range(10):
+        for identifier, model in self.models_.items():
+            for i in range(max_reshuffles):
                 try:
                     if self._budget_type is None:
                         _fit_and_suppress_warnings(self._logger, model, X, y)
@@ -1201,7 +1212,7 @@ class AutoML(BaseEstimator):
                     X = X[indices]
                     y = y[indices]
 
-                    if i == 9:
+                    if i == (max_reshuffles - 1):
                         raise e
 
         self._can_predict = True
@@ -1210,17 +1221,17 @@ class AutoML(BaseEstimator):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES | spmatrix,
         is_classification: bool,
-        config: Union[Configuration,  Dict[str, Union[str, float, int]]],
+        config: Configuration | dict[str, str | float | int],
         task: Optional[int] = None,
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[str]] = None,
-        **kwargs: Dict,
+        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
+        feat_type: Optional[list[str]] = None,
+        **kwargs: dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
-        """ Fits and individual pipeline configuration and returns
+        """Fits and individual pipeline configuration and returns
         the result to the user.
 
         The Estimator constraints are honored, for example the resampling
@@ -1239,15 +1250,15 @@ class AutoML(BaseEstimator):
             If provided, the testing performance will be tracked on this features.
         y_test: array-like
             If provided, the testing performance will be tracked on this labels
-        config: Union[Configuration,  Dict[str, Union[str, float, int]]]
-            A configuration object used to define the pipeline steps. If a dictionary is passed,
-            a configuration is created based on this dictionary.
+        config: Configuration |  dict[str, str | float | int]
+            A configuration object used to define the pipeline steps.
+            If a dict is passed, a configuration is created based on this dict.
         dataset_name: Optional[str]
             A string to tag and identify the Auto-Sklearn run
         is_classification: bool
             Whether the task is for classification or regression. This affects
             how the targets are treated
-        feat_type : list, optional (default=None)
+        feat_type : List, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
             attributes will be automatically One-Hot encoded. The values
@@ -1272,27 +1283,32 @@ class AutoML(BaseEstimator):
         if task is None:
             y_task = type_of_target(y)
             if not self._supports_task_type(y_task):
-                raise ValueError(f"{self.__class__.__name__} does not support"
-                                 f" task {y_task}")
+                raise ValueError(
+                    f"{self.__class__.__name__} does not support" f" task {y_task}"
+                )
             self._task = self._task_type_id(y_task)
         else:
             self._task = task
 
         # Assign a metric if it doesnt exist
-        if self._metric is None:
-            self._metric = default_metric_for_task[self._task]
+        if self._metrics is None:
+            self._metrics = [default_metric_for_task[self._task]]
 
         # Get the configuration space
         # This also ensures that the Backend has processed the
         # dataset
         if self.configuration_space is None:
             self.configuration_space = self.fit(
-                X=X, y=y,
-                dataset_name=dataset_name if dataset_name is not None else self._dataset_name,
+                X=X,
+                y=y,
+                dataset_name=dataset_name
+                if dataset_name is not None
+                else self._dataset_name,
                 X_test=X_test,
                 y_test=y_test,
                 feat_type=feat_type,
-                only_return_configuration_space=True)
+                only_return_configuration_space=True,
+            )
 
         # We do not want to overwrite existing runs
         self.num_run += 1
@@ -1301,25 +1317,35 @@ class AutoML(BaseEstimator):
         config.config_id = self.num_run
 
         # Prepare missing components to the TAE function call
-        if 'include' not in kwargs:
-            kwargs['include'] = self._include
-        if 'exclude' not in kwargs:
-            kwargs['exclude'] = self._exclude
-        if 'memory_limit' not in kwargs:
-            kwargs['memory_limit'] = self._memory_limit
-        if 'resampling_strategy' not in kwargs:
-            kwargs['resampling_strategy'] = self._resampling_strategy
-        if 'metric' not in kwargs:
-            kwargs['metric'] = self._metric
-        if 'disable_file_output' not in kwargs:
-            kwargs['disable_file_output'] = self._disable_evaluator_output
-        if 'pynisher_context' not in kwargs:
-            kwargs['pynisher_context'] = self._multiprocessing_context
-        if 'stats' not in kwargs:
+        if "include" not in kwargs:
+            kwargs["include"] = self._include
+        if "exclude" not in kwargs:
+            kwargs["exclude"] = self._exclude
+        if "memory_limit" not in kwargs:
+            kwargs["memory_limit"] = self._memory_limit
+        if "resampling_strategy" not in kwargs:
+            kwargs["resampling_strategy"] = self._resampling_strategy
+        if "metrics" not in kwargs:
+            if "metric" in kwargs:
+                kwargs["metrics"] = kwargs["metric"]
+                del kwargs["metric"]
+            else:
+                kwargs["metrics"] = self._metrics
+        if not isinstance(kwargs["metrics"], Sequence):
+            kwargs["metrics"] = [kwargs["metrics"]]
+        if "scoring_functions" not in kwargs:
+            kwargs["scoring_functions"] = self._scoring_functions
+        if "disable_file_output" not in kwargs:
+            kwargs["disable_file_output"] = self._disable_evaluator_output
+        if "pynisher_context" not in kwargs:
+            kwargs["pynisher_context"] = self._multiprocessing_context
+        if "stats" not in kwargs:
             scenario_mock = unittest.mock.Mock()
             scenario_mock.wallclock_limit = self._time_for_task
-            kwargs['stats'] = Stats(scenario_mock)
-        kwargs['stats'].start_timing()
+            kwargs["stats"] = Stats(scenario_mock)
+        kwargs["stats"].start_timing()
+
+        _validate_metrics(kwargs["metrics"], kwargs["scoring_functions"])
 
         # Fit a pipeline, which will be stored on disk
         # which we can later load via the backend
@@ -1327,10 +1353,11 @@ class AutoML(BaseEstimator):
             backend=self._backend,
             autosklearn_seed=self._seed,
             abort_on_first_run_crash=False,
-            cost_for_crash=get_cost_of_crash(kwargs['metric']),
+            multi_objectives=["cost"],
+            cost_for_crash=get_cost_of_crash(kwargs["metrics"]),
             port=self._logger_port,
             **kwargs,
-            **self._resampling_strategy_arguments
+            **self._resampling_strategy_arguments,
         )
 
         run_info, run_value = ta.run_wrapper(
@@ -1339,16 +1366,16 @@ class AutoML(BaseEstimator):
                 instance=None,
                 instance_specific=None,
                 seed=self._seed,
-                cutoff=kwargs.pop('cutoff', self._per_run_time_limit),
+                cutoff=kwargs.pop("cutoff", self._per_run_time_limit),
                 capped=False,
             )
         )
 
         pipeline = None
-        if kwargs['disable_file_output'] or kwargs['resampling_strategy'] == 'test':
+        if kwargs["disable_file_output"] or kwargs["resampling_strategy"] == "test":
             self._logger.warning("File output is disabled. No pipeline can returned")
         elif run_value.status == StatusType.SUCCESS:
-            if kwargs['resampling_strategy'] in ('cv', 'cv-iterative-fit'):
+            if kwargs["resampling_strategy"] in ("cv", "cv-iterative-fit"):
                 load_function = self._backend.load_cv_model_by_seed_and_id_and_budget
             else:
                 load_function = self._backend.load_model_by_seed_and_id_and_budget
@@ -1378,35 +1405,47 @@ class AutoML(BaseEstimator):
             Parallelize the predictions across the models with n_jobs
             processes.
         """
+        check_is_fitted(self)
+
         if (
-            self._resampling_strategy not in (
-                'holdout', 'holdout-iterative-fit', 'cv', 'cv-iterative-fit')
+            self._resampling_strategy
+            not in ("holdout", "holdout-iterative-fit", "cv", "cv-iterative-fit")
             and not self._can_predict
         ):
             raise NotImplementedError(
-                'Predict is currently not implemented for resampling '
-                'strategy %s, please call refit().' % self._resampling_strategy)
+                "Predict is currently not implemented for resampling "
+                f"strategy {self._resampling_strategy}, please call refit()."
+            )
+        elif self._disable_evaluator_output is not False:
+            raise NotImplementedError(
+                "Predict cannot be called when evaluator output is disabled."
+            )
 
         if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
-        # If self.ensemble_ is None, it means that ensemble_size is set to zero.
+        # If self.ensemble_ is None, it means that ensemble_class is None.
         # In such cases, raise error because predict and predict_proba cannot
         # be called.
         if self.ensemble_ is None:
-            raise ValueError("Predict and predict_proba can only be called "
-                             "if 'ensemble_size != 0'")
+            raise ValueError(
+                "Predict and predict_proba can only be called "
+                "if ensemble class is given."
+            )
 
         # Make sure that input is valid
         if self.InputValidator is None or not self.InputValidator._is_fitted:
-            raise ValueError("predict() can only be called after performing fit(). Kindly call "
-                             "the estimator fit() method first.")
+            raise ValueError(
+                "predict() can only be called after performing fit(). Kindly call "
+                "the estimator fit() method first."
+            )
         X = self.InputValidator.feature_validator.transform(X)
 
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
         try:
             for i, tmp_model in enumerate(self.models_.values()):
+                # TODO, modify this
                 if isinstance(tmp_model, (DummyRegressor, DummyClassifier)):
                     check_is_fitted(tmp_model)
                 else:
@@ -1422,24 +1461,26 @@ class AutoML(BaseEstimator):
                 check_is_fitted(list(self.cv_models_.values())[0])
                 models = self.cv_models_
             except sklearn.exceptions.NotFittedError:
-                raise ValueError('Found no fitted models!')
+                raise ValueError("Found no fitted models!")
 
         all_predictions = joblib.Parallel(n_jobs=n_jobs)(
             joblib.delayed(_model_predict)(
-                model=models[identifier],
-                X=X,
-                task=self._task,
-                batch_size=batch_size
+                model=models[identifier], X=X, task=self._task, batch_size=batch_size
             )
             for identifier in self.ensemble_.get_selected_model_identifiers()
         )
 
         if len(all_predictions) == 0:
-            raise ValueError('Something went wrong generating the predictions. '
-                             'The ensemble should consist of the following '
-                             'models: %s, the following models were loaded: '
-                             '%s' % (str(list(self.ensemble_indices_.keys())),
-                                     str(list(self.models_.keys()))))
+            raise ValueError(
+                "Something went wrong generating the predictions. "
+                "The ensemble should consist of the following "
+                "models: %s, the following models were loaded: "
+                "%s"
+                % (
+                    str(list(self.ensemble_indices_.keys())),
+                    str(list(self.models_.keys())),
+                )
+            )
 
         predictions = self.ensemble_.predict(all_predictions)
 
@@ -1451,103 +1492,136 @@ class AutoML(BaseEstimator):
 
         return predictions
 
-    def fit_ensemble(self, y, task=None, precision=32,
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
+    def fit_ensemble(
+        self,
+        y: SUPPORTED_TARGET_TYPES,
+        task: Optional[int] = None,
+        precision: Literal[16, 32, 64] = 32,
+        dataset_name: Optional[str] = None,
+        ensemble_nbest: Optional[int] = None,
+        ensemble_class: Optional[AbstractEnsemble] = EnsembleSelection,
+        ensemble_kwargs: Optional[Dict[str, Any]] = None,
+        metrics: Scorer | Sequence[Scorer] | None = None,
+    ):
+        check_is_fitted(self)
+
+        if ensemble_class is None and self._ensemble_class is None:
+            raise ValueError(
+                "Please pass `ensemble_class` either to `fit_ensemble()` "
+                "or the constructor."
+            )
+
         # AutoSklearn does not handle sparse y for now
         y = convert_if_sparse(y)
 
-        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
-            raise ValueError('Cannot call fit_ensemble with resampling '
-                             'strategy %s.' % self._resampling_strategy)
+        if self._resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
+            raise ValueError(
+                "Cannot call fit_ensemble with resampling "
+                "strategy %s." % self._resampling_strategy
+            )
 
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
         # Make sure that input is valid
-        if self.InputValidator is None or not self.InputValidator._is_fitted:
-            raise ValueError("fit_ensemble() can only be called after fit. Please call the "
-                             "estimator fit() method prior to fit_ensemble().")
         y = self.InputValidator.target_validator.transform(y)
 
-        # Create a client if needed
-        if self._dask_client is None:
-            self._create_dask_client()
-        else:
-            self._is_dask_client_internally_created = False
+        metrics = metrics if metrics is not None else self._metrics
+        if not isinstance(metrics, Sequence):
+            metrics = [metrics]
 
         # Use the current thread to start the ensemble builder process
         # The function ensemble_builder_process will internally create a ensemble
         # builder in the provide dask client
-        manager = EnsembleBuilderManager(
-            start_time=time.time(),
-            time_left_for_ensembles=self._time_for_task,
-            backend=copy.deepcopy(self._backend),
-            dataset_name=dataset_name if dataset_name else self._dataset_name,
-            task=task if task else self._task,
-            metric=self._metric,
-            ensemble_size=ensemble_size if ensemble_size else self._ensemble_size,
-            ensemble_nbest=ensemble_nbest if ensemble_nbest else self._ensemble_nbest,
-            max_models_on_disc=self._max_models_on_disc,
-            seed=self._seed,
-            precision=precision if precision else self.precision,
-            max_iterations=1,
-            read_at_most=np.inf,
-            ensemble_memory_limit=self._memory_limit,
-            random_state=self._seed,
-            logger_port=self._logger_port,
-            pynisher_context=self._multiprocessing_context,
-        )
-        manager.build_ensemble(self._dask_client)
-        future = manager.futures.pop()
-        result = future.result()
+        with self._dask as dask_client:
+            manager = EnsembleBuilderManager(
+                start_time=time.time(),
+                time_left_for_ensembles=self._time_for_task,
+                backend=copy.deepcopy(self._backend),
+                dataset_name=dataset_name if dataset_name else self._dataset_name,
+                task=task if task else self._task,
+                metrics=metrics if metrics is not None else self._metrics,
+                ensemble_class=(
+                    ensemble_class
+                    if ensemble_class is not None
+                    else self._ensemble_class
+                ),
+                ensemble_kwargs=(
+                    ensemble_kwargs
+                    if ensemble_kwargs is not None
+                    else self._ensemble_kwargs
+                ),
+                ensemble_nbest=ensemble_nbest
+                if ensemble_nbest
+                else self._ensemble_nbest,
+                max_models_on_disc=self._max_models_on_disc,
+                seed=self._seed,
+                precision=precision if precision else self.precision,
+                max_iterations=1,
+                read_at_most=None,
+                memory_limit=self._memory_limit,
+                random_state=self._seed,
+                logger_port=self._logger_port,
+                pynisher_context=self._multiprocessing_context,
+            )
+            manager.build_ensemble(dask_client)
+            future = manager.futures.pop()
+            result = future.result()
+
         if result is None:
-            raise ValueError("Error building the ensemble - please check the log file and command "
-                             "line output for error messages.")
-        self.ensemble_performance_history, _, _, _, _ = result
+            raise ValueError(
+                "Error building the ensemble - please check the log file and command "
+                "line output for error messages."
+            )
+        self.ensemble_performance_history, _ = result
+        self._ensemble_class = ensemble_class
 
         self._load_models()
-        self._close_dask_client()
         return self
 
     def _load_models(self):
-        self.ensemble_ = self._backend.load_ensemble(self._seed)
+        if self._ensemble_class is not None:
+            self.ensemble_ = self._backend.load_ensemble(self._seed)
+        else:
+            self.ensemble_ = None
 
-        # If no ensemble is loaded, try to get the best performing model
-        if not self.ensemble_:
+        # If no ensemble is loaded, try to get the best performing model.
+        # This is triggered if
+        # 1. self._ensemble_class is None (see if-statement above)
+        # 2. if the ensemble builder crashed and no ensemble is available
+        # 3. if the ensemble cannot be built because of arguments passed
+        #    by the user (disable_evaluator_output and
+        #    resampling_strategy)
+        if (
+            not self.ensemble_
+            and not (
+                self._disable_evaluator_output is True
+                or (
+                    isinstance(self._disable_evaluator_output, list)
+                    and "model" in self._disable_evaluator_output
+                )
+            )
+            and self._resampling_strategy
+            not in (
+                "partial-cv",
+                "partial-cv-iterative-fit",
+            )
+        ):
             self.ensemble_ = self._load_best_individual_model()
 
         if self.ensemble_:
             identifiers = self.ensemble_.get_selected_model_identifiers()
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
-            if self._resampling_strategy in ('cv', 'cv-iterative-fit'):
-                self.cv_models_ = self._backend.load_cv_models_by_identifiers(identifiers)
+
+            if self._resampling_strategy in ("cv", "cv-iterative-fit"):
+                self.cv_models_ = self._backend.load_cv_models_by_identifiers(
+                    identifiers
+                )
             else:
                 self.cv_models_ = None
-            if (
-                len(self.models_) == 0 and
-                self._resampling_strategy not in ['partial-cv', 'partial-cv-iterative-fit']
-            ):
-                raise ValueError('No models fitted!')
-            if (
-                self._resampling_strategy in ['cv', 'cv-iterative-fit']
-                and len(self.cv_models_) == 0
-            ):
-                raise ValueError('No models fitted!')
-
-        elif self._disable_evaluator_output is False or \
-                (isinstance(self._disable_evaluator_output, list) and
-                 'model' not in self._disable_evaluator_output):
-            model_names = self._backend.list_all_models(self._seed)
-
-            if len(model_names) == 0 and self._resampling_strategy not in \
-                    ['partial-cv', 'partial-cv-iterative-fit']:
-                raise ValueError('No models fitted!')
-
-            self.models_ = []
-
         else:
             self.models_ = []
+            self.cv_models_ = []
 
     def _load_best_individual_model(self):
         """
@@ -1556,28 +1630,132 @@ class AutoML(BaseEstimator):
         by AutoML.
         This is a robust mechanism to be able to predict,
         even though no ensemble was found by ensemble builder.
+        It is also used to load the single best model in case
+        the user does not want to build an ensemble.
         """
-
         # We also require that the model is fit and a task is defined
-        # The ensemble size must also be greater than 1, else it means
-        # that the user intentionally does not want an ensemble
-        if not self._task or self._ensemble_size < 1:
+        if not self._task:
             return None
 
         # SingleBest contains the best model found by AutoML
-        ensemble = SingleBest(
-            metric=self._metric,
+        ensemble = SingleBestFromRunhistory(
+            metrics=self._metrics,
+            task_type=self._task,
             seed=self._seed,
             run_history=self.runhistory_,
             backend=self._backend,
+            random_state=self._seed,
         )
         self._logger.warning(
             "No valid ensemble was created. Please check the log"
             "file for errors. Default to the best individual estimator:{}".format(
-                ensemble.identifiers_
+                ensemble.get_identifiers_with_weights()[0][0]
             )
         )
         return ensemble
+
+    def _load_pareto_set(self) -> Sequence[VotingClassifier | VotingRegressor]:
+        if self.ensemble_ is None:
+            self.ensemble_ = self._backend.load_ensemble(self._seed)
+
+        # If no ensemble is loaded we cannot do anything
+        if not self.ensemble_:
+            raise ValueError("Pareto set only available if ensemble can be loaded.")
+
+        if isinstance(self.ensemble_, AbstractMultiObjectiveEnsemble):
+            pareto_set = self.ensemble_.pareto_set
+        else:
+            self._logger.warning(
+                "Pareto set not available for single objective ensemble "
+                "method. The Pareto set will only include the single ensemble "
+                f"constructed by {type(self.ensemble_)},"
+            )
+            pareto_set = [self.ensemble_]
+
+        ensembles = []
+        for ensemble in pareto_set:
+            identifiers = ensemble.get_selected_model_identifiers()
+            weights = {
+                identifier: weight
+                for identifier, weight in ensemble.get_identifiers_with_weights()
+            }
+
+            if self._task in CLASSIFICATION_TASKS:
+                voter = VotingClassifier(
+                    estimators=None,
+                    voting="soft",
+                )
+                kind = "classifier"
+            else:
+                voter = VotingRegressor(estimators=None)
+                kind = "regeressor"
+
+            if self._resampling_strategy in ("cv", "cv-iterative-fit"):
+                models = self._backend.load_cv_models_by_identifiers(identifiers)
+            else:
+                models = self._backend.load_models_by_identifiers(identifiers)
+
+            if len(models) == 0:
+                raise ValueError("No models fitted!")
+
+            weight_vector = []
+            estimators = []
+            for identifier in identifiers:
+                estimator = models[identifier]
+                weight = weights[identifier]
+
+                # Kind of hacky, really the dummy models should
+                # act like everything else does. Doing this is
+                # required so that the VotingClassifier/Regressor
+                # can use it as intended
+                if not isinstance(estimator, Pipeline):
+                    if kind == "classifier":
+                        steps = [
+                            ("data_preprocessor", None),
+                            ("balancing", None),
+                            ("feature_preprocessor", None),
+                            (kind, estimator),
+                        ]
+                    else:
+                        steps = [
+                            ("data_preprocessor", None),
+                            ("feature_preprocessor", None),
+                            (kind, estimator),
+                        ]
+
+                    estimator = Pipeline(steps=steps)
+
+                weight_vector.append(weight)
+                estimators.append(estimator)
+
+            voter.estimators = estimators
+            voter.estimators_ = estimators
+            voter.weights = weight_vector
+
+            if self._task in CLASSIFICATION_TASKS:
+                # Scikit-learn would raise a shape error here which we
+                # have to work around.
+
+                def inverse_transform(self, y):
+                    if len(y.shape) == 1:
+                        y = y.reshape((-1, 1))
+                        reshaped = True
+                    else:
+                        reshaped = False
+                    y = self.old_inverse_transform(y)
+                    if reshaped:
+                        return y.flatten()
+                    else:
+                        return y
+
+                voter.le_ = copy.deepcopy(self.InputValidator.target_validator.encoder)
+                functype = types.MethodType
+                voter.le_.old_inverse_transform = voter.le_.inverse_transform
+                voter.le_.inverse_transform = functype(inverse_transform, voter.le_)
+
+            ensembles.append(voter)
+
+        return ensembles
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
@@ -1588,12 +1766,8 @@ class AutoML(BaseEstimator):
         # The reason is we do not want to trigger the
         # check for changing input types on successive
         # input validator calls
+        check_is_fitted(self)
         prediction = self.predict(X)
-
-        # Make sure that input is valid
-        if self.InputValidator is None or not self.InputValidator._is_fitted:
-            raise ValueError("score() is only supported after calling fit. Kindly call first "
-                             "the estimator fit() method.")
         y = self.InputValidator.target_validator.transform(y)
 
         # Encode the prediction using the input validator
@@ -1604,13 +1778,15 @@ class AutoML(BaseEstimator):
         # same representation domain
         prediction = self.InputValidator.target_validator.transform(prediction)
 
-        return calculate_metric(solution=y,
-                                prediction=prediction,
-                                task_type=self._task,
-                                metric=self._metric, )
+        return compute_single_metric(
+            solution=y,
+            prediction=prediction,
+            task_type=self._task,
+            metric=self._metrics[0],
+        )
 
     def _get_runhistory_models_performance(self):
-        metric = self._metric
+        metric = self._metrics[0]
         data = self.runhistory_.data
         performance_list = []
         for run_key, run_value in data.items():
@@ -1619,20 +1795,28 @@ class AutoML(BaseEstimator):
                 continue
             # Alternatively, it is possible to also obtain the start time with
             # ``run_value.starttime``
-            endtime = pd.Timestamp(time.strftime('%Y-%m-%d %H:%M:%S',
-                                                 time.localtime(run_value.endtime)))
-            val_score = metric._optimum - (metric._sign * run_value.cost)
-            train_score = metric._optimum - (metric._sign * run_value.additional_info['train_loss'])
+            endtime = pd.Timestamp(
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(run_value.endtime))
+            )
+            cost = run_value.cost
+            train_loss = run_value.additional_info["train_loss"]
+            if len(self._metrics) > 1:
+                cost = cost[0]
+                train_loss = train_loss[0]
+            val_score = metric._optimum - (metric._sign * cost)
+            train_score = metric._optimum - (metric._sign * train_loss)
             scores = {
-                'Timestamp': endtime,
-                'single_best_optimization_score': val_score,
-                'single_best_train_score': train_score,
+                "Timestamp": endtime,
+                "single_best_optimization_score": val_score,
+                "single_best_train_score": train_score,
             }
             # Append test-scores, if data for test_loss are available.
             # This is the case, if X_test and y_test where provided.
-            if 'test_loss' in run_value.additional_info:
-                test_score = metric._optimum - (metric._sign *
-                                                run_value.additional_info['test_loss'])
+            if "test_loss" in run_value.additional_info:
+                test_loss = run_value.additional_info["test_loss"]
+                if len(self._metrics) > 1:
+                    test_loss = test_loss[0]
+                test_score = metric._optimum - (metric._sign * test_loss)
                 scores["single_best_test_score"] = test_score
 
             performance_list.append(scores)
@@ -1640,42 +1824,54 @@ class AutoML(BaseEstimator):
 
     @property
     def performance_over_time_(self):
+        check_is_fitted(self)
         individual_performance_frame = self._get_runhistory_models_performance()
-        best_values = pd.Series({'single_best_optimization_score': -np.inf,
-                                 'single_best_test_score': -np.inf,
-                                 'single_best_train_score': -np.inf})
+        best_values = pd.Series(
+            {
+                "single_best_optimization_score": -np.inf,
+                "single_best_test_score": -np.inf,
+                "single_best_train_score": -np.inf,
+            }
+        )
         for idx in individual_performance_frame.index:
             if (
-                individual_performance_frame.loc[idx, 'single_best_optimization_score']
-                > best_values['single_best_optimization_score']
+                individual_performance_frame.loc[idx, "single_best_optimization_score"]
+                > best_values["single_best_optimization_score"]
             ):
                 best_values = individual_performance_frame.loc[idx]
             individual_performance_frame.loc[idx] = best_values
 
         performance_over_time = individual_performance_frame
 
-        if self._ensemble_size != 0:
+        if self._ensemble_class is not None:
             ensemble_performance_frame = pd.DataFrame(self.ensemble_performance_history)
-            best_values = pd.Series({'ensemble_optimization_score': -np.inf,
-                                    'ensemble_test_score': -np.inf})
+            best_values = pd.Series(
+                {"ensemble_optimization_score": -np.inf, "ensemble_test_score": -np.inf}
+            )
             for idx in ensemble_performance_frame.index:
                 if (
-                    ensemble_performance_frame.loc[idx, 'ensemble_optimization_score']
-                    > best_values['ensemble_optimization_score']
+                    ensemble_performance_frame.loc[idx, "ensemble_optimization_score"]
+                    > best_values["ensemble_optimization_score"]
                 ):
                     best_values = ensemble_performance_frame.loc[idx]
                 ensemble_performance_frame.loc[idx] = best_values
 
-            performance_over_time = pd.merge(
-                ensemble_performance_frame,
-                individual_performance_frame,
-                on="Timestamp", how='outer'
-            ).sort_values('Timestamp').fillna(method='ffill')
+            performance_over_time = (
+                pd.merge(
+                    ensemble_performance_frame,
+                    individual_performance_frame,
+                    on="Timestamp",
+                    how="outer",
+                )
+                .sort_values("Timestamp")
+                .fillna(method="ffill")
+            )
 
         return performance_over_time
 
     @property
     def cv_results_(self):
+        check_is_fitted(self)
         results = dict()
 
         # Missing in contrast to scikit-learn
@@ -1693,8 +1889,8 @@ class AutoML(BaseEstimator):
         # TODO: add those arguments
 
         # TODO remove this restriction!
-        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
-            raise ValueError('Cannot call cv_results when using partial-cv!')
+        if self._resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
+            raise ValueError("Cannot call cv_results when using partial-cv!")
 
         parameter_dictionaries = dict()
         masks = dict()
@@ -1709,14 +1905,11 @@ class AutoML(BaseEstimator):
 
         metric_mask = dict()
         metric_dict = dict()
-        metric_name = []
 
-        for metric in self._scoring_functions:
-            metric_name.append(metric.name)
+        for metric in itertools.chain(self._metrics, self._scoring_functions):
             metric_dict[metric.name] = []
             metric_mask[metric.name] = []
 
-        mean_test_score = []
         mean_fit_time = []
         params = []
         status = []
@@ -1729,19 +1922,19 @@ class AutoML(BaseEstimator):
 
             s = run_value.status
             if s == StatusType.SUCCESS:
-                status.append('Success')
+                status.append("Success")
             elif s == StatusType.DONOTADVANCE:
-                status.append('Success (but do not advance to higher budget)')
+                status.append("Success (but do not advance to higher budget)")
             elif s == StatusType.TIMEOUT:
-                status.append('Timeout')
+                status.append("Timeout")
             elif s == StatusType.CRASHED:
-                status.append('Crash')
+                status.append("Crash")
             elif s == StatusType.ABORT:
-                status.append('Abort')
+                status.append("Abort")
             elif s == StatusType.MEMOUT:
-                status.append('Memout')
-            # TODO remove StatusType.RUNNING at some point in the future when the new SMAC 0.13.2
-            #  is the new minimum required version!
+                status.append("Memout")
+            # TODO remove StatusType.RUNNING at some point in the future when the new
+            # SMAC 0.13.2 is the new minimum required version!
             elif s in (StatusType.STOP, StatusType.RUNNING):
                 continue
             else:
@@ -1749,7 +1942,7 @@ class AutoML(BaseEstimator):
 
             param_dict = config.get_dictionary()
             params.append(param_dict)
-            mean_test_score.append(self._metric._optimum - (self._metric._sign * run_value.cost))
+
             mean_fit_time.append(run_value.time)
             budgets.append(run_key.budget)
 
@@ -1764,7 +1957,18 @@ class AutoML(BaseEstimator):
                 parameter_dictionaries[hp_name].append(hp_value)
                 masks[hp_name].append(mask_value)
 
+            cost = [run_value.cost] if len(self._metrics) == 1 else run_value.cost
+            for metric_idx, metric in enumerate(self._metrics):
+                metric_cost = cost[metric_idx]
+                metric_value = metric._optimum - (metric._sign * metric_cost)
+                mask_value = False
+                metric_dict[metric.name].append(metric_value)
+                metric_mask[metric.name].append(mask_value)
+
+            optimization_metric_names = set(m.name for m in self._metrics)
             for metric in self._scoring_functions:
+                if metric.name in optimization_metric_names:
+                    continue
                 if metric.name in run_value.additional_info.keys():
                     metric_cost = run_value.additional_info[metric.name]
                     metric_value = metric._optimum - (metric._sign * metric_cost)
@@ -1775,69 +1979,101 @@ class AutoML(BaseEstimator):
                 metric_dict[metric.name].append(metric_value)
                 metric_mask[metric.name].append(mask_value)
 
-        results['mean_test_score'] = np.array(mean_test_score)
-        for name in metric_name:
-            masked_array = ma.MaskedArray(metric_dict[name],
-                                          metric_mask[name])
-            results['metric_%s' % name] = masked_array
+        if len(self._metrics) == 1:
+            results["mean_test_score"] = np.array(metric_dict[self._metrics[0].name])
+            rank_order = -1 * self._metrics[0]._sign * results["mean_test_score"]
+            results["rank_test_scores"] = scipy.stats.rankdata(rank_order, method="min")
+        else:
+            for metric in self._metrics:
+                key = f"mean_test_{metric.name}"
+                results[key] = np.array(metric_dict[metric.name])
+                rank_order = -1 * metric._sign * results[key]
+                results[f"rank_test_{metric.name}"] = scipy.stats.rankdata(
+                    rank_order, method="min"
+                )
+        for metric in self._scoring_functions:
+            masked_array = ma.MaskedArray(
+                metric_dict[metric.name], metric_mask[metric.name]
+            )
+            results[f"metric_{metric.name}"] = masked_array
 
-        results['mean_fit_time'] = np.array(mean_fit_time)
-        results['params'] = params
-        rank_order = -1 * self._metric._sign * results['mean_test_score']
-        results['rank_test_scores'] = scipy.stats.rankdata(rank_order, method='min')
-        results['status'] = status
-        results['budgets'] = budgets
+        results["mean_fit_time"] = np.array(mean_fit_time)
+        results["params"] = params
+        results["status"] = status
+        results["budgets"] = budgets
 
         for hp_name in hp_names:
-            masked_array = ma.MaskedArray(parameter_dictionaries[hp_name],
-                                          masks[hp_name])
-            results['param_%s' % hp_name] = masked_array
+            masked_array = ma.MaskedArray(
+                parameter_dictionaries[hp_name], masks[hp_name]
+            )
+            results["param_%s" % hp_name] = masked_array
 
         return results
 
-    def sprint_statistics(self):
+    def sprint_statistics(self) -> str:
+        check_is_fitted(self)
         cv_results = self.cv_results_
         sio = io.StringIO()
-        sio.write('auto-sklearn results:\n')
-        sio.write('  Dataset name: %s\n' % self._dataset_name)
-        sio.write('  Metric: %s\n' % self._metric)
-        idx_success = np.where(np.array(
-            [status in ['Success', 'Success (but do not advance to higher budget)']
-             for status in cv_results['status']]
-        ))[0]
+        sio.write("auto-sklearn results:\n")
+        sio.write("  Dataset name: %s\n" % self._dataset_name)
+        if len(self._metrics) == 1:
+            sio.write("  Metric: %s\n" % self._metrics[0])
+        else:
+            sio.write("  Metrics: %s\n" % self._metrics)
+        idx_success = np.where(
+            np.array(
+                [
+                    status
+                    in ["Success", "Success (but do not advance to higher budget)"]
+                    for status in cv_results["status"]
+                ]
+            )
+        )[0]
         if len(idx_success) > 0:
-            if not self._metric._optimum:
-                idx_best_run = np.argmin(cv_results['mean_test_score'][idx_success])
+            key = (
+                "mean_test_score"
+                if len(self._metrics) == 1
+                else f"mean_test_" f"{self._metrics[0].name}"
+            )
+
+            if not self._metrics[0]._optimum:
+                idx_best_run = np.argmin(cv_results[key][idx_success])
             else:
-                idx_best_run = np.argmax(cv_results['mean_test_score'][idx_success])
-            best_score = cv_results['mean_test_score'][idx_success][idx_best_run]
-            sio.write('  Best validation score: %f\n' % best_score)
-        num_runs = len(cv_results['status'])
-        sio.write('  Number of target algorithm runs: %d\n' % num_runs)
-        num_success = sum([
-            s in ['Success', 'Success (but do not advance to higher budget)']
-            for s in cv_results['status']
-        ])
-        sio.write('  Number of successful target algorithm runs: %d\n' % num_success)
-        num_crash = sum([s == 'Crash' for s in cv_results['status']])
-        sio.write('  Number of crashed target algorithm runs: %d\n' % num_crash)
-        num_timeout = sum([s == 'Timeout' for s in cv_results['status']])
-        sio.write('  Number of target algorithms that exceeded the time '
-                  'limit: %d\n' % num_timeout)
-        num_memout = sum([s == 'Memout' for s in cv_results['status']])
-        sio.write('  Number of target algorithms that exceeded the memory '
-                  'limit: %d\n' % num_memout)
+                idx_best_run = np.argmax(cv_results[key][idx_success])
+            best_score = cv_results[key][idx_success][idx_best_run]
+            sio.write("  Best validation score: %f\n" % best_score)
+        num_runs = len(cv_results["status"])
+        sio.write("  Number of target algorithm runs: %d\n" % num_runs)
+        num_success = sum(
+            [
+                s in ["Success", "Success (but do not advance to higher budget)"]
+                for s in cv_results["status"]
+            ]
+        )
+        sio.write("  Number of successful target algorithm runs: %d\n" % num_success)
+        num_crash = sum([s == "Crash" for s in cv_results["status"]])
+        sio.write("  Number of crashed target algorithm runs: %d\n" % num_crash)
+        num_timeout = sum([s == "Timeout" for s in cv_results["status"]])
+        sio.write(
+            "  Number of target algorithms that exceeded the time "
+            "limit: %d\n" % num_timeout
+        )
+        num_memout = sum([s == "Memout" for s in cv_results["status"]])
+        sio.write(
+            "  Number of target algorithms that exceeded the memory "
+            "limit: %d\n" % num_memout
+        )
         return sio.getvalue()
 
-    def get_models_with_weights(self):
-        if self.models_ is None or len(self.models_) == 0 or \
-                self.ensemble_ is None:
+    def get_models_with_weights(self) -> list[Tuple[float, BasePipeline]]:
+        check_is_fitted(self)
+        if self.models_ is None or len(self.models_) == 0 or self.ensemble_ is None:
             self._load_models()
 
         return self.ensemble_.get_models_with_weights(self.models_)
 
-    def show_models(self) -> Dict[int, Any]:
-        """ Returns a dictionary containing dictionaries of ensemble models.
+    def show_models(self) -> dict[int, Any]:
+        """Returns a dictionary containing dictionaries of ensemble models.
 
         Each model in the ensemble can be accessed by giving its ``model_id`` as key.
 
@@ -1860,7 +2096,6 @@ class AutoML(BaseEstimator):
         .. code-block:: python
 
             import sklearn.datasets
-            import sklearn.metrics
             import autosklearn.regression
 
             X, y = sklearn.datasets.load_diabetes(return_X_y=True)
@@ -1891,46 +2126,57 @@ class AutoML(BaseEstimator):
                     'rank': 2,
                     'cost': 0.4550418898836528,
                     'ensemble_weight': 0.3,
-                    'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing....>,
+                    'data_preprocessor': <pipeline.components.data_preprocessing....>,
                     'feature_preprocessor': <autosklearn.pipeline.components....>,
                     'regressor': <autosklearn.pipeline.components.regression....>,
-                    'sklearn_regressor': ARDRegression(alpha_1=0.0003701926442639788,...)
-                    }...
+                    'sklearn_regressor': ARDRegression(alpha_1=0.027,...)
+                    },
+                ...
             }
 
         Returns
         -------
-        Dict(int, Any) : dictionary of length = number of models in the ensemble
+        dict[int, Any] : dictionary of length = number of models in the ensemble
             A dictionary of models in the ensemble, where ``model_id`` is the key.
-
-        """
+        """  # noqa: E501
+        check_is_fitted(self)
 
         ensemble_dict = {}
+
+        if self._ensemble_class is None:
+            warnings.warn(
+                "No models in the ensemble. Kindly provide an ensemble class."
+            )
+            return ensemble_dict
+
+        # check for condition when ensemble_size > 0 but there is no ensemble to load
+        if self.ensemble_ is None:
+            warnings.warn("No ensemble found. Returning empty dictionary.")
+            return ensemble_dict
 
         def has_key(rv, key):
             return rv.additional_info and key in rv.additional_info
 
         table_dict = {}
-        for rkey, rval in self.runhistory_.data.items():
-            if has_key(rval, 'num_run'):
-                model_id = rval.additional_info['num_run']
-                table_dict[model_id] = {
-                        'model_id': model_id,
-                        'cost': rval.cost
-                        }
+        for run_key, run_val in self.runhistory_.data.items():
+            if has_key(run_val, "num_run"):
+                model_id = run_val.additional_info["num_run"]
+                table_dict[model_id] = {"model_id": model_id, "cost": run_val.cost}
 
         # Checking if the dictionary is empty
         if not table_dict:
-            raise RuntimeError('No model found. Try increasing \'time_left_for_this_task\'.')
+            raise RuntimeError(
+                "No model found. Try increasing 'time_left_for_this_task'."
+            )
 
-        for i, weight in enumerate(self.ensemble_.weights_):
-            (_, model_id, _) = self.ensemble_.identifiers_[i]
-            table_dict[model_id]['ensemble_weight'] = weight
+        for (_, model_id, _), weight in self.ensemble_.get_identifiers_with_weights():
+            table_dict[model_id]["ensemble_weight"] = weight
 
-        table = pd.DataFrame.from_dict(table_dict, orient='index')
+        table = pd.DataFrame.from_dict(table_dict, orient="index")
+        table.sort_values(by="cost", inplace=True)
 
-        # Checking which resampling strategy is chosen and selecting the appropriate models
-        is_cv = (self._resampling_strategy == "cv")
+        # Check which resampling strategy is chosen and selecting the appropriate models
+        is_cv = self._resampling_strategy == "cv"
         models = self.cv_models_ if is_cv else self.models_
 
         rank = 1  # Initializing rank for the first model
@@ -1938,23 +2184,23 @@ class AutoML(BaseEstimator):
             model_dict = {}  # Declaring model dictionary
 
             # Inserting model_id, rank, cost and ensemble weight
-            model_dict['model_id'] = table.loc[model_id]['model_id'].astype(int)
-            model_dict['rank'] = rank
-            model_dict['cost'] = table.loc[model_id]['cost']
-            model_dict['ensemble_weight'] = table.loc[model_id]['ensemble_weight']
+            model_dict["model_id"] = table.loc[model_id]["model_id"].astype(int)
+            model_dict["rank"] = rank
+            model_dict["cost"] = table.loc[model_id]["cost"]
+            model_dict["ensemble_weight"] = table.loc[model_id]["ensemble_weight"]
             rank += 1  # Incrementing rank by 1 for the next model
 
             # The steps in the models pipeline are as follows:
             # 'data_preprocessor': DataPreprocessor,
             # 'balancing': Balancing,
             # 'feature_preprocessor': FeaturePreprocessorChoice,
-            # 'classifier'/'regressor': ClassifierChoice/RegressorChoice (autosklearn wrapped model)
+            # 'classifier'/'regressor': ClassifierChoice/RegressorChoice (wrapped model)
 
             # For 'cv' (cross validation) strategy
             if is_cv:
                 # Voting model created by cross validation
                 cv_voting_ensemble = model
-                model_dict['voting_model'] = cv_voting_ensemble
+                model_dict["voting_model"] = cv_voting_ensemble
 
                 # List of models, each trained on one cv fold
                 cv_models = []
@@ -1963,9 +2209,11 @@ class AutoML(BaseEstimator):
 
                     # Adding sklearn model to the model dictionary
                     model_type, autosklearn_wrapped_model = cv_model.steps[-1]
-                    estimator[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
+                    estimator[
+                        f"sklearn_{model_type}"
+                    ] = autosklearn_wrapped_model.choice.estimator
                     cv_models.append(estimator)
-                model_dict['estimators'] = cv_models
+                model_dict["estimators"] = cv_models
 
             # For any other strategy
             else:
@@ -1974,64 +2222,64 @@ class AutoML(BaseEstimator):
 
                 # Adding sklearn model to the model dictionary
                 model_type, autosklearn_wrapped_model = model.steps[-1]
-                model_dict[f'sklearn_{model_type}'] = autosklearn_wrapped_model.choice.estimator
+                model_dict[
+                    f"sklearn_{model_type}"
+                ] = autosklearn_wrapped_model.choice.estimator
 
             # Insterting model_dict in the ensemble dictionary
             ensemble_dict[model_id] = model_dict
 
         return ensemble_dict
 
+    def has_ensemble(self) -> bool:
+        """
+        Returns
+        -------
+        bool
+            Whether this AutoML instance has an ensemble
+        """
+        return self.ensemble_ is not None
+
     def _create_search_space(
         self,
-        tmp_dir,
-        backend,
-        datamanager,
-        include: Optional[Dict[str, List[str]]] = None,
-        exclude: Optional[Dict[str, List[str]]] = None,
-    ):
-        task_name = 'CreateConfigSpace'
-
-        self._stopwatch.start_task(task_name)
-        configspace_path = os.path.join(tmp_dir, 'space.json')
+        tmp_dir: str,
+        backend: Backend,
+        datamanager: XYDataManager,
+        include: Optional[Mapping[str, list[str]]] = None,
+        exclude: Optional[Mapping[str, list[str]]] = None,
+    ) -> Tuple[ConfigurationSpace, str]:
+        configspace_path = os.path.join(tmp_dir, "space.json")
         configuration_space = pipeline.get_configuration_space(
-            datamanager.info,
+            datamanager,
             include=include,
             exclude=exclude,
         )
-        configuration_space = self.configuration_space_created_hook(
-            datamanager, configuration_space)
         backend.write_txt_file(
             configspace_path,
             cs_json.write(configuration_space),
-            'Configuration space'
+            "Configuration space",
         )
-        self._stopwatch.stop_task(task_name)
 
         return configuration_space, configspace_path
 
-    def configuration_space_created_hook(self, datamanager, configuration_space):
-        return configuration_space
-
-    def __getstate__(self) -> Dict[str, Any]:
+    def __getstate__(self) -> dict[str, Any]:
         # Cannot serialize a client!
-        self._dask_client = None
+        self._dask = None
         self.logging_server = None
         self.stop_logging_server = None
         return self.__dict__
 
-    def __del__(self):
+    def __del__(self) -> None:
         # Clean up the logger
         self._clean_logger()
-
-        self._close_dask_client()
 
 
 class AutoMLClassifier(AutoML):
 
     _task_mapping = {
-        'multilabel-indicator': MULTILABEL_CLASSIFICATION,
-        'multiclass': MULTICLASS_CLASSIFICATION,
-        'binary': BINARY_CLASSIFICATION,
+        "multilabel-indicator": MULTILABEL_CLASSIFICATION,
+        "multiclass": MULTICLASS_CLASSIFICATION,
+        "binary": BINARY_CLASSIFICATION,
     }
 
     @classmethod
@@ -2045,16 +2293,17 @@ class AutoMLClassifier(AutoML):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES | spmatrix,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[bool]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
+        feat_type: Optional[list[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-    ):
+    ) -> AutoMLClassifier:
         return super().fit(
-            X, y,
+            X,
+            y,
             X_test=X_test,
             y_test=y_test,
             feat_type=feat_type,
@@ -2067,17 +2316,19 @@ class AutoMLClassifier(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
-        config: Union[Configuration,  Dict[str, Union[str, float, int]]],
+        y: SUPPORTED_TARGET_TYPES | spmatrix,
+        config: Configuration | dict[str, str | float | int],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[str]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
+        feat_type: Optional[list[str]] = None,
         **kwargs,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         return super().fit_pipeline(
-            X=X, y=y,
-            X_test=X_test, y_test=y_test,
+            X=X,
+            y=y,
+            X_test=X_test,
+            y_test=y_test,
             dataset_name=dataset_name,
             config=config,
             is_classification=True,
@@ -2085,13 +2336,18 @@ class AutoMLClassifier(AutoML):
             **kwargs,
         )
 
-    def predict(self, X, batch_size=None, n_jobs=1):
-        predicted_probabilities = super().predict(X, batch_size=batch_size,
-                                                  n_jobs=n_jobs)
+    def predict(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        batch_size: Optional[int] = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
+        check_is_fitted(self)
 
-        if self.InputValidator is None or not self.InputValidator._is_fitted:
-            raise ValueError("predict() is only supported after calling fit. Kindly call first "
-                             "the estimator fit() method.")
+        predicted_probabilities = super().predict(
+            X, batch_size=batch_size, n_jobs=n_jobs
+        )
+
         if self.InputValidator.target_validator.is_single_column_target():
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
         else:
@@ -2099,16 +2355,21 @@ class AutoMLClassifier(AutoML):
 
         return self.InputValidator.target_validator.inverse_transform(predicted_indexes)
 
-    def predict_proba(self, X, batch_size=None, n_jobs=1):
+    def predict_proba(
+        self,
+        X: SUPPORTED_FEAT_TYPES,
+        batch_size: Optional[int] = None,
+        n_jobs: int = 1,
+    ) -> np.ndarray:
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
 
 class AutoMLRegressor(AutoML):
 
     _task_mapping = {
-        'continuous-multioutput': MULTIOUTPUT_REGRESSION,
-        'continuous': REGRESSION,
-        'multiclass': REGRESSION,
+        "continuous-multioutput": MULTIOUTPUT_REGRESSION,
+        "continuous": REGRESSION,
+        "multiclass": REGRESSION,
     }
 
     @classmethod
@@ -2122,16 +2383,17 @@ class AutoMLRegressor(AutoML):
     def fit(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
+        y: SUPPORTED_TARGET_TYPES | spmatrix,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[bool]] = None,
+        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
+        feat_type: Optional[list[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-    ):
+    ) -> AutoMLRegressor:
         return super().fit(
-            X, y,
+            X,
+            y,
             X_test=X_test,
             y_test=y_test,
             feat_type=feat_type,
@@ -2144,17 +2406,19 @@ class AutoMLRegressor(AutoML):
     def fit_pipeline(
         self,
         X: SUPPORTED_FEAT_TYPES,
-        y: Union[SUPPORTED_TARGET_TYPES, spmatrix],
-        config: Union[Configuration,  Dict[str, Union[str, float, int]]],
+        y: SUPPORTED_TARGET_TYPES | spmatrix,
+        config: Configuration | dict[str, str | float | int],
         dataset_name: Optional[str] = None,
         X_test: Optional[SUPPORTED_FEAT_TYPES] = None,
-        y_test: Optional[Union[SUPPORTED_TARGET_TYPES, spmatrix]] = None,
-        feat_type: Optional[List[str]] = None,
-        **kwargs: Dict,
+        y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
+        feat_type: Optional[list[str]] = None,
+        **kwargs: dict,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
         return super().fit_pipeline(
-            X=X, y=y,
-            X_test=X_test, y_test=y_test,
+            X=X,
+            y=y,
+            X_test=X_test,
+            y_test=y_test,
             config=config,
             feat_type=feat_type,
             dataset_name=dataset_name,

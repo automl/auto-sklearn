@@ -13,11 +13,30 @@ give short explanations (click the title to expand text), e.g.
 
     We provide examples on using *auto-sklearn* for multiple use cases ranging from
     simple classification to advanced uses such as feature importance, parallel runs
-    and customization. They can be found in the :ref:`sphx_glr_examples`.
+    and customization. They can be found in the :ref:`examples`.
 
 .. collapse:: <b>Material from talks and presentations</b>
 
     We provide resources for talks, tutorials and presentations on *auto-sklearn* under `auto-sklearn-talks <https://github.com/automl/auto-sklearn-talks>`_
+
+.. _askl2:
+
+Auto-sklearn 2.0
+================
+
+Auto-sklearn 2.0 includes latest research on automatically configuring the AutoML system itself
+and contains a multitude of improvements which speed up the fitting the AutoML system.
+Concretely, Auto-sklearn 2.0 automatically sets the :ref:`bestmodel`, decides whether it can use
+the efficient bandit strategy *Successive Halving* and uses meta-feature free *Portfolios* for
+efficient meta-learning.
+
+*auto-sklearn 2.0* has the same interface as regular *auto-sklearn* and you can use it via
+
+.. code:: python
+
+    from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+
+A paper describing our advances is available on `arXiv <https://arxiv.org/abs/2007.04074>`_.
 
 .. _limits:
 
@@ -44,6 +63,54 @@ tested.
 .. collapse:: <b>CPU cores</b>
 
     By default, *auto-sklearn* uses **one core**. See also :ref:`parallel` on how to configure this.
+
+
+.. collapse:: <b>Managing data compression</b>
+
+    .. _manual_managing_data_compression:
+
+    Auto-sklearn will attempt to fit the dataset into 1/10th of the ``memory_limit``.
+    This won't happen unless your dataset is quite large or you have small a
+    ``memory_limit``. This is done using two methods, reducing **precision** and
+    to **subsample**. One reason you may want to control this is if you require high
+    precision or you rely on predefined splits for which subsampling does not account
+    for.
+
+    To turn off data preprocessing:
+
+    .. code:: python
+
+        AutoSklearnClassifier(
+            dataset_compression = False
+        )
+
+    You can specify which of the methods are performed using:
+
+    .. code:: python
+
+        AutoSklearnClassifier(
+            dataset_compression = { "methods": ["precision", "subsample"] },
+        )
+
+    You can change the memory allocation for the dataset to a percentage of ``memory_limit``
+    or an absolute amount using:
+
+    .. code:: python
+
+        AutoSklearnClassifier(
+            dataset_compression = { "memory_allocation": 0.2 },
+        )
+
+    The default arguments are used when ``dataset_compression = True`` are:
+
+    .. code:: python
+
+        {
+            "memory_allocation": 0.1,
+            "methods": ["precision", "subsample"]
+        }
+
+    The full description is given at :class:`AutoSklearnClassifier(dataset_compression=...) <autosklearn.classification.AutoSklearnClassifier>`.
 
 .. _space:
 
@@ -250,26 +317,30 @@ Other
     Optionally, you can measure the ability of this fitted model to generalize to unseen data by
     providing an optional testing pair (X_test/Y_test). For further details, please refer to the
     Example :ref:`sphx_glr_examples_40_advanced_example_pandas_train_test.py`.
-    Supported formats for these training and testing pairs are: np.ndarray,
-    pd.DataFrame, scipy.sparse.csr_matrix and python lists.
 
-    If your data contains categorical values (in the features or targets), autosklearn will automatically encode your
-    data using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
-    for unidimensional data and a `sklearn.preprocessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_
-    for multidimensional data.
-
-    Regarding the features, there are two methods to guide *auto-sklearn* to properly encode categorical columns:
+    Regarding the features, there are multiple things to consider:
 
     * Providing a X_train/X_test numpy array with the optional flag feat_type. For further details, you
       can check the Example :ref:`sphx_glr_examples_40_advanced_example_feature_types.py`.
-    * You can provide a pandas DataFrame, with properly formatted columns. If a column has numerical
-      dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. If the
-      column has a categorical/boolean class, it will be encoded. If the column is of any other type
-      (Object or Timeseries), an error will be raised. For further details on how to properly encode
-      your data, you can check the Pandas Example
-      `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_).
-      If you are working with time series, it is recommended that you follow this approach
+    * You can provide a pandas DataFrame with properly formatted columns. If a column has numerical
+      dtype, *auto-sklearn* will not encode it and it will be passed directly to scikit-learn. *auto-sklearn*
+      supports both categorical or string as column type. Please ensure that you are using the correct
+      dtype for your task. By default *auto-sklearn* treats object and string columns as strings and
+      encodes the data using `sklearn.feature_extraction.text.CountVectorizer <https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html>`_
+    * If your data contains categorical values (in the features or targets), ensure that you explicitly label them as categorical.
+      Data labeled as categorical is encoded by using a `sklearn.preprocessing.LabelEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_
+      for unidimensional data and a `sklearn.preprodcessing.OrdinalEncoder <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html>`_ for multidimensional data.
+    * For further details on how to properly encode your data, you can check the Pandas Example
+      `Working with categorical data <https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html>`_). If you are working with time series, it is recommended that you follow this approach
       `Working with time data <https://stats.stackexchange.com/questions/311494/>`_.
+    * If you prefer not using the string option at all you can disable this option. In this case
+      objects, strings and categorical columns are encoded as categorical.
+
+    .. code:: python
+
+        import autosklearn.classification
+        automl = autosklearn.classification.AutoSklearnClassifier(allow_string_features=False)
+        automl.fit(X_train, y_train)
 
     Regarding the targets (y_train/y_test), if the task involves a classification problem, such features will be
     automatically encoded. It is recommended to provide both y_train and y_test during fit, so that a common encoding
@@ -288,17 +359,23 @@ Other
 
     In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Automated Machine Learning
     <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine -learning>`_
-    set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
+    set ``ensemble_size=1``, ``initial_configurations_via_metalearning=0`` and ``allow_string_features=False``:
 
     .. code:: python
 
         import autosklearn.classification
         automl = autosklearn.classification.AutoSklearnClassifier(
             ensemble_size=1,
-            initial_configurations_via_metalearning=0
+            initial_configurations_via_metalearning=0,
+            allow_string_features=False,
         )
 
     An ensemble of size one will result in always choosing the current best model
     according to its performance on the validation set. Setting the initial
     configurations found by meta-learning to zero makes *auto-sklearn* use the
     regular SMAC algorithm for suggesting new hyperparameter configurations.
+
+.. collapse:: <b>Early stopping and Callbacks</b>
+
+   By using the parameter ``get_trials_callback``, we can get access to the results
+   of runs as they occur. See this example :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>` for more!

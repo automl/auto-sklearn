@@ -2,8 +2,7 @@ import sklearn.metrics
 import sklearn.svm
 
 from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
-from autosklearn.pipeline.util import get_dataset, \
-    _test_classifier_predict_proba
+from autosklearn.pipeline.util import _test_classifier_predict_proba, get_dataset
 
 from .test_base import BaseClassificationComponentTest
 
@@ -30,22 +29,23 @@ class LibSVM_SVCComponentTest(BaseClassificationComponentTest):
         # Leave this additional test here
         for i in range(2):
             predictions, targets = _test_classifier_predict_proba(
-                LibSVM_SVC, sparse=True, dataset='digits',
-                train_size_maximum=500)
-            self.assertAlmostEqual(5.273502056835706,
-                                   sklearn.metrics.log_loss(targets,
-                                                            predictions))
+                LibSVM_SVC, sparse=True, dataset="digits", train_size_maximum=500
+            )
+            self.assertAlmostEqual(
+                5.273502056835706, sklearn.metrics.log_loss(targets, predictions)
+            )
 
         for i in range(2):
             predictions, targets = _test_classifier_predict_proba(
-                LibSVM_SVC, sparse=True, dataset='iris')
-            self.assertAlmostEqual(0.8408320837510618,
-                                   sklearn.metrics.log_loss(targets,
-                                                            predictions))
+                LibSVM_SVC, sparse=True, dataset="iris"
+            )
+            self.assertAlmostEqual(
+                0.8408320837510618, sklearn.metrics.log_loss(targets, predictions)
+            )
 
         # 2 class
         for i in range(2):
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset="iris")
             remove_training_data = Y_train == 2
             remove_test_data = Y_test == 2
             X_train = X_train[~remove_training_data]
@@ -57,11 +57,19 @@ class LibSVM_SVCComponentTest(BaseClassificationComponentTest):
             configuration_space = LibSVM_SVC.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
 
-            cls = LibSVM_SVC(random_state=1, **{hp_name: default[hp_name]
-                                                for hp_name in default
-                                                if default[hp_name] is not None})
+            cls = LibSVM_SVC(
+                random_state=1,
+                **{
+                    hp_name: default[hp_name]
+                    for hp_name in default
+                    if default[hp_name] is not None
+                },
+            )
 
             cls = cls.fit(X_train, Y_train)
             prediction = cls.predict_proba(X_test)
-            self.assertAlmostEqual(sklearn.metrics.log_loss(Y_test, prediction),
-                                   0.6927962762794081, places=4)
+            self.assertAlmostEqual(
+                sklearn.metrics.log_loss(Y_test, prediction),
+                0.6927962762794081,
+                places=4,
+            )

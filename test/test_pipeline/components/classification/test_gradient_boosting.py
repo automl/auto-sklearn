@@ -1,7 +1,8 @@
 import sklearn.ensemble
 
-from autosklearn.pipeline.components.classification.gradient_boosting import \
-    GradientBoostingClassifier
+from autosklearn.pipeline.components.classification.gradient_boosting import (
+    GradientBoostingClassifier,
+)
 
 from .test_base import BaseClassificationComponentTest
 
@@ -24,6 +25,6 @@ class GradientBoostingComponentTest(BaseClassificationComponentTest):
     sk_mod = sklearn.ensemble.ExtraTreesClassifier
     module = GradientBoostingClassifier
     step_hyperparameter = {
-        'name': 'max_iter',
-        'value': module.get_max_iter(),
+        "name": "max_iter",
+        "value": module.get_max_iter(),
     }

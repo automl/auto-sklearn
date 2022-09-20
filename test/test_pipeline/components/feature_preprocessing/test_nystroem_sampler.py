@@ -1,11 +1,12 @@
-import unittest
-
 import numpy as np
 import sklearn.preprocessing
 
-from autosklearn.pipeline.components.feature_preprocessing.nystroem_sampler import \
-    Nystroem
+from autosklearn.pipeline.components.feature_preprocessing.nystroem_sampler import (
+    Nystroem,
+)
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
+
+import unittest
 
 
 class NystroemComponentTest(unittest.TestCase):
@@ -16,7 +17,7 @@ class NystroemComponentTest(unittest.TestCase):
         self.assertFalse((transformation == 0).all())
 
         # Custon preprocessing test to check if clipping to zero works
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset="digits")
         original_X_train = X_train.copy()
         ss = sklearn.preprocessing.StandardScaler()
         X_train = ss.fit_transform(X_train)
@@ -25,12 +26,15 @@ class NystroemComponentTest(unittest.TestCase):
 
         preprocessor = Nystroem(
             random_state=1,
-            **{hp_name: default[hp_name] for hp_name in default if default[hp_name] is not None},
-            )
+            **{
+                hp_name: default[hp_name]
+                for hp_name in default
+                if default[hp_name] is not None
+            },
+        )
 
         transformer = preprocessor.fit(X_train, Y_train)
-        transformation, original = transformer.transform(
-            X_train), original_X_train
+        transformation, original = transformer.transform(X_train), original_X_train
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertEqual(transformation.shape[1], 100)
 
@@ -46,7 +50,7 @@ class NystroemComponentTest(unittest.TestCase):
         preprocessor = Nystroem(
             random_state=1,
             **{hp.hyperparameter.name: hp.value for hp in default.values.values()},
-            )
+        )
         preprocessor.fit(X_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float32)
@@ -59,7 +63,7 @@ class NystroemComponentTest(unittest.TestCase):
         preprocessor = Nystroem(
             random_state=1,
             **{hp.hyperparameter.name: hp.value for hp in default.values.values()},
-            )
+        )
         preprocessor.fit(X_train, Y_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float64)
@@ -73,7 +77,7 @@ class NystroemComponentTest(unittest.TestCase):
         preprocessor = Nystroem(
             random_state=1,
             **{hp.hyperparameter.name: hp.value for hp in default.values.values()},
-            )
+        )
         preprocessor.fit(X_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float32)
@@ -86,7 +90,7 @@ class NystroemComponentTest(unittest.TestCase):
         preprocessor = Nystroem(
             random_state=1,
             **{hp.hyperparameter.name: hp.value for hp in default.values.values()},
-            )
+        )
         preprocessor.fit(X_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float64)

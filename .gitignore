@@ -1,6 +1,6 @@
 # Documentation
-docs/build/*
-docs/examples
+doc/build/*
+doc/examples
 
 *.py[cod]
 
@@ -37,6 +37,9 @@ nosetests.xml
 htmlcov
 .coverage
 .tox
+
+# Pytest cache
+.pytest_cache
 
 # pycharm
 .idea

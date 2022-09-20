@@ -46,7 +46,7 @@ Following that we'll tell you about how you can test your changes locally and th
     # If you missed the --recurse-submodules arg during clone or need to install the
     # submodule manually, then execute the following line:
     #
-    # git submodule update --init --recursive
+    # git submodule udate --init --recursive
 
     # ... Alternatively, if you would prefer a more manual method
     # Show all the available branches with a * beside your current one
@@ -61,7 +61,7 @@ Following that we'll tell you about how you can test your changes locally and th
     # If you missed the --recurse-submodules arg during clone or need to install the
     # submodule manually, then execute the following line:
     #
-    # git submodule udate --init --recursive
+    # git submodule update --init --recursive
     ```
 
     The reason to create a new branch is two fold:
@@ -87,7 +87,11 @@ Following that we'll tell you about how you can test your changes locally and th
         Fortunately, you can check out [pyenv](https://github.com/pyenv/pyenv) which lets you switch between Python versions on the fly!
 
 *   Now that we have a virtual environment, it's time to install all the dependencies into it.
+    We've provided a simple `make` command to help do this.
     ```bash
+    make install-dev
+
+    # Manually
     pip install -e .[test,examples,doc]
 
     # If you're using shells other than bash you'll need to use
@@ -100,6 +104,8 @@ Following that we'll tell you about how you can test your changes locally and th
         These are dependencies used in development but ones that are not required to actually run auto-sklearn itself.
         You can check out what these are in the `setup.py` file.
     *   If you're new to virtual environments, after performing all this, it's a great time to check out what actually exists in the `my-virtual-env` folder.
+
+* You can check out some functionality we have captured in a `Makefile` by running `make help`
 
 *   Now it's time to make some changes, whether it be for [documentation](#documentation), a [bug fix](#bug-fixes) or a new [features](#features).
 
@@ -201,16 +207,16 @@ Sometimes, the new functionality isn't so clear from a simple parameter descript
 Lastly, if the feature really is a game changer or you're very proud of it, consider making an `example_*.py` that will be run and rendered in the online docs!
 
 ## Testing
-*   Let's assume you've made some changes, now we have to make sure they work.
+* Let's assume you've made some changes, now we have to make sure they work.
     Begin by simply running all the tests.
     If there's any errors, they'll pop up once it's complete.
     ```bash
     pytest
     ```
-    *   Note that these may take a while so check out `pytest --help` to see how you can run tests so that only previous failures run or only certain tests are run.
+    * Note that these may take a while so check out `pytest --help` to see how you can run tests so that only previous failures run or only certain tests are run.
         This can help you try changes and get results faster.
         Do however run one last full `pytest` once you are finished and happy!
-    *   Here are some we find particularly useful
+    * Here are some we find particularly useful
         ```
         # Run tests in specific file like 'test_estimators.py'
         pytest "test/test_automl/test_estimators.py"
@@ -230,26 +236,30 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
         # Exit on the first test failure
         pytest -x
         ```
-    *   More advanced editors like PyCharm may have built in integrations which could be good to check out!
+    * More advanced editors like PyCharm may have built in integrations which could be good to check out!
+    * Running all unittests will take a while, here's how you can run them in parallel
+        ```
+        export OPENBLAS_NUM_THREADS=1
+        export MKL_NUM_THREADS=1
+        export OMP_NUM_THREADS=1
+      
+        pytest -n 4
+        ```
 
-*   Now we are going to use [sphinx](https://www.sphinx-doc.org/en/master/) to generate all the documentation and make sure there are no issues.
+
+* Now we are going to use [sphinx](https://www.sphinx-doc.org/en/master/) to generate all the documentation and make sure there are no issues.
     ```bash
-    cd doc
-    make html
+    make doc
     ```
     *   If you're unfamiliar with sphinx, it's a documentation generator which can read comments and docstrings from within the code and generate html documentation.
-    *   We also use sphinx-gallery which can take python files (such as those in the `examples` folder) and run them, creating html which shows the code and the output it generates.
-        Unfortunately this can take quite some time but you should only have to run this once.
-    *   If you need to quickly check something, you can run `make html-noexamples` to prevent sphinx from running the examples.
-    ```bash
-    cd doc
-    make html-noexamples
-    ```
-    *   Sphinx also has a command `linkcheck` for making sure all the links correctly go to some destination.
+    *   If you've added documentation, we also has a command `linkcheck` for making sure all the links correctly go to some destination.
         This helps tests for dead links or accidental typos.
     ```bash
-    cd doc
     make linkcheck
+    ```
+    *   We also use sphinx-gallery which can take python files (such as those in the `examples` folder) and run them, creating html which shows the code and the output it generates.
+    ```bash
+    make examples
     ```
     *   To view the documentation itself, make sure it is built with the above commands and then open `doc/build/html/index.html` with your favourite browser:
     ```bash
@@ -260,20 +270,34 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     xdg-open ./doc/build/html/index.html
     ```
 
-*   Once you've made all your changes and all the tests pass successfully, we need to make sure that the code fits a certain format and that the [typing](https://docs.python.org/3/library/typing.html) is correct.
-    To do this, we use a tool call `pre-commit` which runs `flake8`, a code checker and `mypy`, a static type checker against the code.
+* Once you've made all your changes and all the tests pass successfully, we need to make sure that the code fits a certain format and that the [typing](https://docs.python.org/3/library/typing.html) is correct.
+    * Formatting and import sorting can helps keep things uniform across all coding styles. We use [`black`](https://black.readthedocs.io/en/stable/) and [`isort`](https://isort.readthedocs.io/en/latest/) to do this for us. To automatically run these formatters across the code base, just run the following command:
     ```bash
-    pip install pre-commit
+    make format
+    ```
+    * To then check for issues using [`black`](https://black.readthedocs.io/en/stable/), [`isort`](https://isort.readthedocs.io/en/latest/), [`mypy`](http://mypy-lang.org/), [`flake8`](https://flake8.pycqa.org/en/latest/) and [`pydocstyle`](http://www.pydocstyle.org/en/stable/), run
+    ```bash
+    make check
+    ```
+    * To do this checking automatically, we use `pre-commit` which if you already installed everything with `make install-dev` then this has been done for you.
+    This will happen every time you make a commit and warn you of any issues.
+    Otherwise you can run the following to install pre-commit.
+    ```bash
+    pre-commit install
+    ```
+    * To run `pre-commit` manually:
+    ```bash
     pre-commit run --all-files
     ```
-    *   The reason we use a code standard like `flake8` is to make sure that when we review code:
-        *   There are no extra blank spaces and blank lines.
-        *   Lines don't end up too long
-        *   Code from multiple source keeps a similar appearance.
-    *   We perform static type checking with `mypy` as this can remove a majority of bugs, before a test is even run.
-        It points out programmer errors and is what makes compiled languages so safe.
+    *   The reason we use tools like [`flake8`](https://flake8.pycqa.org/en/latest/), [`mypy`](http://mypy-lang.org/), [`black`](https://black.readthedocs.io/en/stable/), [`isort`](https://isort.readthedocs.io/en/latest/) and [`pydocstyle`](http://www.pydocstyle.org/en/stable/) is to make sure that when we review code:
+        *   There are no extra blank spaces and blank lines. (`flake8`, `black`)
+        *   Lines don't end up too long. (`flake8`, `black`)
+        *   Code from multiple source keeps a similar appearance. (`black`)
+        *   Importing things is consistently ordered. (`isort`)
+        *   Functions are type annotated and correct with static type checking. (`mypy`)
+        * Function and classes have docstrings. (`pydocstyle`)
         If you are new to Python types, or stuck with how something should be 'typed', please feel free to push the pull request in the following steps and we should be able to help you out.
-    * If interested, the configuration for `pre-commit` can be found in `.pre-commit-config.yaml`
+    * If interested, the configuration for `pre-commit` can be found in `.pre-commit-config.yaml` with the other tools mainly being configured in `pyproject.toml` and `.flake8`.
 
 
 ## Creating the PR
@@ -341,6 +365,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
 
 # Pull Request Overview
 * Create a [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) of the [automl/auto-sklearn](https://github.com/automl/auto-sklearn) git repo
+* Check out what's available by running `make help`.
 * Clone your own fork and create a new branch from the branch to work on
     ```bash
     git clone git@github.com:your-username/auto-sklearn.git
@@ -355,15 +380,24 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     python -m venv my-virtual-env
     source my-virtual-env/bin/activate
 
-    pip install -e .[test,docs,examples] # zsh users need quotes ".[test,...]"
+    make install-dev
+    # pip install -e ".[test,docs,examples]" # To manually install things
 
     # Edit files...
 
+    # Format code
+    make format
+
+    # Check for any issues
+    make check
+
+    # ... fix any issues
+
     # If you changed documentation:
-    # This will generate all documentation, run examples and check links
-    cd doc
-    make html
+    # This will generate all documentation and check links
+    make doc
     make linkcheck
+    make examples  # mainly needed if you modified some examples
 
     # ... fix any issues
 
@@ -373,8 +407,8 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
 
     # ... fix any issues
 
-    # Use pre-commit for style and typing checks
-    pip install pre-commit
+    # If you want to run pre-commit, the formatting checks we run on github
+    pre-commit install
     pre-commit run --all-files
 
     # ... fix any issues

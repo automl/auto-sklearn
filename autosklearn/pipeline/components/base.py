@@ -1,12 +1,14 @@
-from collections import OrderedDict
+from typing import Dict, Optional
+
 import importlib
 import inspect
 import pkgutil
 import sys
-from typing import Dict
+from collections import OrderedDict
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
 from autosklearn.pipeline.constants import SPARSE
 
 _addons = dict()  # type: Dict[str, 'ThirdPartyComponents']
@@ -21,8 +23,11 @@ def find_components(package, directory, base_class):
             module = importlib.import_module(full_module_name)
 
             for member_name, obj in inspect.getmembers(module):
-                if inspect.isclass(obj) and issubclass(obj, base_class) and \
-                        obj != base_class:
+                if (
+                    inspect.isclass(obj)
+                    and issubclass(obj, base_class)
+                    and obj != base_class
+                ):
                     # TODO test if the obj implements the interface
                     # Keep in mind that this only instantiates the ensemble_wrapper,
                     # but not the real target classifier
@@ -42,24 +47,35 @@ class ThirdPartyComponents(object):
             name = obj.__name__
             classifier = obj
         else:
-            raise TypeError('add_component works only with a subclass of %s' %
-                            str(self.base_class))
+            raise TypeError(
+                "add_component works only with a subclass of %s" % str(self.base_class)
+            )
 
         properties = set(classifier.get_properties())
-        should_be_there = {'shortname', 'name', 'handles_regression',
-                           'handles_classification', 'handles_multiclass',
-                           'handles_multilabel', 'handles_multioutput',
-                           'is_deterministic', 'input', 'output'}
+        should_be_there = {
+            "shortname",
+            "name",
+            "handles_regression",
+            "handles_classification",
+            "handles_multiclass",
+            "handles_multilabel",
+            "handles_multioutput",
+            "is_deterministic",
+            "input",
+            "output",
+        }
         for property in properties:
             if property not in should_be_there:
-                raise ValueError('Property %s must not be specified for '
-                                 'algorithm %s. Only the following properties '
-                                 'can be specified: %s' %
-                                 (property, name, str(should_be_there)))
+                raise ValueError(
+                    "Property %s must not be specified for "
+                    "algorithm %s. Only the following properties "
+                    "can be specified: %s" % (property, name, str(should_be_there))
+                )
         for property in should_be_there:
             if property not in properties:
-                raise ValueError('Property %s not specified for algorithm %s' %
-                                 (property, name))
+                raise ValueError(
+                    "Property %s not specified for algorithm %s" % (property, name)
+                )
 
         self.components[name] = classifier
 
@@ -83,12 +99,14 @@ class AutoSklearnComponent(BaseEstimator):
         raise NotImplementedError()
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(
+        feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
+    ):
         """Return the configuration space of this classification algorithm.
 
         Parameters
         ----------
-
+        feat_type : FEAT_TYPE_TYPE (default=None)
         dataset_properties : dict, optional (default=None)
 
         Returns
@@ -121,39 +139,45 @@ class AutoSklearnComponent(BaseEstimator):
         for further information."""
         raise NotImplementedError()
 
-    def set_hyperparameters(self, configuration, init_params=None):
+    def set_hyperparameters(
+        self,
+        configuration,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params=None,
+    ):
         params = configuration.get_dictionary()
 
         for param, value in params.items():
             if not hasattr(self, param):
-                raise ValueError('Cannot set hyperparameter %s for %s because '
-                                 'the hyperparameter does not exist.' %
-                                 (param, str(self)))
+                raise ValueError(
+                    "Cannot set hyperparameter %s for %s because "
+                    "the hyperparameter does not exist." % (param, str(self))
+                )
             setattr(self, param, value)
 
         if init_params is not None:
             for param, value in init_params.items():
                 if not hasattr(self, param):
-                    raise ValueError('Cannot set init param %s for %s because '
-                                     'the init param does not exist.' %
-                                     (param, str(self)))
+                    raise ValueError(
+                        "Cannot set init param %s for %s because "
+                        "the init param does not exist." % (param, str(self))
+                    )
                 setattr(self, param, value)
 
         return self
 
     def __str__(self):
-        name = self.get_properties()['name']
+        name = self.get_properties()["name"]
         return "autosklearn.pipeline %s" % name
 
 
 class IterativeComponent(AutoSklearnComponent):
-
     def fit(self, X, y, sample_weight=None):
         self.iterative_fit(X, y, n_iter=2, refit=True)
 
         iteration = 2
         while not self.configuration_fully_fitted():
-            n_iter = int(2 ** iteration / 2)
+            n_iter = int(2**iteration / 2)
             self.iterative_fit(X, y, n_iter=n_iter, refit=False)
             iteration += 1
 
@@ -168,14 +192,15 @@ class IterativeComponent(AutoSklearnComponent):
 
 
 class IterativeComponentWithSampleWeight(AutoSklearnComponent):
-
     def fit(self, X, y, sample_weight=None):
         self.iterative_fit(X, y, n_iter=2, refit=True, sample_weight=sample_weight)
 
         iteration = 2
         while not self.configuration_fully_fitted():
-            n_iter = int(2 ** iteration / 2)
-            self.iterative_fit(X, y, n_iter=n_iter, refit=False, sample_weight=sample_weight)
+            n_iter = int(2**iteration / 2)
+            self.iterative_fit(
+                X, y, n_iter=n_iter, refit=False, sample_weight=sample_weight
+            )
             iteration += 1
 
         return self
@@ -322,7 +347,12 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
 
 class AutoSklearnChoice(object):
-    def __init__(self, dataset_properties, random_state=None):
+    def __init__(
+        self,
+        dataset_properties,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        random_state=None,
+    ):
         """
         Parameters
         ----------
@@ -356,23 +386,25 @@ class AutoSklearnChoice(object):
     def get_components(cls):
         raise NotImplementedError()
 
-    def get_available_components(self, dataset_properties=None,
-                                 include=None,
-                                 exclude=None):
+    def get_available_components(
+        self, dataset_properties=None, include=None, exclude=None
+    ):
         if dataset_properties is None:
             dataset_properties = {}
 
         if include is not None and exclude is not None:
             raise ValueError(
-                "The argument include and exclude cannot be used together.")
+                "The argument include and exclude cannot be used together."
+            )
 
         available_comp = self.get_components()
 
         if include is not None:
             for incl in include:
                 if incl not in available_comp:
-                    raise ValueError("Trying to include unknown component: "
-                                     "%s" % incl)
+                    raise ValueError(
+                        "Trying to include unknown component: " "%s" % incl
+                    )
 
         components_dict = OrderedDict()
         for name in available_comp:
@@ -381,47 +413,56 @@ class AutoSklearnChoice(object):
             elif exclude is not None and name in exclude:
                 continue
 
-            if 'sparse' in dataset_properties and dataset_properties['sparse']:
+            if "sparse" in dataset_properties and dataset_properties["sparse"]:
                 # In case the dataset is sparse, ignore
                 # components that do not handle sparse data
                 # Auto-sklearn uses SPARSE constant as a mechanism
                 # to indicate whether a component can handle sparse data.
                 # If SPARSE is not in the input properties of the component, it
                 # means SPARSE is not a valid input to this component, so filter it out
-                if SPARSE not in available_comp[name].get_properties()['input']:
+                if SPARSE not in available_comp[name].get_properties()["input"]:
                     continue
 
             components_dict[name] = available_comp[name]
 
         return components_dict
 
-    def set_hyperparameters(self, configuration, init_params=None):
+    def set_hyperparameters(
+        self,
+        configuration,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        init_params=None,
+    ):
         new_params = {}
 
         params = configuration.get_dictionary()
-        choice = params['__choice__']
-        del params['__choice__']
+        choice = params["__choice__"]
+        del params["__choice__"]
 
         for param, value in params.items():
-            param = param.replace(choice, '').replace(':', '')
+            param = param.replace(choice, "").replace(":", "")
             new_params[param] = value
 
         if init_params is not None:
             for param, value in init_params.items():
-                param = param.replace(choice, '').replace(':', '')
+                param = param.replace(choice, "").replace(":", "")
                 new_params[param] = value
 
-        new_params['random_state'] = self.random_state
+        new_params["random_state"] = self.random_state
 
         self.new_params = new_params
         self.choice = self.get_components()[choice](**new_params)
 
         return self
 
-    def get_hyperparameter_search_space(self, dataset_properties=None,
-                                        default=None,
-                                        include=None,
-                                        exclude=None):
+    def get_hyperparameter_search_space(
+        self,
+        feat_type: FEAT_TYPE_TYPE,
+        dataset_properties=None,
+        default=None,
+        include=None,
+        exclude=None,
+    ):
         raise NotImplementedError()
 
     def fit(self, X, y, **kwargs):

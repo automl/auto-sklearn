@@ -1,27 +1,27 @@
-from typing import Any, List, Dict, Optional, Tuple, Union
-
-from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-
+from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from sklearn.base import BaseEstimator
 
-from autosklearn.pipeline.components.data_preprocessing.category_shift.\
-    category_shift import CategoryShift
-from autosklearn.pipeline.components.data_preprocessing.imputation.\
-    categorical_imputation import CategoricalImputation
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
-    import CoalescenseChoice
-from autosklearn.pipeline.components.data_preprocessing.categorical_encoding \
-    import OHEChoice
-from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.encoding import (
-    OrdinalEncoding
+from autosklearn.askl_typing import FEAT_TYPE_TYPE
+from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, BasePipeline
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (  # noqa: E501
+    OHEChoice,
 )
-from autosklearn.pipeline.base import (
-    BasePipeline,
-    DATASET_PROPERTIES_TYPE,
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.encoding import (  # noqa: E501
+    OrdinalEncoding,
 )
-from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
+from autosklearn.pipeline.components.data_preprocessing.category_shift.category_shift import (  # noqa: E501
+    CategoryShift,
+)
+from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation import (  # noqa: E501
+    CategoricalImputation,
+)
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense import (
+    CoalescenseChoice,
+)
+from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 
 
 class CategoricalPreprocessingPipeline(BasePipeline):
@@ -33,12 +33,10 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         3 - Minority coalescence: Assign category 1 to all categories whose occurrence
             don't sum-up to a certain minimum fraction
         4 - One hot encoding: usual sklearn one hot encoding
-
     Parameters
     ----------
     config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
-
     random_state : Optional[int | RandomState]
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
@@ -47,50 +45,60 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def __init__(
         self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         config: Optional[Configuration] = None,
         steps: Optional[List[Tuple[str, BaseEstimator]]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
-        init_params: Optional[Dict[str, Any]] = None
+        init_params: Optional[Dict[str, Any]] = None,
     ) -> None:
         self._output_dtype = np.int32
         super().__init__(
-            config, steps, dataset_properties, include, exclude,
-            random_state, init_params
+            config=config,
+            steps=steps,
+            dataset_properties=dataset_properties,
+            include=include,
+            exclude=exclude,
+            random_state=random_state,
+            init_params=init_params,
+            feat_type=feat_type,
         )
 
     @staticmethod
-    def get_properties(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
-                       ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
-        return {'shortname': 'cat_datapreproc',
-                'name': 'categorical data preprocessing',
-                'handles_missing_values': True,
-                'handles_nominal_values': True,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
-                'handles_regression': True,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'is_deterministic': True,
-                # TODO find out if this is right!
-                'handles_sparse': True,
-                'handles_dense': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                'preferred_dtype': None}
+    def get_properties(
+        dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
+    ) -> Dict[str, Optional[Union[str, int, bool, Tuple]]]:
+        return {
+            "shortname": "cat_datapreproc",
+            "name": "categorical data preprocessing",
+            "handles_missing_values": True,
+            "handles_nominal_values": True,
+            "handles_numerical_features": True,
+            "prefers_data_scaled": False,
+            "prefers_data_normalized": False,
+            "handles_regression": True,
+            "handles_classification": True,
+            "handles_multiclass": True,
+            "handles_multilabel": True,
+            "is_deterministic": True,
+            # TODO find out if this is right!
+            "handles_sparse": True,
+            "handles_dense": True,
+            "input": (DENSE, SPARSE, UNSIGNED_DATA),
+            "output": (INPUT,),
+            "preferred_dtype": None,
+        }
 
     def _get_hyperparameter_search_space(
         self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
         include: Optional[Dict[str, str]] = None,
         exclude: Optional[Dict[str, str]] = None,
         dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None,
     ) -> ConfigurationSpace:
         """Create the hyperparameter configuration space.
-
         Returns
         -------
         cs : ConfigSpace.configuration_space.Configuration
@@ -102,27 +110,48 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             dataset_properties = dict()
 
         cs = self._get_base_search_space(
-            cs=cs, dataset_properties=dataset_properties,
-            exclude=exclude, include=include, pipeline=self.steps)
+            cs=cs,
+            feat_type=feat_type,
+            dataset_properties=dataset_properties,
+            exclude=exclude,
+            include=include,
+            pipeline=self.steps,
+        )
 
         return cs
 
-    def _get_pipeline_steps(self,
-                            dataset_properties: Optional[Dict[str, str]] = None,
-                            ) -> List[Tuple[str, BaseEstimator]]:
+    def _get_pipeline_steps(
+        self,
+        feat_type: Optional[FEAT_TYPE_TYPE] = None,
+        dataset_properties: Optional[Dict[str, str]] = None,
+    ) -> List[Tuple[str, BaseEstimator]]:
         steps = []
 
         default_dataset_properties = {}
         if dataset_properties is not None and isinstance(dataset_properties, dict):
             default_dataset_properties.update(dataset_properties)
 
-        steps.extend([
-            ("imputation", CategoricalImputation()),
-            ("encoding", OrdinalEncoding()),
-            ("category_shift", CategoryShift()),
-            ("category_coalescence", CoalescenseChoice(default_dataset_properties)),
-            ("categorical_encoding", OHEChoice(default_dataset_properties)),
-            ])
+        steps = [
+            ("imputation", CategoricalImputation(random_state=self.random_state)),
+            ("encoding", OrdinalEncoding(random_state=self.random_state)),
+            ("category_shift", CategoryShift(random_state=self.random_state)),
+            (
+                "category_coalescence",
+                CoalescenseChoice(
+                    feat_type=feat_type,
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state,
+                ),
+            ),
+            (
+                "categorical_encoding",
+                OHEChoice(
+                    feat_type=feat_type,
+                    dataset_properties=default_dataset_properties,
+                    random_state=self.random_state,
+                ),
+            ),
+        ]
 
         return steps
 

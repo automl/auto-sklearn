@@ -1,38 +1,37 @@
-import unittest
-
 import numpy as np
-
 import scipy.sparse
-import sklearn.tree
 import sklearn.datasets
 import sklearn.model_selection
 import sklearn.pipeline
+import sklearn.tree
 from sklearn.impute import SimpleImputer
 from sklearn.tree import DecisionTreeClassifier
 
-from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
+from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 
-sparse1 = scipy.sparse.csc_matrix(([3, 2, 1, 1, 2, 3],
-                                   ((1, 4, 5, 2, 3, 5),
-                                    (0, 0, 0, 1, 1, 1))), shape=(6, 2))
-sparse1_1h = scipy.sparse.csc_matrix(([1, 1, 1, 1, 1, 1],
-                                      ((5, 4, 1, 2, 3, 5),
-                                       (0, 1, 2, 3, 4, 5))), shape=(6, 6))
+import unittest
 
-sparse2 = scipy.sparse.csc_matrix(([2, 1, 0, 0, 0, 0],
-                                   ((1, 4, 5, 2, 3, 5),
-                                    (0, 0, 0, 1, 1, 1))), shape=(6, 2))
-sparse2_1h = scipy.sparse.csc_matrix(([1, 1, 1, 1, 1, 1],
-                                      ((5, 4, 1, 2, 3, 5),
-                                       (0, 1, 2, 3, 3, 3))), shape=(6, 4))
+sparse1 = scipy.sparse.csc_matrix(
+    ([3, 2, 1, 1, 2, 3], ((1, 4, 5, 2, 3, 5), (0, 0, 0, 1, 1, 1))), shape=(6, 2)
+)
+sparse1_1h = scipy.sparse.csc_matrix(
+    ([1, 1, 1, 1, 1, 1], ((5, 4, 1, 2, 3, 5), (0, 1, 2, 3, 4, 5))), shape=(6, 6)
+)
 
-sparse2_csr = scipy.sparse.csr_matrix(([2, 1, 0, 0, 0, 0],
-                                      ((1, 4, 5, 2, 3, 5),
-                                       (0, 0, 0, 1, 1, 1))), shape=(6, 2))
-sparse2_csr_1h = scipy.sparse.csr_matrix(([1, 1, 1, 1, 1, 1],
-                                         ((5, 4, 1, 2, 3, 5),
-                                          (0, 1, 2, 3, 3, 3))), shape=(6, 4))
+sparse2 = scipy.sparse.csc_matrix(
+    ([2, 1, 0, 0, 0, 0], ((1, 4, 5, 2, 3, 5), (0, 0, 0, 1, 1, 1))), shape=(6, 2)
+)
+sparse2_1h = scipy.sparse.csc_matrix(
+    ([1, 1, 1, 1, 1, 1], ((5, 4, 1, 2, 3, 5), (0, 1, 2, 3, 3, 3))), shape=(6, 4)
+)
+
+sparse2_csr = scipy.sparse.csr_matrix(
+    ([2, 1, 0, 0, 0, 0], ((1, 4, 5, 2, 3, 5), (0, 0, 0, 1, 1, 1))), shape=(6, 2)
+)
+sparse2_csr_1h = scipy.sparse.csr_matrix(
+    ([1, 1, 1, 1, 1, 1], ((5, 4, 1, 2, 3, 5), (0, 1, 2, 3, 3, 3))), shape=(6, 4)
+)
 
 
 class TestSparseOneHotEncoder(unittest.TestCase):
@@ -52,8 +51,7 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         transformation = ohe.fit_transform(input)
         self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
         np.testing.assert_array_almost_equal(
-            expected.astype(float),
-            transformation.todense()
+            expected.astype(float), transformation.todense()
         )
         self._check_arrays_equal(input, input_copy)
 
@@ -90,23 +88,26 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         self.assertEqual(3, np.sum(output))
 
     def test_classification_workflow(self):
-        X, y = sklearn.datasets.fetch_openml(data_id=24, as_frame=False, return_X_y=True)
+        X, y = sklearn.datasets.fetch_openml(
+            data_id=24, as_frame=False, return_X_y=True
+        )
         print(type(X))
 
-        X_train, X_test, y_train, y_test = \
-            sklearn.model_selection.train_test_split(X, y, random_state=3,
-                                                     train_size=0.5,
-                                                     test_size=0.5)
+        X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+            X, y, random_state=3, train_size=0.5, test_size=0.5
+        )
 
         X_train = scipy.sparse.csc_matrix(X_train)
         X_test = scipy.sparse.csc_matrix(X_test)
 
-        pipeline = sklearn.pipeline.Pipeline((
-            ('shift', CategoryShift()),
-            ('imput', SimpleImputer(strategy='constant', fill_value=2)),
-            ('ohe', SparseOneHotEncoder()),
-            ('tree', DecisionTreeClassifier(random_state=1)),
-            ))
+        pipeline = sklearn.pipeline.Pipeline(
+            (
+                ("shift", CategoryShift()),
+                ("imput", SimpleImputer(strategy="constant", fill_value=2)),
+                ("ohe", SparseOneHotEncoder()),
+                ("tree", DecisionTreeClassifier(random_state=1)),
+            )
+        )
 
         pipeline.fit(X_train, y_train)
         pred_train = pipeline.predict(X_train)

@@ -1,25 +1,50 @@
-import unittest
-
 import numpy as np
 
 from autosklearn.pipeline.implementations.util import softmax
 
+import unittest
+
 
 class UtilTest(unittest.TestCase):
     def test_softmax_binary(self):
-        df = np.array([-40.00643897, 34.69754581, 23.71181359, -29.89724287,
-                       27.06071791, -37.78334103, -40.15812461, 40.16139229,
-                       -27.85887801, 42.67404756, -36.89753589, -36.45148009,
-                       54.68976306, 19.47886562, -49.99821027, -35.70205302,
-                       -40.59639267, 32.96343916, -39.23777841, -37.86535019,
-                       -33.10196906, 26.84144377, -36.8569686])
+        df = np.array(
+            [
+                -40.00643897,
+                34.69754581,
+                23.71181359,
+                -29.89724287,
+                27.06071791,
+                -37.78334103,
+                -40.15812461,
+                40.16139229,
+                -27.85887801,
+                42.67404756,
+                -36.89753589,
+                -36.45148009,
+                54.68976306,
+                19.47886562,
+                -49.99821027,
+                -35.70205302,
+                -40.59639267,
+                32.96343916,
+                -39.23777841,
+                -37.86535019,
+                -33.10196906,
+                26.84144377,
+                -36.8569686,
+            ]
+        )
         probas = softmax(df)
-        expected = [[1., 0.] if d < 0. else [0., 1.] for d in df]
+        expected = [[1.0, 0.0] if d < 0.0 else [0.0, 1.0] for d in df]
         np.testing.assert_array_almost_equal(expected, probas)
 
     def test_softmax(self):
-        df = np.array([[2.75021367e+10, -8.83772371e-01, -2.20516715e+27],
-                       [-2.10848072e+11, 2.35024444e-01, 5.20106536e+25]])
+        df = np.array(
+            [
+                [2.75021367e10, -8.83772371e-01, -2.20516715e27],
+                [-2.10848072e11, 2.35024444e-01, 5.20106536e25],
+            ]
+        )
         # With a numerically unstable softmax, the output would be something
         # like this:
         # [[  0.   0.  nan]
@@ -30,6 +55,7 @@ class UtilTest(unittest.TestCase):
 
         df = np.array([[0.1, 0.6, 0.3], [0.2, 0.3, 0.5]])
         probas = softmax(df)
-        expected = np.array([[0.25838965, 0.42601251, 0.31559783],
-                             [0.28943311, 0.31987306, 0.39069383]])
+        expected = np.array(
+            [[0.25838965, 0.42601251, 0.31559783], [0.28943311, 0.31987306, 0.39069383]]
+        )
         np.testing.assert_array_almost_equal(expected, probas)

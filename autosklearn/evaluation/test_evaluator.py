@@ -1,36 +1,29 @@
 # -*- encoding: utf-8 -*-
-import multiprocessing
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
-from ConfigSpace import Configuration
+import multiprocessing
 
 import numpy as np
-
+from ConfigSpace import Configuration
 from smac.tae import StatusType
 
 from autosklearn.automl_common.common.utils.backend import Backend
-
 from autosklearn.evaluation.abstract_evaluator import (
     AbstractEvaluator,
     _fit_and_suppress_warnings,
 )
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.components.base import ThirdPartyComponents
-from autosklearn.metrics import calculate_loss, Scorer
 
-
-__all__ = [
-    'eval_t',
-    'TestEvaluator'
-]
+__all__ = ["eval_t", "TestEvaluator"]
 
 
 class TestEvaluator(AbstractEvaluator):
-
     def __init__(
         self,
         backend: Backend,
         queue: multiprocessing.Queue,
-        metric: Scorer,
+        metrics: Sequence[Scorer],
         additional_components: Dict[str, ThirdPartyComponents],
         port: Optional[int],
         configuration: Optional[Union[int, Configuration]] = None,
@@ -46,7 +39,7 @@ class TestEvaluator(AbstractEvaluator):
             queue=queue,
             port=port,
             configuration=configuration,
-            metric=metric,
+            metrics=metrics,
             additional_components=additional_components,
             scoring_functions=scoring_functions,
             seed=seed,
@@ -55,17 +48,17 @@ class TestEvaluator(AbstractEvaluator):
             include=include,
             exclude=exclude,
             disable_file_output=disable_file_output,
-            init_params=init_params
+            init_params=init_params,
         )
         self.configuration = configuration
 
-        self.X_train = self.datamanager.data['X_train']
-        self.Y_train = self.datamanager.data['Y_train']
+        self.X_train = self.datamanager.data["X_train"]
+        self.Y_train = self.datamanager.data["Y_train"]
 
-        self.X_test = self.datamanager.data.get('X_test')
-        self.Y_test = self.datamanager.data.get('Y_test')
+        self.X_test = self.datamanager.data.get("X_test")
+        self.Y_test = self.datamanager.data.get("Y_test")
 
-        self.model = self._get_model()
+        self.model = self._get_model(self.feat_type)
 
     def fit_predict_and_loss(self) -> None:
         _fit_and_suppress_warnings(self.logger, self.model, self.X_train, self.Y_train)
@@ -74,7 +67,6 @@ class TestEvaluator(AbstractEvaluator):
             loss=loss,
             train_loss=None,
             opt_pred=Y_pred,
-            valid_pred=None,
             test_pred=None,
             file_output=False,
             final_call=True,
@@ -85,25 +77,28 @@ class TestEvaluator(AbstractEvaluator):
     def predict_and_loss(
         self, train: bool = False
     ) -> Tuple[Union[Dict[str, float], float], np.array, Any, Any]:
-
         if train:
-            Y_pred = self.predict_function(self.X_train, self.model,
-                                           self.task_type, self.Y_train)
-            err = calculate_loss(
+            Y_pred = self.predict_function(
+                self.X_train, self.model, self.task_type, self.Y_train
+            )
+            err = calculate_losses(
                 solution=self.Y_train,
                 prediction=Y_pred,
                 task_type=self.task_type,
-                metric=self.metric,
-                scoring_functions=self.scoring_functions)
+                metrics=self.metrics,
+                scoring_functions=self.scoring_functions,
+            )
         else:
-            Y_pred = self.predict_function(self.X_test, self.model,
-                                           self.task_type, self.Y_train)
-            err = calculate_loss(
+            Y_pred = self.predict_function(
+                self.X_test, self.model, self.task_type, self.Y_train
+            )
+            err = calculate_losses(
                 solution=self.Y_test,
                 prediction=Y_pred,
                 task_type=self.task_type,
-                metric=self.metric,
-                scoring_functions=self.scoring_functions)
+                metrics=self.metrics,
+                scoring_functions=self.scoring_functions,
+            )
 
         return err, Y_pred, None, None
 
@@ -114,7 +109,7 @@ def eval_t(
     queue: multiprocessing.Queue,
     config: Union[int, Configuration],
     backend: Backend,
-    metric: Scorer,
+    metrics: Sequence[Scorer],
     seed: int,
     num_run: int,
     instance: Dict[str, Any],
@@ -129,14 +124,19 @@ def eval_t(
     budget: Optional[float] = None,
     budget_type: Optional[str] = None,
 ) -> None:
-    evaluator = TestEvaluator(configuration=config,
-                              backend=backend, metric=metric, seed=seed,
-                              port=port,
-                              queue=queue,
-                              scoring_functions=scoring_functions,
-                              include=include, exclude=exclude,
-                              disable_file_output=disable_file_output,
-                              additional_components=additional_components,
-                              init_params=init_params,)
+    evaluator = TestEvaluator(
+        configuration=config,
+        backend=backend,
+        metrics=metrics,
+        seed=seed,
+        port=port,
+        queue=queue,
+        scoring_functions=scoring_functions,
+        include=include,
+        exclude=exclude,
+        disable_file_output=disable_file_output,
+        additional_components=additional_components,
+        init_params=init_params,
+    )
 
     evaluator.fit_predict_and_loss()

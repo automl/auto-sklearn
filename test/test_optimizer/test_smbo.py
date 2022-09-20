@@ -2,41 +2,44 @@ import logging.handlers
 
 from ConfigSpace.configuration_space import Configuration
 
-import pytest
-
 import autosklearn.metrics
-from autosklearn.smbo import AutoMLSMBO
 import autosklearn.pipeline.util as putil
 from autosklearn.automl import AutoML
 from autosklearn.constants import BINARY_CLASSIFICATION
 from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.stopwatch import StopWatch
 
+import pytest
 
-@pytest.mark.parametrize("context", ['fork', 'forkserver'])
-def test_smbo_metalearning_configurations(backend, context, dask_client):
 
+@pytest.mark.parametrize("context", ["fork", "forkserver", "spawn"])
+def test_smbo_metalearning_configurations(backend, context, dask_client) -> None:
     # Get the inputs to the optimizer
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-    config_space = AutoML(delete_tmp_folder_after_terminate=False,
-                          metric=autosklearn.metrics.accuracy,
-                          time_left_for_this_task=20,
-                          per_run_time_limit=5).fit(
-                              X_train, Y_train,
-                              task=BINARY_CLASSIFICATION,
-                              only_return_configuration_space=True)
-    watcher = StopWatch()
+    X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
+    config_space = AutoML(
+        delete_tmp_folder_after_terminate=False,
+        metrics=[autosklearn.metrics.accuracy],
+        time_left_for_this_task=20,
+        per_run_time_limit=5,
+    ).fit(
+        X_train,
+        Y_train,
+        task=BINARY_CLASSIFICATION,
+        only_return_configuration_space=True,
+    )
+    stopwatch = StopWatch()
 
     # Create an optimizer
     smbo = AutoMLSMBO(
         config_space=config_space,
-        dataset_name='iris',
+        dataset_name="iris",
         backend=backend,
         total_walltime_limit=10,
         func_eval_time_limit=5,
         memory_limit=4096,
-        metric=autosklearn.metrics.accuracy,
-        watcher=watcher,
+        metrics=[autosklearn.metrics.accuracy],
+        stopwatch=stopwatch,
         n_jobs=1,
         dask_client=dask_client,
         port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
@@ -49,11 +52,13 @@ def test_smbo_metalearning_configurations(backend, context, dask_client):
 
     # Create the inputs to metalearning
     datamanager = XYDataManager(
-        X_train, Y_train,
-        X_test, Y_test,
+        X_train,
+        Y_train,
+        X_test,
+        Y_test,
         task=BINARY_CLASSIFICATION,
-        dataset_name='iris',
-        feat_type={i: 'numerical' for i in range(X_train.shape[1])},
+        dataset_name="iris",
+        feat_type={i: "numerical" for i in range(X_train.shape[1])},
     )
     backend.save_datamanager(datamanager)
     smbo.task = BINARY_CLASSIFICATION

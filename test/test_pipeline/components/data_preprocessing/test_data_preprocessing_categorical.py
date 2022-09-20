@@ -1,34 +1,35 @@
-import unittest
 import numpy as np
 from scipy import sparse
 
-import pytest
+from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical import (  # noqa: E501
+    CategoricalPreprocessingPipeline,
+)
 
-from autosklearn.pipeline.components.data_preprocessing.feature_type_categorical \
-    import CategoricalPreprocessingPipeline
+import pytest
+import unittest
 
 
 class CategoricalPreprocessingPipelineTest(unittest.TestCase):
-
     def test_data_type_consistency(self):
         X = np.random.randint(3, 6, (3, 4))
         Y = CategoricalPreprocessingPipeline().fit_transform(X)
         self.assertFalse(sparse.issparse(Y))
 
         X = sparse.csc_matrix(
-            ([3, 6, 4, 5], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4))
+            ([3, 6, 4, 5], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4)
+        )
         Y = CategoricalPreprocessingPipeline().fit_transform(X)
         self.assertTrue(sparse.issparse(Y))
 
     def test_fit_transform(self):
-        X = np.array([
-            [1, 2, 1],
-            [3, 1, 1],
-            [2, 9, np.nan]])
-        Y = np.array([
-            [1, 0, 0, 0, 1, 0, 0, 1],
-            [0, 0, 1, 1, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 1, 1, 0]])
+        X = np.array([[1, 2, 1], [3, 1, 1], [2, 9, np.nan]])
+        Y = np.array(
+            [
+                [1, 0, 0, 0, 1, 0, 0, 1],
+                [0, 0, 1, 1, 0, 0, 0, 1],
+                [0, 1, 0, 0, 0, 1, 1, 0],
+            ]
+        )
         # dense input
         # Notice the X.copy() here as the imputation
         # is in place to save resources
@@ -41,30 +42,30 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         np.testing.assert_array_equal(Yt, Y)
 
     def test_transform(self):
-        X1 = np.array([
-            [1, 2, 0],
-            [3, 0, 0],
-            [2, 9, np.nan]])
-        Y1 = np.array([
-            [1, 0, 0, 0, 1, 0, 0, 1],
-            [0, 0, 1, 1, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 1, 1, 0]])
-        X2 = np.array([
-            [2, 2, 1],
-            [3, 0, 0],
-            [2, np.nan, np.nan]])
-        Y2 = np.array([
-            [0, 1, 0, 0, 1, 0, 0, 0],
-            [0, 0, 1, 1, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 0, 1, 0]])
-        X3 = np.array([
-            [3, np.nan, 0],
-            [3, 9, np.nan],
-            [2, 2, 5]])
-        Y3 = np.array([
-            [0, 0, 1, 0, 0, 0, 0, 1],
-            [0, 0, 1, 0, 0, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0, 0, 0]])
+        X1 = np.array([[1, 2, 0], [3, 0, 0], [2, 9, np.nan]])
+        Y1 = np.array(
+            [
+                [1, 0, 0, 0, 1, 0, 0, 1],
+                [0, 0, 1, 1, 0, 0, 0, 1],
+                [0, 1, 0, 0, 0, 1, 1, 0],
+            ]
+        )
+        X2 = np.array([[2, 2, 1], [3, 0, 0], [2, np.nan, np.nan]])
+        Y2 = np.array(
+            [
+                [0, 1, 0, 0, 1, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1],
+                [0, 1, 0, 0, 0, 0, 1, 0],
+            ]
+        )
+        X3 = np.array([[3, np.nan, 0], [3, 9, np.nan], [2, 2, 5]])
+        Y3 = np.array(
+            [
+                [0, 0, 1, 0, 0, 0, 0, 1],
+                [0, 0, 1, 0, 0, 1, 1, 0],
+                [0, 1, 0, 0, 1, 0, 0, 0],
+            ]
+        )
         # "fit"
         CPPL = CategoricalPreprocessingPipeline()
         CPPL.fit_transform(X1)
@@ -81,13 +82,15 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
     def test_transform_with_coalescence(self):
         # Generates an array with categories 0, 20, 5, 6, 10, and occurences of 60%,
         # 30%, 19% 0.5% and 0.5% respectively
-        X = np.vstack((
-            np.ones((120, 10)) * 0,
-            np.ones((60, 10)) * 20,
-            np.ones((18, 10)) * 5,
-            np.ones((1, 10)) * 6,
-            np.ones((1, 10)) * 10,
-        ))
+        X = np.vstack(
+            (
+                np.ones((120, 10)) * 0,
+                np.ones((60, 10)) * 20,
+                np.ones((18, 10)) * 5,
+                np.ones((1, 10)) * 6,
+                np.ones((1, 10)) * 10,
+            )
+        )
         for col in range(X.shape[1]):
             np.random.shuffle(X[:, col])
 
@@ -100,10 +103,12 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         Y2t = CPPL.transform(X)
         np.testing.assert_array_equal(Y1t, Y2t)
 
-    @pytest.mark.xfail(reason=(
-        "Encoding step does not support sparse matrices to convert negative labels to"
-        " positive ones as it does with non-sparse matrices"
-    ))
+    @pytest.mark.xfail(
+        reason=(
+            "Encoding step does not support sparse matrices to convert negative labels"
+            " to positive ones as it does with non-sparse matrices"
+        )
+    )
     def test_transform_with_sparse_column_with_negative_labels(self):
         X = sparse.csr_matrix([[0], [-1]])
         CategoricalPreprocessingPipeline().fit_transform(X)

@@ -1,28 +1,35 @@
+from __future__ import annotations
+
+from typing import Dict, List, Sequence, Tuple, Union
+
 import random
+import warnings
 from collections import Counter
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
-
 from sklearn.utils import check_random_state
 
+from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import TASK_TYPES
+from autosklearn.data.validation import SUPPORTED_FEAT_TYPES
+from autosklearn.ensemble_building.run import Run
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.metrics import Scorer, calculate_loss
+from autosklearn.metrics import Scorer, calculate_losses
 from autosklearn.pipeline.base import BasePipeline
 
 
 class EnsembleSelection(AbstractEnsemble):
     def __init__(
         self,
-        ensemble_size: int,
         task_type: int,
-        metric: Scorer,
+        metrics: Sequence[Scorer] | Scorer,
+        backend: Backend,
+        ensemble_size: int = 50,
         bagging: bool = False,
-        mode: str = 'fast',
-        random_state: Optional[Union[int, np.random.RandomState]] = None,
+        mode: str = "fast",
+        random_state: int | np.random.RandomState | None = None,
     ) -> None:
-        """ An ensemble of selected algorithms
+        """An ensemble of selected algorithms
 
         Fitting an EnsembleSelection generates an ensemble from the the models
         generated during the search process. Can be further used for prediction.
@@ -31,25 +38,50 @@ class EnsembleSelection(AbstractEnsemble):
         ----------
         task_type: int
             An identifier indicating which task is being performed.
-        metric: Scorer
-            The metric used to evaluate the models
+
+        metrics: Sequence[Scorer] | Scorer
+            The metric used to evaluate the models. If multiple metrics are passed,
+            ensemble selection only optimizes for the first
+
+        backend : Backend
+            Gives access to the backend of Auto-sklearn. Not used by Ensemble Selection.
+
         bagging: bool = False
             Whether to use bagging in ensemble selection
+
         mode: str in ['fast', 'slow'] = 'fast'
             Which kind of ensemble generation to use
-            *   'slow' - The original method used in Rich Caruana's ensemble selection.
-            *   'fast' - A faster version of Rich Caruanas' ensemble selection.
+            * 'slow' - The original method used in Rich Caruana's ensemble selection.
+            * 'fast' - A faster version of Rich Caruanas' ensemble selection.
 
-        random_state: Optional[int | RandomState] = None
+        random_state: int | RandomState | None = None
             The random_state used for ensemble selection.
-            *   None - Uses numpy's default RandomState object
-            *   int - Successive calls to fit will produce the same results
-            *   RandomState - Truely random, each call to fit will produce
-                              different results, even with the same object.
-        """
+
+            * None - Uses numpy's default RandomState object
+            * int - Successive calls to fit will produce the same results
+            * RandomState - Truly random, each call to fit will produce
+              different results, even with the same object.
+
+        References
+        ----------
+        | Ensemble selection from libraries of models
+        | Rich Caruana, Alexandru Niculescu-Mizil, Geoff Crew and Alex Ksikes
+        | ICML 2004
+        | https://dl.acm.org/doi/10.1145/1015330.1015432
+        | https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf
+        """  # noqa: E501
         self.ensemble_size = ensemble_size
         self.task_type = task_type
-        self.metric = metric
+        if isinstance(metrics, Sequence):
+            if len(metrics) > 1:
+                warnings.warn(
+                    "Ensemble selection can only optimize one metric, "
+                    "but multiple metrics were passed, dropping all "
+                    "except for the first metric."
+                )
+            self.metric = metrics[0]
+        else:
+            self.metric = metrics
         self.bagging = bagging
         self.mode = mode
 
@@ -60,60 +92,61 @@ class EnsembleSelection(AbstractEnsemble):
         # https://scikit-learn.org/stable/common_pitfalls.html#controlling-randomness
         self.random_state = random_state
 
-    def __getstate__(self) -> Dict[str, Any]:
-        # Cannot serialize a metric if
-        # it is user defined.
-        # That is, if doing pickle dump
-        # the metric won't be the same as the
-        # one in __main__. we don't use the metric
-        # in the EnsembleSelection so this should
-        # be fine
-        self.metric = None  # type: ignore
-        return self.__dict__
-
     def fit(
         self,
-        predictions: List[np.ndarray],
-        labels: np.ndarray,
-        identifiers: List[Tuple[int, int, float]],
-    ) -> AbstractEnsemble:
+        base_models_predictions: List[np.ndarray],
+        true_targets: np.ndarray,
+        model_identifiers: List[Tuple[int, int, float]],
+        runs: Sequence[Run],
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
+    ) -> EnsembleSelection:
         self.ensemble_size = int(self.ensemble_size)
         if self.ensemble_size < 1:
-            raise ValueError('Ensemble size cannot be less than one!')
+            raise ValueError("Ensemble size cannot be less than one!")
         if self.task_type not in TASK_TYPES:
-            raise ValueError('Unknown task type %s.' % self.task_type)
+            raise ValueError("Unknown task type %s." % self.task_type)
         if not isinstance(self.metric, Scorer):
-            raise ValueError("The provided metric must be an instance of Scorer, "
-                             "nevertheless it is {}({})".format(
-                                 self.metric,
-                                 type(self.metric),
-                             ))
-        if self.mode not in ('fast', 'slow'):
-            raise ValueError('Unknown mode %s' % self.mode)
+            raise ValueError(
+                "The provided metric must be an instance of Scorer, "
+                "nevertheless it is {}({})".format(
+                    self.metric,
+                    type(self.metric),
+                )
+            )
+        if self.mode not in ("fast", "slow"):
+            raise ValueError("Unknown mode %s" % self.mode)
 
         if self.bagging:
-            self._bagging(predictions, labels)
+            self._bagging(base_models_predictions, true_targets)
         else:
-            self._fit(predictions, labels)
+            self._fit(
+                predictions=base_models_predictions,
+                X_data=X_data,
+                labels=true_targets,
+            )
         self._calculate_weights()
-        self.identifiers_ = identifiers
+        self.identifiers_ = model_identifiers
         return self
 
     def _fit(
         self,
         predictions: List[np.ndarray],
         labels: np.ndarray,
-    ) -> AbstractEnsemble:
-        if self.mode == 'fast':
-            self._fast(predictions, labels)
+        *,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
+    ) -> EnsembleSelection:
+        if self.mode == "fast":
+            self._fast(predictions=predictions, X_data=X_data, labels=labels)
         else:
-            self._slow(predictions, labels)
+            self._slow(predictions=predictions, X_data=X_data, labels=labels)
         return self
 
     def _fast(
         self,
         predictions: List[np.ndarray],
         labels: np.ndarray,
+        *,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> None:
         """Fast version of Rich Caruana's ensemble selection method."""
         self.num_input_models_ = len(predictions)
@@ -149,32 +182,27 @@ class EnsembleSelection(AbstractEnsemble):
             # Memory-efficient averaging!
             for j, pred in enumerate(predictions):
                 # fant_ensemble_prediction is the prediction of the current ensemble
-                # and should be ([predictions[selected_prev_iterations] + predictions[j])/(s+1)
-                # We overwrite the contents of fant_ensemble_prediction
-                # directly with weighted_ensemble_prediction + new_prediction and then scale for avg
-                np.add(
-                    weighted_ensemble_prediction,
-                    pred,
-                    out=fant_ensemble_prediction
-                )
+                # and should be
+                #
+                #   ([predictions[selected_prev_iterations] + predictions[j])/(s+1)
+                #
+                # We overwrite the contents of fant_ensemble_prediction directly with
+                # weighted_ensemble_prediction + new_prediction and then scale for avg
+                np.add(weighted_ensemble_prediction, pred, out=fant_ensemble_prediction)
                 np.multiply(
                     fant_ensemble_prediction,
-                    (1. / float(s + 1)),
-                    out=fant_ensemble_prediction
+                    (1.0 / float(s + 1)),
+                    out=fant_ensemble_prediction,
                 )
 
-                # calculate_loss is versatile and can return a dict of losses
-                # when scoring_functions=None, we know it will be a float
-                losses[j] = cast(
-                    float,
-                    calculate_loss(
-                        solution=labels,
-                        prediction=fant_ensemble_prediction,
-                        task_type=self.task_type,
-                        metric=self.metric,
-                        scoring_functions=None
-                    )
-                )
+                losses[j] = calculate_losses(
+                    solution=labels,
+                    prediction=fant_ensemble_prediction,
+                    task_type=self.task_type,
+                    metrics=[self.metric],
+                    X_data=X_data,
+                    scoring_functions=None,
+                )[self.metric.name]
 
             all_best = np.argwhere(losses == np.nanmin(losses)).flatten()
 
@@ -195,7 +223,9 @@ class EnsembleSelection(AbstractEnsemble):
     def _slow(
         self,
         predictions: List[np.ndarray],
-        labels: np.ndarray
+        labels: np.ndarray,
+        *,
+        X_data: SUPPORTED_FEAT_TYPES | None = None,
     ) -> None:
         """Rich Caruana's ensemble selection method."""
         self.num_input_models_ = len(predictions)
@@ -214,18 +244,14 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                # calculate_loss is versatile and can return a dict of losses
-                # when scoring_functions=None, we know it will be a float
-                losses[j] = cast(
-                    float,
-                    calculate_loss(
-                        solution=labels,
-                        prediction=ensemble_prediction,
-                        task_type=self.task_type,
-                        metric=self.metric,
-                        scoring_functions=None
-                    )
-                )
+                losses[j] = calculate_losses(
+                    solution=labels,
+                    prediction=ensemble_prediction,
+                    task_type=self.task_type,
+                    metrics=[self.metric],
+                    X_data=X_data,
+                    scoring_functions=None,
+                )[self.metric.name]
                 ensemble.pop()
             best = np.nanargmin(losses)
             ensemble.append(predictions[best])
@@ -269,7 +295,7 @@ class EnsembleSelection(AbstractEnsemble):
         n_bags: int = 20,
     ) -> np.ndarray:
         """Rich Caruana's ensemble selection method with bagging."""
-        raise ValueError('Bagging might not work with class-based interface!')
+        raise ValueError("Bagging might not work with class-based interface!")
         n_models = predictions.shape[0]
         bag_size = int(n_models * fraction)
 
@@ -278,7 +304,7 @@ class EnsembleSelection(AbstractEnsemble):
             # Bagging a set of models
             indices = sorted(random.sample(range(0, n_models), bag_size))
             bag = predictions[indices, :, :]
-            order, _ = self._fit(bag, labels)
+            order, _ = self._fit(predictions=bag, labels=labels)
             order_of_each_bag.append(order)
 
         return np.array(
@@ -286,52 +312,58 @@ class EnsembleSelection(AbstractEnsemble):
             dtype=np.int64,
         )
 
-    def predict(self, predictions: Union[np.ndarray, List[np.ndarray]]) -> np.ndarray:
+    def predict(
+        self, base_models_predictions: Union[np.ndarray, List[np.ndarray]]
+    ) -> np.ndarray:
 
-        average = np.zeros_like(predictions[0], dtype=np.float64)
-        tmp_predictions = np.empty_like(predictions[0], dtype=np.float64)
+        average = np.zeros_like(base_models_predictions[0], dtype=np.float64)
+        tmp_predictions = np.empty_like(base_models_predictions[0], dtype=np.float64)
 
         # if predictions.shape[0] == len(self.weights_),
         # predictions include those of zero-weight models.
-        if len(predictions) == len(self.weights_):
-            for pred, weight in zip(predictions, self.weights_):
+        if len(base_models_predictions) == len(self.weights_):
+            for pred, weight in zip(base_models_predictions, self.weights_):
                 np.multiply(pred, weight, out=tmp_predictions)
                 np.add(average, tmp_predictions, out=average)
 
         # if prediction model.shape[0] == len(non_null_weights),
         # predictions do not include those of zero-weight models.
-        elif len(predictions) == np.count_nonzero(self.weights_):
+        elif len(base_models_predictions) == np.count_nonzero(self.weights_):
             non_null_weights = [w for w in self.weights_ if w > 0]
-            for pred, weight in zip(predictions, non_null_weights):
+            for pred, weight in zip(base_models_predictions, non_null_weights):
                 np.multiply(pred, weight, out=tmp_predictions)
                 np.add(average, tmp_predictions, out=average)
 
         # If none of the above applies, then something must have gone wrong.
         else:
-            raise ValueError("The dimensions of ensemble predictions"
-                             " and ensemble weights do not match!")
+            raise ValueError(
+                "The dimensions of ensemble predictions"
+                " and ensemble weights do not match!"
+            )
         del tmp_predictions
         return average
 
     def __str__(self) -> str:
-        trajectory_str = ' '.join([
-            f'{id}: {perf:.5f}'
-            for id, perf in enumerate(self.trajectory_)
-        ])
-        identifiers_str = ' '.join([
-            f'{identifier}'
-            for idx, identifier in enumerate(self.identifiers_)
-            if self.weights_[idx] > 0
-        ])
-        return ("Ensemble Selection:\n"
-                f"\tTrajectory: {trajectory_str}\n"
-                f"\tMembers: {self.indices_}\n"
-                f"\tWeights: {self.weights_}\n"
-                f"\tIdentifiers: {identifiers_str}\n")
+        trajectory_str = " ".join(
+            [f"{id}: {perf:.5f}" for id, perf in enumerate(self.trajectory_)]
+        )
+        identifiers_str = " ".join(
+            [
+                f"{identifier}"
+                for idx, identifier in enumerate(self.identifiers_)
+                if self.weights_[idx] > 0
+            ]
+        )
+        return (
+            "Ensemble Selection:\n"
+            f"\tTrajectory: {trajectory_str}\n"
+            f"\tMembers: {self.indices_}\n"
+            f"\tWeights: {self.weights_}\n"
+            f"\tIdentifiers: {identifiers_str}\n"
+        )
 
     def get_models_with_weights(
-        self,
-        models: BasePipeline
+        self, models: Dict[Tuple[int, int, float], BasePipeline]
     ) -> List[Tuple[float, BasePipeline]]:
         output = []
         for i, weight in enumerate(self.weights_):
@@ -343,6 +375,11 @@ class EnsembleSelection(AbstractEnsemble):
         output.sort(reverse=True, key=lambda t: t[0])
 
         return output
+
+    def get_identifiers_with_weights(
+        self,
+    ) -> List[Tuple[Tuple[int, int, float], float]]:
+        return list(zip(self.identifiers_, self.weights_))
 
     def get_selected_model_identifiers(self) -> List[Tuple[int, int, float]]:
         output = []

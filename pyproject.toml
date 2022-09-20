@@ -1,0 +1,164 @@
+# For TOML reference
+# https://learnxinyminutes.com/docs/toml/
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+minversion = "3.7"
+addopts = "--forked"
+
+[tool.coverage.run]
+branch = true
+context = "autosklearn"
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    '\.\.\.',
+    "raise NotImplementedError",
+    "if TYPE_CHECKING"
+]
+
+[tool.black]
+target-version = ['py37']
+
+[tool.isort]
+py_version = "37"
+profile = "black" # Play nicely with black
+src_paths = ["autosklearn", "test"]
+known_types = ["typing", "abc"] # We put these in their own section TYPES
+known_testlibs = ["unittest", "pytest", "pytest_cases"] # Put test libs in their own section
+known_first_party = ["autosklearn"] # Say that autosklearn is FIRSTPARTY
+known_test = ["test"] # Say that test.* is TEST
+sections = [
+    "FUTURE",
+    "TYPES",
+    "STDLIB",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "TESTLIBS",
+    "TEST",
+    "LOCALFOLDER"
+] # section ordering
+multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
+skip = ["autosklearn/automl_common"]  # Don't validate automl_common
+
+[tool.pydocstyle]
+convention = "numpy"
+add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+
+    "D203", # 1 blank line required before class docstring
+    "D205", # 1 blank line required between summary and description
+    "D210", # No whitespaces allowed surrounding docstring text
+    "D212", # Multi-line docstring summary should start at the first line
+    "D213", # Multi-line docstring summary should start at the second line
+
+    "D400", # First line should end with a period
+    "D401", # First line should be in imperative mood
+    "D404", # First word of the docstring should not be "This"
+    "D413", # Missing blank line after last section
+    "D415"  # First line should end with a period, question mark, or exclamation point
+]
+
+[tool.mypy]
+python_version = "3.7"
+
+show_error_codes = true
+
+warn_unused_configs = true  # warn about unused [tool.mypy] lines
+
+follow_imports = "normal" # Type check top level api code we use from imports
+ignore_missing_imports = false # prefer explicit ignores
+
+disallow_untyped_defs = true # All functions must have types
+disallow_untyped_decorators = true # ... even decorators
+disallow_incomplete_defs = true # ...all types
+
+# This is a problem with the tests of `automl_common` being distributed as a submodule
+# probably indicative that is should be a package.
+exclude = "autosklearn/automl_common/test"
+
+# This is handled by automl_common itself in its own CI
+[[tool.mypy.overrides]]
+module = ["autosklearn.automl_common.common.*"]
+ignore_errors = true
+
+# Submodules that need to be updated with mypy
+[[tool.mypy.overrides]]
+module = [
+    "autosklearn", #__init__
+    "autosklearn.estimators",
+    "autosklearn.automl",
+    "autosklearn.smbo",
+    "autosklearn.experimental.askl2",
+    "autosklearn.evaluation", #__init__
+    "autosklearn.evaluation.abstract_evaluator",
+    "autosklearn.evaluation.test_evaluator",
+    "autosklearn.evaluation.train_evaluator",
+    "autosklearn.metalearning.input.aslib_simple",
+    "autosklearn.metalearning.mismbo",
+    "autosklearn.metalearning.metafeatures.metafeature",
+    "autosklearn.metalearning.metafeatures.metafeatures",
+    "autosklearn.metalearning.metalearning.meta_base",
+    "autosklearn.metalearning.metalearning.metrics.misc",
+    "autosklearn.metalearning.metalearning.create_datasets",
+    "autosklearn.metalearning.metalearning.kNearestDatasets.kND",
+    "autosklearn.metalearning.metalearning.clustering.gmeans",
+    "autosklearn.metalearning.optimizers.optimizer_base",
+    "autosklearn.metalearning.optimizers.metalearn_optimizer.metalearn_optimizer_parser",
+    "autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner",
+    "autosklearn.pipeline.base",
+    "autosklearn.pipeline.classification",
+    "autosklearn.pipeline.regression",
+    "autosklearn.pipeline.components.base",
+    "autosklearn.pipeline.components.data_preprocessing.*",
+    "autosklearn.pipeline.components.regression.*",
+    "autosklearn.pipeline.components.classification.*",
+    "autosklearn.pipeline.components.feature_preprocessing.*",
+    "autosklearn.pipeline.util",
+    "autosklearn.pipeline.logging_",
+    "autosklearn.pipeline.create_searchspace_util",
+    "autosklearn.pipeline.implementations.util",
+    "autosklearn.pipeline.implementations.SparseOneHotEncoder",
+    "autosklearn.pipeline.implementations.MinorityCoalescer",
+    "autosklearn.pipeline.implementations.CategoryShift",
+    "autosklearn.experimental.selector",
+    "autosklearn.data.validation",
+    "autosklearn.data.abstract_data_manager",
+    "autosklearn.data.xy_data_manager",
+    "autosklearn.data.target_validator",
+    "autosklearn.data.feature_validator",
+    "autosklearn.util.single_threaded_client",
+    "autosklearn.util.logging_",
+]
+ignore_errors = true
+
+# Packages without exported types
+[[tool.mypy.overrides]]
+module = [
+    "sklearn.*",
+    "dask.*",
+    "ConfigSpace.*",
+    "arff.*",
+    "scipy.*",
+    "smac.*",
+    "pandas.*",
+    "pynisher.*",
+    "distro.*",
+    "joblib.*",
+    "threadpoolctl.*",
+    "setuptools.*",
+    "pkg_resources.*",
+    "yaml.*",
+    "psutil.*"
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["test.*"]
+disallow_untyped_decorators = false # Test decorators are not properly typed

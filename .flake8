@@ -1,7 +1,13 @@
 [flake8]
-max-line-length = 100
 show-source = True
-application-import-names = autosklearn
-exclude =
+max-line-length = 88
+extend-exclude =
     venv
+    .venv
     build
+    autosklearn/automl_common
+extend-ignore =
+    # No whitespace before ':' in [x : y]
+    E203
+    # No lambdas — too strict
+    E731
