@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fit a single configuration &#8212; AutoSklearn 0.15.0 documentation</title>
+    <title>Fit a single configuration &#8212; AutoSklearn 0.16.0dev documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
@@ -54,7 +54,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           auto-sklearn</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.15.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.16.0dev</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -211,57 +211,63 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(
-{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f162a7e82b0&gt;, &#39;balancing&#39;: Balancing(random_state=1), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f1629d66d60&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f1629d66fa0&gt;}
+{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f5badf19df0&gt;, &#39;balancing&#39;: Balancing(random_state=1), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f5ba86e5cd0&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f5ba86e5790&gt;}
 RunInfo(config=Configuration(values={
   &#39;balancing:strategy&#39;: &#39;none&#39;,
   &#39;classifier:__choice__&#39;: &#39;random_forest&#39;,
-  &#39;classifier:random_forest:bootstrap&#39;: &#39;False&#39;,
+  &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;,
   &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;,
   &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;,
-  &#39;classifier:random_forest:max_features&#39;: 0.9016352760799984,
+  &#39;classifier:random_forest:max_features&#39;: 0.5865013020626391,
   &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;,
   &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0,
-  &#39;classifier:random_forest:min_samples_leaf&#39;: 18,
+  &#39;classifier:random_forest:min_samples_leaf&#39;: 6,
   &#39;classifier:random_forest:min_samples_split&#39;: 11,
   &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0,
   &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;,
   &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0027256333102392205,
-  &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.000395631153921125,
+  &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;,
+  &#39;feature_preprocessor:polynomial:degree&#39;: 2,
+  &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;,
+  &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;,
 })
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.019905213270142164, time=2.3973488807678223, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1661964882.5426927, endtime=1661964884.9610825, additional_info={&#39;duration&#39;: 2.3120338916778564, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.019149929939280663, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.006635071090047351, time=5.096505641937256, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1663673515.61538, endtime=1663673520.734784, additional_info={&#39;duration&#39;: 5.018842458724976, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.004670714619336769, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration(values={
   &#39;balancing:strategy&#39;: &#39;none&#39;,
   &#39;classifier:__choice__&#39;: &#39;random_forest&#39;,
-  &#39;classifier:random_forest:bootstrap&#39;: &#39;False&#39;,
+  &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;,
   &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;,
   &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;,
-  &#39;classifier:random_forest:max_features&#39;: 0.9016352760799984,
+  &#39;classifier:random_forest:max_features&#39;: 0.5865013020626391,
   &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;,
   &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0,
-  &#39;classifier:random_forest:min_samples_leaf&#39;: 18,
+  &#39;classifier:random_forest:min_samples_leaf&#39;: 6,
   &#39;classifier:random_forest:min_samples_split&#39;: 11,
   &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0,
   &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;encoding&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;one_hot_encoding&#39;,
   &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.0027256333102392205,
-  &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.000395631153921125,
+  &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;,
+  &#39;feature_preprocessor:polynomial:degree&#39;: 2,
+  &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;,
+  &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;False&#39;,
 })
 
-Random Forest: RandomForestClassifier(bootstrap=False, max_features=25, min_samples_leaf=18,
+Random Forest: RandomForestClassifier(max_features=102, min_samples_leaf=6,
                        min_samples_split=11, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)
 /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  15.610 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  12.277 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
-<a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/b71f91b170d4a46b842cd9568511ced2/example_single_configuration.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_single_configuration.py</span></code></a></p>

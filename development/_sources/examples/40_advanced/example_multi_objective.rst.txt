@@ -162,7 +162,7 @@ They are by default sorted by the first metric given to *auto-sklearn*.
 
               rank  ensemble_weight           type    cost_0    cost_1  duration
     model_id                                                                    
-    21           1              1.0  random_forest  0.205128  0.586667  1.787868
+    21           1              1.0  random_forest  0.205128  0.586667  1.735724
 
 
 
@@ -223,13 +223,13 @@ to *auto-sklearn*.
                  0.0,
                  0.0,
                  0.0],
-     'mean_fit_time': array([ 1.82028031,  1.73077607,  1.60600901,  1.68246794,  2.25132585,
-            2.15981817,  1.68409371,  0.93279314,  1.82503748, 12.01225758,
-            1.26230574,  1.36539149,  1.34617019,  0.78577662,  1.79526544,
-            0.95391321,  4.77272367,  1.07500982,  8.20369768,  1.78786826,
-            1.55661249,  0.75116658,  1.80918741,  0.88730717,  1.20938563,
-            1.80887842,  2.00507259,  0.92794013,  1.43362641,  1.85926366,
-            0.78836322,  2.20545745,  0.92013001,  1.85873079]),
+     'mean_fit_time': array([ 1.72212005,  1.62101436,  1.52376771,  1.61312962,  2.22948432,
+            2.06983376,  1.60272551,  0.90915251,  1.78266692, 12.01695752,
+            1.16484833,  1.30506897,  1.30484915,  0.75303769,  1.69986677,
+            0.92179012,  5.19420028,  1.02951694,  7.64877415,  1.73572397,
+            1.48832846,  0.73675871,  1.74074721,  0.85072446,  1.13507009,
+            1.76314592,  1.9312346 ,  0.89211059,  1.35746884,  1.78984427,
+            0.75199437,  2.10041094,  0.88895869,  1.72359896]),
      'mean_test_precision': array([0.68888889, 0.61403509, 0.42156863, 0.55072464, 0.53333333,
            0.70588235, 0.67391304, 0.34313725, 0.51401869, 0.        ,
            0.49090909, 0.55263158, 0.50526316, 0.59016393, 0.625     ,
@@ -2779,7 +2779,7 @@ Visualize the Pareto set
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  21.582 seconds)
+   **Total running time of the script:** ( 3 minutes  2.472 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_multi_objective.py:
@@ -2792,7 +2792,7 @@ Visualize the Pareto set
     .. container:: binder-badge
 
       .. image:: images/binder_badge_logo.svg
-        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_multi_objective.ipynb
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_multi_objective.ipynb
         :alt: Launch binder
         :width: 150 px
 

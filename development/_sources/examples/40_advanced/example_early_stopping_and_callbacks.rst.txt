@@ -127,10 +127,10 @@ Build and fit a classifier
       'feature_preprocessor:polynomial:interaction_only': 'False',
     })
     , instance='{"task_id": "breast_cancer"}', instance_specific='0', seed=0, cutoff=30.0, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.014184397163120588, time=1.5217235088348389, status=<StatusType.SUCCESS: 1>, starttime=1661964114.9617765, endtime=1661964116.5022397, additional_info={'duration': 1.4392247200012207, 'num_run': 7, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
+    RunValue(cost=0.014184397163120588, time=1.408132791519165, status=<StatusType.SUCCESS: 1>, starttime=1663672762.2597682, endtime=1663672763.6860816, additional_info={'duration': 1.3338630199432373, 'num_run': 7, 'train_loss': 0.0, 'configuration_origin': 'Initial design'})
 
     AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
-                          get_trials_callback=<function callback at 0x7f163bb6f8b0>,
+                          get_trials_callback=<function callback at 0x7f5bb7c01ee0>,
                           per_run_time_limit=30, time_left_for_this_task=120)
 
 
@@ -157,9 +157,9 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    7            1             0.68    extra_trees  0.014184  1.521724
-    2            2             0.10  random_forest  0.028369  1.603834
-    3            3             0.22            mlp  0.028369  0.867046
+    7            1             0.68    extra_trees  0.014184  1.408133
+    2            2             0.10  random_forest  0.028369  1.520214
+    3            3             0.22            mlp  0.028369  0.824424
 
 
 
@@ -185,21 +185,21 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f16297fc8b0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f5badcb9fa0>,
                'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f162a11d6d0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f5bad89d2b0>,
                'ensemble_weight': 0.1,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f162c2bc8e0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f5badcb9cd0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         3: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f16296d45b0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f5bb0be71c0>,
                'cost': 0.028368794326241176,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f162bfb97c0>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f5bae3c4c40>,
                'ensemble_weight': 0.22,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f16296d4df0>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f5bb0be7d00>,
                'model_id': 3,
                'rank': 2,
                'sklearn_classifier': MLPClassifier(activation='tanh', alpha=0.0001363185819149026, beta_1=0.999,
@@ -208,11 +208,11 @@ Print the final ensemble constructed by auto-sklearn
                   learning_rate_init=0.00018009776276177523, max_iter=32,
                   n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
         7: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f162bebc730>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f5bb0d98a30>,
                'cost': 0.014184397163120588,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f162c30b550>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f5bb0b69d00>,
                'ensemble_weight': 0.68,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f162c2bd550>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f5bae496940>,
                'model_id': 7,
                'rank': 3,
                'sklearn_classifier': ExtraTreesClassifier(max_features=34, min_samples_leaf=3, min_samples_split=11,
@@ -250,7 +250,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.306 seconds)
+   **Total running time of the script:** ( 0 minutes  23.246 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_early_stopping_and_callbacks.py:
@@ -263,7 +263,7 @@ Get the Score of the final ensemble
     .. container:: binder-badge
 
       .. image:: images/binder_badge_logo.svg
-        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/master?urlpath=lab/tree/notebooks/examples/40_advanced/example_early_stopping_and_callbacks.ipynb
+        :target: https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_early_stopping_and_callbacks.ipynb
         :alt: Launch binder
         :width: 150 px
 
