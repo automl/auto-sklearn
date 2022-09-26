@@ -44,38 +44,7 @@ class TestScorer(unittest.TestCase):
         )
         scorer_nox(y_true, y_pred, X_data=np.array([32]))
 
-    def test_sign_flip(self):
-        y_true = np.arange(0, 1.01, 0.1)
-        y_pred = y_true.copy()
 
-        scorer = autosklearn.metrics.make_scorer(
-            "r2", sklearn.metrics.r2_score, greater_is_better=True
-        )
-
-        score = scorer(y_true, y_pred + 1.0)
-        self.assertAlmostEqual(score, -9.0)
-
-        score = scorer(y_true, y_pred + 0.5)
-        self.assertAlmostEqual(score, -1.5)
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        scorer = autosklearn.metrics.make_scorer(
-            "r2", sklearn.metrics.r2_score, greater_is_better=False
-        )
-
-        score = scorer(y_true, y_pred + 1.0)
-        self.assertAlmostEqual(score, 9.0)
-
-        score = scorer(y_true, y_pred + 0.5)
-        self.assertAlmostEqual(score, 1.5)
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-
-# Trial changes for _PredictScorer, _ProbaScorer, and _TresholdScorer.
 @pytest.mark.parametrize(
     "y_pred, y_true, scorer, expected_score",
     [
@@ -207,47 +176,104 @@ def test_scorer(
     scorer: autosklearn.metrics.Scorer,
     expected_score: float,
 ) -> None:
-
+    """
+    Expects
+    -------
+    * Expected scores are equal to scores gained from implementing assembled scorers.
+    """
     result_score = scorer(y_true, y_pred)
     assert expected_score == pytest.approx(result_score)
 
 
-class TestMetricsDoNotAlterInput(unittest.TestCase):
-    def test_regression_metrics(self):
-        for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
-            y_true = np.random.random(100).reshape((-1, 1))
-            y_pred = y_true.copy() + np.random.randn(100, 1) * 0.1
+@pytest.mark.parametrize(
+    "y_pred, y_true, expected_score",
+    [
+        (
+            np.arange(0, 1.01, 0.1) + 1.0,
+            np.arange(0, 1.01, 0.1),
+            -9.0,
+        ),
+        (
+            np.arange(0, 1.01, 0.1) + 0.5,
+            np.arange(0, 1.01, 0.1),
+            -1.5,
+        ),
+        (
+            np.arange(0, 1.01, 0.1),
+            np.arange(0, 1.01, 0.1),
+            1.0,
+        ),
+    ],
+)
+def test_sign_flip(
+    y_pred: np.array,
+    y_true: np.array,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Flipping greater_is_better for r2_score result in flipped signs of its output.
+    """
+    greater_true_scorer = autosklearn.metrics.make_scorer(
+        "r2", sklearn.metrics.r2_score, greater_is_better=True
+    )
+    greater_true_score = greater_true_scorer(y_true, y_pred)
+    assert expected_score == pytest.approx(greater_true_score)
 
-            if metric == "mean_squared_log_error":
-                y_true = np.abs(y_true)
-                y_pred = np.abs(y_pred)
+    greater_false_scorer = autosklearn.metrics.make_scorer(
+        "r2", sklearn.metrics.r2_score, greater_is_better=False
+    )
+    greater_false_score = greater_false_scorer(y_true, y_pred)
+    assert (expected_score * -1.0) == pytest.approx(greater_false_score)
 
-            y_true_2 = y_true.copy()
-            y_pred_2 = y_pred.copy()
-            self.assertTrue(np.isfinite(scorer(y_true_2, y_pred_2)))
+
+def test_regression_metrics():
+    """
+    Expects
+    -------
+    * Test metrics do not change output for autosklearn.metrics.REGRESSION_METRICS.
+    """
+    for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
+        y_true = np.random.random(100).reshape((-1, 1))
+        y_pred = y_true.copy() + np.random.randn(100, 1) * 0.1
+
+        if metric == "mean_squared_log_error":
+            y_true = np.abs(y_true)
+            y_pred = np.abs(y_pred)
+
+        y_true_2 = y_true.copy()
+        y_pred_2 = y_pred.copy()
+        assert np.isfinite(scorer(y_true_2, y_pred_2))
+        np.testing.assert_array_almost_equal(y_true, y_true_2, err_msg=metric)
+        np.testing.assert_array_almost_equal(y_pred, y_pred_2, err_msg=metric)
+
+
+def test_classification_metrics():
+    """
+    Expects
+    -------
+    * Test metrics do not change output for autosklearn.metrics.CLASSIFICATION_METRICS.
+    """
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        y_true = np.random.randint(0, 2, size=(100, 1))
+        y_pred = np.random.random(200).reshape((-1, 2))
+        y_pred = np.array([y_pred[i] / np.sum(y_pred[i]) for i in range(100)])
+
+        y_true_2 = y_true.copy()
+        y_pred_2 = y_pred.copy()
+        try:
+            assert np.isfinite(scorer(y_true_2, y_pred_2))
             np.testing.assert_array_almost_equal(y_true, y_true_2, err_msg=metric)
             np.testing.assert_array_almost_equal(y_pred, y_pred_2, err_msg=metric)
-
-    def test_classification_metrics(self):
-        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
-            y_true = np.random.randint(0, 2, size=(100, 1))
-            y_pred = np.random.random(200).reshape((-1, 2))
-            y_pred = np.array([y_pred[i] / np.sum(y_pred[i]) for i in range(100)])
-
-            y_true_2 = y_true.copy()
-            y_pred_2 = y_pred.copy()
-            try:
-                self.assertTrue(np.isfinite(scorer(y_true_2, y_pred_2)))
-                np.testing.assert_array_almost_equal(y_true, y_true_2, err_msg=metric)
-                np.testing.assert_array_almost_equal(y_pred, y_pred_2, err_msg=metric)
-            except ValueError as e:
-                if (
-                    e.args[0] == "Samplewise metrics are not available outside"
-                    " of multilabel classification."
-                ):
-                    pass
-                else:
-                    raise e
+        except ValueError as e:
+            if (
+                e.args[0] == "Samplewise metrics are not available outside"
+                " of multilabel classification."
+            ):
+                pass
+            else:
+                raise e
 
 
 class TestMetric(unittest.TestCase):
