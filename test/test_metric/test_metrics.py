@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import sklearn.metrics
 
@@ -272,6 +274,196 @@ def test_classification_metrics():
                 pass
             else:
                 raise e
+
+
+def test_regression_all():
+    """
+    Expects
+    -------
+    * Correct scores from REGRESSION_METRICS.
+    """
+    for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
+        if scorer.name == "mean_squared_log_error":
+            continue
+
+        y_true = np.array([1, 2, 3, 4])
+
+        y_pred_list = [
+            np.array([1, 2, 3, 4]),
+            np.array([3, 4, 5, 6]),
+            np.array([-1, 0, -1, 0]),
+            np.array([-5, 10, 7, -3]),
+        ]
+
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
+
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
+
+
+def test_classification_binary():
+    """
+    Expects
+    -------
+    * Correct scores from CLASSIFICATION_METRICS for binary classification.
+    """
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        # Skip functions not applicable for binary classification.
+        # TODO: Average precision should work for binary classification,
+        # TODO: but its behavior is not right. When y_pred is completely
+        # TODO: wrong, it does return 0.5, but when it is not completely
+        # TODO: wrong, it returns value smaller than 0.5.
+        if metric in [
+            "average_precision",
+            "precision_samples",
+            "recall_samples",
+            "f1_samples",
+        ]:
+            continue
+
+        y_true = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
+
+        y_pred_list = [
+            np.array(
+                [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]]
+            ),
+            np.array(
+                [[0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0]]
+            ),
+            np.array(
+                [[0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
+            ),
+            np.array(
+                [[1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
+            ),
+        ]
+
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
+
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
+
+
+def test_classification_multiclass():
+    """
+    Expects
+    -------
+    * Correct scores from CLASSIFICATION_METRICS for multiclass classification.
+    """
+    # The last check in this test has a mismatch between the number of
+    # labels predicted in y_pred and the number of labels in y_true.
+    # This triggers several warnings but we are aware.
+    #
+    # TODO convert to pytest with fixture
+    #
+    #   This test should be parameterized so we can identify which metrics
+    #   cause which warning specifically and rectify if needed.
+    ignored_warnings = [(UserWarning, "y_pred contains classes not in y_true")]
+
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        # Skip functions not applicable for multiclass classification.
+        if metric in [
+            "roc_auc",
+            "average_precision",
+            "precision",
+            "recall",
+            "f1",
+            "precision_samples",
+            "recall_samples",
+            "f1_samples",
+        ]:
+            continue
+
+        y_true = np.array([0.0, 0.0, 1.0, 1.0, 2.0])
+
+        y_pred_list = [
+            np.array(
+                [
+                    [1.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                ]
+            ),
+            np.array(
+                [
+                    [1.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 1.0],
+                    [0.0, 1.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 1.0],
+                    [0.0, 0.0, 1.0],
+                    [1.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                ]
+            ),
+        ]
+
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
+
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
+
+        # less labels in the targets than in the predictions
+        y_true = np.array([0.0, 0.0, 1.0, 1.0])
+        y_pred = np.array(
+            [[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        )
+
+        with warnings.catch_warnings():
+            for category, message in ignored_warnings:
+                warnings.filterwarnings("ignore", category=category, message=message)
+
+            score = scorer(y_true, y_pred)
+            assert np.isfinite(score)
+
+
+def test_classification_multilabel():
+    """
+    Expects
+    -------
+    * Correct scores from CLASSIFICATION_METRICS for multi-label classification.
+    """
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        # Skip functions not applicable for multi-label classification.
+        if metric in [
+            "roc_auc",
+            "log_loss",
+            "precision",
+            "recall",
+            "f1",
+            "balanced_accuracy",
+        ]:
+            continue
+        y_true = np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]])
+
+        y_pred_list = [
+            np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]]),
+            np.array([[1, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1]]),
+            np.array([[1, 0, 0], [0, 0, 1], [1, 0, 1], [1, 1, 0]]),
+            np.array([[0, 1, 1], [0, 0, 1], [1, 0, 0], [0, 0, 0]]),
+        ]
+
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
+
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
 
 
 class TestCalculateScore(unittest.TestCase):
