@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 """
-==============
-Classification
-==============
+======================
+Multi-objective AutoML
+======================
 
 The following example shows how to fit *auto-sklearn* to optimize for two
 competing metrics: `precision` and `recall` (read more on this tradeoff
