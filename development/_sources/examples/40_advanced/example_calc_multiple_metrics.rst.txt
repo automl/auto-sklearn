@@ -177,12 +177,13 @@ Get the Score of the final ensemble
                    26               random_forest         0.929078                  0.923833          0.943820       0.943820   0.943820             0.070922
                    22                    adaboost         0.950355                  0.944685          0.955556       0.966292   0.960894             0.049645
                     4                 extra_trees         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
-                   28                         mlp         0.765957                  0.794620          0.924242       0.685393   0.787097             0.234043
-                   31           gradient_boosting         0.368794                  0.500000          0.000000       0.000000   0.000000             0.631206
-                   29          passive_aggressive         0.737589                  0.788137          0.981481       0.595506   0.741259             0.262411
+                   29                         mlp         0.765957                  0.794620          0.924242       0.685393   0.787097             0.234043
+                   32           gradient_boosting         0.368794                  0.500000          0.000000       0.000000   0.000000             0.631206
+                   30          passive_aggressive         0.737589                  0.788137          0.981481       0.595506   0.741259             0.262411
                     4                 extra_trees         0.971631                  0.965536          0.967033       0.988764   0.977778             0.028369
-                   30                bernoulli_nb         0.390071                  0.516854          1.000000       0.033708   0.065217             0.609929
+                   31                bernoulli_nb         0.390071                  0.516854          1.000000       0.033708   0.065217             0.609929
                     4                 extra_trees         0.971631                  0.973531          0.988506       0.966292   0.977273             0.028369
+                   27         k_nearest_neighbors         0.921986                  0.902226          0.906250       0.977528   0.940541             0.078014
 
 
 
@@ -190,7 +191,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  56.528 seconds)
+   **Total running time of the script:** ( 1 minutes  58.721 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_calc_multiple_metrics.py:
