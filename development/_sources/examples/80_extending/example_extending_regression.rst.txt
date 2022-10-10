@@ -265,14 +265,22 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.5839028553469898
-    {   5: {   'cost': 0.6467596531418793,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fe2c1138760>,
-               'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fe2bfa4dbb0>,
-               'model_id': 5,
+    r2 score:  -0.05043774591985306
+    {   2: {   'cost': 0.6625196676691287,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f40a346b220>,
+               'ensemble_weight': 0.34,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f40a15c3910>,
+               'model_id': 2,
                'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fe2c7e3c850>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f409ae4d250>,
+               'sklearn_regressor': KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel='polynomial')},
+        5: {   'cost': 0.5828148953313685,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f40a303b310>,
+               'ensemble_weight': 0.66,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f409e5bd6d0>,
+               'model_id': 5,
+               'rank': 2,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f409e5bde80>,
                'sklearn_regressor': KernelRidge(alpha=0.12092279509584172, coef0=0.8084604056638881, degree=2,
                 gamma=0.0005846787584894724, kernel='polynomial')}}
 
@@ -282,7 +290,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.173 seconds)
+   **Total running time of the script:** ( 0 minutes  10.407 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:

@@ -163,59 +163,53 @@ Fit an user provided configuration
 
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
       warnings.warn(
-    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fe2b28ac640>, 'balancing': Balancing(random_state=1), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fe2bf948850>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fe2bfb14a90>}
+    {'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f409f0430a0>, 'balancing': Balancing(random_state=1), 'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f40a1546a00>, 'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f40a1546b50>}
     RunInfo(config=Configuration(values={
       'balancing:strategy': 'none',
       'classifier:__choice__': 'random_forest',
       'classifier:random_forest:bootstrap': 'True',
-      'classifier:random_forest:criterion': 'gini',
+      'classifier:random_forest:criterion': 'entropy',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.6342114245981949,
+      'classifier:random_forest:max_features': 0.20183330062980365,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 15,
+      'classifier:random_forest:min_samples_leaf': 5,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense',
-      'feature_preprocessor:__choice__': 'random_trees_embedding',
-      'feature_preprocessor:random_trees_embedding:bootstrap': 'False',
-      'feature_preprocessor:random_trees_embedding:max_depth': 5,
-      'feature_preprocessor:random_trees_embedding:max_leaf_nodes': 'None',
-      'feature_preprocessor:random_trees_embedding:min_samples_leaf': 2,
-      'feature_preprocessor:random_trees_embedding:min_samples_split': 15,
-      'feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf': 1.0,
-      'feature_preprocessor:random_trees_embedding:n_estimators': 19,
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0010483828736567475,
+      'feature_preprocessor:__choice__': 'select_rates_classification',
+      'feature_preprocessor:select_rates_classification:alpha': 0.19122253852849966,
+      'feature_preprocessor:select_rates_classification:mode': 'fwe',
+      'feature_preprocessor:select_rates_classification:score_func': 'chi2',
     })
     , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-    RunValue(cost=0.07772511848341235, time=2.8693764209747314, status=<StatusType.SUCCESS: 1>, starttime=1665397486.3860676, endtime=1665397489.2761369, additional_info={'duration': 2.793865442276001, 'num_run': 2, 'train_loss': 0.07940214852872485, 'configuration_origin': None})
+    RunValue(cost=0.09857819905213272, time=2.0312612056732178, status=<StatusType.SUCCESS: 1>, starttime=1665397665.935988, endtime=1665397667.9915383, additional_info={'duration': 1.9284534454345703, 'num_run': 2, 'train_loss': 0.09434843531060255, 'configuration_origin': None})
     Passed Configuration: Configuration(values={
       'balancing:strategy': 'none',
       'classifier:__choice__': 'random_forest',
       'classifier:random_forest:bootstrap': 'True',
-      'classifier:random_forest:criterion': 'gini',
+      'classifier:random_forest:criterion': 'entropy',
       'classifier:random_forest:max_depth': 'None',
-      'classifier:random_forest:max_features': 0.6342114245981949,
+      'classifier:random_forest:max_features': 0.20183330062980365,
       'classifier:random_forest:max_leaf_nodes': 'None',
       'classifier:random_forest:min_impurity_decrease': 0.0,
-      'classifier:random_forest:min_samples_leaf': 15,
+      'classifier:random_forest:min_samples_leaf': 5,
       'classifier:random_forest:min_samples_split': 11,
       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
       'data_preprocessor:__choice__': 'feature_type',
-      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'one_hot_encoding',
-      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'no_coalescense',
-      'feature_preprocessor:__choice__': 'random_trees_embedding',
-      'feature_preprocessor:random_trees_embedding:bootstrap': 'False',
-      'feature_preprocessor:random_trees_embedding:max_depth': 5,
-      'feature_preprocessor:random_trees_embedding:max_leaf_nodes': 'None',
-      'feature_preprocessor:random_trees_embedding:min_samples_leaf': 2,
-      'feature_preprocessor:random_trees_embedding:min_samples_split': 15,
-      'feature_preprocessor:random_trees_embedding:min_weight_fraction_leaf': 1.0,
-      'feature_preprocessor:random_trees_embedding:n_estimators': 19,
+      'data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__': 'no_encoding',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__': 'minority_coalescer',
+      'data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction': 0.0010483828736567475,
+      'feature_preprocessor:__choice__': 'select_rates_classification',
+      'feature_preprocessor:select_rates_classification:alpha': 0.19122253852849966,
+      'feature_preprocessor:select_rates_classification:mode': 'fwe',
+      'feature_preprocessor:select_rates_classification:score_func': 'chi2',
     })
 
-    Random Forest: RandomForestClassifier(max_features=44, min_samples_leaf=15,
+    Random Forest: RandomForestClassifier(criterion='entropy', max_features=1, min_samples_leaf=5,
                            min_samples_split=11, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)
     /home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
@@ -227,7 +221,7 @@ Fit an user provided configuration
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  15.171 seconds)
+   **Total running time of the script:** ( 2 minutes  10.112 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_single_configuration.py:
