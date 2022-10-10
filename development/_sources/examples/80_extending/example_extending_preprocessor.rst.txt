@@ -256,32 +256,32 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    accuracy:  0.8811188811188811
+    accuracy:  0.958041958041958
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f5bc5d47250>,
-               'cost': 0.07801418439716312,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f5bae3b70d0>,
-               'ensemble_weight': 0.16,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f5ba8796190>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fe2c4bf0160>,
+               'cost': 0.06382978723404253,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fe2c5e8da60>,
+               'ensemble_weight': 0.38,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fe2c63dcca0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=1, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         4: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f5bad8d6eb0>,
-               'cost': 0.07801418439716312,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f5bad738460>,
-               'ensemble_weight': 0.5,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f5baeba06a0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fe2c12e89a0>,
+               'cost': 0.08510638297872342,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fe2c577db80>,
+               'ensemble_weight': 0.34,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fe2c12e8520>,
                'model_id': 4,
                'rank': 2,
                'sklearn_classifier': BernoulliNB(alpha=23.95520684365466, fit_prior=False)},
         5: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f5ba8b233d0>,
-               'cost': 0.07801418439716312,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f5ba9425460>,
-               'ensemble_weight': 0.34,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f5ba8b23fa0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fe2c5bbc220>,
+               'cost': 0.09219858156028371,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fe2c6451af0>,
+               'ensemble_weight': 0.28,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fe2c7f06d60>,
                'model_id': 5,
                'rank': 3,
                'sklearn_classifier': AdaBoostClassifier(algorithm='SAMME',
@@ -295,7 +295,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.642 seconds)
+   **Total running time of the script:** ( 0 minutes  16.365 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_preprocessor.py:
