@@ -1825,7 +1825,15 @@ class AutoML(BaseEstimator):
     @property
     def performance_over_time_(self):
         check_is_fitted(self)
-        individual_performance_frame = self._get_runhistory_models_performance()
+        individual_performance_frame = (
+            self._get_runhistory_models_performance().sort_values(
+                by=["Timestamp", "single_best_optimization_score"]
+            )
+        )
+
+        metric = self._metrics[0]
+        individual_performance_frame["single_best_optimization_score"] *= metric._sign
+
         best_values = pd.Series(
             {
                 "single_best_optimization_score": -np.inf,
@@ -1840,6 +1848,8 @@ class AutoML(BaseEstimator):
             ):
                 best_values = individual_performance_frame.loc[idx]
             individual_performance_frame.loc[idx] = best_values
+
+        individual_performance_frame["single_best_optimization_score"] *= metric._sign
 
         performance_over_time = individual_performance_frame
 
@@ -1856,6 +1866,12 @@ class AutoML(BaseEstimator):
                     best_values = ensemble_performance_frame.loc[idx]
                 ensemble_performance_frame.loc[idx] = best_values
 
+            for c in ensemble_performance_frame.columns:
+                if c != "Timestamp":
+                    ensemble_performance_frame[c] = (
+                        ensemble_performance_frame[c] * metric._sign
+                    )
+
             performance_over_time = (
                 pd.merge(
                     ensemble_performance_frame,
@@ -1867,7 +1883,7 @@ class AutoML(BaseEstimator):
                 .fillna(method="ffill")
             )
 
-        return performance_over_time
+        return performance_over_time.drop_duplicates()
 
     @property
     def cv_results_(self):

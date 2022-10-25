@@ -530,7 +530,6 @@ class AutoSklearnEstimator(BaseEstimator):
         return automl
 
     def fit(self, **kwargs):
-
         # Automatically set the cutoff time per task
         if self.per_run_time_limit is None:
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10

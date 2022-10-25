@@ -195,6 +195,7 @@ class DummyDatamanager(AbstractDataManager):
         self._info = info
         self.feat_type = feat_type
 
+
 def main():
     parser = ArgumentParser()
 
@@ -239,7 +240,7 @@ def main():
             configuration_space = pipeline.get_configuration_space(
                 DummyDatamanager(
                     info={"is_sparse": sparse, "task": task},
-                    feat_type={"A": "numerical", "B": "categorical"}
+                    feat_type={"A": "numerical", "B": "categorical"},
                 )
             )
 
