@@ -1868,9 +1868,7 @@ class AutoML(BaseEstimator):
 
             for c in ensemble_performance_frame.columns:
                 if c != "Timestamp":
-                    ensemble_performance_frame[c] = (
-                        ensemble_performance_frame[c] * metric._sign
-                    )
+                    ensemble_performance_frame[c] *= metric._sign
 
             performance_over_time = (
                 pd.merge(
