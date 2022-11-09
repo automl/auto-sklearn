@@ -120,6 +120,7 @@ from autosklearn.util.logging_ import (
     warnings_to,
 )
 from autosklearn.util.parallel import preload_modules
+from autosklearn.util.progress_bar import ProgressBar
 from autosklearn.util.smac_wrap import SMACCallback, SmacRunCallback
 from autosklearn.util.stopwatch import StopWatch
 
@@ -239,6 +240,7 @@ class AutoML(BaseEstimator):
         get_trials_callback: SMACCallback | None = None,
         dataset_compression: bool | Mapping[str, Any] = True,
         allow_string_features: bool = True,
+        disable_progress_bar: bool = False,
     ):
         super().__init__()
 
@@ -295,6 +297,7 @@ class AutoML(BaseEstimator):
         self.logging_config = logging_config
         self.precision = precision
         self.allow_string_features = allow_string_features
+        self.disable_progress_bar = disable_progress_bar
         self._initial_configurations_via_metalearning = (
             initial_configurations_via_metalearning
         )
@@ -597,6 +600,7 @@ class AutoML(BaseEstimator):
         -------
         self
         """
+        progress_bar = ProgressBar(total=self._time_for_task, disable=self.disable_progress_bar)
         if (X_test is not None) ^ (y_test is not None):
             raise ValueError("Must provide both X_test and y_test together")
 
@@ -961,6 +965,7 @@ class AutoML(BaseEstimator):
             self._logger.exception(e)
             raise e
         finally:
+            progress_bar.stop()
             self._fit_cleanup()
 
         self.fitted = True

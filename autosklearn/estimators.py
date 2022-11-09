@@ -76,6 +76,7 @@ class AutoSklearnEstimator(BaseEstimator):
         get_trials_callback: SMACCallback | None = None,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
         allow_string_features: bool = True,
+        disable_progress_bar: bool = False,
     ):
         """
         Parameters
@@ -475,6 +476,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.get_trials_callback = get_trials_callback
         self.dataset_compression = dataset_compression
         self.allow_string_features = allow_string_features
+        self.disable_progress_bar = disable_progress_bar
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -525,6 +527,7 @@ class AutoSklearnEstimator(BaseEstimator):
             get_trials_callback=self.get_trials_callback,
             dataset_compression=self.dataset_compression,
             allow_string_features=self.allow_string_features,
+            disable_progress_bar=self.disable_progress_bar
         )
 
         return automl
