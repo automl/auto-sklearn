@@ -629,6 +629,9 @@ class AutoML(BaseEstimator):
         # By default try to use the TCP logging port or get a new port
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
+        progress_bar = ProgressBar(
+            total=self._time_for_task, disable=self.disable_progress_bar
+        )
         # Once we start the logging server, it starts in a new process
         # If an error occurs then we want to make sure that we exit cleanly
         # and shut it down, else it might hang
@@ -647,11 +650,6 @@ class AutoML(BaseEstimator):
                 self._backend.save_start_time(self._seed)
 
             self._stopwatch = StopWatch()
-            progress_bar = ProgressBar(
-                total=self._time_for_task,
-                disable=self.disable_progress_bar,
-                final_message="Running cleanup...",
-            )
 
             # Make sure that input is valid
             # Performs Ordinal one hot encoding to the target

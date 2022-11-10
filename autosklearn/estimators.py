@@ -382,6 +382,10 @@ class AutoSklearnEstimator(BaseEstimator):
             Whether autosklearn should process string features. By default the
             textpreprocessing is enabled.
 
+        disable_progress_bar: bool = False
+            Whether to disable the progress bar that is displayed in the console
+            while fitting to the training data.
+
         Attributes
         ----------
         cv_results_ : dict of numpy (masked) ndarrays

@@ -285,6 +285,10 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
 
+        disable_progress_bar: bool = False
+            Whether to disable the progress bar that is displayed in the console
+            while fitting to the training data.
+
         Attributes
         ----------
 
