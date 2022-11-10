@@ -527,7 +527,7 @@ class AutoSklearnEstimator(BaseEstimator):
             get_trials_callback=self.get_trials_callback,
             dataset_compression=self.dataset_compression,
             allow_string_features=self.allow_string_features,
-            disable_progress_bar=self.disable_progress_bar
+            disable_progress_bar=self.disable_progress_bar,
         )
 
         return automl

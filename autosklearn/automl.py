@@ -600,7 +600,6 @@ class AutoML(BaseEstimator):
         -------
         self
         """
-        progress_bar = ProgressBar(total=self._time_for_task, disable=self.disable_progress_bar)
         if (X_test is not None) ^ (y_test is not None):
             raise ValueError("Must provide both X_test and y_test together")
 
@@ -648,6 +647,11 @@ class AutoML(BaseEstimator):
                 self._backend.save_start_time(self._seed)
 
             self._stopwatch = StopWatch()
+            progress_bar = ProgressBar(
+                total=self._time_for_task,
+                disable=self.disable_progress_bar,
+                final_message="Running cleanup...",
+            )
 
             # Make sure that input is valid
             # Performs Ordinal one hot encoding to the target
