@@ -630,7 +630,10 @@ class AutoML(BaseEstimator):
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
         progress_bar = ProgressBar(
-            total=self._time_for_task, disable=self.disable_progress_bar
+            total=self._time_for_task,
+            disable=self.disable_progress_bar,
+            desc="Fitting to the training data",
+            colour="green",
         )
         # Once we start the logging server, it starts in a new process
         # If an error occurs then we want to make sure that we exit cleanly
