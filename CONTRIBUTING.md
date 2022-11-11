@@ -252,10 +252,11 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     make doc
     ```
     *   If you're unfamiliar with sphinx, it's a documentation generator which can read comments and docstrings from within the code and generate html documentation.
-    *   If you've added documentation, we also has a command `linkcheck` for making sure all the links correctly go to some destination.
+    *   If you've added documentation, we also have a command `links` for making sure 
+        all the links correctly go to some destination.
         This helps tests for dead links or accidental typos.
     ```bash
-    make linkcheck
+    make links
     ```
     *   We also use sphinx-gallery which can take python files (such as those in the `examples` folder) and run them, creating html which shows the code and the output it generates.
     ```bash
@@ -396,7 +397,7 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     # If you changed documentation:
     # This will generate all documentation and check links
     make doc
-    make linkcheck
+    make links
     make examples  # mainly needed if you modified some examples
 
     # ... fix any issues
