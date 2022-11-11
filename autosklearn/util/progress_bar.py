@@ -23,9 +23,9 @@ class ProgressBar(Thread):
         Turns on or off the progress bar. If True, this thread won't be started or
         initialized.
     kwargs : Any
-        Keyword arguments that are passed on to tqdm, refer to:
-        https://tqdm.github.io/docs/tqdm/. Note that postfix can not be specified
-        as a kwarg since it is already passed to tqdm by this class.
+        Keyword arguments that are passed into tqdm's constructor. Refer to:
+        `tqdm <https://tqdm.github.io/docs/tqdm/>`_. Note that postfix can not be
+        specified in the kwargs since it is already passed into tqdm by this class.
     """
 
     def __init__(
