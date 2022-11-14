@@ -2,7 +2,6 @@ import warnings
 
 import numpy as np
 import sklearn.metrics
-from smac.utils.constants import MAXINT
 
 import autosklearn.metrics
 from autosklearn.constants import BINARY_CLASSIFICATION, REGRESSION
@@ -45,425 +44,340 @@ class TestScorer(unittest.TestCase):
         )
         scorer_nox(y_true, y_pred, X_data=np.array([32]))
 
-    def test_predict_scorer_binary(self):
-        y_true = np.array([0, 0, 1, 1])
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
 
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "bac", sklearn.metrics.balanced_accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            name="accuracy",
-            score_func=sklearn.metrics.accuracy_score,
-            optimum=1,
-            worst_possible_result=0,
-            sign=-1,
-            kwargs={},
-        )
-
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_predict_scorer_multiclass(self):
-        y_true = np.array([0, 1, 2])
-        y_pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.333333333)
-
-        y_pred = np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.333333333)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "bac", sklearn.metrics.balanced_accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.333333333)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_predict_scorer_multilabel(self):
-        y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.25)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.25)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_predict_scorer_regression(self):
-        y_true = np.arange(0, 1.01, 0.1)
-        y_pred = y_true.copy()
-
-        scorer = autosklearn.metrics._PredictScorer(
-            "r2", sklearn.metrics.r2_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.ones(y_true.shape) * np.mean(y_true)
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.0)
-
-    def test_proba_scorer_binary(self):
-        y_true = [0, 0, 1, 1]
-        y_pred = [[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.0)
-
-        y_pred = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        y_pred = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, -1, {}
-        )
-
-        y_pred = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -0.69314718055994529)
-
-    def test_proba_scorer_multiclass(self):
-        y_true = [0, 1, 2]
-        y_pred = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.0)
-
-        y_pred = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0986122886681098)
-
-        y_pred = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0986122886681096)
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, -1, {}
-        )
-
-        y_pred = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0986122886681096)
-
-    def test_proba_scorer_multilabel(self):
-        y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.34657359027997314)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.69314718055994529)
-
-        scorer = autosklearn.metrics._ProbaScorer(
-            "log_loss", sklearn.metrics.log_loss, 0, MAXINT, -1, {}
-        )
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -0.34657359027997314)
-
-    def test_threshold_scorer_binary(self):
-        y_true = [0, 0, 1, 1]
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_threshold_scorer_multilabel(self):
-        y_true = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, 1, {}
-        )
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
-
-        scorer = autosklearn.metrics._ThresholdScorer(
-            "roc_auc", sklearn.metrics.roc_auc_score, 1, 0, -1, {}
-        )
-
-        y_pred = np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-    def test_sign_flip(self):
-        y_true = np.arange(0, 1.01, 0.1)
-        y_pred = y_true.copy()
-
-        scorer = autosklearn.metrics.make_scorer(
-            "r2", sklearn.metrics.r2_score, greater_is_better=True
-        )
-
-        score = scorer(y_true, y_pred + 1.0)
-        self.assertAlmostEqual(score, -9.0)
-
-        score = scorer(y_true, y_pred + 0.5)
-        self.assertAlmostEqual(score, -1.5)
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 1.0)
-
-        scorer = autosklearn.metrics.make_scorer(
-            "r2", sklearn.metrics.r2_score, greater_is_better=False
-        )
-
-        score = scorer(y_true, y_pred + 1.0)
-        self.assertAlmostEqual(score, 9.0)
-
-        score = scorer(y_true, y_pred + 0.5)
-        self.assertAlmostEqual(score, 1.5)
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
-
-
-class TestMetricsDoNotAlterInput(unittest.TestCase):
-    def test_regression_metrics(self):
-        for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
-            y_true = np.random.random(100).reshape((-1, 1))
-            y_pred = y_true.copy() + np.random.randn(100, 1) * 0.1
-
-            if metric == "mean_squared_log_error":
-                y_true = np.abs(y_true)
-                y_pred = np.abs(y_pred)
-
-            y_true_2 = y_true.copy()
-            y_pred_2 = y_pred.copy()
-            self.assertTrue(np.isfinite(scorer(y_true_2, y_pred_2)))
+@pytest.mark.parametrize(
+    "y_pred, y_true, scorer, expected_score",
+    [
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            np.array([0, 0, 1, 1]),
+            autosklearn.metrics.accuracy,
+            1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            np.array([0, 0, 1, 1]),
+            autosklearn.metrics.accuracy,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            np.array([0, 0, 1, 1]),
+            autosklearn.metrics.balanced_accuracy,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+            np.array([0, 1, 2]),
+            autosklearn.metrics.accuracy,
+            1.0,
+        ),
+        (
+            np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
+            np.array([0, 1, 2]),
+            autosklearn.metrics.accuracy,
+            0.333333333,
+        ),
+        (
+            np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
+            np.array([0, 1, 2]),
+            autosklearn.metrics.accuracy,
+            0.333333333,
+        ),
+        (
+            np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
+            np.array([0, 1, 2]),
+            autosklearn.metrics.balanced_accuracy,
+            0.333333333,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]),
+            np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+            autosklearn.metrics.accuracy,
+            1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+            autosklearn.metrics.accuracy,
+            0.25,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+            autosklearn.metrics.accuracy,
+            0.25,
+        ),
+        (
+            np.arange(0, 1.01, 0.1),
+            np.arange(0, 1.01, 0.1),
+            autosklearn.metrics.r2,
+            1.0,
+        ),
+        (
+            np.ones(np.arange(0, 1.01, 0.1).shape) * np.mean(np.arange(0, 1.01, 0.1)),
+            np.arange(0, 1.01, 0.1),
+            autosklearn.metrics.r2,
+            0.0,
+        ),
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            np.array([0, 0, 1, 1]),
+            autosklearn.metrics.log_loss,
+            0.0,
+        ),
+        (
+            np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+            np.array([0, 1, 2]),
+            autosklearn.metrics.log_loss,
+            0.0,
+        ),
+        (
+            np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]),
+            np.array([0, 0, 1, 1]),
+            autosklearn.metrics.roc_auc,
+            1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            np.array([0, 0, 1, 1]),
+            autosklearn.metrics.roc_auc,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            np.array([0, 0, 1, 1]),
+            autosklearn.metrics.roc_auc,
+            0.5,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]),
+            np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+            autosklearn.metrics.roc_auc,
+            1.0,
+        ),
+        (
+            np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+            np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+            autosklearn.metrics.roc_auc,
+            0.5,
+        ),
+        (
+            np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+            np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+            autosklearn.metrics.roc_auc,
+            0.5,
+        ),
+    ],
+)
+def test_scorer(
+    y_pred: np.ndarray,
+    y_true: np.ndarray,
+    scorer: autosklearn.metrics.Scorer,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Expected scores are equal to scores gained from implementing assembled scorers.
+    """
+    result_score = scorer(y_true, y_pred)
+    assert expected_score == pytest.approx(result_score)
+
+
+@pytest.mark.parametrize(
+    "y_pred, y_true, expected_score",
+    [
+        (
+            np.arange(0, 1.01, 0.1) + 1.0,
+            np.arange(0, 1.01, 0.1),
+            -9.0,
+        ),
+        (
+            np.arange(0, 1.01, 0.1) + 0.5,
+            np.arange(0, 1.01, 0.1),
+            -1.5,
+        ),
+        (
+            np.arange(0, 1.01, 0.1),
+            np.arange(0, 1.01, 0.1),
+            1.0,
+        ),
+    ],
+)
+def test_sign_flip(
+    y_pred: np.array,
+    y_true: np.array,
+    expected_score: float,
+) -> None:
+    """
+    Expects
+    -------
+    * Flipping greater_is_better for r2_score result in flipped signs of its output.
+    """
+    greater_true_scorer = autosklearn.metrics.make_scorer(
+        "r2", sklearn.metrics.r2_score, greater_is_better=True
+    )
+    greater_true_score = greater_true_scorer(y_true, y_pred)
+    assert expected_score == pytest.approx(greater_true_score)
+
+    greater_false_scorer = autosklearn.metrics.make_scorer(
+        "r2", sklearn.metrics.r2_score, greater_is_better=False
+    )
+    greater_false_score = greater_false_scorer(y_true, y_pred)
+    assert (expected_score * -1.0) == pytest.approx(greater_false_score)
+
+
+def test_regression_metrics():
+    """
+    Expects
+    -------
+    * Test metrics do not change output for autosklearn.metrics.REGRESSION_METRICS.
+    """
+    for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
+        y_true = np.random.random(100).reshape((-1, 1))
+        y_pred = y_true.copy() + np.random.randn(100, 1) * 0.1
+
+        if metric == "mean_squared_log_error":
+            y_true = np.abs(y_true)
+            y_pred = np.abs(y_pred)
+
+        y_true_2 = y_true.copy()
+        y_pred_2 = y_pred.copy()
+        assert np.isfinite(scorer(y_true_2, y_pred_2))
+        np.testing.assert_array_almost_equal(y_true, y_true_2, err_msg=metric)
+        np.testing.assert_array_almost_equal(y_pred, y_pred_2, err_msg=metric)
+
+
+def test_classification_metrics():
+    """
+    Expects
+    -------
+    * Test metrics do not change output for autosklearn.metrics.CLASSIFICATION_METRICS.
+    """
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        y_true = np.random.randint(0, 2, size=(100, 1))
+        y_pred = np.random.random(200).reshape((-1, 2))
+        y_pred = np.array([y_pred[i] / np.sum(y_pred[i]) for i in range(100)])
+
+        y_true_2 = y_true.copy()
+        y_pred_2 = y_pred.copy()
+        try:
+            assert np.isfinite(scorer(y_true_2, y_pred_2))
             np.testing.assert_array_almost_equal(y_true, y_true_2, err_msg=metric)
             np.testing.assert_array_almost_equal(y_pred, y_pred_2, err_msg=metric)
-
-    def test_classification_metrics(self):
-        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
-            y_true = np.random.randint(0, 2, size=(100, 1))
-            y_pred = np.random.random(200).reshape((-1, 2))
-            y_pred = np.array([y_pred[i] / np.sum(y_pred[i]) for i in range(100)])
-
-            y_true_2 = y_true.copy()
-            y_pred_2 = y_pred.copy()
-            try:
-                self.assertTrue(np.isfinite(scorer(y_true_2, y_pred_2)))
-                np.testing.assert_array_almost_equal(y_true, y_true_2, err_msg=metric)
-                np.testing.assert_array_almost_equal(y_pred, y_pred_2, err_msg=metric)
-            except ValueError as e:
-                if (
-                    e.args[0] == "Samplewise metrics are not available outside"
-                    " of multilabel classification."
-                ):
-                    pass
-                else:
-                    raise e
+        except ValueError as e:
+            if (
+                e.args[0] == "Samplewise metrics are not available outside"
+                " of multilabel classification."
+            ):
+                pass
+            else:
+                raise e
 
 
-class TestMetric(unittest.TestCase):
-    def test_regression_all(self):
+def test_regression_all():
+    """
+    Expects
+    -------
+    * Correct scores from REGRESSION_METRICS.
+    """
+    for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
+        if scorer.name == "mean_squared_log_error":
+            continue
 
-        for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
-            y_true = np.array([1, 2, 3, 4])
-            y_pred = y_true.copy()
-            previous_score = scorer._optimum
-            current_score = scorer(y_true, y_pred)
-            self.assertAlmostEqual(current_score, previous_score)
+        y_true = np.array([1, 2, 3, 4])
 
-            y_pred = np.array([3, 4, 5, 6])
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
+        y_pred_list = [
+            np.array([1, 2, 3, 4]),
+            np.array([3, 4, 5, 6]),
+            np.array([-1, 0, -1, 0]),
+            np.array([-5, 10, 7, -3]),
+        ]
 
-            if scorer.name == "mean_squared_log_error":
-                continue
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
 
-            y_pred = np.array([-1, 0, -1, 0])
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
 
-            y_pred = np.array([-5, 10, 7, -3])
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
 
-    def test_classification_binary(self):
+def test_classification_binary():
+    """
+    Expects
+    -------
+    * Correct scores from CLASSIFICATION_METRICS for binary classification.
+    """
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        # Skip functions not applicable for binary classification.
+        # TODO: Average precision should work for binary classification,
+        # TODO: but its behavior is not right. When y_pred is completely
+        # TODO: wrong, it does return 0.5, but when it is not completely
+        # TODO: wrong, it returns value smaller than 0.5.
+        if metric in [
+            "average_precision",
+            "precision_samples",
+            "recall_samples",
+            "f1_samples",
+        ]:
+            continue
 
-        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
-            # Skip functions not applicable for binary classification.
-            # TODO: Average precision should work for binary classification,
-            # TODO: but its behavior is not right. When y_pred is completely
-            # TODO: wrong, it does return 0.5, but when it is not completely
-            # TODO: wrong, it returns value smaller than 0.5.
-            if metric in [
-                "average_precision",
-                "precision_samples",
-                "recall_samples",
-                "f1_samples",
-            ]:
-                continue
+        y_true = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
 
-            y_true = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-            y_pred = np.array(
+        y_pred_list = [
+            np.array(
                 [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]]
-            )
-            previous_score = scorer._optimum
-            current_score = scorer(y_true, y_pred)
-            self.assertAlmostEqual(current_score, previous_score)
-
-            y_pred = np.array(
+            ),
+            np.array(
                 [[0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0]]
-            )
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
-
-            y_pred = np.array(
+            ),
+            np.array(
                 [[0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
-            )
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
-
-            y_pred = np.array(
+            ),
+            np.array(
                 [[1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
-            )
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
+            ),
+        ]
 
-    def test_classification_multiclass(self):
-        # The last check in this test has a mismatch between the number of
-        # labels predicted in y_pred and the number of labels in y_true.
-        # This triggers several warnings but we are aware.
-        #
-        # TODO convert to pytest with fixture
-        #
-        #   This test should be parameterized so we can identify which metrics
-        #   cause which warning specifically and rectify if needed.
-        ignored_warnings = [(UserWarning, "y_pred contains classes not in y_true")]
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
 
-        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
-            # Skip functions not applicable for multiclass classification.
-            if metric in [
-                "roc_auc",
-                "average_precision",
-                "precision",
-                "recall",
-                "f1",
-                "precision_samples",
-                "recall_samples",
-                "f1_samples",
-            ]:
-                continue
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
 
-            y_true = np.array([0.0, 0.0, 1.0, 1.0, 2.0])
 
-            y_pred = np.array(
+def test_classification_multiclass():
+    """
+    Expects
+    -------
+    * Correct scores from CLASSIFICATION_METRICS for multiclass classification.
+    """
+    # The last check in this test has a mismatch between the number of
+    # labels predicted in y_pred and the number of labels in y_true.
+    # This triggers several warnings but we are aware.
+    #
+    # TODO convert to pytest with fixture
+    #
+    #   This test should be parameterized so we can identify which metrics
+    #   cause which warning specifically and rectify if needed.
+    ignored_warnings = [(UserWarning, "y_pred contains classes not in y_true")]
+
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        # Skip functions not applicable for multiclass classification.
+        if metric in [
+            "roc_auc",
+            "average_precision",
+            "precision",
+            "recall",
+            "f1",
+            "precision_samples",
+            "recall_samples",
+            "f1_samples",
+        ]:
+            continue
+
+        y_true = np.array([0.0, 0.0, 1.0, 1.0, 2.0])
+
+        y_pred_list = [
+            np.array(
                 [
                     [1.0, 0.0, 0.0],
                     [1.0, 0.0, 0.0],
@@ -471,12 +385,8 @@ class TestMetric(unittest.TestCase):
                     [0.0, 1.0, 0.0],
                     [0.0, 0.0, 1.0],
                 ]
-            )
-            previous_score = scorer._optimum
-            current_score = scorer(y_true, y_pred)
-            self.assertAlmostEqual(current_score, previous_score)
-
-            y_pred = np.array(
+            ),
+            np.array(
                 [
                     [1.0, 0.0, 0.0],
                     [1.0, 0.0, 0.0],
@@ -484,12 +394,8 @@ class TestMetric(unittest.TestCase):
                     [0.0, 1.0, 0.0],
                     [0.0, 0.0, 1.0],
                 ]
-            )
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
-
-            y_pred = np.array(
+            ),
+            np.array(
                 [
                     [0.0, 0.0, 1.0],
                     [0.0, 1.0, 0.0],
@@ -497,12 +403,8 @@ class TestMetric(unittest.TestCase):
                     [0.0, 1.0, 0.0],
                     [0.0, 1.0, 0.0],
                 ]
-            )
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
-
-            y_pred = np.array(
+            ),
+            np.array(
                 [
                     [0.0, 0.0, 1.0],
                     [0.0, 0.0, 1.0],
@@ -510,59 +412,58 @@ class TestMetric(unittest.TestCase):
                     [1.0, 0.0, 0.0],
                     [0.0, 1.0, 0.0],
                 ]
-            )
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
+            ),
+        ]
 
-            # less labels in the targets than in the predictions
-            y_true = np.array([0.0, 0.0, 1.0, 1.0])
-            y_pred = np.array(
-                [[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-            )
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
 
-            with warnings.catch_warnings():
-                for category, message in ignored_warnings:
-                    warnings.filterwarnings(
-                        "ignore", category=category, message=message
-                    )
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
 
-                score = scorer(y_true, y_pred)
-                self.assertTrue(np.isfinite(score))
+        # less labels in the targets than in the predictions
+        y_true = np.array([0.0, 0.0, 1.0, 1.0])
+        y_pred = np.array(
+            [[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        )
 
-    def test_classification_multilabel(self):
+        with warnings.catch_warnings():
+            for category, message in ignored_warnings:
+                warnings.filterwarnings("ignore", category=category, message=message)
 
-        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
-            # Skip functions not applicable for multi-label classification.
-            if metric in [
-                "roc_auc",
-                "log_loss",
-                "precision",
-                "recall",
-                "f1",
-                "balanced_accuracy",
-            ]:
-                continue
-            y_true = np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]])
-            y_pred = y_true.copy()
-            previous_score = scorer._optimum
-            current_score = scorer(y_true, y_pred)
-            self.assertAlmostEqual(current_score, previous_score)
+            score = scorer(y_true, y_pred)
+            assert np.isfinite(score)
 
-            y_pred = np.array([[1, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1]])
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
 
-            y_pred = np.array([[1, 0, 0], [0, 0, 1], [1, 0, 1], [1, 1, 0]])
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
+def test_classification_multilabel():
+    """
+    Expects
+    -------
+    * Correct scores from CLASSIFICATION_METRICS for multi-label classification.
+    """
+    for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+        # Skip functions not applicable for multi-label classification.
+        if metric in [
+            "roc_auc",
+            "log_loss",
+            "precision",
+            "recall",
+            "f1",
+            "balanced_accuracy",
+        ]:
+            continue
+        y_true = np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]])
 
-            y_pred = np.array([[0, 1, 1], [0, 0, 1], [1, 0, 0], [0, 0, 0]])
-            previous_score = current_score
-            current_score = scorer(y_true, y_pred)
-            self.assertLess(current_score, previous_score)
+        y_pred_list = [
+            np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]]),
+            np.array([[1, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1]]),
+            np.array([[1, 0, 0], [0, 0, 1], [1, 0, 1], [1, 1, 0]]),
+            np.array([[0, 1, 1], [0, 0, 1], [1, 0, 0], [0, 0, 0]]),
+        ]
+
+        score_list = [scorer(y_true, y_pred) for y_pred in y_pred_list]
+
+        assert scorer._optimum == pytest.approx(score_list[0])
+        assert score_list == sorted(score_list, reverse=True)
 
 
 class TestCalculateScore(unittest.TestCase):
