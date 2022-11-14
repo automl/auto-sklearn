@@ -14,6 +14,7 @@ pyyaml
 pandas>=1.0
 liac-arff
 threadpoolctl
+tqdm
 
 ConfigSpace>=0.4.21,<0.5
 pynisher>=0.6.3,<0.7

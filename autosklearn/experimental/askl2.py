@@ -166,6 +166,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         load_models: bool = True,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
         allow_string_features: bool = True,
+        disable_progress_bar: bool = False,
     ):
 
         """
@@ -284,6 +285,10 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
         load_models : bool, optional (True)
             Whether to load the models after fitting Auto-sklearn.
 
+        disable_progress_bar: bool = False
+            Whether to disable the progress bar that is displayed in the console
+            while fitting to the training data.
+
         Attributes
         ----------
 
@@ -337,6 +342,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             scoring_functions=scoring_functions,
             load_models=load_models,
             allow_string_features=allow_string_features,
+            disable_progress_bar=disable_progress_bar,
         )
 
     def train_selectors(self, selected_metric=None):

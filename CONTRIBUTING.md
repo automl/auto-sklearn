@@ -252,8 +252,8 @@ Lastly, if the feature really is a game changer or you're very proud of it, cons
     make doc
     ```
     *   If you're unfamiliar with sphinx, it's a documentation generator which can read comments and docstrings from within the code and generate html documentation.
-    *   If you've added documentation, we also have a command `links` for making sure 
-        all the links correctly go to some destination.
+    *   If you've added documentation, we also have a command `links` for making 
+        sure all the links correctly go to some destination.
         This helps tests for dead links or accidental typos.
     ```bash
     make links

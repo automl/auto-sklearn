@@ -32,7 +32,7 @@ extras_reqs = {
     "test": [
         "pytest>=4.6",
         "pytest-cov",
-        "pytest-xdist",
+        "pytest-forked",
         "pytest-timeout",
         "pytest-cases>=3.6.11",
         "mypy",
