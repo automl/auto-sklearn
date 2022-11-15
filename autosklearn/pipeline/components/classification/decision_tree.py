@@ -114,6 +114,8 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
     ):
         cs = ConfigurationSpace()
 
+        # Criterion has now `log_loss` but it is equivalent to entropy, leave it out
+        # so as to not confuse the optimizer
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini"
         )
