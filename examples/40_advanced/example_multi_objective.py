@@ -8,7 +8,7 @@ The following example shows how to fit *auto-sklearn* to optimize for two
 competing metrics: `precision` and `recall` (read more on this tradeoff
 in the `scikit-learn docs <https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html>`_.
 
-Auto-sklearn uses `SMAC3's implementation of ParEGO <https://automl.github.io/SMAC3/main/details/multi_objective.html>`_.
+Auto-sklearn uses `SMAC3's implementation of ParEGO <https://automl.github.io/SMAC3/main/examples/3_multi_objective/2_parego.html#parego>`_.
 Multi-objective ensembling and proper access to the full Pareto set will be added in the near
 future.
 """
