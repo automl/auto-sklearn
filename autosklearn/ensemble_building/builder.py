@@ -4,11 +4,11 @@ from typing import Any, Iterable, Mapping, Sequence, Type, cast
 
 import logging.handlers
 import multiprocessing
-import numbers
 import os
 import pickle
 import time
 import traceback
+from contextlib import suppress
 from itertools import accumulate
 from pathlib import Path
 
@@ -320,45 +320,51 @@ class EnsembleBuilder:
             if wall_time_in_s < 1:
                 break
 
-            context = multiprocessing.get_context(pynisher_context)
-            preload_modules(context)
+            # Only useful with for forkserver
+            if pynisher_context == "forkserver":
+                context = multiprocessing.get_context(pynisher_context)
+                preload_modules(context)
 
-            safe_ensemble_script = pynisher.enforce_limits(
-                wall_time_in_s=wall_time_in_s,
-                mem_in_mb=self.memory_limit,
-                logger=self.logger,
-                context=context,
-            )(self.main)
+            main = pynisher.limit(
+                self.main,
+                wall_time=wall_time_in_s,
+                memory=(self.memory_limit, "MB"),
+                context=pynisher_context,
+            )
 
-            safe_ensemble_script(time_left, iteration)
-
-            status = safe_ensemble_script.exit_status
-            if isinstance(status, pynisher.MemorylimitException):
-                # if ensemble script died because of memory error,
-                # reduce nbest to reduce memory consumption and try it again
-
-                # ATTENTION: main will start from scratch;
-                # all data structures are empty again
-                try:
+            try:
+                result = main(time_left=time_left, iteration=iteration)
+                return result
+            except MemoryError as e:
+                # if ensemble script died because of memory error, reduce nbest to
+                # reduce memory consumption and try it again
+                with suppress(Exception):
                     self.previous_candidates_path.unlink()
-                except:  # noqa E722
-                    pass
 
-                if (
-                    isinstance(self.ensemble_nbest, numbers.Integral)
-                    and self.ensemble_nbest <= 1
-                ):
+                # It's a float, we can just half it
+                if isinstance(self.ensemble_nbest, float):
+                    self.ensemble_nbest /= 2
+                    self.logger.warning(f"{e}\n{self.ensemble_nbest=}")
+                    return [], self.ensemble_nbest
+
+                # It's an int and we can reduce ensemble_nbest
+                elif isinstance(self.ensemble_nbest, int) and self.ensemble_nbest > 1:
+                    self.ensemble_nbest = max(1, self.ensemble_nbest // 2)
+                    self.logger.warning(f"{e}\n{self.ensemble_nbest=}")
+                    return [], self.ensemble_nbest
+
+                # It's an int and we're already consuming as little memory as possible
+                elif isinstance(self.ensemble_nbest, int) and self.ensemble_nbest <= 1:
                     if self.read_at_most == 1:
-                        self.logger.error(
-                            "Memory Exception -- Unable to further reduce the number"
-                            " of ensemble members and can no further limit the number"
-                            " of ensemble members loaded per iteration, please restart"
-                            " Auto-sklearn with a higher value for the argument"
-                            f" `memory_limit` (current limit is {self.memory_limit}MB)."
-                            " The ensemble builder will keep running to delete files"
-                            " from disk in case this was enabled.",
-                        )
                         self.ensemble_nbest = 0
+                        self.logger.error(
+                            f"{e}\nUnable to further reduce the number of ensemble"
+                            " members nor limit the number loaded per iteration,"
+                            " please restart Auto-sklearn with a higher `memory_limit`"
+                            f" (current limit is {self.memory_limit}MB). The ensemble"
+                            " builder will keep running to delete files from disk in"
+                            " case this was enabled.",
+                        )
                     else:
                         self.read_at_most = 1
                         self.logger.warning(
@@ -367,19 +373,11 @@ class EnsembleBuilder:
                             " per call to read at most to 1."
                         )
                 else:
-                    if isinstance(self.ensemble_nbest, numbers.Integral):
-                        self.ensemble_nbest = max(1, int(self.ensemble_nbest / 2))
-                    else:
-                        self.ensemble_nbest = self.ensemble_nbest / 2
-                    self.logger.warning(
-                        "Memory Exception -- restart with "
-                        "less ensemble_nbest: %d" % self.ensemble_nbest
+                    raise RuntimeError(
+                        "We should not reach here, please report if this happens!"
                     )
-                    return [], self.ensemble_nbest
-            elif isinstance(status, pynisher.AnythingException):
-                return ([], self.ensemble_nbest)
-            else:
-                return safe_ensemble_script.result
+            except Exception:
+                return [], self.ensemble_nbest
 
         return [], self.ensemble_nbest
 
