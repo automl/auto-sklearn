@@ -221,18 +221,27 @@ We will instead create a custom one as follows:</p>
     <span class="nb">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fitting to the training data:   0%|          | 0/30 [00:00&lt;?, ?it/s, The total time budget for this task is 0:00:30]/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(
-2022-10-10 11:17:29,089 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-10-10 11:17:29.075186&#39;), &#39;ensemble_optimization_score&#39;: 0.9886363636363636, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.10.10-11.17.29 for iteration 0.
-2022-10-10 11:17:31,579 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-10-10 11:17:31.563724&#39;), &#39;ensemble_optimization_score&#39;: 0.9911616161616161, &#39;ensemble_test_score&#39;: 0.9887359198998749}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.10.10-11.17.31 for iteration 1.
+
+Fitting to the training data:   3%|3         | 1/30 [00:01&lt;00:29,  1.03s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:   7%|6         | 2/30 [00:02&lt;00:28,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  10%|#         | 3/30 [00:03&lt;00:27,  1.01s/it, The total time budget for this task is 0:00:30]2022-11-15 16:47:07,017 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-11-15 16:47:07.000616&#39;), &#39;ensemble_optimization_score&#39;: 0.9886363636363636, &#39;ensemble_test_score&#39;: 0.9899874843554443}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.11.15-16.47.07 for iteration 0.
+
+Fitting to the training data:  13%|#3        | 4/30 [00:04&lt;00:26,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  17%|#6        | 5/30 [00:05&lt;00:25,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  20%|##        | 6/30 [00:06&lt;00:24,  1.01s/it, The total time budget for this task is 0:00:30]2022-11-15 16:47:09,675 - Client-EnsembleBuilder - INFO - DummyFuture: ([{&#39;Timestamp&#39;: Timestamp(&#39;2022-11-15 16:47:09.656895&#39;), &#39;ensemble_optimization_score&#39;: 0.9911616161616161, &#39;ensemble_test_score&#39;: 0.9887359198998749}], 50)/SingleThreadedClient() Started Ensemble builder job at 2022.11.15-16.47.09 for iteration 1.
+
+Fitting to the training data:  23%|##3       | 7/30 [00:07&lt;00:23,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data: 100%|##########| 30/30 [00:07&lt;00:00,  4.26it/s, The total time budget for this task is 0:00:30]
+tmp_folder/AutoML(1):21b8112d-6505-11ed-87d4-4fdc6f7a4f0f.log
 tmp_folder/distributed.log
-tmp_folder/space.json
-tmp_folder/AutoML(1):1db7a4a7-488d-11ed-87f7-f776db4c0b78.log
-tmp_folder/.auto-sklearn
 tmp_folder/smac3-output
+tmp_folder/.auto-sklearn
+tmp_folder/space.json
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.508 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.362 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-debug-logging-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_debug_logging.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

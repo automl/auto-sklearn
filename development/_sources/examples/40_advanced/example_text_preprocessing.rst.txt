@@ -132,6 +132,7 @@ Build and fit a classifier
 
  .. code-block:: none
 
+    Fitting to the training data:   0%|          | 0/60 [00:00<?, ?it/s, The total time budget for this task is 0:01:00]    Fitting to the training data:   2%|1         | 1/60 [00:01<00:59,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   3%|3         | 2/60 [00:02<00:58,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   5%|5         | 3/60 [00:03<00:57,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   7%|6         | 4/60 [00:04<00:56,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   8%|8         | 5/60 [00:05<00:55,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  10%|#         | 6/60 [00:06<00:54,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  12%|#1        | 7/60 [00:07<00:53,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  13%|#3        | 8/60 [00:08<00:52,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  15%|#5        | 9/60 [00:09<00:51,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  17%|#6        | 10/60 [00:10<00:50,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  18%|#8        | 11/60 [00:11<00:49,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  20%|##        | 12/60 [00:12<00:48,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  22%|##1       | 13/60 [00:13<00:47,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  23%|##3       | 14/60 [00:14<00:46,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  25%|##5       | 15/60 [00:15<00:45,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  27%|##6       | 16/60 [00:16<00:44,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  28%|##8       | 17/60 [00:17<00:43,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  30%|###       | 18/60 [00:18<00:42,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  32%|###1      | 19/60 [00:19<00:41,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  33%|###3      | 20/60 [00:20<00:40,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  35%|###5      | 21/60 [00:21<00:39,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  37%|###6      | 22/60 [00:22<00:38,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  38%|###8      | 23/60 [00:23<00:37,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  40%|####      | 24/60 [00:24<00:36,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  42%|####1     | 25/60 [00:25<00:35,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  43%|####3     | 26/60 [00:26<00:34,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  45%|####5     | 27/60 [00:27<00:33,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  47%|####6     | 28/60 [00:28<00:32,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  48%|####8     | 29/60 [00:29<00:31,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  50%|#####     | 30/60 [00:30<00:30,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  52%|#####1    | 31/60 [00:31<00:29,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  53%|#####3    | 32/60 [00:32<00:28,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  55%|#####5    | 33/60 [00:33<00:27,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  57%|#####6    | 34/60 [00:34<00:26,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  58%|#####8    | 35/60 [00:35<00:25,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  60%|######    | 36/60 [00:36<00:24,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  62%|######1   | 37/60 [00:37<00:23,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  63%|######3   | 38/60 [00:38<00:22,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  65%|######5   | 39/60 [00:39<00:21,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  67%|######6   | 40/60 [00:40<00:20,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  68%|######8   | 41/60 [00:41<00:19,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  70%|#######   | 42/60 [00:42<00:18,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  72%|#######1  | 43/60 [00:43<00:17,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  73%|#######3  | 44/60 [00:44<00:16,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  75%|#######5  | 45/60 [00:45<00:15,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  77%|#######6  | 46/60 [00:46<00:14,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  78%|#######8  | 47/60 [00:47<00:13,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  80%|########  | 48/60 [00:48<00:12,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  82%|########1 | 49/60 [00:49<00:11,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  83%|########3 | 50/60 [00:50<00:10,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  85%|########5 | 51/60 [00:51<00:09,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  87%|########6 | 52/60 [00:52<00:08,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  88%|########8 | 53/60 [00:53<00:07,  1.01s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  90%|######### | 54/60 [00:54<00:06,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data: 100%|##########| 60/60 [00:54<00:00,  1.11it/s, The total time budget for this task is 0:01:00]
 
     AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
                           per_run_time_limit=30, time_left_for_this_task=60)
@@ -160,10 +161,8 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost   duration
     model_id                                                           
-    3            1             0.22            mlp  0.030612   9.699834
-    5            2             0.22            mlp  0.030612   8.698388
-    2            3             0.30  random_forest  0.035714  10.673655
-    4            4             0.26    extra_trees  0.068878   9.582083
+    3            1             0.64            mlp  0.015306  12.959355
+    2            2             0.36  random_forest  0.040816  13.766268
 
 
 
@@ -189,49 +188,27 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f869b383a00>,
-               'cost': 0.0357142857142857,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f869aed6d60>,
-               'ensemble_weight': 0.3,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f869b383700>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71b4d70e20>,
+               'cost': 0.04081632653061229,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71b55ac0a0>,
+               'ensemble_weight': 0.36,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b4d707f0>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=10, n_estimators=512, n_jobs=1,
                            random_state=1, warm_start=True)},
         3: {   'balancing': Balancing(random_state=1, strategy='weighting'),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f869bfaf820>,
-               'cost': 0.030612244897959218,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f869afeb400>,
-               'ensemble_weight': 0.22,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f869b181ac0>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71b4710670>,
+               'cost': 0.015306122448979553,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71c7e3b070>,
+               'ensemble_weight': 0.64,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b4686c70>,
                'model_id': 3,
                'rank': 2,
                'sklearn_classifier': MLPClassifier(activation='tanh', alpha=1.103855734598575e-05, beta_1=0.999,
                   beta_2=0.9, early_stopping=True,
                   hidden_layer_sizes=(229, 229, 229),
                   learning_rate_init=0.00014375616988222174, max_iter=32,
-                  n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
-        4: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f869aec2970>,
-               'cost': 0.06887755102040816,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f869ae065e0>,
-               'ensemble_weight': 0.26,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f869aec2f40>,
-               'model_id': 4,
-               'rank': 3,
-               'sklearn_classifier': ExtraTreesClassifier(max_features=9, min_samples_split=4, n_estimators=512,
-                         n_jobs=1, random_state=1, warm_start=True)},
-        5: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f869aac39d0>,
-               'cost': 0.030612244897959218,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f869d99a700>,
-               'ensemble_weight': 0.22,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f869aac3f70>,
-               'model_id': 5,
-               'rank': 4,
-               'sklearn_classifier': MLPClassifier(activation='tanh', alpha=0.05476322473700896, beta_1=0.999,
-                  beta_2=0.9, early_stopping=True, hidden_layer_sizes=(136,),
-                  learning_rate_init=0.012698439797907473, max_iter=64,
                   n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)}}
 
 
@@ -257,7 +234,7 @@ Get the Score of the final ensemble
 
  .. code-block:: none
 
-    Accuracy score: 0.9847908745247148
+    Accuracy score: 0.9784537389100126
 
 
 
@@ -265,7 +242,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  5.132 seconds)
+   **Total running time of the script:** ( 1 minutes  8.237 seconds)
 
 
 .. _sphx_glr_download_examples_40_advanced_example_text_preprocessing.py:

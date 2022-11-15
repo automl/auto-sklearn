@@ -279,6 +279,7 @@
         <span class="n">load_models</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">dataset_compression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">allow_string_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">disable_progress_bar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
@@ -376,7 +377,7 @@
 
 <span class="sd">        smac_scenario_args : dict, optional (None)</span>
 <span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
-<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/main/api/smac.scenario.scenario.html#module-smac.scenario.scenario&gt;`_</span>
+<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario&gt;`_</span>
 <span class="sd">            for a list of available arguments.</span>
 
 <span class="sd">        logging_config : dict, optional (None)</span>
@@ -396,6 +397,10 @@
 
 <span class="sd">        load_models : bool, optional (True)</span>
 <span class="sd">            Whether to load the models after fitting Auto-sklearn.</span>
+
+<span class="sd">        disable_progress_bar: bool = False</span>
+<span class="sd">            Whether to disable the progress bar that is displayed in the console</span>
+<span class="sd">            while fitting to the training data.</span>
 
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
@@ -450,6 +455,7 @@
             <span class="n">scoring_functions</span><span class="o">=</span><span class="n">scoring_functions</span><span class="p">,</span>
             <span class="n">load_models</span><span class="o">=</span><span class="n">load_models</span><span class="p">,</span>
             <span class="n">allow_string_features</span><span class="o">=</span><span class="n">allow_string_features</span><span class="p">,</span>
+            <span class="n">disable_progress_bar</span><span class="o">=</span><span class="n">disable_progress_bar</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">train_selectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected_metric</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

@@ -214,6 +214,7 @@ Fit Random forest classifier to the data
 
  .. code-block:: none
 
+    Fitting to the training data:   0%|          | 0/30 [00:00<?, ?it/s, The total time budget for this task is 0:00:30]    Fitting to the training data:   3%|3         | 1/30 [00:01<00:29,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:   7%|6         | 2/30 [00:02<00:28,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data: 100%|##########| 30/30 [00:02<00:00, 14.97it/s, The total time budget for this task is 0:00:30]
 
     AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
                           exclude={'classifier': ['random_forest']},
@@ -627,7 +628,7 @@ Print the configuration space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.504 seconds)
+   **Total running time of the script:** ( 0 minutes  7.036 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_restrict_number_of_hyperparameters.py:

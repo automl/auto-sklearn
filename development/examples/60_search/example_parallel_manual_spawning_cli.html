@@ -319,17 +319,40 @@ the information in the file created by the scheduler.</p>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>auto-sklearn results:
-  Dataset name: 524da851-488f-11ed-87f7-f776db4c0b78
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fitting to the training data:   0%|          | 0/30 [00:00&lt;?, ?it/s, The total time budget for this task is 0:00:30]
+Fitting to the training data:   3%|3         | 1/30 [00:01&lt;00:29,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:   7%|6         | 2/30 [00:02&lt;00:28,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  10%|#         | 3/30 [00:03&lt;00:27,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  13%|#3        | 4/30 [00:04&lt;00:26,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  17%|#6        | 5/30 [00:05&lt;00:25,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  20%|##        | 6/30 [00:06&lt;00:24,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  23%|##3       | 7/30 [00:07&lt;00:23,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  27%|##6       | 8/30 [00:08&lt;00:22,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  30%|###       | 9/30 [00:09&lt;00:21,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  33%|###3      | 10/30 [00:10&lt;00:20,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  37%|###6      | 11/30 [00:11&lt;00:19,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  40%|####      | 12/30 [00:12&lt;00:18,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  43%|####3     | 13/30 [00:13&lt;00:17,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  47%|####6     | 14/30 [00:14&lt;00:16,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  50%|#####     | 15/30 [00:15&lt;00:15,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  53%|#####3    | 16/30 [00:16&lt;00:14,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  57%|#####6    | 17/30 [00:17&lt;00:13,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  60%|######    | 18/30 [00:18&lt;00:12,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  63%|######3   | 19/30 [00:19&lt;00:11,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  67%|######6   | 20/30 [00:20&lt;00:10,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  70%|#######   | 21/30 [00:21&lt;00:09,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data: 100%|##########| 30/30 [00:21&lt;00:00,  1.43it/s, The total time budget for this task is 0:00:30]
+auto-sklearn results:
+  Dataset name: 5700f124-6507-11ed-87d4-4fdc6f7a4f0f
   Metric: accuracy
   Best validation score: 0.992908
-  Number of target algorithm runs: 15
-  Number of successful target algorithm runs: 14
+  Number of target algorithm runs: 12
+  Number of successful target algorithm runs: 11
   Number of crashed target algorithm runs: 0
   Number of target algorithms that exceeded the time limit: 1
   Number of target algorithms that exceeded the memory limit: 0
 
-Accuracy score 0.9440559440559441
+Accuracy score 0.965034965034965
 </pre></div>
 </div>
 </div>
@@ -345,7 +368,7 @@ line.</p>
         <span class="n">process</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  43.053 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  45.671 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-60-search-example-parallel-manual-spawning-cli-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/60_search/example_parallel_manual_spawning_cli.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo2.svg" width="150px" /></a>

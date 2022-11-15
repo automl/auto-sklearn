@@ -189,6 +189,7 @@
         <span class="n">get_trials_callback</span><span class="p">:</span> <span class="n">SMACCallback</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset_compression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">allow_string_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">disable_progress_bar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -388,12 +389,12 @@
 
 <span class="sd">        smac_scenario_args : dict, optional (None)</span>
 <span class="sd">            Additional arguments inserted into the scenario of SMAC. See the</span>
-<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/main/api/smac.scenario.scenario.html#module-smac.scenario.scenario&gt;`_</span>
+<span class="sd">            `SMAC documentation &lt;https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario&gt;`_</span>
 <span class="sd">            for a list of available arguments.</span>
 
 <span class="sd">        get_smac_object_callback : callable</span>
 <span class="sd">            Callback function to create an object of class</span>
-<span class="sd">            `smac.optimizer.smbo.SMBO &lt;https://automl.github.io/SMAC3/main/api/smac.optimizer.smbo.html&gt;`_.</span>
+<span class="sd">            `smac.facade.AbstractFacade &lt;https://automl.github.io/SMAC3/main/api/smac.facade.html&gt;`_.</span>
 <span class="sd">            The function must accept the arguments ``scenario_dict``,</span>
 <span class="sd">            ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.</span>
 <span class="sd">            This is an advanced feature. Use only if you are familiar with</span>
@@ -494,6 +495,10 @@
 <span class="sd">            Whether autosklearn should process string features. By default the</span>
 <span class="sd">            textpreprocessing is enabled.</span>
 
+<span class="sd">        disable_progress_bar: bool = False</span>
+<span class="sd">            Whether to disable the progress bar that is displayed in the console</span>
+<span class="sd">            while fitting to the training data.</span>
+
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
 <span class="sd">        cv_results_ : dict of numpy (masked) ndarrays</span>
@@ -588,6 +593,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span> <span class="o">=</span> <span class="n">get_trials_callback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_compression</span> <span class="o">=</span> <span class="n">dataset_compression</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">allow_string_features</span> <span class="o">=</span> <span class="n">allow_string_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disable_progress_bar</span> <span class="o">=</span> <span class="n">disable_progress_bar</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">automl_</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[AutoML]</span>
 
@@ -638,6 +644,7 @@
             <span class="n">get_trials_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_trials_callback</span><span class="p">,</span>
             <span class="n">dataset_compression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_compression</span><span class="p">,</span>
             <span class="n">allow_string_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">allow_string_features</span><span class="p">,</span>
+            <span class="n">disable_progress_bar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">disable_progress_bar</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">automl</span>

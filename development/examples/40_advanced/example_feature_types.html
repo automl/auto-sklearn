@@ -180,7 +180,13 @@ Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdo
 <span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">feat_type</span><span class="o">=</span><span class="n">feat_type</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fitting to the training data:   0%|          | 0/30 [00:00&lt;?, ?it/s, The total time budget for this task is 0:00:30]
+Fitting to the training data:   3%|3         | 1/30 [00:01&lt;00:29,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:   7%|6         | 2/30 [00:02&lt;00:28,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  10%|#         | 3/30 [00:03&lt;00:27,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data: 100%|##########| 30/30 [00:03&lt;00:00,  9.98it/s, The total time budget for this task is 0:00:30]
+
+AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
                       initial_configurations_via_metalearning=0,
                       per_run_time_limit=3,
                       smac_scenario_args={&#39;runcount_limit&#39;: 1},
@@ -197,7 +203,7 @@ Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdo
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score 0.8786127167630058
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.087 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.479 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-feature-types-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_feature_types.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

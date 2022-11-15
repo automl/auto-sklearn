@@ -261,7 +261,12 @@ but with different hyperparameters .</p>
 <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fitting to the training data:   0%|          | 0/30 [00:00&lt;?, ?it/s, The total time budget for this task is 0:00:30]
+Fitting to the training data:   3%|3         | 1/30 [00:01&lt;00:29,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:   7%|6         | 2/30 [00:02&lt;00:28,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data: 100%|##########| 30/30 [00:02&lt;00:00, 14.97it/s, The total time budget for this task is 0:00:30]
+
+AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
                       exclude={&#39;classifier&#39;: [&#39;random_forest&#39;]},
                       initial_configurations_via_metalearning=0,
                       per_run_time_limit=10,
@@ -653,7 +658,7 @@ but with different hyperparameters .</p>
     (Forbidden: feature_preprocessor:__choice__ == &#39;nystroem_sampler&#39; &amp;&amp; Forbidden: classifier:__choice__ == &#39;multinomial_nb&#39;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.504 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.036 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-restrict-number-of-hyperparameters-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_restrict_number_of_hyperparameters.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

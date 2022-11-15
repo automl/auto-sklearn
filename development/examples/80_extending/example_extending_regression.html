@@ -281,7 +281,15 @@ component for using in auto-sklearn.</p>
 <span class="n">reg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>AutoSklearnRegressor(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fitting to the training data:   0%|          | 0/30 [00:00&lt;?, ?it/s, The total time budget for this task is 0:00:30]
+Fitting to the training data:   3%|3         | 1/30 [00:01&lt;00:29,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:   7%|6         | 2/30 [00:02&lt;00:28,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  10%|#         | 3/30 [00:03&lt;00:27,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  13%|#3        | 4/30 [00:04&lt;00:26,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  17%|#6        | 5/30 [00:05&lt;00:25,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data: 100%|##########| 30/30 [00:05&lt;00:00,  5.98it/s, The total time budget for this task is 0:00:30]
+
+AutoSklearnRegressor(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
                      include={&#39;regressor&#39;: [&#39;KernelRidgeRegression&#39;]},
                      initial_configurations_via_metalearning=0,
                      per_run_time_limit=10,
@@ -297,27 +305,27 @@ component for using in auto-sklearn.</p>
 <span class="n">pprint</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.6473391601184222
-{   2: {   &#39;cost&#39;: 0.5861072281099023,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f869b19a670&gt;,
-           &#39;ensemble_weight&#39;: 0.22,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f8696a1d250&gt;,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>r2 score:  -0.29830856682815665
+{   2: {   &#39;cost&#39;: 0.5545980507331993,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71ab4ab9a0&gt;,
+           &#39;ensemble_weight&#39;: 0.42,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71ab4ab670&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f8696a1d7f0&gt;,
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f71ab4abd60&gt;,
            &#39;sklearn_regressor&#39;: KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel=&#39;polynomial&#39;)},
-    5: {   &#39;cost&#39;: 0.5053263983252455,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f869590be50&gt;,
-           &#39;ensemble_weight&#39;: 0.78,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f8696d3d370&gt;,
+    5: {   &#39;cost&#39;: 0.5291088215618682,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71b6e635e0&gt;,
+           &#39;ensemble_weight&#39;: 0.58,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b756a670&gt;,
            &#39;model_id&#39;: 5,
            &#39;rank&#39;: 2,
-           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f8696d3d070&gt;,
+           &#39;regressor&#39;: &lt;autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f71b756a130&gt;,
            &#39;sklearn_regressor&#39;: KernelRidge(alpha=0.12092279509584172, coef0=0.8084604056638881, degree=2,
             gamma=0.0005846787584894724, kernel=&#39;polynomial&#39;)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  9.635 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  10.053 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-regression-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_regression.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>
