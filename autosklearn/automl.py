@@ -34,6 +34,7 @@ import pandas as pd
 import pkg_resources
 import scipy.stats
 import sklearn.utils
+import smac
 from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from ConfigSpace.read_and_write import json as cs_json
 from dask.distributed import Client
@@ -47,7 +48,6 @@ from sklearn.model_selection._split import _RepeatedSplits
 from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
-from smac.callbacks import IncorporateRunResultCallback
 from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.stats.stats import Stats
 from smac.tae import StatusType
@@ -118,7 +118,6 @@ from autosklearn.util.logging_ import (
 )
 from autosklearn.util.parallel import preload_modules
 from autosklearn.util.progress_bar import ProgressBar
-from autosklearn.util.smac_wrap import SMACCallback, SmacRunCallback
 from autosklearn.util.stopwatch import StopWatch
 
 import unittest.mock
@@ -234,7 +233,9 @@ class AutoML(BaseEstimator):
         logging_config: Optional[Mapping] = None,
         metrics: Sequence[Scorer] | None = None,
         scoring_functions: Optional[list[Scorer]] = None,
-        get_trials_callback: SMACCallback | None = None,
+        callback: (
+            smac.callback.Callback | Iterable[smac.callback.Callback] | None
+        ) = None,
         dataset_compression: bool | Mapping[str, Any] = True,
         allow_string_features: bool = True,
         disable_progress_bar: bool = False,
@@ -264,15 +265,6 @@ class AutoML(BaseEstimator):
                 memory_limit=memory_limit,
             )
 
-        # If we got something callable for `get_trials_callback`, wrap it so SMAC
-        # will accept it.
-        if (
-            get_trials_callback is not None
-            and callable(get_trials_callback)
-            and not isinstance(get_trials_callback, IncorporateRunResultCallback)
-        ):
-            get_trials_callback = SmacRunCallback(get_trials_callback)
-
         self._delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
@@ -289,7 +281,7 @@ class AutoML(BaseEstimator):
         self._resampling_strategy = resampling_strategy
         self._disable_evaluator_output = disable_evaluator_output
         self._get_smac_object_callback = get_smac_object_callback
-        self._get_trials_callback = get_trials_callback
+        self._callback = callback
         self._smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
         self.precision = precision
@@ -895,7 +887,7 @@ class AutoML(BaseEstimator):
                             port=self._logger_port,
                             pynisher_context=self._multiprocessing_context,
                             ensemble_callback=proc_ensemble,
-                            trials_callback=self._get_trials_callback,
+                            callback=self._callback,
                         )
 
                         (

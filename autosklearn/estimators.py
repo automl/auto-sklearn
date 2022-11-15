@@ -14,12 +14,11 @@ from typing import (
     Union,
 )
 
-import warnings
-
 import dask.distributed
 import joblib
 import numpy as np
 import pandas as pd
+import smac
 from ConfigSpace.configuration_space import Configuration, ConfigurationSpace
 from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
@@ -41,7 +40,7 @@ from autosklearn.ensembles.multiobjective_dummy_ensemble import (
 )
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
-from autosklearn.util.smac_wrap import SMACCallback
+from autosklearn.util.deprecations import deprecate, deprecated
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -73,389 +72,363 @@ class AutoSklearnEstimator(BaseEstimator):
         metric: Scorer | Sequence[Scorer] | None = None,
         scoring_functions: Optional[List[Scorer]] = None,
         load_models: bool = True,
-        get_trials_callback: SMACCallback | None = None,
+        get_trials_callback: Any | None = None,
+        callback: (
+            smac.callback.Callback | Iterable[smac.callback.Callback] | None
+        ) = None,
         dataset_compression: Union[bool, Mapping[str, Any]] = True,
         allow_string_features: bool = True,
         disable_progress_bar: bool = False,
-    ):
+    ) -> None:
         """
-        Parameters
-        ----------
-        time_left_for_this_task : int, optional (default=3600)
-            Time limit in seconds for the search of appropriate
-            models. By increasing this value, *auto-sklearn* has a higher
-            chance of finding better models.
-
-        per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)
-            Time limit for a single call to the machine learning model.
-            Model fitting will be terminated if the machine learning
-            algorithm runs over the time limit. Set this value high enough so
-            that typical machine learning algorithms can be fit on the
-            training data.
-
-        initial_configurations_via_metalearning : int, optional (default=25)
-            Initialize the hyperparameter optimization algorithm with this
-            many configurations which worked well on previously seen
-            datasets. Disable if the hyperparameter optimization algorithm
-            should start from scratch.
-
-        ensemble_size : int, optional
-            Number of models added to the ensemble built by *Ensemble
-            selection from libraries of models*. Models are drawn with
-            replacement. If set to ``0`` no ensemble is fit.
-
-            Deprecated - will be removed in Auto-sklearn 0.16. Please pass
-            this argument via ``ensemble_kwargs={"ensemble_size": int}``
-            if you want to change the ensemble size for ensemble selection.
-
-        ensemble_class : Type[AbstractEnsemble] | "default", optional (default="default")
-            Class implementing the post-hoc ensemble algorithm. Set to
-            ``None`` to disable ensemble building or use :class:`SingleBest`
-            to obtain only use the single best model instead of an
-            ensemble.
-
-            If set to "default" it will use :class:`EnsembleSelection` for
-            single-objective problems and :class:`MultiObjectiveDummyEnsemble`
-            for multi-objective problems.
-
-        ensemble_kwargs : Dict, optional
-            Keyword arguments that are passed to the ensemble class upon
-            initialization.
-
-        ensemble_nbest : int, optional (default=50)
-            Only consider the ``ensemble_nbest`` models when building an
-            ensemble. This is inspired by a concept called library pruning
-            introduced in `Getting Most out of Ensemble Selection`. This
-            is independent of the ``ensemble_class`` argument and this
-            pruning step is done prior to constructing an ensemble.
-
-        max_models_on_disc: int, optional (default=50),
-            Defines the maximum number of models that are kept in the disc.
-            The additional number of models are permanently deleted. Due to the
-            nature of this variable, it sets the upper limit on how many models
-            can be used for an ensemble.
-            It must be an integer greater or equal than 1.
-            If set to None, all models are kept on the disc.
-
-        seed : int, optional (default=1)
-            Used to seed SMAC. Will determine the output file names.
-
-        memory_limit : int, optional (3072)
-            Memory limit in MB for the machine learning algorithm.
-            `auto-sklearn` will stop fitting the machine learning algorithm if
-            it tries to allocate more than ``memory_limit`` MB.
-
-            **Important notes:**
-
-            * If ``None`` is provided, no memory limit is set.
-            * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is
-              ``n_jobs x memory_limit``.
-            * The memory limit also applies to the ensemble creation process.
-
-        include : Optional[Dict[str, List[str]]] = None
-            If None, all possible algorithms are used.
-
-            Otherwise, specifies a step and the components that are included in search.
-            See ``/pipeline/components/<step>/*`` for available components.
-
-            Incompatible with parameter ``exclude``.
-
-            **Possible Steps**:
-
-            * ``"data_preprocessor"``
-            * ``"balancing"``
-            * ``"feature_preprocessor"``
-            * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
-            * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
-
-            **Example**:
-
-            .. code-block:: python
-
-                include = {
-                    'classifier': ["random_forest"],
-                    'feature_preprocessor': ["no_preprocessing"]
-                }
-
-        exclude : Optional[Dict[str, List[str]]] = None
-            If None, all possible algorithms are used.
-
-            Otherwise, specifies a step and the components that are excluded from search.
-            See ``/pipeline/components/<step>/*`` for available components.
-
-            Incompatible with parameter ``include``.
-
-            **Possible Steps**:
-
-            * ``"data_preprocessor"``
-            * ``"balancing"``
-            * ``"feature_preprocessor"``
-            * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
-            * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
-
-            **Example**:
-
-            .. code-block:: python
-
-                exclude = {
-                    'classifier': ["random_forest"],
-                    'feature_preprocessor': ["no_preprocessing"]
-                }
-
-        resampling_strategy : str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = "holdout"
-            How to to handle overfitting, might need to use ``resampling_strategy_arguments``
-            if using ``"cv"`` based method or a Splitter object.
-
-            * **Options**
-                *   ``"holdout"`` - Use a 67:33 (train:test) split
-                *   ``"cv"``: perform cross validation, requires "folds" in ``resampling_strategy_arguments``
-                *   ``"holdout-iterative-fit"`` - Same as "holdout" but iterative fit where possible
-                *   ``"cv-iterative-fit"``: Same as "cv" but iterative fit where possible
-                *   ``"partial-cv"``: Same as "cv" but uses intensification.
-                *   ``BaseCrossValidator`` - any BaseCrossValidator subclass (found in scikit-learn model_selection module)
-                *   ``_RepeatedSplits`` - any _RepeatedSplits subclass (found in scikit-learn model_selection module)
-                *   ``BaseShuffleSplit`` - any BaseShuffleSplit subclass (found in scikit-learn model_selection module)
-
-            If using a Splitter object that relies on the dataset retaining it's current
-            size and order, you will need to look at the ``dataset_compression`` argument
-            and ensure that ``"subsample"`` is not included in the applied compression
-            ``"methods"`` or disable it entirely with ``False``.
-
-        resampling_strategy_arguments : Optional[Dict] = None
-            Additional arguments for ``resampling_strategy``, this is required if
-            using a ``cv`` based strategy. The default arguments if left as ``None``
-            are:
-
-            .. code-block:: python
-
-                {
-                    "train_size": 0.67,     # The size of the training set
-                    "shuffle": True,        # Whether to shuffle before splitting data
-                    "folds": 5              # Used in 'cv' based resampling strategies
-                }
-
-            If using a custom splitter class, which takes ``n_splits`` such as
-            `PredefinedSplit <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold>`_,
-            the value of ``"folds"`` will be used.
-
-        tmp_folder : string, optional (None)
-            folder to store configuration output and log files, if ``None``
-            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
-
-        delete_tmp_folder_after_terminate: bool, optional (True)
-            remove tmp_folder, when finished. If tmp_folder is None
-            tmp_dir will always be deleted
-
-        n_jobs : int, optional, experimental
-            The number of jobs to run in parallel for ``fit()``. ``-1`` means
-            using all processors.
-
-            **Important notes**:
-
-            * By default, Auto-sklearn uses one core.
-            * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number
-              of models in the ensemble.
-            * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)
-            * If ``dask_client`` is ``None``, a new dask client is created.
-
-        dask_client : dask.distributed.Client, optional
-            User-created dask client, can be used to start a dask cluster and then
-            attach auto-sklearn to it.
-
-        disable_evaluator_output: bool or list, optional (False)
-            If True, disable model and prediction output. Cannot be used
-            together with ensemble building. ``predict()`` cannot be used when
-            setting this True. Can also be used as a list to pass more
-            fine-grained information on what to save. Allowed elements in the
-            list are:
-
-            * ``'y_optimization'`` : do not save the predictions for the
-              optimization set, which would later on be used to build an ensemble.
-
-            * ``model`` : do not save any model files
-
-        smac_scenario_args : dict, optional (None)
-            Additional arguments inserted into the scenario of SMAC. See the
-            `SMAC documentation <https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario>`_
-            for a list of available arguments.
-
-        get_smac_object_callback : callable
-            Callback function to create an object of class
-            `smac.facade.AbstractFacade <https://automl.github.io/SMAC3/main/api/smac.facade.html>`_.
-            The function must accept the arguments ``scenario_dict``,
-            ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
-            This is an advanced feature. Use only if you are familiar with
-            `SMAC <https://automl.github.io/SMAC3/main/index.html>`_.
-
-        logging_config : dict, optional (None)
-            dictionary object specifying the logger configuration. If None,
-            the default logging.yaml file is used, which can be found in
-            the directory ``util/logging.yaml`` relative to the installation.
-
-        metadata_directory : str, optional (None)
-            path to the metadata directory. If None, the default directory
-            (autosklearn.metalearning.files) is used.
-
-        metric : Scorer, optional (None)
-            An instance of :class:`autosklearn.metrics.Scorer` as created by
-            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
-            Metrics`_.
-            If None is provided, a default metric is selected depending on the task.
-
-        scoring_functions : List[Scorer], optional (None)
-            List of scorers which will be calculated for each pipeline and results will be
-            available via ``cv_results``
-
-        load_models : bool, optional (True)
-            Whether to load the models after fitting Auto-sklearn.
-
-        get_trials_callback: callable
-            A callable with the following definition.
-
-            * (smac.SMBO, smac.RunInfo, smac.RunValue, time_left: float) -> bool | None
-
-            This will be called after SMAC, the underlying optimizer for autosklearn,
-            finishes training each run.
-
-            You can use this to record your own information about the optimization
-            process. You can also use this to enable a early stopping based on some
-            critera.
-
-            See the example:
-            :ref:`Early Stopping And Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>`.
-
-        dataset_compression: Union[bool, Mapping[str, Any]] = True
-            We compress datasets so that they fit into some predefined amount of memory.
-            Currently this does not apply to dataframes or sparse arrays, only to raw
-            numpy arrays.
-
-            **NOTE** - If using a custom ``resampling_strategy`` that relies on specific
-            size or ordering of data, this must be disabled to preserve these properties.
-
-            You can disable this entirely by passing ``False`` or leave as the default
-            ``True`` for configuration below.
-
-            .. code-block:: python
-
-                {
-                    "memory_allocation": 0.1,
-                    "methods": ["precision", "subsample"]
-                }
-
-            You can also pass your own configuration with the same keys and choosing
-            from the available ``"methods"``.
-
-            The available options are described here:
-
-            * **memory_allocation**
-                By default, we attempt to fit the dataset into ``0.1 * memory_limit``.
-                This float value can be set with ``"memory_allocation": 0.1``.
-                We also allow for specifying absolute memory in MB, e.g. 10MB is
-                ``"memory_allocation": 10``.
-
-                The memory used by the dataset is checked after each reduction method is
-                performed. If the dataset fits into the allocated memory, any further
-                methods listed in ``"methods"`` will not be performed.
-
-                For example, if ``methods: ["precision", "subsample"]`` and the
-                ``"precision"`` reduction step was enough to make the dataset fit into
-                memory, then the ``"subsample"`` reduction step will not be performed.
-
-            * **methods**
-                We provide the following methods for reducing the dataset size.
-                These can be provided in a list and are performed in the order as given.
-
-                *   ``"precision"`` - We reduce floating point precision as follows:
-                    *   ``np.float128 -> np.float64``
-                    *   ``np.float96 -> np.float64``
-                    *   ``np.float64 -> np.float32``
-
-                *   ``subsample`` - We subsample data such that it **fits directly into
-                    the memory allocation** ``memory_allocation * memory_limit``.
-                    Therefore, this should likely be the last method listed in
-                    ``"methods"``.
-                    Subsampling takes into account classification labels and stratifies
-                    accordingly. We guarantee that at least one occurrence of each
-                    label is included in the sampled set.
-
-        allow_string_features: bool = True
-            Whether autosklearn should process string features. By default the
-            textpreprocessing is enabled.
-
-        disable_progress_bar: bool = False
-            Whether to disable the progress bar that is displayed in the console
-            while fitting to the training data.
-
-        Attributes
-        ----------
-        cv_results_ : dict of numpy (masked) ndarrays
-            A dict with keys as column headers and values as columns, that can be
-            imported into a pandas ``DataFrame``.
-
-            Not all keys returned by scikit-learn are supported yet.
-
-        performance_over_time_ : pandas.core.frame.DataFrame
-            A ``DataFrame`` containing the models performance over time data. Can be
-            used for plotting directly. Please refer to the example
-            :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.
-
+            Parameters
+            ----------
+            time_left_for_this_task : int, optional (default=3600)
+                Time limit in seconds for the search of appropriate
+                models. By increasing this value, *auto-sklearn* has a higher
+                chance of finding better models.
+
+            per_run_time_limit : int, optional (default=1/10 of time_left_for_this_task)
+                Time limit for a single call to the machine learning model.
+                Model fitting will be terminated if the machine learning
+                algorithm runs over the time limit. Set this value high enough so
+                that typical machine learning algorithms can be fit on the
+                training data.
+
+            initial_configurations_via_metalearning : int, optional (default=25)
+                Initialize the hyperparameter optimization algorithm with this
+                many configurations which worked well on previously seen
+                datasets. Disable if the hyperparameter optimization algorithm
+                should start from scratch.
+
+            ensemble_size : int, optional
+                Number of models added to the ensemble built by *Ensemble
+                selection from libraries of models*. Models are drawn with
+                replacement. If set to ``0`` no ensemble is fit.
+
+                Deprecated - will be removed in Auto-sklearn 0.16. Please pass
+                this argument via ``ensemble_kwargs={"ensemble_size": int}``
+                if you want to change the ensemble size for ensemble selection.
+
+            ensemble_class : Type[AbstractEnsemble] | "default", optional (default="default")
+                Class implementing the post-hoc ensemble algorithm. Set to
+                ``None`` to disable ensemble building or use :class:`SingleBest`
+                to obtain only use the single best model instead of an
+                ensemble.
+
+                If set to "default" it will use :class:`EnsembleSelection` for
+                single-objective problems and :class:`MultiObjectiveDummyEnsemble`
+                for multi-objective problems.
+
+            ensemble_kwargs : Dict, optional
+                Keyword arguments that are passed to the ensemble class upon
+                initialization.
+
+            ensemble_nbest : int, optional (default=50)
+                Only consider the ``ensemble_nbest`` models when building an
+                ensemble. This is inspired by a concept called library pruning
+                introduced in `Getting Most out of Ensemble Selection`. This
+                is independent of the ``ensemble_class`` argument and this
+                pruning step is done prior to constructing an ensemble.
+
+            max_models_on_disc: int, optional (default=50),
+                Defines the maximum number of models that are kept in the disc.
+                The additional number of models are permanently deleted. Due to the
+                nature of this variable, it sets the upper limit on how many models
+                can be used for an ensemble.
+                It must be an integer greater or equal than 1.
+                If set to None, all models are kept on the disc.
+
+            seed : int, optional (default=1)
+                Used to seed SMAC. Will determine the output file names.
+
+            memory_limit : int, optional (3072)
+                Memory limit in MB for the machine learning algorithm.
+                `auto-sklearn` will stop fitting the machine learning algorithm if
+                it tries to allocate more than ``memory_limit`` MB.
+
+                **Important notes:**
+
+                * If ``None`` is provided, no memory limit is set.
+                * In case of multi-processing, ``memory_limit`` will be *per job*, so the total usage is
+                  ``n_jobs x memory_limit``.
+                * The memory limit also applies to the ensemble creation process.
+
+            include : Optional[Dict[str, List[str]]] = None
+                If None, all possible algorithms are used.
+
+                Otherwise, specifies a step and the components that are included in search.
+                See ``/pipeline/components/<step>/*`` for available components.
+
+                Incompatible with parameter ``exclude``.
+
+                **Possible Steps**:
+
+                * ``"data_preprocessor"``
+                * ``"balancing"``
+                * ``"feature_preprocessor"``
+                * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
+                * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
+
+                **Example**:
+
+                .. code-block:: python
+
+                    include = {
+                        'classifier': ["random_forest"],
+                        'feature_preprocessor': ["no_preprocessing"]
+                    }
+
+            exclude : Optional[Dict[str, List[str]]] = None
+                If None, all possible algorithms are used.
+
+                Otherwise, specifies a step and the components that are excluded from search.
+                See ``/pipeline/components/<step>/*`` for available components.
+
+                Incompatible with parameter ``include``.
+
+                **Possible Steps**:
+
+                * ``"data_preprocessor"``
+                * ``"balancing"``
+                * ``"feature_preprocessor"``
+                * ``"classifier"`` - Only for when when using ``AutoSklearnClasssifier``
+                * ``"regressor"`` - Only for when when using ``AutoSklearnRegressor``
+
+                **Example**:
+
+                .. code-block:: python
+
+                    exclude = {
+                        'classifier': ["random_forest"],
+                        'feature_preprocessor': ["no_preprocessing"]
+                    }
+
+            resampling_strategy : str | BaseCrossValidator | _RepeatedSplits | BaseShuffleSplit = "holdout"
+                How to to handle overfitting, might need to use ``resampling_strategy_arguments``
+                if using ``"cv"`` based method or a Splitter object.
+
+                * **Options**
+                    *   ``"holdout"`` - Use a 67:33 (train:test) split
+                    *   ``"cv"``: perform cross validation, requires "folds" in ``resampling_strategy_arguments``
+                    *   ``"holdout-iterative-fit"`` - Same as "holdout" but iterative fit where possible
+                    *   ``"cv-iterative-fit"``: Same as "cv" but iterative fit where possible
+                    *   ``"partial-cv"``: Same as "cv" but uses intensification.
+                    *   ``BaseCrossValidator`` - any BaseCrossValidator subclass (found in scikit-learn model_selection module)
+                    *   ``_RepeatedSplits`` - any _RepeatedSplits subclass (found in scikit-learn model_selection module)
+                    *   ``BaseShuffleSplit`` - any BaseShuffleSplit subclass (found in scikit-learn model_selection module)
+
+                If using a Splitter object that relies on the dataset retaining it's current
+                size and order, you will need to look at the ``dataset_compression`` argument
+                and ensure that ``"subsample"`` is not included in the applied compression
+                ``"methods"`` or disable it entirely with ``False``.
+
+            resampling_strategy_arguments : Optional[Dict] = None
+                Additional arguments for ``resampling_strategy``, this is required if
+                using a ``cv`` based strategy. The default arguments if left as ``None``
+                are:
+
+                .. code-block:: python
+
+                    {
+                        "train_size": 0.67,     # The size of the training set
+                        "shuffle": True,        # Whether to shuffle before splitting data
+                        "folds": 5              # Used in 'cv' based resampling strategies
+                    }
+
+                If using a custom splitter class, which takes ``n_splits`` such as
+                `PredefinedSplit <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html#sklearn-model-selection-kfold>`_,
+                the value of ``"folds"`` will be used.
+
+            tmp_folder : string, optional (None)
+                folder to store configuration output and log files, if ``None``
+                automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
+
+            delete_tmp_folder_after_terminate: bool, optional (True)
+                remove tmp_folder, when finished. If tmp_folder is None
+                tmp_dir will always be deleted
+
+            n_jobs : int, optional, experimental
+                The number of jobs to run in parallel for ``fit()``. ``-1`` means
+                using all processors.
+
+                **Important notes**:
+
+                * By default, Auto-sklearn uses one core.
+                * Ensemble building is not affected by ``n_jobs`` but can be controlled by the number
+                  of models in the ensemble.
+                * ``predict()`` is not affected by ``n_jobs`` (in contrast to most scikit-learn models)
+                * If ``dask_client`` is ``None``, a new dask client is created.
+
+            dask_client : dask.distributed.Client, optional
+                User-created dask client, can be used to start a dask cluster and then
+                attach auto-sklearn to it.
+
+            disable_evaluator_output: bool or list, optional (False)
+                If True, disable model and prediction output. Cannot be used
+                together with ensemble building. ``predict()`` cannot be used when
+                setting this True. Can also be used as a list to pass more
+                fine-grained information on what to save. Allowed elements in the
+                list are:
+
+                * ``'y_optimization'`` : do not save the predictions for the
+                  optimization set, which would later on be used to build an ensemble.
+
+                * ``model`` : do not save any model files
+
+            smac_scenario_args : dict, optional (None)
+                Additional arguments inserted into the scenario of SMAC. See the
+                `SMAC documentation <https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario>`_
+                for a list of available arguments.
+
+            get_smac_object_callback : callable
+                Callback function to create an object of class
+                `smac.facade.AbstractFacade <https://automl.github.io/SMAC3/main/api/smac.facade.html>`_.
+                The function must accept the arguments ``scenario_dict``,
+                ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
+                This is an advanced feature. Use only if you are familiar with
+                `SMAC <https://automl.github.io/SMAC3/main/index.html>`_.
+
+            logging_config : dict, optional (None)
+                dictionary object specifying the logger configuration. If None,
+                the default logging.yaml file is used, which can be found in
+                the directory ``util/logging.yaml`` relative to the installation.
+
+            metadata_directory : str, optional (None)
+                path to the metadata directory. If None, the default directory
+                (autosklearn.metalearning.files) is used.
+
+            metric : Scorer, optional (None)
+                An instance of :class:`autosklearn.metrics.Scorer` as created by
+                :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
+                Metrics`_.
+                If None is provided, a default metric is selected depending on the task.
+
+            scoring_functions : List[Scorer], optional (None)
+                List of scorers which will be calculated for each pipeline and results will be
+                available via ``cv_results``
+
+            load_models : bool, optional (True)
+                Whether to load the models after fitting Auto-sklearn.
+
+            get_trials_callback: callable [deprecated]
+                Please use ``callback`` parameter now and see the example at
+                :ref:`Callbacks <sphx_glr_examples_40_advanced_example_early_stopping_and_callbacks.py>`.
+
+            callback: smac.callback.Callback | Iterable[smac.callback.Callback] | None = None,
+                Pass a `callback <https://automl.github.io/SMAC3/main/examples/1_basics/4_callback.html#sphx-glr-examples-1-basics-4-callback-py>`_ to SMAC.
+        s
+            dataset_compression: Union[bool, Mapping[str, Any]] = True
+                We compress datasets so that they fit into some predefined amount of memory.
+                Currently this does not apply to dataframes or sparse arrays, only to raw
+                numpy arrays.
+
+                **NOTE** - If using a custom ``resampling_strategy`` that relies on specific
+                size or ordering of data, this must be disabled to preserve these properties.
+
+                You can disable this entirely by passing ``False`` or leave as the default
+                ``True`` for configuration below.
+
+                .. code-block:: python
+
+                    {
+                        "memory_allocation": 0.1,
+                        "methods": ["precision", "subsample"]
+                    }
+
+                You can also pass your own configuration with the same keys and choosing
+                from the available ``"methods"``.
+
+                The available options are described here:
+
+                * **memory_allocation**
+                    By default, we attempt to fit the dataset into ``0.1 * memory_limit``.
+                    This float value can be set with ``"memory_allocation": 0.1``.
+                    We also allow for specifying absolute memory in MB, e.g. 10MB is
+                    ``"memory_allocation": 10``.
+
+                    The memory used by the dataset is checked after each reduction method is
+                    performed. If the dataset fits into the allocated memory, any further
+                    methods listed in ``"methods"`` will not be performed.
+
+                    For example, if ``methods: ["precision", "subsample"]`` and the
+                    ``"precision"`` reduction step was enough to make the dataset fit into
+                    memory, then the ``"subsample"`` reduction step will not be performed.
+
+                * **methods**
+                    We provide the following methods for reducing the dataset size.
+                    These can be provided in a list and are performed in the order as given.
+
+                    *   ``"precision"`` - We reduce floating point precision as follows:
+                        *   ``np.float128 -> np.float64``
+                        *   ``np.float96 -> np.float64``
+                        *   ``np.float64 -> np.float32``
+
+                    *   ``subsample`` - We subsample data such that it **fits directly into
+                        the memory allocation** ``memory_allocation * memory_limit``.
+                        Therefore, this should likely be the last method listed in
+                        ``"methods"``.
+                        Subsampling takes into account classification labels and stratifies
+                        accordingly. We guarantee that at least one occurrence of each
+                        label is included in the sampled set.
+
+            allow_string_features: bool = True
+                Whether autosklearn should process string features. By default the
+                textpreprocessing is enabled.
+
+            disable_progress_bar: bool = False
+                Whether to disable the progress bar that is displayed in the console
+                while fitting to the training data.
+
+            Attributes
+            ----------
+            cv_results_ : dict of numpy (masked) ndarrays
+                A dict with keys as column headers and values as columns, that can be
+                imported into a pandas ``DataFrame``.
+
+                Not all keys returned by scikit-learn are supported yet.
+
+            performance_over_time_ : pandas.core.frame.DataFrame
+                A ``DataFrame`` containing the models performance over time data. Can be
+                used for plotting directly. Please refer to the example
+                :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.
         """  # noqa (links are too long)
-        # Raise error if the given total time budget is less than 30 seconds.
-        if time_left_for_this_task < 30:
-            raise ValueError("Time left for this task must be at least " "30 seconds. ")
-        self.time_left_for_this_task = time_left_for_this_task
-        self.per_run_time_limit = per_run_time_limit
-        self.initial_configurations_via_metalearning = (
-            initial_configurations_via_metalearning
+        deprecated(
+            get_trials_callback,
+            "Please use `callback` parameter instead",
+            when=(0, 16, 0),
+        )
+        deprecate(
+            ensemble_size is not None
+            and ensemble_kwargs
+            and "ensemble_size" in ensemble_kwargs,
+            msg=f"`ensemble_size` is deprecated but is present in {ensemble_kwargs=}",
+            ignore="`ensemble_size`",
+            when=(0, 17, 0),
+        )
+        deprecate(
+            ensemble_size is not None
+            and not isinstance(ensemble_class, EnsembleSelection),
+            msg=(
+                "`ensemble_size` has been deprecated and we do not know how to handle"
+                f"with {ensemble_class=}"
+            ),
+            ignore="ensemble_size",
+            when=(0, 17, 0),
         )
 
-        # Need to resolve the ensemble class here so we can act on it below.
-        if ensemble_class == "default":
-            ensemble_class = self._resolve_ensemble_class(metric)
+        if deprecate(
+            ensemble_size is not None and isinstance(ensemble_class, EnsembleSelection),
+            msg="`ensemble_size` has been deprecated",
+            new=f"Please use `ensemble_kwargs = {{'ensemble_size': {ensemble_size}}}`",
+            fix="Inserting `ensemble_size` into `ensemble_kwargs`.",
+            when=(0, 17, 0),
+        ):
+            ensemble_kwargs = ensemble_kwargs if ensemble_kwargs is not None else {}
+            ensemble_kwargs["ensemble_size"] = ensemble_size
 
-        self.ensemble_class = ensemble_class
-
-        # User specified `ensemble_size` explicitly, warn them about deprecation
-        if ensemble_size is not None:
-            # Keep consistent behaviour
-            message = (
-                "`ensemble_size` has been deprecated, please use `ensemble_kwargs = "
-                "{'ensemble_size': %d}`. Inserting `ensemble_size` into "
-                "`ensemble_kwargs` for now. `ensemble_size` will be removed in "
-                "auto-sklearn 0.16."
-            ) % ensemble_size
-            if ensemble_class == EnsembleSelection:
-                if ensemble_kwargs is None:
-                    ensemble_kwargs = {"ensemble_size": ensemble_size}
-                    warnings.warn(message, DeprecationWarning, stacklevel=2)
-                elif "ensemble_size" not in ensemble_kwargs:
-                    ensemble_kwargs["ensemble_size"] = ensemble_size
-                    warnings.warn(message, DeprecationWarning, stacklevel=2)
-                else:
-                    warnings.warn(
-                        "Deprecated argument `ensemble_size` is both provided "
-                        "as an argument to the constructor and passed inside "
-                        "`ensemble_kwargs`. Will ignore the argument and use "
-                        "the value given in `ensemble_kwargs` (%d). `ensemble_size` "
-                        "will be removed in auto-sklearn 0.16."
-                        % ensemble_kwargs["ensemble_size"],
-                        DeprecationWarning,
-                        stacklevel=2,
-                    )
-            else:
-                warnings.warn(
-                    "`ensemble_size` has been deprecated, please use "
-                    "`ensemble_kwargs = {'ensemble_size': %d} if this "
-                    "was intended. Ignoring `ensemble_size` because "
-                    "`ensemble_class` != EnsembleSelection. "
-                    "`ensemble_size` will be removed in auto-sklearn 0.16."
-                    % ensemble_size,
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-        self.ensemble_size = (
-            ensemble_size  # Otherwise sklean.base.get_params() will complain
-        )
+        # Otherwise sklean.base.get_params() will complain
+        self.ensemble_size = ensemble_size
         self.ensemble_kwargs = ensemble_kwargs
         self.ensemble_nbest = ensemble_nbest
         self.max_models_on_disc = max_models_on_disc
@@ -477,10 +450,25 @@ class AutoSklearnEstimator(BaseEstimator):
         self.metric = metric
         self.scoring_functions = scoring_functions
         self.load_models = load_models
-        self.get_trials_callback = get_trials_callback
+        self.callback = callback
         self.dataset_compression = dataset_compression
         self.allow_string_features = allow_string_features
         self.disable_progress_bar = disable_progress_bar
+
+        # Raise error if the given total time budget is less than 30 seconds.
+        if time_left_for_this_task < 30:
+            raise ValueError("Time left for this task must be at least " "30 seconds. ")
+        self.time_left_for_this_task = time_left_for_this_task
+        self.per_run_time_limit = per_run_time_limit
+        self.initial_configurations_via_metalearning = (
+            initial_configurations_via_metalearning
+        )
+
+        # Need to resolve the ensemble class here so we can act on it below.
+        if ensemble_class == "default":
+            ensemble_class = self._resolve_ensemble_class(metric)
+
+        self.ensemble_class = ensemble_class
 
         self.automl_ = None  # type: Optional[AutoML]
 
@@ -528,7 +516,7 @@ class AutoSklearnEstimator(BaseEstimator):
             metadata_directory=self.metadata_directory,
             metrics=[self.metric] if isinstance(self.metric, Scorer) else self.metric,
             scoring_functions=self.scoring_functions,
-            get_trials_callback=self.get_trials_callback,
+            callback=self.callback,
             dataset_compression=self.dataset_compression,
             allow_string_features=self.allow_string_features,
             disable_progress_bar=self.disable_progress_bar,
@@ -691,7 +679,6 @@ class AutoSklearnEstimator(BaseEstimator):
         -------
         self
         """  # noqa: E501
-
         if ensemble_class == "default":
             # Things are actually a little more nuanced here:
             # * If they passed `metric=None` at init, we would infer this in automl
@@ -705,52 +692,42 @@ class AutoSklearnEstimator(BaseEstimator):
 
             ensemble_class = self._resolve_ensemble_class(metric)
 
+        deprecate(
+            ensemble_size is not None
+            and ensemble_kwargs
+            and "ensemble_size" in ensemble_kwargs,
+            msg=f"`ensemble_size` is deprecated but is present in {ensemble_kwargs=}",
+            ignore="`ensemble_size`",
+            when=(0, 17, 0),
+        )
+        deprecate(
+            ensemble_size is not None
+            and not isinstance(ensemble_class, EnsembleSelection),
+            msg=(
+                "`ensemble_size` has been deprecated and we do not know how to handle"
+                f"with {ensemble_class=}"
+            ),
+            ignore="ensemble_size",
+            when=(0, 17, 0),
+        )
+
+        if deprecate(
+            ensemble_size is not None and isinstance(ensemble_class, EnsembleSelection),
+            msg="`ensemble_size` has been deprecated",
+            new=f"Please use `ensemble_kwargs = {{'ensemble_size': {ensemble_size}}}`",
+            fix="Inserting `ensemble_size` into `ensemble_kwargs`.",
+            when=(0, 17, 0),
+        ):
+            ensemble_kwargs = ensemble_kwargs if ensemble_kwargs is not None else {}
+            ensemble_kwargs["ensemble_size"] = ensemble_size
+
         self.ensemble_class = ensemble_class
 
-        # User specified `ensemble_size` explicitly, warn them about deprecation
-        if ensemble_size is not None:
-            # Keep consistent behaviour
-            message = (
-                "`ensemble_size` has been deprecated, please use `ensemble_kwargs = "
-                "{'ensemble_size': %d}`. Inserting `ensemble_size` into "
-                "`ensemble_kwargs` for now. `ensemble_size` will be removed in "
-                "auto-sklearn 0.16."
-            ) % ensemble_size
-            if ensemble_class == EnsembleSelection:
-                if ensemble_kwargs is None:
-                    ensemble_kwargs = {"ensemble_size": ensemble_size}
-                    warnings.warn(message, DeprecationWarning, stacklevel=2)
-                elif "ensemble_size" not in ensemble_kwargs:
-                    ensemble_kwargs["ensemble_size"] = ensemble_size
-                    warnings.warn(message, DeprecationWarning, stacklevel=2)
-                else:
-                    warnings.warn(
-                        "Deprecated argument `ensemble_size` is both provided "
-                        "as an argument to the constructor and passed inside "
-                        "`ensemble_kwargs`. Will ignore the argument and use "
-                        "the value given in `ensemble_kwargs` (%d). `ensemble_size` "
-                        "will be removed in auto-sklearn 0.16."
-                        % ensemble_kwargs["ensemble_size"],
-                        DeprecationWarning,
-                        stacklevel=2,
-                    )
-            else:
-                warnings.warn(
-                    "`ensemble_size` has been deprecated, please use "
-                    "`ensemble_kwargs = {'ensemble_size': %d} if this "
-                    "was intended. Ignoring `ensemble_size` because "
-                    "`ensemble_class` != EnsembleSelection. "
-                    "`ensemble_size` will be removed in auto-sklearn 0.16."
-                    % ensemble_size,
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-
         if self.automl_ is None:
-            # Build a dummy automl object to call fit_ensemble
-            # The ensemble size is honored in the .automl_.fit_ensemble
-            # call
+            # Build a dummy automl object to call fit_ensemble. The ensemble size is
+            # honored in the .automl_.fit_ensemble call
             self.automl_ = self.build_automl()
+
         self.automl_.fit_ensemble(
             y=y,
             task=task,

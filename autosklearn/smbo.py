@@ -1,4 +1,3 @@
-import typing
 from typing import Dict, List, Optional, Sequence
 
 import copy
@@ -12,7 +11,7 @@ import warnings
 
 import dask.distributed
 import pynisher
-from smac.callbacks import IncorporateRunResultCallback
+import smac
 from smac.facade.smac_ac_facade import SMAC4AC
 from smac.intensification.intensification import Intensifier
 from smac.intensification.simple_intensifier import SimpleIntensifier
@@ -271,8 +270,8 @@ class AutoMLSMBO:
         get_smac_object_callback=None,
         scoring_functions=None,
         pynisher_context="spawn",
-        ensemble_callback: typing.Optional[EnsembleBuilderManager] = None,
-        trials_callback: typing.Optional[IncorporateRunResultCallback] = None,
+        ensemble_callback: Optional[EnsembleBuilderManager] = None,
+        callback: smac.Callback | None = None,
     ):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -318,7 +317,7 @@ class AutoMLSMBO:
         self.pynisher_context = pynisher_context
 
         self.ensemble_callback = ensemble_callback
-        self.trials_callback = trials_callback
+        self.callback = callback
 
         dataset_name_ = "" if dataset_name is None else dataset_name
         logger_name = "%s(%d):%s" % (
@@ -347,7 +346,6 @@ class AutoMLSMBO:
         self.task = self.datamanager.info["task"]
 
     def collect_metalearning_suggestions(self, meta_base):
-
         with self.stopwatch.time("Initial Configurations") as task:
             metalearning_configurations = _get_metalearning_configurations(
                 meta_base=meta_base,
@@ -428,7 +426,6 @@ class AutoMLSMBO:
         return res
 
     def run_smbo(self):
-
         self.stopwatch.start("SMBO")
 
         # == first things first: load the datamanager
