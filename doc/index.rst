@@ -25,6 +25,14 @@ the technology behind *auto-sklearn* by reading our paper published at
 `NeurIPS 2015 <https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
+
+.. topic:: Python3.7
+   With the update to `scikit-learn 1.2 <https://github.com/automl/auto-sklearn/pull/1611>_`,
+   we are forced to drop `Python3.7` from version `0.16.0` onwards.
+   This means that that Google Colab, who only support `Python3.7` will no longer be able to
+   run the latest versions of AutoSklearn. Please use `0.15.0` if colab usage is required.
+
+
 .. topic:: NEW: Text feature support
 
     Auto-sklearn now supports text features, check our new example:
