@@ -3,7 +3,16 @@ import sys
 
 
 def preload_modules(context: multiprocessing.context.BaseContext) -> None:
-    all_loaded_modules = sys.modules.keys()
+    """Attempt to preload modules when using forkserver"""
+    # NOTE: preloading and docstring
+    #
+    #   This is just a best guess at why this is used, coming from this blogpost
+    #   https://bnikolic.co.uk/blog/python/parallelism/2019/11/13/python-forkserver-preload.html
+    #   Ideally we should identify subprocesses that get run with this and try limit the
+    #   necessity to use all of these modules
+    #
+    #   @eddiebergman
+    all_loaded_modules = list(sys.modules.keys())
     preload = [
         loaded_module
         for loaded_module in all_loaded_modules
