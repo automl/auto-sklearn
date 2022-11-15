@@ -382,6 +382,7 @@ class AutoSklearnChoice(object):
         # necessary to do this upon the construction of this object
         # self.set_hyperparameters(self.configuration)
         self.choice = None
+        self._fitted = False
 
     def get_components(cls):
         raise NotImplementedError()
@@ -466,11 +467,13 @@ class AutoSklearnChoice(object):
         raise NotImplementedError()
 
     def fit(self, X, y, **kwargs):
-        # Allows to use check_is_fitted on the choice object
-        self.fitted_ = True
+        self._fitted = True
         if kwargs is None:
             kwargs = {}
         return self.choice.fit(X, y, **kwargs)
+
+    def __sklearn_is_fitted__(self) -> bool:
+        return self._fitted
 
     def predict(self, X):
         return self.choice.predict(X)
