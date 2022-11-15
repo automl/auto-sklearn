@@ -105,7 +105,7 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
         cs = ConfigurationSpace()
 
         criterion = CategoricalHyperparameter(
-            "criterion", ["squared_error", "friedman_mse", "mae"]
+            "criterion", ["squared_error", "friedman_mse", "absolute_error"]
         )
         max_features = Constant("max_features", 1.0)
         max_depth_factor = UniformFloatHyperparameter(

@@ -174,7 +174,7 @@ class GradientBoosting(
     ):
         cs = ConfigurationSpace()
         loss = CategoricalHyperparameter(
-            "loss", ["squared_error"], default_value="least_squares"
+            "loss", ["squared_error"], default_value="squared_error"
         )
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True

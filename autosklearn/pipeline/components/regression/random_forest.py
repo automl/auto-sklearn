@@ -143,7 +143,7 @@ class RandomForest(
     ):
         cs = ConfigurationSpace()
         criterion = CategoricalHyperparameter(
-            "criterion", ["squared_error", "friedman_mse", "mae"]
+            "criterion", ["squared_error", "friedman_mse", "absolute_error"]
         )
 
         # In contrast to the random forest classifier we want to use more max_features
