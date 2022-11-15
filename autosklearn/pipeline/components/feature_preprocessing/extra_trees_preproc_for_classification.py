@@ -132,6 +132,9 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
 
         n_estimators = Constant("n_estimators", 100)
+        # There is also the `criterion` called `log_loss`, however the documation states
+        # they are equivalent. We leave one of them out so the optimizer does not need
+        # to worry about it
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini"
         )
