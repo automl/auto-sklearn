@@ -14,6 +14,7 @@ from ConfigSpace import Configuration
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import (
     BaseCrossValidator,
+    BaseShuffleSplit,
     KFold,
     PredefinedSplit,
     ShuffleSplit,
@@ -21,7 +22,7 @@ from sklearn.model_selection import (
     StratifiedShuffleSplit,
     train_test_split,
 )
-from sklearn.model_selection._split import BaseShuffleSplit, _RepeatedSplits
+from sklearn.model_selection._split import _RepeatedSplits
 from smac.tae import StatusType, TAEAbortException
 
 from autosklearn.automl_common.common.utils.backend import Backend

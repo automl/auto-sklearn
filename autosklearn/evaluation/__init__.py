@@ -26,11 +26,8 @@ from queue import Empty
 import numpy as np
 import pynisher
 from ConfigSpace import Configuration
-from sklearn.model_selection._split import (
-    BaseCrossValidator,
-    BaseShuffleSplit,
-    _RepeatedSplits,
-)
+from sklearn.model_selection import BaseCrossValidator, BaseShuffleSplit
+from sklearn.model_selection._split import _RepeatedSplits
 from smac.runhistory.runhistory import RunInfo, RunValue
 from smac.stats.stats import Stats
 from smac.tae import StatusType, TAEAbortException

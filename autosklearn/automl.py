@@ -42,11 +42,8 @@ from sklearn.base import BaseEstimator
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.ensemble import VotingClassifier, VotingRegressor
 from sklearn.metrics._classification import type_of_target
-from sklearn.model_selection._split import (
-    BaseCrossValidator,
-    BaseShuffleSplit,
-    _RepeatedSplits,
-)
+from sklearn.model_selection import BaseCrossValidator, BaseShuffleSplit
+from sklearn.model_selection._split import _RepeatedSplits
 from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
