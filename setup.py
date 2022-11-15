@@ -14,10 +14,10 @@ if os.name != "posix":
         % sys.platform
     )
 
-if sys.version_info < (3, 7):
+if sys.version_info < (3, 8):
     raise ValueError(
         "Unsupported Python version %d.%d.%d found. Auto-sklearn requires Python "
-        "3.7 or higher."
+        "3.8 or higher."
         % (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)
     )
 
@@ -91,10 +91,10 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Scientific/Engineering :: Information Analysis",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     url="https://automl.github.io/auto-sklearn",
 )
