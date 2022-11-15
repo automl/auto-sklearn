@@ -281,7 +281,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         get_smac_object_callback : callable
             Callback function to create an object of class
-            `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/main/api/smac.optimizer.smbo.html>`_.
+            `smac.facade.AbstractFacade <https://automl.github.io/SMAC3/main/api/smac.facade.html>`_.
             The function must accept the arguments ``scenario_dict``,
             ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
             This is an advanced feature. Use only if you are familiar with
