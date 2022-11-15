@@ -135,7 +135,7 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
 
         n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "friedman_mse", "mae"]
+            "criterion", ["squared_error", "friedman_mse", "mae"]
         )
         max_features = UniformFloatHyperparameter(
             "max_features", 0.1, 1.0, default_value=1.0
