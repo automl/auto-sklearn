@@ -78,7 +78,7 @@ class RandomForest(
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
 
-            if self.max_features not in ("sqrt", "log2", "auto"):
+            if self.max_features not in ("sqrt", "log2"):
                 max_features = int(X.shape[1] ** float(self.max_features))
             else:
                 max_features = self.max_features
