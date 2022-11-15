@@ -189,7 +189,7 @@ class GradientBoostingClassifier(
         feat_type: Optional[FEAT_TYPE_TYPE] = None, dataset_properties=None
     ):
         cs = ConfigurationSpace()
-        loss = Constant("loss", "auto")
+        loss = Constant("loss", "log_loss")
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True
         )
