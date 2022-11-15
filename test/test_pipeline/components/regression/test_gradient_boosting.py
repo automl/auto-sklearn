@@ -21,5 +21,5 @@ class GradientBoostingComponentTest(BaseRegressionComponentTest):
     res["default_diabetes_sparse"] = None
     res["diabetes_n_call"] = 11
 
-    sk_mod = sklearn.ensemble.GradientBoostingRegressor
+    sk_mod = sklearn.ensemble.HistGradientBoostingRegressor
     module = GradientBoosting
