@@ -35,10 +35,9 @@ from smac.tae.execute_func import AbstractTAFunc
 
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.train_evaluator
-import autosklearn.evaluation.util
 import autosklearn.pipeline.components
 from autosklearn.automl_common.common.utils.backend import Backend
-from autosklearn.evaluation.train_evaluator import TYPE_ADDITIONAL_INFO
+from autosklearn.evaluation.util import extract_learning_curve, read_queue
 from autosklearn.metrics import Scorer
 from autosklearn.util.logging_ import PickableLoggerAdapter, get_named_client_logger
 from autosklearn.util.parallel import preload_modules
@@ -245,15 +244,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self,
         run_info: RunInfo,
     ) -> Tuple[RunInfo, RunValue]:
-        """
-        wrapper function for ExecuteTARun.run_wrapper() to cap the target algorithm
-        runtime if it would run over the total allowed runtime.
+        """Wraps ExecuteTARun.run_wrapper() to cap the target algorithm runtime
 
         Parameters
         ----------
         run_info : RunInfo
             Object that contains enough information to execute a configuration run in
             isolation.
+
         Returns
         -------
         RunInfo:
@@ -327,15 +325,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         float,
         Dict[str, Union[int, float, str, Dict, List, Tuple]],
     ]:
-
-        # Additional information of each of the tae executions
-        # Defined upfront for mypy
-        additional_run_info: TYPE_ADDITIONAL_INFO = {}
-
-        context = multiprocessing.get_context(self.pynisher_context)
-        preload_modules(context)
-        queue = context.Queue()
-
         if not (instance_specific is None or instance_specific == "0"):
             raise ValueError(instance_specific)
 
@@ -343,27 +332,17 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if self.init_params is not None:
             init_params.update(self.init_params)
 
-        if self.port is None:
-            logger: Union[logging.Logger, PickableLoggerAdapter] = logging.getLogger(
-                "pynisher"
-            )
-        else:
-            logger = get_named_client_logger(
-                name="pynisher",
-                port=self.port,
-            )
-        arguments = dict(
-            logger=logger,
-            wall_time_in_s=cutoff,
-            mem_in_mb=self.memory_limit,
-            capture_output=True,
-            context=context,
-        )
-
+        # Dummy config when `isinstance(config, int)`
         if isinstance(config, int):
             num_run = self.initial_num_run
         else:
             num_run = config.config_id + self.initial_num_run
+
+        context = multiprocessing.get_context(self.pynisher_context)
+        queue = context.Queue()
+
+        if context == "forkserver":
+            preload_modules(context)
 
         obj_kwargs = dict(
             queue=queue,
@@ -385,114 +364,57 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             additional_components=autosklearn.pipeline.components.base._addons,
         )
 
+        # TODO This seems to be used scripts/run_auto-sklearn_for_metadata_generation.py
         if self.resampling_strategy != "test":
             obj_kwargs["resampling_strategy"] = self.resampling_strategy
             obj_kwargs["resampling_strategy_args"] = self.resampling_strategy_args
 
+        target_function = pynisher.limit(
+            memory=(self.memory_limit, "MB"),
+            wall_time=(cutoff, "s"),
+            context=self.pynisher_context,
+        )
+
+        start = time.time()
         try:
-            obj = pynisher.enforce_limits(**arguments)(self.ta)
-            obj(**obj_kwargs)
+            target_function(**obj_kwargs)  # The result will be put into the queue
+            error = None
+            traceback = None
         except Exception as e:
-            exception_traceback = traceback.format_exc()
-            error_message = repr(e)
-            additional_run_info.update(
-                {"traceback": exception_traceback, "error": error_message}
-            )
-            return (
-                StatusType.CRASHED,
-                self.worst_possible_result,
-                0.0,
-                additional_run_info,
-            )
+            error = e
+            traceback = traceback.format_exc()
 
-        if obj.exit_status in (
-            pynisher.TimeoutException,
-            pynisher.MemorylimitException,
-        ):
-            # Even if the pynisher thinks that a timeout or memout occured,
-            # it can be that the target algorithm wrote something into the queue
-            #  - then we treat it as a succesful run
-            try:
-                info = autosklearn.evaluation.util.read_queue(queue)
-                result = info[-1]["loss"]
-                status = info[-1]["status"]
-                additional_run_info = info[-1]["additional_run_info"]
+        duration = time.time() - start
 
-                if obj.stdout:
-                    additional_run_info["subprocess_stdout"] = obj.stdout
-                if obj.stderr:
-                    additional_run_info["subprocess_stderr"] = obj.stderr
-
-                if obj.exit_status is pynisher.TimeoutException:
-                    additional_run_info["info"] = "Run stopped because of timeout."
-                elif obj.exit_status is pynisher.MemorylimitException:
-                    additional_run_info["info"] = "Run stopped because of memout."
-
-                if status in [StatusType.SUCCESS, StatusType.DONOTADVANCE]:
-                    cost = result
-                else:
-                    cost = self.worst_possible_result
-
-            except Empty:
-                info = None
-                if obj.exit_status is pynisher.TimeoutException:
-                    status = StatusType.TIMEOUT
-                    additional_run_info = {"error": "Timeout"}
-                elif obj.exit_status is pynisher.MemorylimitException:
-                    status = StatusType.MEMOUT
-                    additional_run_info = {
-                        "error": "Memout (used more than {} MB).".format(
-                            self.memory_limit
-                        )
-                    }
-                else:
-                    raise ValueError(obj.exit_status)
-                cost = self.worst_possible_result
-
-        elif obj.exit_status is TAEAbortException:
+        # We now try read out and see if we got a result from the queue
+        try:
+            info = read_queue(queue)[-1]
+            cost = info.get("loss", self.worst_possible_result)
+            status = info.get("status")
+            additional_run_info = info.get("additional_run_info", {})
+        except Empty:
             info = None
-            status = StatusType.ABORT
             cost = self.worst_possible_result
-            additional_run_info = {
-                "error": "Your configuration of " "auto-sklearn does not work!",
-                "exit_status": _encode_exit_status(obj.exit_status),
-                "subprocess_stdout": obj.stdout,
-                "subprocess_stderr": obj.stderr,
-            }
-
-        else:
-            try:
-                info = autosklearn.evaluation.util.read_queue(queue)
-                result = info[-1]["loss"]
-                status = info[-1]["status"]
-                additional_run_info = info[-1]["additional_run_info"]
-
-                if obj.exit_status == 0:
-                    cost = result
+            status = None
+            additional_run_info = {}
+        finally:
+            if status is None:
+                if error is None:
+                    status = StatusType.CRASHED
+                elif isinstance(error, MemoryError):
+                    status = StatusType.MEMOUT
+                elif isinstance(error, pynisher.TimeoutException):
+                    status = StatusType.TIMEOUT
+                elif isinstance(error, TAEAbortException):
+                    status = StatusType.ABORT
                 else:
                     status = StatusType.CRASHED
-                    cost = self.worst_possible_result
-                    additional_run_info["info"] = (
-                        "Run treated as crashed "
-                        "because the pynisher exit "
-                        "status %s is unknown." % str(obj.exit_status)
-                    )
-                    additional_run_info["exit_status"] = _encode_exit_status(
-                        obj.exit_status
-                    )
-                    additional_run_info["subprocess_stdout"] = obj.stdout
-                    additional_run_info["subprocess_stderr"] = obj.stderr
-            except Empty:
-                info = None
-                additional_run_info = {
-                    "error": "Result queue is empty",
-                    "exit_status": _encode_exit_status(obj.exit_status),
-                    "subprocess_stdout": obj.stdout,
-                    "subprocess_stderr": obj.stderr,
-                    "exitcode": obj.exitcode,
-                }
-                status = StatusType.CRASHED
-                cost = self.worst_possible_result
+
+            if error is not None:
+                additional_run_info["error"] = repr(error)
+
+            if traceback is not None:
+                additional_run_info["traceback"] = traceback
 
         if (
             self.budget_type is None or budget == 0
@@ -508,17 +430,13 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             in ("holdout-iterative-fit", "cv-iterative-fit")
             and status != StatusType.CRASHED
         ):
-            learning_curve = autosklearn.evaluation.util.extract_learning_curve(info)
-            learning_curve_runtime = autosklearn.evaluation.util.extract_learning_curve(
-                info, "duration"
-            )
+            learning_curve = extract_learning_curve(info)
+            learning_curve_runtime = extract_learning_curve(info, "duration")
             if len(learning_curve) > 1:
                 additional_run_info["learning_curve"] = learning_curve
                 additional_run_info["learning_curve_runtime"] = learning_curve_runtime
 
-            train_learning_curve = autosklearn.evaluation.util.extract_learning_curve(
-                info, "train_loss"
-            )
+            train_learning_curve = extract_learning_curve(info, "train_loss")
             if len(train_learning_curve) > 1:
                 additional_run_info["train_learning_curve"] = train_learning_curve
                 additional_run_info["learning_curve_runtime"] = learning_curve_runtime
@@ -544,8 +462,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             config_id = config.config_id
 
         additional_run_info["configuration_origin"] = origin
-
-        runtime = float(obj.wall_clock_time)
 
         autosklearn.evaluation.util.empty_queue(queue)
         self.logger.info("Finished evaluating configuration %d" % config_id)
@@ -578,4 +494,4 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             if isinstance(cost, float):
                 raise RuntimeError(error)
 
-        return status, cost, runtime, additional_run_info
+        return status, cost, float(duration), additional_run_info
