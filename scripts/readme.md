@@ -9,22 +9,13 @@ The working directory will be used to save all temporary and final output.
     working_directory=~/auto-sklearn-metadata/001
     mkdir -p $working_directory
 
-The task type defines whether you want update classification or regression
-metadata:
-
-    task_type=classification
-
-or
-
-    task_type=regression
-
 ## 2. Install the OpenML package and create an OpenML account
 
 Read the [OpenML python package manual](https://openml.github.io/openml-python) for this.
 
 ## 3. Create configuration commands
 
-    python3 01_create_commands.py --working-directory $working_directory --task-type $task_type
+    python3 01_create_commands.py --working-directory $working_directory
 
 This will create a file with all commands necessary to run auto-sklearn on a
 large number of datasets from OpenML. You can change the task IDs or the way
