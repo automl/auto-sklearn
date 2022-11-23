@@ -2184,21 +2184,20 @@ class AutoML(BaseEstimator):
 
         table = pd.DataFrame.from_dict(table_dict, orient="index")
         table.sort_values(by="cost", inplace=True)
+        table["rank"] = np.arange(1, len(table.index) + 1)
 
         # Check which resampling strategy is chosen and selecting the appropriate models
         is_cv = self._resampling_strategy == "cv"
         models = self.cv_models_ if is_cv else self.models_
 
-        rank = 1  # Initializing rank for the first model
         for (_, model_id, _), model in models.items():
             model_dict = {}  # Declaring model dictionary
 
             # Inserting model_id, rank, cost and ensemble weight
             model_dict["model_id"] = table.loc[model_id]["model_id"].astype(int)
-            model_dict["rank"] = rank
+            model_dict["rank"] = table.loc[model_id]["rank"].astype(int)
             model_dict["cost"] = table.loc[model_id]["cost"]
             model_dict["ensemble_weight"] = table.loc[model_id]["ensemble_weight"]
-            rank += 1  # Incrementing rank by 1 for the next model
 
             # The steps in the models pipeline are as follows:
             # 'data_preprocessor': DataPreprocessor,
