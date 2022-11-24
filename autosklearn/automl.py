@@ -652,6 +652,7 @@ class AutoML(BaseEstimator):
                 # space
                 self._backend.save_start_time(self._seed)
 
+            progress_bar.start()
             self._stopwatch = StopWatch()
 
             # Make sure that input is valid
@@ -970,7 +971,7 @@ class AutoML(BaseEstimator):
             self._logger.exception(e)
             raise e
         finally:
-            progress_bar.stop()
+            progress_bar.join()
             self._fit_cleanup()
 
         self.fitted = True
