@@ -264,18 +264,19 @@ in auto-sklearn.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fitting to the training data:   0%|          | 0/30 [00:00&lt;?, ?it/s, The total time budget for this task is 0:00:30]
 Fitting to the training data:   3%|3         | 1/30 [00:01&lt;00:29,  1.00s/it, The total time budget for this task is 0:00:30]
 Fitting to the training data:   7%|6         | 2/30 [00:02&lt;00:28,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  10%|#         | 3/30 [00:03&lt;00:27,  1.01s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  13%|#3        | 4/30 [00:04&lt;00:26,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  10%|#         | 3/30 [00:03&lt;00:27,  1.02s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  13%|#3        | 4/30 [00:04&lt;00:26,  1.02s/it, The total time budget for this task is 0:00:30]
 Fitting to the training data:  17%|#6        | 5/30 [00:05&lt;00:25,  1.01s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  20%|##        | 6/30 [00:06&lt;00:24,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  23%|##3       | 7/30 [00:07&lt;00:23,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  27%|##6       | 8/30 [00:08&lt;00:22,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  20%|##        | 6/30 [00:06&lt;00:24,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  23%|##3       | 7/30 [00:07&lt;00:23,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  27%|##6       | 8/30 [00:08&lt;00:22,  1.01s/it, The total time budget for this task is 0:00:30]
 Fitting to the training data:  30%|###       | 9/30 [00:09&lt;00:21,  1.01s/it, The total time budget for this task is 0:00:30]
 Fitting to the training data:  33%|###3      | 10/30 [00:10&lt;00:20,  1.01s/it, The total time budget for this task is 0:00:30]
 Fitting to the training data:  37%|###6      | 11/30 [00:11&lt;00:19,  1.01s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  40%|####      | 12/30 [00:12&lt;00:18,  1.04s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  43%|####3     | 13/30 [00:13&lt;00:17,  1.03s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data: 100%|##########| 30/30 [00:13&lt;00:00,  2.27it/s, The total time budget for this task is 0:00:30]
+Fitting to the training data:  40%|####      | 12/30 [00:12&lt;00:18,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  43%|####3     | 13/30 [00:13&lt;00:17,  1.05s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  47%|####6     | 14/30 [00:14&lt;00:16,  1.03s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data: 100%|##########| 30/30 [00:14&lt;00:00,  2.11it/s, The total time budget for this task is 0:00:30]
 
 AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
                       include={&#39;feature_preprocessor&#39;: [&#39;LDA&#39;]},
@@ -293,41 +294,41 @@ AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemb
 <span class="n">pprint</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">show_models</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.958041958041958
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>accuracy:  0.9790209790209791
 {   2: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb83a8db730&gt;,
-           &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb83a826250&gt;,
-           &#39;ensemble_weight&#39;: 0.36,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb8314cd460&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2afd3e1400&gt;,
+           &#39;cost&#39;: 0.04255319148936165,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2afd3e12b0&gt;,
+           &#39;ensemble_weight&#39;: 0.38,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2afd3e1490&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
            &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=1, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)},
     4: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb831ecc520&gt;,
-           &#39;cost&#39;: 0.04255319148936165,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb83a9c3370&gt;,
-           &#39;ensemble_weight&#39;: 0.24,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb831ecc5b0&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2af0710d30&gt;,
+           &#39;cost&#39;: 0.08510638297872342,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2b10e20220&gt;,
+           &#39;ensemble_weight&#39;: 0.3,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2af0710400&gt;,
            &#39;model_id&#39;: 4,
-           &#39;rank&#39;: 2,
+           &#39;rank&#39;: 3,
            &#39;sklearn_classifier&#39;: BernoulliNB(alpha=23.955206843654683, fit_prior=False)},
     5: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb8386e4910&gt;,
-           &#39;cost&#39;: 0.03546099290780147,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb832b00340&gt;,
-           &#39;ensemble_weight&#39;: 0.4,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb8386e4610&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2af752cdc0&gt;,
+           &#39;cost&#39;: 0.07092198581560283,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2aee5d9f40&gt;,
+           &#39;ensemble_weight&#39;: 0.32,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2af752c850&gt;,
            &#39;model_id&#39;: 5,
-           &#39;rank&#39;: 3,
+           &#39;rank&#39;: 2,
            &#39;sklearn_classifier&#39;: AdaBoostClassifier(algorithm=&#39;SAMME&#39;,
                    base_estimator=DecisionTreeClassifier(max_depth=7),
                    learning_rate=1.371412136822841, n_estimators=135,
                    random_state=1)}}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  23.462 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  23.434 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-80-extending-example-extending-preprocessor-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/80_extending/example_extending_preprocessor.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo3.svg" width="150px" /></a>

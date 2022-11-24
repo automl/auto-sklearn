@@ -235,7 +235,7 @@ Fit the model using KRR
 
  .. code-block:: none
 
-    Fitting to the training data:   0%|          | 0/30 [00:00<?, ?it/s, The total time budget for this task is 0:00:30]    Fitting to the training data:   3%|3         | 1/30 [00:01<00:29,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:   7%|6         | 2/30 [00:02<00:28,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  10%|#         | 3/30 [00:03<00:27,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  13%|#3        | 4/30 [00:04<00:26,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  17%|#6        | 5/30 [00:05<00:25,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  20%|##        | 6/30 [00:06<00:24,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data: 100%|##########| 30/30 [00:06<00:00,  4.99it/s, The total time budget for this task is 0:00:30]
+    Fitting to the training data:   0%|          | 0/30 [00:00<?, ?it/s, The total time budget for this task is 0:00:30]    Fitting to the training data:   3%|3         | 1/30 [00:01<00:29,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:   7%|6         | 2/30 [00:02<00:28,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  10%|#         | 3/30 [00:03<00:27,  1.01s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  13%|#3        | 4/30 [00:04<00:26,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  17%|#6        | 5/30 [00:05<00:25,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data:  20%|##        | 6/30 [00:06<00:24,  1.00s/it, The total time budget for this task is 0:00:30]    Fitting to the training data: 100%|##########| 30/30 [00:06<00:00,  4.98it/s, The total time budget for this task is 0:00:30]
 
     AutoSklearnRegressor(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
                          include={'regressor': ['KernelRidgeRegression']},
@@ -266,22 +266,22 @@ Print prediction score and statistics
 
  .. code-block:: none
 
-    r2 score:  -0.1829229775954
-    {   2: {   'cost': 0.5911146491029154,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb838bb88b0>,
-               'ensemble_weight': 0.4,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb83a34a1c0>,
+    r2 score:  -1.172132043597819
+    {   2: {   'cost': 0.819991223708897,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2af6cc60d0>,
+               'ensemble_weight': 0.04,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2b11091460>,
                'model_id': 2,
-               'rank': 1,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fb83a34a760>,
-               'sklearn_regressor': KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel='polynomial')},
-        5: {   'cost': 0.5293906529320538,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb83ac86c40>,
-               'ensemble_weight': 0.6,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb832e3e7c0>,
-               'model_id': 5,
                'rank': 2,
-               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7fb83ad59fa0>,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f2b11091550>,
+               'sklearn_regressor': KernelRidge(alpha=1.0, coef0=1.0, gamma=0.1, kernel='polynomial')},
+        5: {   'cost': 0.5883967966895315,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2af42aaaf0>,
+               'ensemble_weight': 0.96,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2af4c7ed60>,
+               'model_id': 5,
+               'rank': 1,
+               'regressor': <autosklearn.pipeline.components.regression.RegressorChoice object at 0x7f2af4c7ee20>,
                'sklearn_regressor': KernelRidge(alpha=0.12092279509584172, coef0=0.8084604056638888, degree=2,
                 gamma=0.0005846787584894724, kernel='polynomial')}}
 
@@ -291,7 +291,7 @@ Print prediction score and statistics
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.917 seconds)
+   **Total running time of the script:** ( 0 minutes  13.321 seconds)
 
 
 .. _sphx_glr_download_examples_80_extending_example_extending_regression.py:

@@ -213,57 +213,50 @@ get further documentation about Scikit-Learn models here: &lt;<a class="referenc
   warnings.warn(
 
 Fitting to the training data:   1%|          | 1/120 [00:01&lt;01:59,  1.00s/it, The total time budget for this task is 0:02:00]
-Fitting to the training data: 100%|##########| 120/120 [00:01&lt;00:00, 119.80it/s, The total time budget for this task is 0:02:00]
-{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb838a5aeb0&gt;, &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb832e26d00&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb832e26b80&gt;}
+Fitting to the training data: 100%|##########| 120/120 [00:01&lt;00:00, 119.78it/s, The total time budget for this task is 0:02:00]
+{&#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f2af6f3f850&gt;, &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;), &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f2af09a0160&gt;, &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f2af09a0f70&gt;}
 RunInfo(config=Configuration(values={
   &#39;balancing:strategy&#39;: &#39;weighting&#39;,
   &#39;classifier:__choice__&#39;: &#39;random_forest&#39;,
-  &#39;classifier:random_forest:bootstrap&#39;: &#39;False&#39;,
-  &#39;classifier:random_forest:criterion&#39;: &#39;entropy&#39;,
+  &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;,
+  &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;,
   &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;,
-  &#39;classifier:random_forest:max_features&#39;: 0.34765463396846663,
+  &#39;classifier:random_forest:max_features&#39;: 0.7005875707440749,
   &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;,
   &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0,
-  &#39;classifier:random_forest:min_samples_leaf&#39;: 13,
+  &#39;classifier:random_forest:min_samples_leaf&#39;: 3,
   &#39;classifier:random_forest:min_samples_split&#39;: 11,
   &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0,
   &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;,
   &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;,
   &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.38807673661517716,
-  &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;,
-  &#39;feature_preprocessor:polynomial:degree&#39;: 2,
-  &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;,
-  &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.000701312346214207,
+  &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;,
 })
 , instance=None, instance_specific=None, seed=1, cutoff=60, capped=False, budget=0.0, source_id=0)
-RunValue(cost=0.018957345971563955, time=2.886840581893921, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293269.8439643, endtime=1669293272.7554276, additional_info={&#39;duration&#39;: 2.80418062210083, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.02008407286314806, &#39;configuration_origin&#39;: None})
+RunValue(cost=0.008530805687203769, time=3.0632126331329346, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293442.6378815, endtime=1669293445.727358, additional_info={&#39;duration&#39;: 2.971435546875, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.005604857543204056, &#39;configuration_origin&#39;: None})
 Passed Configuration: Configuration(values={
   &#39;balancing:strategy&#39;: &#39;weighting&#39;,
   &#39;classifier:__choice__&#39;: &#39;random_forest&#39;,
-  &#39;classifier:random_forest:bootstrap&#39;: &#39;False&#39;,
-  &#39;classifier:random_forest:criterion&#39;: &#39;entropy&#39;,
+  &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;,
+  &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;,
   &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;,
-  &#39;classifier:random_forest:max_features&#39;: 0.34765463396846663,
+  &#39;classifier:random_forest:max_features&#39;: 0.7005875707440749,
   &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;,
   &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0,
-  &#39;classifier:random_forest:min_samples_leaf&#39;: 13,
+  &#39;classifier:random_forest:min_samples_leaf&#39;: 3,
   &#39;classifier:random_forest:min_samples_split&#39;: 11,
   &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0,
   &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;,
   &#39;data_preprocessor:feature_type:categorical_transformer:categorical_encoding:__choice__&#39;: &#39;no_encoding&#39;,
   &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:__choice__&#39;: &#39;minority_coalescer&#39;,
-  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.38807673661517716,
-  &#39;feature_preprocessor:__choice__&#39;: &#39;polynomial&#39;,
-  &#39;feature_preprocessor:polynomial:degree&#39;: 2,
-  &#39;feature_preprocessor:polynomial:include_bias&#39;: &#39;True&#39;,
-  &#39;feature_preprocessor:polynomial:interaction_only&#39;: &#39;True&#39;,
+  &#39;data_preprocessor:feature_type:categorical_transformer:category_coalescence:minority_coalescer:minimum_fraction&#39;: 0.000701312346214207,
+  &#39;feature_preprocessor:__choice__&#39;: &#39;no_preprocessing&#39;,
 })
 
-Random Forest: RandomForestClassifier(bootstrap=False, criterion=&#39;entropy&#39;, max_features=9,
-                       min_samples_leaf=13, min_samples_split=11,
-                       n_estimators=512, n_jobs=1, random_state=1,
-                       warm_start=True)
+Random Forest: RandomForestClassifier(max_features=12, min_samples_leaf=3,
+                       min_samples_split=11, n_estimators=512, n_jobs=1,
+                       random_state=1, warm_start=True)
 
 Fitting to the training data:   0%|          | 0/120 [00:00&lt;?, ?it/s, The total time budget for this task is 0:02:00]/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(
@@ -378,11 +371,10 @@ Fitting to the training data:  89%|########9 | 107/120 [01:47&lt;00:13,  1.00s/i
 Fitting to the training data:  90%|######### | 108/120 [01:48&lt;00:12,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  91%|######### | 109/120 [01:49&lt;00:11,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  92%|#########1| 110/120 [01:50&lt;00:10,  1.00s/it, The total time budget for this task is 0:02:00]
-Fitting to the training data:  92%|#########2| 111/120 [01:51&lt;00:09,  1.00s/it, The total time budget for this task is 0:02:00]
-Fitting to the training data: 100%|##########| 120/120 [01:51&lt;00:00,  1.08it/s, The total time budget for this task is 0:02:00]
+Fitting to the training data: 100%|##########| 120/120 [01:50&lt;00:00,  1.09it/s, The total time budget for this task is 0:02:00]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  30.203 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  22.789 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-single-configuration-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_single_configuration.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>
