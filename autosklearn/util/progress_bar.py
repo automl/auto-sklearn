@@ -33,24 +33,23 @@ class ProgressBar(Thread):
         already passed into tqdm by this class.
 
     Examples
-    ----------
+    --------
+
+    .. code:: python
+
         progress_bar = ProgressBar(
             total=10,
             desc="Executing code that runs for 10 seconds",
             colour="green",
         )
         # colour is a tqdm parameter passed as a tqdm_kwargs
-
         try:
             progress_bar.start()
-
             # some code that runs for 10 seconds
-
         except SomeException:
             # something went wrong
         finally:
             progress_bar.join()
-
             # perform some cleanup
     """
 
