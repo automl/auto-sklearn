@@ -179,17 +179,19 @@ Fitting to the training data:  23%|##3       | 7/30 [00:07&lt;00:23,  1.00s/it, 
 Fitting to the training data:  27%|##6       | 8/30 [00:08&lt;00:22,  1.00s/it, The total time budget for this task is 0:00:30]
 Fitting to the training data:  30%|###       | 9/30 [00:09&lt;00:21,  1.00s/it, The total time budget for this task is 0:00:30]
 Fitting to the training data:  33%|###3      | 10/30 [00:10&lt;00:20,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  37%|###6      | 11/30 [00:11&lt;00:19,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  40%|####      | 12/30 [00:12&lt;00:18,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  43%|####3     | 13/30 [00:13&lt;00:17,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  47%|####6     | 14/30 [00:14&lt;00:16,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  50%|#####     | 15/30 [00:15&lt;00:15,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  53%|#####3    | 16/30 [00:16&lt;00:14,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  57%|#####6    | 17/30 [00:17&lt;00:13,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  60%|######    | 18/30 [00:18&lt;00:12,  1.00s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  63%|######3   | 19/30 [00:19&lt;00:11,  1.04s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data:  67%|######6   | 20/30 [00:20&lt;00:10,  1.03s/it, The total time budget for this task is 0:00:30]
-Fitting to the training data: 100%|##########| 30/30 [00:20&lt;00:00,  1.49it/s, The total time budget for this task is 0:00:30]
+Fitting to the training data:  37%|###6      | 11/30 [00:11&lt;00:19,  1.02s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  40%|####      | 12/30 [00:12&lt;00:18,  1.02s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  43%|####3     | 13/30 [00:13&lt;00:17,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  47%|####6     | 14/30 [00:14&lt;00:16,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  50%|#####     | 15/30 [00:15&lt;00:15,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  53%|#####3    | 16/30 [00:16&lt;00:14,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  57%|#####6    | 17/30 [00:17&lt;00:13,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  60%|######    | 18/30 [00:18&lt;00:12,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  63%|######3   | 19/30 [00:19&lt;00:11,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  67%|######6   | 20/30 [00:20&lt;00:10,  1.00s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  70%|#######   | 21/30 [00:21&lt;00:09,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data:  73%|#######3  | 22/30 [00:22&lt;00:08,  1.01s/it, The total time budget for this task is 0:00:30]
+Fitting to the training data: 100%|##########| 30/30 [00:22&lt;00:00,  1.35it/s, The total time budget for this task is 0:00:30]
 
 AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemble_selection.EnsembleSelection&#39;&gt;,
                       include={&#39;feature_preprocessor&#39;: [&#39;pca&#39;]},
@@ -203,7 +205,7 @@ AutoSklearnClassifier(ensemble_class=&lt;class &#39;autosklearn.ensembles.ensemb
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score:0.951048951048951
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Accuracy score:0.958041958041958
 </pre></div>
 </div>
 </div>
@@ -226,32 +228,32 @@ model is stored in the <code class="docutils literal notranslate"><span class="p
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{   2: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71b861c6a0&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb83a9a3130&gt;,
            &#39;cost&#39;: 0.07801418439716312,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71b75380a0&gt;,
-           &#39;ensemble_weight&#39;: 0.16,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b7368280&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb832e3ebe0&gt;,
+           &#39;ensemble_weight&#39;: 0.12,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb82bad1b80&gt;,
            &#39;model_id&#39;: 2,
            &#39;rank&#39;: 1,
            &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=5, n_estimators=512, n_jobs=1,
                        random_state=1, warm_start=True)},
     3: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71b4041940&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb8320f9760&gt;,
            &#39;cost&#39;: 0.07092198581560283,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71b46f2c70&gt;,
-           &#39;ensemble_weight&#39;: 0.06,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b40417f0&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb83aadbf70&gt;,
+           &#39;ensemble_weight&#39;: 0.16,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb8320f9b80&gt;,
            &#39;model_id&#39;: 3,
            &#39;rank&#39;: 2,
            &#39;sklearn_classifier&#39;: RandomForestClassifier(max_features=1, min_samples_leaf=2, min_samples_split=20,
                        n_estimators=512, n_jobs=1, random_state=1,
                        warm_start=True)},
     4: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71a64ae340&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb8386bd940&gt;,
            &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71b53e3610&gt;,
-           &#39;ensemble_weight&#39;: 0.24,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b446c6d0&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb832e3e430&gt;,
+           &#39;ensemble_weight&#39;: 0.06,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb83153cac0&gt;,
            &#39;model_id&#39;: 4,
            &#39;rank&#39;: 3,
            &#39;sklearn_classifier&#39;: MLPClassifier(activation=&#39;tanh&#39;, alpha=1.103855734598575e-05, beta_1=0.999,
@@ -260,69 +262,55 @@ model is stored in the <code class="docutils literal notranslate"><span class="p
               learning_rate_init=0.00014375616988222174, max_iter=32,
               n_iter_no_change=32, random_state=1, verbose=0, warm_start=True)},
     5: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71a8b9b0a0&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb832bbf550&gt;,
            &#39;cost&#39;: 0.1063829787234043,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71ab52df10&gt;,
-           &#39;ensemble_weight&#39;: 0.06,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71a8b9bf10&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb832a11d00&gt;,
+           &#39;ensemble_weight&#39;: 0.12,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb832bbfdc0&gt;,
            &#39;model_id&#39;: 5,
            &#39;rank&#39;: 4,
            &#39;sklearn_classifier&#39;: KNeighborsClassifier(n_neighbors=4, weights=&#39;distance&#39;)},
     6: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71ab63d070&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb831ecc4c0&gt;,
            &#39;cost&#39;: 0.11347517730496459,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71a648ac40&gt;,
-           &#39;ensemble_weight&#39;: 0.14,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71ab63d490&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb83227b670&gt;,
+           &#39;ensemble_weight&#39;: 0.12,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb831ecc700&gt;,
            &#39;model_id&#39;: 6,
            &#39;rank&#39;: 5,
-           &#39;sklearn_classifier&#39;: SVC(C=100.5905006626969, cache_size=1806.6119791666667,
+           &#39;sklearn_classifier&#39;: SVC(C=100.5905006626969, cache_size=1811.3802083333333,
     coef0=0.08087614244138486, gamma=0.011333066835975528, kernel=&#39;poly&#39;,
     max_iter=-1.0, random_state=1, tol=0.012391313886912093)},
     7: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71aa69fc70&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb8383359a0&gt;,
            &#39;cost&#39;: 0.1063829787234043,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71aa67d3d0&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb831ed5520&gt;,
            &#39;ensemble_weight&#39;: 0.08,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71ab67ed30&gt;,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb838335a00&gt;,
            &#39;model_id&#39;: 7,
            &#39;rank&#39;: 6,
            &#39;sklearn_classifier&#39;: LinearSVC(C=10.369811497206404, class_weight=&#39;balanced&#39;, dual=False,
           intercept_scaling=1.0, random_state=1, tol=0.0015130257264171173)},
     8: {   &#39;balancing&#39;: Balancing(random_state=1),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71b7390ac0&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb831816a00&gt;,
            &#39;cost&#39;: 0.028368794326241176,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71c7e0e940&gt;,
-           &#39;ensemble_weight&#39;: 0.1,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b7390400&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb831266970&gt;,
+           &#39;ensemble_weight&#39;: 0.28,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb8318164c0&gt;,
            &#39;model_id&#39;: 8,
            &#39;rank&#39;: 7,
            &#39;sklearn_classifier&#39;: KNeighborsClassifier(n_neighbors=10, p=1)},
     9: {   &#39;balancing&#39;: Balancing(random_state=1, strategy=&#39;weighting&#39;),
-           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71ab29dc40&gt;,
+           &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb838cb7340&gt;,
            &#39;cost&#39;: 0.08510638297872342,
-           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71a8836370&gt;,
-           &#39;ensemble_weight&#39;: 0.08,
-           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71ab29dc70&gt;,
+           &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb83290d1f0&gt;,
+           &#39;ensemble_weight&#39;: 0.06,
+           &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb83ab77280&gt;,
            &#39;model_id&#39;: 9,
            &#39;rank&#39;: 8,
            &#39;sklearn_classifier&#39;: DecisionTreeClassifier(class_weight=&#39;balanced&#39;, criterion=&#39;entropy&#39;,
                        max_depth=1, min_samples_leaf=12, min_samples_split=13,
-                       random_state=1)},
-    10: {   &#39;balancing&#39;: Balancing(random_state=1),
-            &#39;classifier&#39;: &lt;autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71b53f8b20&gt;,
-            &#39;cost&#39;: 0.07801418439716312,
-            &#39;data_preprocessor&#39;: &lt;autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71aa69f820&gt;,
-            &#39;ensemble_weight&#39;: 0.08,
-            &#39;feature_preprocessor&#39;: &lt;autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b53f8e20&gt;,
-            &#39;model_id&#39;: 10,
-            &#39;rank&#39;: 9,
-            &#39;sklearn_classifier&#39;: HistGradientBoostingClassifier(early_stopping=False,
-                               l2_regularization=3.511604744219034e-05,
-                               learning_rate=0.06666502293259023, max_iter=512,
-                               max_leaf_nodes=18, min_samples_leaf=5,
-                               n_iter_no_change=0, random_state=1,
-                               validation_fraction=None, warm_start=True)}}
+                       random_state=1)}}
 </pre></div>
 </div>
 </div>
@@ -338,9 +326,9 @@ iterations, number of models failed with a time out etc.</p>
   Metric: accuracy
   Best validation score: 0.971631
   Number of target algorithm runs: 9
-  Number of successful target algorithm runs: 9
+  Number of successful target algorithm runs: 8
   Number of crashed target algorithm runs: 0
-  Number of target algorithms that exceeded the time limit: 0
+  Number of target algorithms that exceeded the time limit: 1
   Number of target algorithms that exceeded the memory limit: 0
 </pre></div>
 </div>
@@ -353,7 +341,7 @@ optimization procedurce, which are stored in a so-called
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">automl</span><span class="o">.</span><span class="n">automl_</span><span class="o">.</span><span class="n">runhistory_</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;smac.runhistory.runhistory.RunHistory object at 0x7f71b6e63430&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;smac.runhistory.runhistory.RunHistory object at 0x7fb84e40c790&gt;
 </pre></div>
 </div>
 <p>Runs are stored inside an <code class="docutils literal notranslate"><span class="pre">OrderedDict</span></code> called <code class="docutils literal notranslate"><span class="pre">data</span></code>:</p>
@@ -372,34 +360,34 @@ optimization procedurce, which are stored in a so-called
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>#########
 RunKey(config_id=1, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.07801418439716312, time=1.5877084732055664, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531217.2382457, endtime=1668531218.8476155, additional_info={&#39;duration&#39;: 1.4882240295410156, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.07801418439716312, time=1.8991475105285645, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293809.4462245, endtime=1669293811.3669322, additional_info={&#39;duration&#39;: 1.8083181381225586, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=2, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.07092198581560283, time=1.369232416152954, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531218.909948, endtime=1668531220.3029284, additional_info={&#39;duration&#39;: 1.2721962928771973, &#39;num_run&#39;: 3, &#39;train_loss&#39;: 0.06315789473684208, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.07092198581560283, time=1.626826524734497, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293811.4205987, endtime=1669293813.0697792, additional_info={&#39;duration&#39;: 1.5438971519470215, &#39;num_run&#39;: 3, &#39;train_loss&#39;: 0.06315789473684208, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=3, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.028368794326241176, time=1.175771713256836, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531220.3978593, endtime=1668531221.5972664, additional_info={&#39;duration&#39;: 1.101370096206665, &#39;num_run&#39;: 4, &#39;train_loss&#39;: 0.04210526315789476, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.028368794326241176, time=1.6119751930236816, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293813.1753986, endtime=1669293814.8112864, additional_info={&#39;duration&#39;: 1.5470607280731201, &#39;num_run&#39;: 4, &#39;train_loss&#39;: 0.04210526315789476, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=4, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.1063829787234043, time=0.6929812431335449, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531221.7105772, endtime=1668531222.4271085, additional_info={&#39;duration&#39;: 0.618436336517334, &#39;num_run&#39;: 5, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.1063829787234043, time=0.7312066555023193, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293814.9455132, endtime=1669293815.6980882, additional_info={&#39;duration&#39;: 0.6695399284362793, &#39;num_run&#39;: 5, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=5, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.11347517730496459, time=0.588576078414917, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531222.5530632, endtime=1668531223.1644628, additional_info={&#39;duration&#39;: 0.5121462345123291, &#39;num_run&#39;: 6, &#39;train_loss&#39;: 0.09122807017543855, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
+RunValue(cost=0.11347517730496459, time=0.6307129859924316, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293815.8432767, endtime=1669293816.4968963, additional_info={&#39;duration&#39;: 0.5695219039916992, &#39;num_run&#39;: 6, &#39;train_loss&#39;: 0.09122807017543855, &#39;configuration_origin&#39;: &#39;Initial design&#39;})
 #########
 RunKey(config_id=6, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.1063829787234043, time=0.702528715133667, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531224.9904606, endtime=1668531225.7157025, additional_info={&#39;duration&#39;: 0.6244926452636719, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.1473684210526316, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
+RunValue(cost=0.1063829787234043, time=0.741229772567749, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293818.5876145, endtime=1669293819.3522475, additional_info={&#39;duration&#39;: 0.671191930770874, &#39;num_run&#39;: 7, &#39;train_loss&#39;: 0.1473684210526316, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
 #########
 RunKey(config_id=7, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.028368794326241176, time=0.6808106899261475, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531227.5736887, endtime=1668531228.2777388, additional_info={&#39;duration&#39;: 0.6024422645568848, &#39;num_run&#39;: 8, &#39;train_loss&#39;: 0.03157894736842104, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
+RunValue(cost=0.028368794326241176, time=0.7333588600158691, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293821.4759896, endtime=1669293822.2307038, additional_info={&#39;duration&#39;: 0.6686034202575684, &#39;num_run&#39;: 8, &#39;train_loss&#39;: 0.03157894736842104, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
 #########
 RunKey(config_id=8, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.08510638297872342, time=0.7059969902038574, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531228.461483, endtime=1668531229.190241, additional_info={&#39;duration&#39;: 0.6280481815338135, &#39;num_run&#39;: 9, &#39;train_loss&#39;: 0.07017543859649122, &#39;configuration_origin&#39;: &#39;Random Search&#39;})
+RunValue(cost=0.08510638297872342, time=0.7458891868591309, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1669293822.4582806, endtime=1669293823.226131, additional_info={&#39;duration&#39;: 0.683368444442749, &#39;num_run&#39;: 9, &#39;train_loss&#39;: 0.07017543859649122, &#39;configuration_origin&#39;: &#39;Random Search&#39;})
 #########
 RunKey(config_id=9, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=0.07801418439716312, time=1.3156969547271729, status=&lt;StatusType.SUCCESS: 1&gt;, starttime=1668531231.4210753, endtime=1668531232.7629821, additional_info={&#39;duration&#39;: 1.2330703735351562, &#39;num_run&#39;: 10, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
+RunValue(cost=1.0, time=1.008246898651123, status=&lt;StatusType.TIMEOUT: 2&gt;, starttime=1669293825.7699428, endtime=1669293827.8003688, additional_info={&#39;error&#39;: &#39;Timeout&#39;, &#39;configuration_origin&#39;: &#39;Random Search (sorted)&#39;})
 #########
 RunKey(config_id=10, instance_id=&#39;{&quot;task_id&quot;: &quot;breast_cancer&quot;}&#39;, seed=0, budget=0.0)
-RunValue(cost=1.0, time=0.0, status=&lt;StatusType.STOP: 8&gt;, starttime=1668531235.1723065, endtime=1668531235.1723065, additional_info={})
+RunValue(cost=1.0, time=0.0, status=&lt;StatusType.STOP: 8&gt;, starttime=1669293830.2841246, endtime=1669293830.2841249, additional_info={})
 </pre></div>
 </div>
 <p>and have a detailed look at one entry:</p>
@@ -461,11 +449,11 @@ problems, too.</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Cost: 0.07801418439716312
-Time: 1.5877084732055664
+Time: 1.8991475105285645
 Status: StatusType.SUCCESS
-Additional information: {&#39;duration&#39;: 1.4882240295410156, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;}
-Start time: 1668531217.2382457
-End time 1668531218.8476155
+Additional information: {&#39;duration&#39;: 1.8083181381225586, &#39;num_run&#39;: 2, &#39;train_loss&#39;: 0.0, &#39;configuration_origin&#39;: &#39;Initial design&#39;}
+Start time: 1669293809.4462245
+End time 1669293811.3669322
 </pre></div>
 </div>
 <p>Cost is basically the same as a loss. In case the metric to optimize for
@@ -529,8 +517,8 @@ same data as
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;mean_test_score&#39;: array([0.92198582, 0.92907801, 0.97163121, 0.89361702, 0.88652482,
-       0.89361702, 0.97163121, 0.91489362, 0.92198582]), &#39;rank_test_scores&#39;: array([4, 3, 1, 7, 9, 7, 1, 6, 4]), &#39;mean_fit_time&#39;: array([1.58770847, 1.36923242, 1.17577171, 0.69298124, 0.58857608,
-       0.70252872, 0.68081069, 0.70599699, 1.31569695]), &#39;params&#39;: [{&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9999, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.9331254454871041, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 2, &#39;classifier:random_forest:min_samples_split&#39;: 20, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9967857433838874, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;mlp&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:mlp:activation&#39;: &#39;tanh&#39;, &#39;classifier:mlp:alpha&#39;: 1.103855734598575e-05, &#39;classifier:mlp:batch_size&#39;: &#39;auto&#39;, &#39;classifier:mlp:beta_1&#39;: 0.9, &#39;classifier:mlp:beta_2&#39;: 0.999, &#39;classifier:mlp:early_stopping&#39;: &#39;valid&#39;, &#39;classifier:mlp:epsilon&#39;: 1e-08, &#39;classifier:mlp:hidden_layer_depth&#39;: 3, &#39;classifier:mlp:learning_rate_init&#39;: 0.00014375616988222174, &#39;classifier:mlp:n_iter_no_change&#39;: 32, &#39;classifier:mlp:num_nodes_per_layer&#39;: 229, &#39;classifier:mlp:shuffle&#39;: &#39;True&#39;, &#39;classifier:mlp:solver&#39;: &#39;adam&#39;, &#39;classifier:mlp:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.7895711479212801, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;classifier:mlp:validation_fraction&#39;: 0.1, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 180, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:k_nearest_neighbors:n_neighbors&#39;: 4, &#39;classifier:k_nearest_neighbors:p&#39;: 2, &#39;classifier:k_nearest_neighbors:weights&#39;: &#39;distance&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.8047274080856589, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;libsvm_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:libsvm_svc:C&#39;: 100.5905006626969, &#39;classifier:libsvm_svc:gamma&#39;: 0.011333066835975528, &#39;classifier:libsvm_svc:kernel&#39;: &#39;poly&#39;, &#39;classifier:libsvm_svc:max_iter&#39;: -1, &#39;classifier:libsvm_svc:shrinking&#39;: &#39;True&#39;, &#39;classifier:libsvm_svc:tol&#39;: 0.012391313886912093, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9290439925152777, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;, &#39;classifier:libsvm_svc:coef0&#39;: 0.08087614244138486, &#39;classifier:libsvm_svc:degree&#39;: 3}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;liblinear_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:liblinear_svc:C&#39;: 10.369811497206404, &#39;classifier:liblinear_svc:dual&#39;: &#39;False&#39;, &#39;classifier:liblinear_svc:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:liblinear_svc:intercept_scaling&#39;: 1, &#39;classifier:liblinear_svc:loss&#39;: &#39;squared_hinge&#39;, &#39;classifier:liblinear_svc:multi_class&#39;: &#39;ovr&#39;, &#39;classifier:liblinear_svc:penalty&#39;: &#39;l2&#39;, &#39;classifier:liblinear_svc:tol&#39;: 0.0015130257264171173, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5306607720040878, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.9866104280704078, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.20576464288464985}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:k_nearest_neighbors:n_neighbors&#39;: 10, &#39;classifier:k_nearest_neighbors:p&#39;: 1, &#39;classifier:k_nearest_neighbors:weights&#39;: &#39;uniform&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9923006586696794, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 1866, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;normal&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;decision_tree&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:decision_tree:criterion&#39;: &#39;entropy&#39;, &#39;classifier:decision_tree:max_depth_factor&#39;: 0.07400222370559417, &#39;classifier:decision_tree:max_features&#39;: 1.0, &#39;classifier:decision_tree:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:decision_tree:min_impurity_decrease&#39;: 0.0, &#39;classifier:decision_tree:min_samples_leaf&#39;: 12, &#39;classifier:decision_tree:min_samples_split&#39;: 13, &#39;classifier:decision_tree:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9710934401815425, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;off&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 3.511604744219034e-05, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.06666502293259023, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 18, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 5, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9968418627262279, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;}], &#39;status&#39;: [&#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;], &#39;budgets&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &#39;param_balancing:strategy&#39;: masked_array(data=[&#39;none&#39;, &#39;none&#39;, &#39;weighting&#39;, &#39;weighting&#39;, &#39;none&#39;,
+       0.89361702, 0.97163121, 0.91489362, 0.        ]), &#39;rank_test_scores&#39;: array([4, 3, 1, 6, 8, 6, 1, 5, 9]), &#39;mean_fit_time&#39;: array([1.89914751, 1.62682652, 1.61197519, 0.73120666, 0.63071299,
+       0.74122977, 0.73335886, 0.74588919, 1.0082469 ]), &#39;params&#39;: [{&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.5, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 1, &#39;classifier:random_forest:min_samples_split&#39;: 2, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9999, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;random_forest&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:random_forest:bootstrap&#39;: &#39;True&#39;, &#39;classifier:random_forest:criterion&#39;: &#39;gini&#39;, &#39;classifier:random_forest:max_depth&#39;: &#39;None&#39;, &#39;classifier:random_forest:max_features&#39;: 0.9331254454871041, &#39;classifier:random_forest:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:random_forest:min_impurity_decrease&#39;: 0.0, &#39;classifier:random_forest:min_samples_leaf&#39;: 2, &#39;classifier:random_forest:min_samples_split&#39;: 20, &#39;classifier:random_forest:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9967857433838874, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;mlp&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:mlp:activation&#39;: &#39;tanh&#39;, &#39;classifier:mlp:alpha&#39;: 1.103855734598575e-05, &#39;classifier:mlp:batch_size&#39;: &#39;auto&#39;, &#39;classifier:mlp:beta_1&#39;: 0.9, &#39;classifier:mlp:beta_2&#39;: 0.999, &#39;classifier:mlp:early_stopping&#39;: &#39;valid&#39;, &#39;classifier:mlp:epsilon&#39;: 1e-08, &#39;classifier:mlp:hidden_layer_depth&#39;: 3, &#39;classifier:mlp:learning_rate_init&#39;: 0.00014375616988222174, &#39;classifier:mlp:n_iter_no_change&#39;: 32, &#39;classifier:mlp:num_nodes_per_layer&#39;: 229, &#39;classifier:mlp:shuffle&#39;: &#39;True&#39;, &#39;classifier:mlp:solver&#39;: &#39;adam&#39;, &#39;classifier:mlp:tol&#39;: 0.0001, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.7895711479212801, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;, &#39;classifier:mlp:validation_fraction&#39;: 0.1, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 180, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;uniform&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:k_nearest_neighbors:n_neighbors&#39;: 4, &#39;classifier:k_nearest_neighbors:p&#39;: 2, &#39;classifier:k_nearest_neighbors:weights&#39;: &#39;distance&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;normalize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.8047274080856589, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;libsvm_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:libsvm_svc:C&#39;: 100.5905006626969, &#39;classifier:libsvm_svc:gamma&#39;: 0.011333066835975528, &#39;classifier:libsvm_svc:kernel&#39;: &#39;poly&#39;, &#39;classifier:libsvm_svc:max_iter&#39;: -1, &#39;classifier:libsvm_svc:shrinking&#39;: &#39;True&#39;, &#39;classifier:libsvm_svc:tol&#39;: 0.012391313886912093, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;minmax&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9290439925152777, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;, &#39;classifier:libsvm_svc:coef0&#39;: 0.08087614244138486, &#39;classifier:libsvm_svc:degree&#39;: 3}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;liblinear_svc&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:liblinear_svc:C&#39;: 10.369811497206404, &#39;classifier:liblinear_svc:dual&#39;: &#39;False&#39;, &#39;classifier:liblinear_svc:fit_intercept&#39;: &#39;True&#39;, &#39;classifier:liblinear_svc:intercept_scaling&#39;: 1, &#39;classifier:liblinear_svc:loss&#39;: &#39;squared_hinge&#39;, &#39;classifier:liblinear_svc:multi_class&#39;: &#39;ovr&#39;, &#39;classifier:liblinear_svc:penalty&#39;: &#39;l2&#39;, &#39;classifier:liblinear_svc:tol&#39;: 0.0015130257264171173, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;robust_scaler&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.5306607720040878, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max&#39;: 0.9866104280704078, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min&#39;: 0.20576464288464985}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;k_nearest_neighbors&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:k_nearest_neighbors:n_neighbors&#39;: 10, &#39;classifier:k_nearest_neighbors:p&#39;: 1, &#39;classifier:k_nearest_neighbors:weights&#39;: &#39;uniform&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;median&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;quantile_transformer&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9923006586696794, &#39;feature_preprocessor:pca:whiten&#39;: &#39;False&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles&#39;: 1866, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution&#39;: &#39;normal&#39;}, {&#39;balancing:strategy&#39;: &#39;weighting&#39;, &#39;classifier:__choice__&#39;: &#39;decision_tree&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:decision_tree:criterion&#39;: &#39;entropy&#39;, &#39;classifier:decision_tree:max_depth_factor&#39;: 0.07400222370559417, &#39;classifier:decision_tree:max_features&#39;: 1.0, &#39;classifier:decision_tree:max_leaf_nodes&#39;: &#39;None&#39;, &#39;classifier:decision_tree:min_impurity_decrease&#39;: 0.0, &#39;classifier:decision_tree:min_samples_leaf&#39;: 12, &#39;classifier:decision_tree:min_samples_split&#39;: 13, &#39;classifier:decision_tree:min_weight_fraction_leaf&#39;: 0.0, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;most_frequent&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;standardize&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9710934401815425, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;}, {&#39;balancing:strategy&#39;: &#39;none&#39;, &#39;classifier:__choice__&#39;: &#39;gradient_boosting&#39;, &#39;data_preprocessor:__choice__&#39;: &#39;feature_type&#39;, &#39;feature_preprocessor:__choice__&#39;: &#39;pca&#39;, &#39;classifier:gradient_boosting:early_stop&#39;: &#39;off&#39;, &#39;classifier:gradient_boosting:l2_regularization&#39;: 3.511604744219034e-05, &#39;classifier:gradient_boosting:learning_rate&#39;: 0.06666502293259023, &#39;classifier:gradient_boosting:loss&#39;: &#39;auto&#39;, &#39;classifier:gradient_boosting:max_bins&#39;: 255, &#39;classifier:gradient_boosting:max_depth&#39;: &#39;None&#39;, &#39;classifier:gradient_boosting:max_leaf_nodes&#39;: 18, &#39;classifier:gradient_boosting:min_samples_leaf&#39;: 5, &#39;classifier:gradient_boosting:scoring&#39;: &#39;loss&#39;, &#39;classifier:gradient_boosting:tol&#39;: 1e-07, &#39;data_preprocessor:feature_type:numerical_transformer:imputation:strategy&#39;: &#39;mean&#39;, &#39;data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__&#39;: &#39;none&#39;, &#39;feature_preprocessor:pca:keep_variance&#39;: 0.9968418627262279, &#39;feature_preprocessor:pca:whiten&#39;: &#39;True&#39;}], &#39;status&#39;: [&#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Success&#39;, &#39;Timeout&#39;], &#39;budgets&#39;: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &#39;param_balancing:strategy&#39;: masked_array(data=[&#39;none&#39;, &#39;none&#39;, &#39;weighting&#39;, &#39;weighting&#39;, &#39;none&#39;,
                    &#39;weighting&#39;, &#39;none&#39;, &#39;weighting&#39;, &#39;none&#39;],
              mask=[False, False, False, False, False, False, False, False,
                    False],
@@ -965,29 +953,28 @@ The explained variance ratio per stage</p>
             <span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The 0th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
-The 1th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The 0th pipeline has a explained variance of [0.46038401 0.16124884 0.09747816 0.06923404 0.06142479 0.03312917
+ 0.03182802 0.01555463 0.01348582 0.00965531 0.00870982 0.007397
+ 0.00547082 0.00443245 0.00396559 0.00313575 0.0022883  0.00195796
+ 0.00156348]
+The 1th pipeline has a explained variance of [0.98080571 0.01684553]
+The 2th pipeline has a explained variance of [4.32956881e-01 1.79057296e-01 1.11737571e-01 6.80724345e-02
  5.94611519e-02 3.70629898e-02 2.38430977e-02 1.49326086e-02
  1.37641366e-02 1.13704890e-02 1.03737258e-02 8.74116751e-03
  7.57629717e-03 4.86528503e-03 3.32225143e-03 2.55773043e-03
  2.20759805e-03 1.88675402e-03 1.36245140e-03 1.03409213e-03
  8.39749085e-04 7.91287172e-04 6.75655689e-04 5.42961621e-04
  5.02641737e-04 2.07827509e-04 1.74597367e-04]
-The 2th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
+The 3th pipeline has a explained variance of [0.76699224 0.17152095]
+The 4th pipeline has a explained variance of [0.49503611 0.16649281 0.09111888 0.07213284 0.04865917 0.03208923
  0.01851537 0.01223987]
-The 3th pipeline has a explained variance of [0.46038401 0.16124884 0.09747816 0.06923404 0.06142479 0.03312917
- 0.03182802 0.01555463 0.01348582 0.00965531 0.00870982 0.007397
- 0.00547082 0.00443245 0.00396559 0.00313575 0.0022883  0.00195796
- 0.00156348]
-The 4th pipeline has a explained variance of [0.72985767]
-The 5th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
+The 5th pipeline has a explained variance of [0.72985767]
+The 6th pipeline has a explained variance of [0.45954164 0.18010277 0.09814953 0.06334655]
+The 7th pipeline has a explained variance of [0.43295688 0.1790573  0.11173757 0.06807243 0.05946115 0.03706299
  0.0238431  0.01493261 0.01376414 0.01137049 0.01037373 0.00874117]
-The 6th pipeline has a explained variance of [0.98080571 0.01684553]
-The 7th pipeline has a explained variance of [0.98080571 0.01684553]
-The 8th pipeline has a explained variance of [0.76699224 0.17152095]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  25.461 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  30.689 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-get-pipeline-components-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_get_pipeline_components.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

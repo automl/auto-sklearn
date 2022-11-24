@@ -167,7 +167,7 @@ accelerometer and gyroscope data collected by a phone. For more information see
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fitting to the training data:   0%|          | 0/120 [00:00&lt;?, ?it/s, The total time budget for this task is 0:02:00]/home/runner/work/auto-sklearn/auto-sklearn/autosklearn/data/target_validator.py:187: UserWarning: Fitting transformer with a pandas series which has the dtype category. Inverse transform may not be able preserve dtype when converting to np.ndarray
   warnings.warn(
 
-Fitting to the training data:   1%|          | 1/120 [00:01&lt;02:00,  1.01s/it, The total time budget for this task is 0:02:00]
+Fitting to the training data:   1%|          | 1/120 [00:01&lt;01:59,  1.01s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:   2%|1         | 2/120 [00:02&lt;01:58,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:   2%|2         | 3/120 [00:03&lt;01:57,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:   3%|3         | 4/120 [00:04&lt;01:56,  1.00s/it, The total time budget for this task is 0:02:00]
@@ -267,8 +267,8 @@ Fitting to the training data:  81%|########  | 97/120 [01:37&lt;00:23,  1.00s/it
 Fitting to the training data:  82%|########1 | 98/120 [01:38&lt;00:22,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  82%|########2 | 99/120 [01:39&lt;00:21,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  83%|########3 | 100/120 [01:40&lt;00:20,  1.00s/it, The total time budget for this task is 0:02:00]
-Fitting to the training data:  84%|########4 | 101/120 [01:41&lt;00:19,  1.01s/it, The total time budget for this task is 0:02:00]
-Fitting to the training data:  85%|########5 | 102/120 [01:42&lt;00:18,  1.01s/it, The total time budget for this task is 0:02:00]
+Fitting to the training data:  84%|########4 | 101/120 [01:41&lt;00:19,  1.00s/it, The total time budget for this task is 0:02:00]
+Fitting to the training data:  85%|########5 | 102/120 [01:42&lt;00:18,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  86%|########5 | 103/120 [01:43&lt;00:17,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  87%|########6 | 104/120 [01:44&lt;00:16,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  88%|########7 | 105/120 [01:45&lt;00:15,  1.00s/it, The total time budget for this task is 0:02:00]
@@ -277,8 +277,8 @@ Fitting to the training data:  89%|########9 | 107/120 [01:47&lt;00:13,  1.00s/i
 Fitting to the training data:  90%|######### | 108/120 [01:48&lt;00:12,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data:  91%|######### | 109/120 [01:49&lt;00:11,  1.00s/it, The total time budget for this task is 0:02:00]
 Fitting to the training data: 100%|##########| 120/120 [01:49&lt;00:00,  1.10it/s, The total time budget for this task is 0:02:00]
-Train score 0.9968571428571429
-Test score 0.9833333333333333
+Train score 0.9957142857142857
+Test score 0.9826666666666667
 </pre></div>
 </div>
 </div>
@@ -308,12 +308,12 @@ in the <a class="reference external" href="https://scikit-learn.org/stable/modul
     <span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_inspect_predictions_001.png" srcset="../../_images/sphx_glr_example_inspect_predictions_001.png" alt="example inspect predictions" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>gyro_y    : 0.001 +/- 0.001
-gyro_x    : 0.020 +/- 0.003
-gyro_z    : 0.035 +/- 0.003
-acceleration_x: 0.055 +/- 0.006
-acceleration_z: 0.145 +/- 0.007
-acceleration_y: 0.271 +/- 0.007
+<img src="../../_images/sphx_glr_example_inspect_predictions_001.png" srcset="../../_images/sphx_glr_example_inspect_predictions_001.png" alt="example inspect predictions" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>gyro_y    : 0.001 +/- 0.002
+gyro_x    : 0.021 +/- 0.003
+gyro_z    : 0.039 +/- 0.004
+acceleration_x: 0.065 +/- 0.008
+acceleration_z: 0.132 +/- 0.005
+acceleration_y: 0.268 +/- 0.007
 </pre></div>
 </div>
 </div>
@@ -359,7 +359,7 @@ these features. Again, we’ll look at acceleration_y and acceleration_z.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_inspect_predictions_003.png" srcset="../../_images/sphx_glr_example_inspect_predictions_003.png" alt="example inspect predictions" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 3 minutes  55.293 seconds)</p>
+<img src="../../_images/sphx_glr_example_inspect_predictions_003.png" srcset="../../_images/sphx_glr_example_inspect_predictions_003.png" alt="example inspect predictions" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  0.518 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-40-advanced-example-inspect-predictions-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/automl/auto-sklearn/development?urlpath=lab/tree/notebooks/examples/40_advanced/example_inspect_predictions.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" width="150px" /></a>

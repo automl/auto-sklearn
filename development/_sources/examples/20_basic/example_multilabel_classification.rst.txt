@@ -118,7 +118,7 @@ Building the classifier
 
  .. code-block:: none
 
-    Fitting to the training data:   0%|          | 0/60 [00:00<?, ?it/s, The total time budget for this task is 0:01:00]    Fitting to the training data:   2%|1         | 1/60 [00:01<00:59,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   3%|3         | 2/60 [00:02<00:58,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   5%|5         | 3/60 [00:03<00:57,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   7%|6         | 4/60 [00:04<00:56,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   8%|8         | 5/60 [00:05<00:55,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:  10%|#         | 6/60 [00:06<00:54,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data: 100%|##########| 60/60 [00:06<00:00,  9.98it/s, The total time budget for this task is 0:01:00]
+    Fitting to the training data:   0%|          | 0/60 [00:00<?, ?it/s, The total time budget for this task is 0:01:00]    Fitting to the training data:   2%|1         | 1/60 [00:01<00:59,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   3%|3         | 2/60 [00:02<00:58,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   5%|5         | 3/60 [00:03<00:57,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   7%|6         | 4/60 [00:04<00:56,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data:   8%|8         | 5/60 [00:05<00:55,  1.00s/it, The total time budget for this task is 0:01:00]    Fitting to the training data: 100%|##########| 60/60 [00:05<00:00, 11.98it/s, The total time budget for this task is 0:01:00]
 
     AutoSklearnClassifier(ensemble_class=<class 'autosklearn.ensembles.ensemble_selection.EnsembleSelection'>,
                           initial_configurations_via_metalearning=0,
@@ -151,7 +151,7 @@ View the models found by auto-sklearn
 
               rank  ensemble_weight           type      cost  duration
     model_id                                                          
-    2            1              1.0  random_forest  0.447294  3.220752
+    2            1              1.0  random_forest  0.447294  3.921251
 
 
 
@@ -177,11 +177,11 @@ Print the final ensemble constructed by auto-sklearn
  .. code-block:: none
 
     {   2: {   'balancing': Balancing(random_state=1),
-               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7f71b4934550>,
+               'classifier': <autosklearn.pipeline.components.classification.ClassifierChoice object at 0x7fb838baa520>,
                'cost': 0.4472941828699525,
-               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7f71b492a190>,
+               'data_preprocessor': <autosklearn.pipeline.components.data_preprocessing.DataPreprocessorChoice object at 0x7fb831eaebb0>,
                'ensemble_weight': 1.0,
-               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7f71b4934d30>,
+               'feature_preprocessor': <autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice object at 0x7fb838baa790>,
                'model_id': 2,
                'rank': 1,
                'sklearn_classifier': RandomForestClassifier(max_features=15, n_estimators=512, n_jobs=1,
@@ -254,7 +254,7 @@ Get the Score of the final ensemble
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.146 seconds)
+   **Total running time of the script:** ( 0 minutes  23.022 seconds)
 
 
 .. _sphx_glr_download_examples_20_basic_example_multilabel_classification.py:
