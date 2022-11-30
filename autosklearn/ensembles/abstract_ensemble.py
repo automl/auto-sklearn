@@ -132,8 +132,6 @@ class AbstractEnsemble(ABC):
     def get_selected_model_identifiers(self) -> List[Tuple[int, int, float]]:
         """Return identifiers of models in the ensemble.
 
-        This includes models which have a weight of zero!
-
         Returns
         -------
         list
