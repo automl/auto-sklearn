@@ -1,27 +1,37 @@
-from typing import Dict, List, Optional, Sequence
+from __future__ import annotations
+
+from abc import ABC
+from typing import Sequence, Tuple, Union
 
 import copy
 import json
 import logging
 import multiprocessing
 import os
+import sys
 import time
 import traceback
 import warnings
+from logging import Logger
+from pathlib import Path
 
-import dask.distributed
+import ConfigSpace
+import numpy as np
 import pynisher
-import smac
-from smac.facade.smac_ac_facade import SMAC4AC
-from smac.intensification.intensification import Intensifier
-from smac.intensification.simple_intensifier import SimpleIntensifier
-from smac.optimizer.multi_objective.parego import ParEGO
-from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
-from smac.scenario.scenario import Scenario
-from smac.tae.dask_runner import DaskParallelRunner
-from smac.tae.serial_runner import SerialRunner
+from dask.distributed import Client
+from sklearn.model_selection import BaseCrossValidator, BaseShuffleSplit
+from sklearn.model_selection._split import _RepeatedSplits
+from smac import AlgorithmConfigurationFacade, Callback, RunHistory, Scenario
+from smac.facade import AbstractFacade
+from smac.intensifier import Intensifier
+from smac.multi_objective import ParEGO
+from smac.runhistory.dataclasses import TrajectoryItem
+from smac.runhistory.encoder import RunHistoryLogEncoder
+from smac.runner import AbstractRunner, DaskParallelRunner
+from smac.runner.abstract_serial_runner import AbstractSerialRunner
 
-import autosklearn.metalearning
+import autosklearn
+from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import (
     BINARY_CLASSIFICATION,
     CLASSIFICATION_TASKS,
@@ -31,9 +41,8 @@ from autosklearn.constants import (
     REGRESSION,
     TASK_TYPES_TO_STRING,
 )
-from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.ensemble_building import EnsembleBuilderManager
-from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
+from autosklearn.evaluation import TargetFunctionRunnerWithQueue, get_cost_of_crash
 from autosklearn.metalearning.metafeatures.metafeatures import (
     calculate_all_metafeatures_encoded_labels,
     calculate_all_metafeatures_with_labels,
@@ -41,9 +50,14 @@ from autosklearn.metalearning.metafeatures.metafeatures import (
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.metrics import Scorer
-from autosklearn.util.logging_ import get_named_client_logger
+from autosklearn.util.logging_ import PicklableClientLogger, get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 from autosklearn.util.stopwatch import StopWatch
+from autosklearn.util.str_types import (
+    BUDGET_TYPE,
+    PYNISHER_CONTEXT,
+    RESAMPLING_STRATEGY,
+)
 
 EXCLUDE_META_FEATURES_CLASSIFICATION = {
     "Landmark1NN",
@@ -202,265 +216,155 @@ def _get_metalearning_configurations(
     return metalearning_configurations
 
 
-def get_smac_object(
-    scenario_dict,
-    seed,
-    ta,
-    ta_kwargs,
-    metalearning_configurations,
-    n_jobs,
-    dask_client,
-    multi_objective_algorithm,
-    multi_objective_kwargs,
-):
-    if len(scenario_dict["instances"]) > 1:
-        intensifier = Intensifier
-    else:
-        intensifier = SimpleIntensifier
+class AutoMLOptimizer(ABC):
+    """The optimizer that searches for the best performing pipeline on the data.
 
-    scenario = Scenario(scenario_dict)
-    if len(metalearning_configurations) > 0:
-        default_config = scenario.cs.get_default_configuration()
-        initial_configurations = [default_config] + metalearning_configurations
-    else:
-        initial_configurations = None
-    rh2EPM = RunHistory2EPM4LogCost
-    return SMAC4AC(
-        scenario=scenario,
-        rng=seed,
-        runhistory2epm=rh2EPM,
-        tae_runner=ta,
-        tae_runner_kwargs=ta_kwargs,
-        initial_configurations=initial_configurations,
-        run_id=seed,
-        intensifier=intensifier,
-        dask_client=dask_client,
-        n_jobs=n_jobs,
-        multi_objective_algorithm=multi_objective_algorithm,
-        multi_objective_kwargs=multi_objective_kwargs,
-    )
+    It essentially just sets up SMAC and exposes the run_smbo() method to start an
+    optimization run on the data stored inside the datamanager.
+    """
 
-
-class AutoMLSMBO:
     def __init__(
         self,
-        config_space,
-        dataset_name,
-        backend,
-        total_walltime_limit,
-        func_eval_time_limit,
-        memory_limit,
-        metrics: Sequence[Scorer],
-        stopwatch: StopWatch,
-        n_jobs,
-        dask_client: dask.distributed.Client,
-        port: int,
-        start_num_run=1,
-        data_memory_limit=None,
-        num_metalearning_cfgs=25,
-        config_file=None,
-        seed=1,
-        metadata_directory=None,
-        resampling_strategy="holdout",
-        resampling_strategy_args=None,
-        include: Optional[Dict[str, List[str]]] = None,
-        exclude: Optional[Dict[str, List[str]]] = None,
-        disable_file_output=False,
-        smac_scenario_args=None,
-        get_smac_object_callback=None,
-        scoring_functions=None,
-        pynisher_context="spawn",
-        ensemble_callback: Optional[EnsembleBuilderManager] = None,
-        callback: smac.Callback | None = None,
+        config_space: ConfigSpace,
+        dataset_name: str = None,
+        backend: Backend = None,
+        total_walltime_limit: int = None,
+        func_eval_time_limit: int = None,
+        memory_limit: int = None,
+        metrics: Sequence[Scorer] = None,
+        stopwatch: StopWatch = None,
+        n_jobs: int = 1,
+        dask_client: Client = None,
+        port: int = None,
+        initial_num_run: int = 1,
+        num_metalearning_cfgs: int = 25,
+        seed: int = 1,
+        metadata_directory: str = None,
+        resampling_strategy: Union[
+            RESAMPLING_STRATEGY, BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit
+        ] = "holdout",
+        resampling_strategy_args: dict = None,
+        include: dict[str, list[str]] | None = None,
+        exclude: dict[str, list[str]] | None = None,
+        disable_file_output: bool = False,
+        smac_scenario_args: dict[str, any] | Scenario | None = None,
+        smac_facade: AbstractFacade | None = None,
+        scoring_functions: list[Scorer] | None = None,
+        pynisher_context: PYNISHER_CONTEXT | str | None = "spawn",
+        ensemble_callback: EnsembleBuilderManager | None = None,
+        trials_callback: Callback | None = None,
     ):
-        super(AutoMLSMBO, self).__init__()
-        # data related
         self.dataset_name = dataset_name
         self.datamanager = None
         self.metrics = metrics
         self.task = None
         self.backend = backend
         self.port = port
-
-        # the configuration space
         self.config_space = config_space
-
-        # the number of parallel workers/jobs
         self.n_jobs = n_jobs
         self.dask_client = dask_client
-
-        # Evaluation
         self.resampling_strategy = resampling_strategy
-        if resampling_strategy_args is None:
-            resampling_strategy_args = {}
         self.resampling_strategy_args = resampling_strategy_args
-
-        # and a bunch of useful limits
         self.worst_possible_result = get_cost_of_crash(self.metrics)
         self.total_walltime_limit = int(total_walltime_limit)
         self.func_eval_time_limit = int(func_eval_time_limit)
         self.memory_limit = memory_limit
-        self.data_memory_limit = data_memory_limit
         self.stopwatch = stopwatch
         self.num_metalearning_cfgs = num_metalearning_cfgs
-        self.config_file = config_file
         self.seed = seed
         self.metadata_directory = metadata_directory
-        self.start_num_run = start_num_run
+        self.initial_num_run = initial_num_run
         self.include = include
         self.exclude = exclude
         self.disable_file_output = disable_file_output
         self.smac_scenario_args = smac_scenario_args
-        self.get_smac_object_callback = get_smac_object_callback
+        self._smac_facade = smac_facade
         self.scoring_functions = scoring_functions
-
         self.pynisher_context = pynisher_context
-
         self.ensemble_callback = ensemble_callback
-        self.callback = callback
+        self.trials_callback = trials_callback
 
-        dataset_name_ = "" if dataset_name is None else dataset_name
-        logger_name = "%s(%d):%s" % (
-            self.__class__.__name__,
-            self.seed,
-            ":" + dataset_name_,
-        )
-        if port is None:
-            self.logger = logging.getLogger(__name__)
-        else:
-            self.logger = get_named_client_logger(
-                name=logger_name,
-                port=self.port,
-            )
+        self.logger = self._create_logger(port)
 
-    def reset_data_manager(self, max_mem=None):
-        if max_mem is None:
-            max_mem = self.data_memory_limit
-        if self.datamanager is not None:
-            del self.datamanager
-        if isinstance(self.dataset_name, AbstractDataManager):
-            self.datamanager = self.dataset_name
-        else:
-            self.datamanager = self.backend.load_datamanager()
+        if self._smac_facade is None:
+            self._smac_facade = AutoMLOptimizer._default_smac_facade
 
-        self.task = self.datamanager.info["task"]
+    def run_smbo(self) -> Tuple[RunHistory, list[TrajectoryItem], BUDGET_TYPE]:
+        """Runs SMAC, the configured underlying optimizer, on the given task.
 
-    def collect_metalearning_suggestions(self, meta_base):
-        with self.stopwatch.time("Initial Configurations") as task:
-            metalearning_configurations = _get_metalearning_configurations(
-                meta_base=meta_base,
-                basename=self.dataset_name,
-                metric=self.metrics[0],
-                configuration_space=self.config_space,
-                task=self.task,
-                is_sparse=self.datamanager.info["is_sparse"],
-                initial_configurations_via_metalearning=self.num_metalearning_cfgs,
-                stopwatch=self.stopwatch,
-                logger=self.logger,
-            )
+        This will return a history of configurations that were sampled by the
+        optimizer and a trajectory of the incumbent (best seen so far) configuration.
 
-        self.logger.debug(f"Initial Configurations: {len(metalearning_configurations)}")
-        for config in metalearning_configurations:
-            self.logger.debug(config)
+        Returns
+        -------
+        runhistory: RunHistory
+            A sequence of runs, where each element contains information about the run
 
-        self.logger.debug(f"{task.name} took {task.wall_duration:5.2f}sec")
+        trajectory: Sequence[TrajectoryItem]
+            A sequence that contains the best configuration found at each time step
+            in the optimization
 
-        time_since_start = self.stopwatch.time_since(self.dataset_name, "start")
-        time_left = self.total_walltime_limit - time_since_start
-        self.logger.info(f"Time left for {task.name}: {time_left:5.2f}s")
-
-        return metalearning_configurations
-
-    def _calculate_metafeatures_with_limits(self, time_limit):
-        res = None
-        time_limit = max(time_limit, 1)
-        try:
-            context = multiprocessing.get_context(self.pynisher_context)
-            preload_modules(context)
-            safe_mf = pynisher.enforce_limits(
-                mem_in_mb=self.memory_limit,
-                wall_time_in_s=int(time_limit),
-                grace_period_in_s=30,
-                context=context,
-                logger=self.logger,
-            )(_calculate_metafeatures)
-            res = safe_mf(
-                data_feat_type=self.datamanager.feat_type,
-                data_info_task=self.datamanager.info["task"],
-                x_train=self.datamanager.data["X_train"],
-                y_train=self.datamanager.data["Y_train"],
-                basename=self.dataset_name,
-                stopwatch=self.stopwatch,
-                logger_=self.logger,
-            )
-        except Exception as e:
-            self.logger.error("Error getting metafeatures: %s", str(e))
-
-        return res
-
-    def _calculate_metafeatures_encoded_with_limits(self, time_limit):
-        res = None
-        time_limit = max(time_limit, 1)
-        try:
-            context = multiprocessing.get_context(self.pynisher_context)
-            preload_modules(context)
-            safe_mf = pynisher.enforce_limits(
-                mem_in_mb=self.memory_limit,
-                wall_time_in_s=int(time_limit),
-                grace_period_in_s=30,
-                context=context,
-                logger=self.logger,
-            )(_calculate_metafeatures_encoded)
-            res = safe_mf(
-                data_feat_type=self.datamanager.feat_type,
-                task=self.datamanager.info["task"],
-                x_train=self.datamanager.data["X_train"],
-                y_train=self.datamanager.data["Y_train"],
-                basename=self.dataset_name,
-                stopwatch=self.stopwatch,
-                logger_=self.logger,
-            )
-        except Exception as e:
-            self.logger.error("Error getting metafeatures (encoded) : %s", str(e))
-
-        return res
-
-    def run_smbo(self):
+        budget_type: BUDGET_TYPE
+            The budget type, based on which the corresponding target algorithm is chosen
+        """
         self.stopwatch.start("SMBO")
+        self._load_data_manager()
+        self.config_space.seed(self.seed)
 
-        # == first things first: load the datamanager
-        self.reset_data_manager()
+        startup_time = self.stopwatch.time_since(self.dataset_name, "start")
+        total_walltime_limit = self.total_walltime_limit - startup_time - 5
 
-        # == Initialize non-SMBO stuff
-        # first create a scenario
-        seed = self.seed
-        self.config_space.seed(seed)
-        # allocate a run history
-        num_run = self.start_num_run
+        # Initialize the optimizer
+        smac = self._initialize_smac(total_walltime_limit)
 
-        # Initialize some SMAC dependencies
+        # Run the optimizer
+        smac.optimize()
 
-        metalearning_configurations = self.get_metalearning_suggestions()
+        # Return the information about the optimization run
+        runhistory = smac.runhistory
+        trajectory = smac.intensifier.trajectory
 
-        if self.resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
-            num_folds = self.resampling_strategy_args["folds"]
-            instances = [
-                [json.dumps({"task_id": self.dataset_name, "fold": fold_number})]
-                for fold_number in range(num_folds)
-            ]
+        # Get the type of budget used by the runner
+        # (We use a custom object as our target function runner, which has a budget_type
+        # attribute)
+        if isinstance(smac._runner, DaskParallelRunner):
+            _budget_type = smac._runner._single_worker.budget_type
+        elif isinstance(smac._runner, AbstractSerialRunner):
+            _budget_type = smac._runner.budget_type
         else:
-            instances = [[json.dumps({"task_id": self.dataset_name})]]
+            raise NotImplementedError(type(smac._runner))
 
-        # TODO rebuild target algorithm to be it's own target algorithm
-        # evaluator, which takes into account that a run can be killed prior
-        # to the model being fully fitted; thus putting intermediate results
-        # into a queue and querying them once the time is over
+        self.stopwatch.stop("SMBO")
 
-        ta_kwargs = dict(
+        return runhistory, trajectory, _budget_type
+
+    def _initialize_smac(self, total_walltime_limit: float) -> AbstractFacade:
+        """Initialize the optimizer with everything needed to start an optimization run.
+
+        Parameters
+        ----------
+        total_walltime_limit: float
+            The time limit to run the optimization under
+
+        Returns
+        -------
+        smac: AbstractFacade
+            The configured optimizer
+        """
+        # ask for a set of initial configurations for the optimizer
+        initial_configurations = self.get_metalearning_suggestions()
+
+        # Set up the environment for the optimizer
+        scenario = self._create_scenario(total_walltime_limit)
+
+        # Create the target function runner, which is a SMAC specific object that
+        # will be used to execute the target function
+        target_function_runner = TargetFunctionRunnerWithQueue(
+            scenario=scenario,
             backend=copy.deepcopy(self.backend),
-            autosklearn_seed=seed,
+            autosklearn_seed=self.seed,
             resampling_strategy=self.resampling_strategy,
-            initial_num_run=num_run,
+            initial_num_run=self.initial_num_run,
             include=self.include,
             exclude=self.exclude,
             metrics=self.metrics,
@@ -469,97 +373,109 @@ class AutoMLSMBO:
             scoring_functions=self.scoring_functions,
             port=self.port,
             pynisher_context=self.pynisher_context,
+            cost_for_crash=self.worst_possible_result,
             **self.resampling_strategy_args,
         )
-        ta = ExecuteTaFuncWithQueue
 
-        startup_time = self.stopwatch.time_since(self.dataset_name, "start")
-        total_walltime_limit = self.total_walltime_limit - startup_time - 5
-
-        scenario_dict = {
-            "abort_on_first_run_crash": False,
-            "save-results-instantly": True,
-            "cs": self.config_space,
-            "cutoff_time": self.func_eval_time_limit,
-            "deterministic": "true",
-            "instances": instances,
-            "memory_limit": self.memory_limit,
-            "output-dir": self.backend.get_smac_output_directory(),
-            "run_obj": "quality",
-            "wallclock_limit": total_walltime_limit,
-            "cost_for_crash": self.worst_possible_result,
+        # Configure the optimizer, SMAC
+        smac_facade_args = {
+            "scenario": scenario,
+            "target_function": target_function_runner,
+            "metalearning_configurations": initial_configurations,
         }
-        if self.smac_scenario_args is not None:
-            for arg in [
-                "abort_on_first_run_crash",
-                "cs",
-                "deterministic",
-                "instances",
-                "output-dir",
-                "run_obj",
-                "shared-model",
-                "cost_for_crash",
-            ]:
-                if arg in self.smac_scenario_args:
-                    self.logger.warning(
-                        "Cannot override scenario argument %s, " "will ignore this.",
-                        arg,
-                    )
-                    del self.smac_scenario_args[arg]
-            for arg in [
-                "cutoff_time",
-                "memory_limit",
-                "wallclock_limit",
-            ]:
-                if arg in self.smac_scenario_args:
-                    self.logger.warning(
-                        "Overriding scenario argument %s: %s with value %s",
-                        arg,
-                        scenario_dict[arg],
-                        self.smac_scenario_args[arg],
-                    )
-            scenario_dict.update(self.smac_scenario_args)
 
-        smac_args = {
-            "scenario_dict": scenario_dict,
-            "seed": seed,
-            "ta": ta,
-            "ta_kwargs": ta_kwargs,
-            "metalearning_configurations": metalearning_configurations,
-            "n_jobs": self.n_jobs,
-            "dask_client": self.dask_client,
-        }
+        # updatesmac: look up what to use for multi_objective_algorithm
         if len(self.metrics) > 1:
-            smac_args["multi_objective_algorithm"] = ParEGO
-            smac_args["multi_objective_kwargs"] = {"rho": 0.05}
-            scenario_dict["multi_objectives"] = [metric.name for metric in self.metrics]
+            smac_facade_args["multi_objective_algorithm"] = ParEGO
+        #     smac_facade_args["multi_objective_kwargs"] = {"rho": 0.05}
         else:
-            smac_args["multi_objective_algorithm"] = None
-            smac_args["multi_objective_kwargs"] = {}
-        if self.get_smac_object_callback is not None:
-            smac = self.get_smac_object_callback(**smac_args)
-        else:
-            smac = get_smac_object(**smac_args)
+            smac_facade_args["multi_objective_algorithm"] = None
+        #    smac_facade_args["multi_objective_kwargs"] = {}
 
+        smac_facade_args["callbacks"] = []
         if self.ensemble_callback is not None:
-            smac.register_callback(self.ensemble_callback)
+            smac_facade_args["callbacks"].append(self.ensemble_callback)
         if self.trials_callback is not None:
-            smac.register_callback(self.trials_callback)
+            smac_facade_args["callbacks"].append(self.trials_callback)
 
-        smac.optimize()
-
-        self.runhistory = smac.solver.runhistory
-        self.trajectory = smac.solver.intensifier.traj_logger.trajectory
-        if isinstance(smac.solver.tae_runner, DaskParallelRunner):
-            self._budget_type = smac.solver.tae_runner.single_worker.budget_type
-        elif isinstance(smac.solver.tae_runner, SerialRunner):
-            self._budget_type = smac.solver.tae_runner.budget_type
+        if self._smac_facade is not None:
+            smac = self._smac_facade(**smac_facade_args)
         else:
-            raise NotImplementedError(type(smac.solver.tae_runner))
 
-        self.stopwatch.stop("SMBO")
+            smac = self._default_smac_facade(**smac_facade_args)
 
-        return self.runhistory, self.trajectory, self._budget_type
+        return smac
+
+    def _create_logger(self, port: int | None) -> Logger | PicklableClientLogger:
+        """Creates the logger.
+
+        Parameters
+        ----------
+        port: int
+            The port of the logging server
+
+        Returns
+        -------
+        logger
+        """
+        if port is None:
+            return logging.getLogger(__name__)
+        logger_name = f"{type(self).__name__}({self.seed}):{'' or self.dataset_name}"
+        return get_named_client_logger(name=logger_name, port=self.port)
+
+    def _load_data_manager(self) -> None:
+        """Loads the object that stores the dataset and some other information about
+        the data."""
+        self.datamanager = self.backend.load_datamanager()
+        self.task = self.datamanager.info["task"]
+
+    def _create_scenario(self, total_walltime_limit: float) -> Scenario:
+        """Sets up the optimization environment for the optimizer.
+
+        Parameters
+        ----------
+        total_walltime_limit: int
+            the total real time to run the optimization for
+
+        Returns
+        -------
+        scenario: Scenario
+            the object describing the optimization environment
+        """
+        objectives = "cost"
+        if len(self.metrics) > 1:
+            objectives = [metric.name for metric in self.metrics]
+
+        if self.resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
+            num_folds = self.resampling_strategy_args["folds"]
+            instances = [
+                json.dumps({"task_id": self.dataset_name, "fold": fold_number})
+                for fold_number in range(num_folds)
+            ]
+        else:
+            instances = [json.dumps({"task_id": self.dataset_name})]
+
+        output_dir = Path(self.backend.get_smac_output_directory())
+        scenario = Scenario(
+            configspace=self.config_space,
+            name=self.dataset_name,
+            output_directory=output_dir,
+            deterministic=True,
+            objectives=objectives,
+            crash_cost=self.worst_possible_result,
+            termination_cost_threshold=np.inf,
+            walltime_limit=total_walltime_limit,
+            trial_walltime_limit=self.func_eval_time_limit,
+            trial_memory_limit=self.memory_limit,
+            n_trials=sys.maxsize,
+            instances=instances,
+            instance_features=None,
+            min_budget=None,
+            max_budget=None,
+            seed=self.seed,
+            n_workers=self.n_jobs,
+        )
+        return scenario
 
     def get_metalearning_suggestions(self):
         # == METALEARNING suggestions
@@ -693,7 +609,7 @@ class AutoMLSMBO:
                         )
                     if metalearning_configurations is None:
                         metalearning_configurations = []
-                    self.reset_data_manager()
+                    self._load_data_manager()
 
                     self.logger.info("%s", meta_features)
 
@@ -720,3 +636,132 @@ class AutoMLSMBO:
         if meta_features is None:
             metalearning_configurations = []
         return metalearning_configurations
+
+    def collect_metalearning_suggestions(self, meta_base):
+
+        with self.stopwatch.time("Initial Configurations") as task:
+            metalearning_configurations = _get_metalearning_configurations(
+                meta_base=meta_base,
+                basename=self.dataset_name,
+                metric=self.metrics[0],
+                configuration_space=self.config_space,
+                task=self.task,
+                is_sparse=self.datamanager.info["is_sparse"],
+                initial_configurations_via_metalearning=self.num_metalearning_cfgs,
+                stopwatch=self.stopwatch,
+                logger=self.logger,
+            )
+
+        self.logger.debug(f"Initial Configurations: {len(metalearning_configurations)}")
+        for config in metalearning_configurations:
+            self.logger.debug(config)
+
+        self.logger.debug(f"{task.name} took {task.wall_duration:5.2f}sec")
+
+        time_since_start = self.stopwatch.time_since(self.dataset_name, "start")
+        time_left = self.total_walltime_limit - time_since_start
+        self.logger.info(f"Time left for {task.name}: {time_left:5.2f}s")
+
+        return metalearning_configurations
+
+    def _calculate_metafeatures_with_limits(self, time_limit):
+        res = None
+        time_limit = max(time_limit, 1)
+        try:
+            context = multiprocessing.get_context(self.pynisher_context)
+            preload_modules(context)
+            safe_mf = pynisher.limit(
+                _calculate_metafeatures,
+                memory=self.memory_limit,
+                wall_time=int(time_limit),
+                # grace_period_in_s=30,
+                context=context,
+                # logger=self.logger,
+            )
+            res = safe_mf(
+                data_feat_type=self.datamanager.feat_type,
+                data_info_task=self.datamanager.info["task"],
+                x_train=self.datamanager.data["X_train"],
+                y_train=self.datamanager.data["Y_train"],
+                basename=self.dataset_name,
+                stopwatch=self.stopwatch,
+                logger_=self.logger,
+            )
+        except Exception as e:
+            self.logger.error("Error getting metafeatures: %s", str(e))
+
+        return res
+
+    def _calculate_metafeatures_encoded_with_limits(self, time_limit):
+        res = None
+        time_limit = max(time_limit, 1)
+        try:
+            context = multiprocessing.get_context(self.pynisher_context)
+            preload_modules(context)
+            safe_mf = pynisher.enforce_limits(
+                mem_in_mb=self.memory_limit,
+                wall_time_in_s=int(time_limit),
+                grace_period_in_s=30,
+                context=context,
+                logger=self.logger,
+            )(_calculate_metafeatures_encoded)
+            res = safe_mf(
+                data_feat_type=self.datamanager.feat_type,
+                task=self.datamanager.info["task"],
+                x_train=self.datamanager.data["X_train"],
+                y_train=self.datamanager.data["Y_train"],
+                basename=self.dataset_name,
+                stopwatch=self.stopwatch,
+                logger_=self.logger,
+            )
+        except Exception as e:
+            self.logger.error("Error getting metafeatures (encoded) : %s", str(e))
+
+        return res
+
+    @classmethod
+    def _default_smac_facade(
+        cls,
+        scenario: Scenario,
+        target_function: AbstractRunner,
+        metalearning_configurations,
+        multi_objective_algorithm,
+        # dask_client,
+        callbacks,
+    ) -> AbstractFacade:
+        """Creates the default optimizer, a specific SMAC object that is already
+        configured well enough for us.
+
+        Parameters
+        ----------
+        scenario : Scenario
+        target_function : AbstractRunner
+        metalearning_configurations
+        dask_client
+        multi_objective_algorithm
+        multi_objective_kwargs
+
+        Returns
+        -------
+        smac: AlgorithmConfigurationFacade
+            The optimizer
+        """
+        # updatesmac: look at the details of what the defaults were before and if
+        #  they match for the defaults of the newer version (for both intensifier and
+        #  encoder)
+        intensifier = Intensifier(scenario)
+        if len(metalearning_configurations) > 0:
+            default_config = scenario.configspace.get_default_configuration()
+            initial_configurations = [default_config] + metalearning_configurations
+        else:
+            initial_configurations = None
+        encoder = RunHistoryLogEncoder(scenario)
+        return AlgorithmConfigurationFacade(
+            scenario=scenario,
+            target_function=target_function,
+            intensifier=intensifier,
+            multi_objective_algorithm=multi_objective_algorithm,
+            runhistory_encoder=encoder,
+            initial_design=initial_configurations,
+            callbacks=callbacks,
+        )
