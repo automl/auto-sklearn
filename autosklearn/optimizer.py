@@ -42,14 +42,14 @@ from autosklearn.constants import (
     TASK_TYPES_TO_STRING,
 )
 from autosklearn.ensemble_building import EnsembleBuilderManager
-from autosklearn.evaluation import TargetFunctionRunnerWithQueue, get_cost_of_crash
+from autosklearn.evaluation import TargetFunctionRunnerWithQueue
 from autosklearn.metalearning.metafeatures.metafeatures import (
     calculate_all_metafeatures_encoded_labels,
     calculate_all_metafeatures_with_labels,
 )
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
-from autosklearn.metrics import Scorer
+from autosklearn.metrics import Scorer, get_cost_of_crash
 from autosklearn.util.logging_ import PicklableClientLogger, get_named_client_logger
 from autosklearn.util.parallel import preload_modules
 from autosklearn.util.stopwatch import StopWatch
@@ -401,7 +401,6 @@ class AutoMLOptimizer(ABC):
         if self._smac_facade is not None:
             smac = self._smac_facade(**smac_facade_args)
         else:
-
             smac = self._default_smac_facade(**smac_facade_args)
 
         return smac

@@ -94,7 +94,7 @@ module = [
     "autosklearn", #__init__
     "autosklearn.estimators",
     "autosklearn.automl",
-    "autosklearn.smbo",
+    "autosklearn.optimizer",
     "autosklearn.experimental.askl2",
     "autosklearn.evaluation", #__init__
     "autosklearn.evaluation.runner_with_queue",
