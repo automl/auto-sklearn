@@ -37,9 +37,9 @@ from autosklearn.util.str_types import (
 # TODO potentially log all inputs to this class to pickle them in order to do
 #   easier debugging of potential crashes
 class TargetFunctionRunnerWithQueue(TargetFunctionRunner):
-    """The target algorithm that takes into account that a trial can be killed prior to
-    the model being fully fitted; thus putting intermediate results into a queue and
-    querying them once the time is over.
+    """The target function runner that takes into account that a trial can be killed
+    prior to the model being fully fitted; thus putting intermediate results into a
+    queue and querying them once the time is over.
 
     Parameters
     ----------
@@ -425,8 +425,8 @@ class TargetFunctionWrapper:
     def __init__(
         self, target_function: Callable, worst_possible_result: list[float] | float
     ):
-        self.target_function = target_function
-        self.worst_possible_result = worst_possible_result
+        self._target_function = target_function
+        self._worst_possible_result = worst_possible_result
 
     def target_function(self, queue: multiprocessing.Queue, **kwargs: Any) -> None:
         """A wrapper around the target function to handle exceptions in case the
@@ -467,7 +467,7 @@ class TargetFunctionWrapper:
 
         """
         try:
-            return self.target_function(queue=queue, **kwargs)
+            return self._target_function(queue=queue, **kwargs)
         except Exception as e:
             if isinstance(e, (MemoryError, pynisher.TimeoutException)):
                 # Re-raise the memory error to let the pynisher handle that correctly
