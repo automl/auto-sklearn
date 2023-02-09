@@ -48,9 +48,7 @@ from sklearn.model_selection._split import _RepeatedSplits
 from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
-from smac.runhistory.runhistory import RunInfo, RunValue
-from smac.stats.stats import Stats
-from smac.tae import StatusType
+from smac.runhistory import StatusType, TrialInfo, TrialValue
 from typing_extensions import Literal
 
 from autosklearn.automl_common.common.utils.backend import Backend, create
@@ -1229,7 +1227,7 @@ class AutoML(BaseEstimator):
         y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
         feat_type: Optional[list[str]] = None,
         **kwargs: dict,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+    ) -> tuple[BasePipeline | None, TrialInfo, TrialValue]:
         """Fits and individual pipeline configuration and returns
         the result to the user.
 
@@ -1270,9 +1268,9 @@ class AutoML(BaseEstimator):
         pipeline: Optional[BasePipeline]
             The fitted pipeline. In case of failure while fitting the pipeline,
             a None is returned.
-        run_info: RunInFo
+        trial_info: TrialInfo
             A named tuple that contains the configuration launched
-        run_value: RunValue
+        trial_value: TrialValue
             A named tuple that contains the result of the run
         """
         # AutoSklearn does not handle sparse y for now
@@ -1359,34 +1357,31 @@ class AutoML(BaseEstimator):
             **self._resampling_strategy_arguments,
         )
 
-        run_info, run_value = ta.run_wrapper(
-            RunInfo(
+        trial_info, trial_value = target_function_runner.run_wrapper(
+            TrialInfo(
                 config=config,
                 instance=None,
-                instance_specific=None,
                 seed=self._seed,
-                cutoff=kwargs.pop("cutoff", self._per_run_time_limit),
-                capped=False,
             )
         )
 
         pipeline = None
         if kwargs["disable_file_output"] or kwargs["resampling_strategy"] == "test":
             self._logger.warning("File output is disabled. No pipeline can returned")
-        elif run_value.status == StatusType.SUCCESS:
+        elif trial_value.status == StatusType.SUCCESS:
             if kwargs["resampling_strategy"] in ("cv", "cv-iterative-fit"):
                 load_function = self._backend.load_cv_model_by_seed_and_id_and_budget
             else:
                 load_function = self._backend.load_model_by_seed_and_id_and_budget
             pipeline = load_function(
                 seed=self._seed,
-                idx=run_info.config.config_id + 1,
-                budget=run_info.budget,
+                idx=trial_info.config.config_id + 1,
+                budget=trial_info.budget,
             )
 
         self._clean_logger()
 
-        return pipeline, run_info, run_value
+        return pipeline, trial_info, trial_value
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """predict.
@@ -1786,19 +1781,19 @@ class AutoML(BaseEstimator):
 
     def _get_runhistory_models_performance(self):
         metric = self._metrics[0]
-        data = self.runhistory_.data
+        data = self.runhistory_._data
         performance_list = []
-        for run_key, run_value in data.items():
-            if run_value.status != StatusType.SUCCESS:
+        for trial_key, trial_value in data.items():
+            if trial_value.status != StatusType.SUCCESS:
                 # Ignore crashed runs
                 continue
             # Alternatively, it is possible to also obtain the start time with
-            # ``run_value.starttime``
+            # ``trial_value.starttime``
             endtime = pd.Timestamp(
-                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(run_value.endtime))
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(trial_value.endtime))
             )
-            cost = run_value.cost
-            train_loss = run_value.additional_info["train_loss"]
+            cost = trial_value.cost
+            train_loss = trial_value.additional_info["train_loss"]
             if len(self._metrics) > 1:
                 cost = cost[0]
                 train_loss = train_loss[0]
@@ -1811,8 +1806,8 @@ class AutoML(BaseEstimator):
             }
             # Append test-scores, if data for test_loss are available.
             # This is the case, if X_test and y_test where provided.
-            if "test_loss" in run_value.additional_info:
-                test_loss = run_value.additional_info["test_loss"]
+            if "test_loss" in trial_value.additional_info:
+                test_loss = trial_value.additional_info["test_loss"]
                 if len(self._metrics) > 1:
                     test_loss = test_loss[0]
                 test_score = metric._optimum - (metric._sign * test_loss)
@@ -1914,36 +1909,28 @@ class AutoML(BaseEstimator):
         status = []
         budgets = []
 
-        for run_key in self.runhistory_.data:
-            run_value = self.runhistory_.data[run_key]
-            config_id = run_key.config_id
+        for trial_key in self.runhistory_._data:
+            trial_value = self.runhistory_._data[trial_key]
+            config_id = trial_key.config_id
             config = self.runhistory_.ids_config[config_id]
 
-            s = run_value.status
+            s = trial_value.status
             if s == StatusType.SUCCESS:
                 status.append("Success")
-            elif s == StatusType.DONOTADVANCE:
-                status.append("Success (but do not advance to higher budget)")
             elif s == StatusType.TIMEOUT:
                 status.append("Timeout")
             elif s == StatusType.CRASHED:
                 status.append("Crash")
-            elif s == StatusType.ABORT:
-                status.append("Abort")
-            elif s == StatusType.MEMOUT:
+            elif s == StatusType.MEMORYOUT:
                 status.append("Memout")
-            # TODO remove StatusType.RUNNING at some point in the future when the new
-            # SMAC 0.13.2 is the new minimum required version!
-            elif s in (StatusType.STOP, StatusType.RUNNING):
-                continue
             else:
                 raise NotImplementedError(s)
 
             param_dict = config.get_dictionary()
             params.append(param_dict)
 
-            mean_fit_time.append(run_value.time)
-            budgets.append(run_key.budget)
+            mean_fit_time.append(trial_value.time)
+            budgets.append(trial_key.budget)
 
             for hp_name in hp_names:
                 if hp_name in param_dict:
@@ -1956,7 +1943,7 @@ class AutoML(BaseEstimator):
                 parameter_dictionaries[hp_name].append(hp_value)
                 masks[hp_name].append(mask_value)
 
-            cost = [run_value.cost] if len(self._metrics) == 1 else run_value.cost
+            cost = [trial_value.cost] if len(self._metrics) == 1 else trial_value.cost
             for metric_idx, metric in enumerate(self._metrics):
                 metric_cost = cost[metric_idx]
                 metric_value = metric._optimum - (metric._sign * metric_cost)
@@ -1968,8 +1955,8 @@ class AutoML(BaseEstimator):
             for metric in self._scoring_functions:
                 if metric.name in optimization_metric_names:
                     continue
-                if metric.name in run_value.additional_info.keys():
-                    metric_cost = run_value.additional_info[metric.name]
+                if metric.name in trial_value.additional_info.keys():
+                    metric_cost = trial_value.additional_info[metric.name]
                     metric_value = metric._optimum - (metric._sign * metric_cost)
                     mask_value = False
                 else:
@@ -2157,10 +2144,10 @@ class AutoML(BaseEstimator):
             return rv.additional_info and key in rv.additional_info
 
         table_dict = {}
-        for run_key, run_val in self.runhistory_.data.items():
-            if has_key(run_val, "num_run"):
-                model_id = run_val.additional_info["num_run"]
-                table_dict[model_id] = {"model_id": model_id, "cost": run_val.cost}
+        for trial_key, trial_value in self.runhistory_._data.items():
+            if has_key(trial_value, "num_run"):
+                model_id = trial_value.additional_info["num_run"]
+                table_dict[model_id] = {"model_id": model_id, "cost": trial_value.cost}
 
         # Checking if the dictionary is empty
         if not table_dict:
@@ -2322,7 +2309,7 @@ class AutoMLClassifier(AutoML):
         y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
         feat_type: Optional[list[str]] = None,
         **kwargs,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+    ) -> tuple[BasePipeline | None, TrialInfo, TrialValue]:
         return super().fit_pipeline(
             X=X,
             y=y,
@@ -2412,7 +2399,7 @@ class AutoMLRegressor(AutoML):
         y_test: Optional[SUPPORTED_TARGET_TYPES | spmatrix] = None,
         feat_type: Optional[list[str]] = None,
         **kwargs: dict,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+    ) -> Tuple[Optional[BasePipeline], TrialInfo, TrialValue]:
         return super().fit_pipeline(
             X=X,
             y=y,
