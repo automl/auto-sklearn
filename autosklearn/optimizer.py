@@ -286,6 +286,9 @@ class AutoMLOptimizer(ABC):
 
         self.logger = self._create_logger(port)
 
+        if self.resampling_strategy is None:
+            self.resampling_strategy = {}
+
         if self._smac_facade is None:
             self._smac_facade = AutoMLOptimizer._default_smac_facade
 
