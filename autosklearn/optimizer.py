@@ -351,14 +351,13 @@ class AutoMLOptimizer(ABC):
         smac: AbstractFacade
             The configured optimizer
         """
-        # ask for a set of initial configurations for the optimizer
+        # Ask for a set of initial configurations for the optimizer
         initial_configurations = self.get_metalearning_suggestions()
 
         # Set up the environment for the optimizer
         scenario = self._create_scenario(total_walltime_limit)
 
-        # Create the target function runner, which is a SMAC specific object that
-        # will be used to execute the target function
+        # Create the target function runner that executes the target function
         target_function_runner = TargetFunctionRunnerWithQueue(
             scenario=scenario,
             backend=copy.deepcopy(self.backend),
@@ -377,11 +376,14 @@ class AutoMLOptimizer(ABC):
             **self.resampling_strategy_args,
         )
 
+        # updatesmac: create the whole facade in a separate function instead of passing
+        #  kwargs to a function
         # Configure the optimizer, SMAC
         smac_facade_args = {
             "scenario": scenario,
             "target_function": target_function_runner,
             "metalearning_configurations": initial_configurations,
+            "seed": self.seed,
         }
 
         # updatesmac: look up what to use for multi_objective_algorithm
@@ -445,6 +447,8 @@ class AutoMLOptimizer(ABC):
         if len(self.metrics) > 1:
             objectives = [metric.name for metric in self.metrics]
 
+        # An instance represents a specific scenario/condition (e.g. different
+        # datasets, subsets, transformations) for the target function to run on.
         if self.resampling_strategy in ["partial-cv", "partial-cv-iterative-fit"]:
             num_folds = self.resampling_strategy_args["folds"]
             instances = [
@@ -454,11 +458,10 @@ class AutoMLOptimizer(ABC):
         else:
             instances = [json.dumps({"task_id": self.dataset_name})]
 
-        output_dir = Path(self.backend.get_smac_output_directory())
         scenario = Scenario(
             configspace=self.config_space,
             name=self.dataset_name,
-            output_directory=output_dir,
+            output_directory=Path(self.backend.get_smac_output_directory()),
             deterministic=True,
             objectives=objectives,
             crash_cost=self.worst_possible_result,
@@ -727,6 +730,7 @@ class AutoMLOptimizer(ABC):
         multi_objective_algorithm,
         # dask_client,
         callbacks,
+        seed,
     ) -> AbstractFacade:
         """Creates the default optimizer, a specific SMAC object that is already
         configured well enough for us.
@@ -754,7 +758,7 @@ class AutoMLOptimizer(ABC):
             initial_configurations = [default_config] + metalearning_configurations
         else:
             initial_configurations = None
-        encoder = RunHistoryLogEncoder(scenario)
+        encoder = RunHistoryLogEncoder(scenario=scenario, seed=seed)
         return AlgorithmConfigurationFacade(
             scenario=scenario,
             target_function=target_function,
