@@ -888,11 +888,13 @@ class AutoML(BaseEstimator):
                             callback=self._callback,
                         )
 
+                        # Run the underlying optimizer to find the optimal pipeline
+                        # for the given data
                         (
                             self.runhistory_,
                             self.trajectory_,
                             self._budget_type,
-                        ) = _proc_smac.run_smbo()
+                        ) = _proc_smac.run()
 
                         trajectory_filename = os.path.join(
                             self._backend.get_smac_output_directory_for_run(
