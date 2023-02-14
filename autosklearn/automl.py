@@ -901,14 +901,13 @@ class AutoML(BaseEstimator):
                                 self._dataset_name, self._seed),
                             "trajectory.json",
                         )
-                        saveable_trajectory = [
-                            list(entry[:2])
-                            + [entry[2].get_dictionary()]
-                            + list(entry[3:])
-                            for entry in self.trajectory_
-                        ]
+
                         with open(trajectory_filename, "w") as fh:
-                            json.dump(saveable_trajectory, fh)
+                            json.dump(
+                                self.trajectory_,
+                                fh,
+                                default=lambda traj: traj.__dict__
+                            )
 
                         self._logger.info("Starting shutdown...")
                         # Wait until the ensemble process is finished to avoid shutting
