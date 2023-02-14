@@ -705,13 +705,20 @@ class AutoMLOptimizer(ABC):
         try:
             context = multiprocessing.get_context(self.pynisher_context)
             preload_modules(context)
-            safe_mf = pynisher.enforce_limits(
-                mem_in_mb=self.memory_limit,
-                wall_time_in_s=int(time_limit),
-                grace_period_in_s=30,
+
+            memory_limit = None
+            if self.memory_limit is not None:
+                memory_limit = (self.memory_limit, "MB")
+
+            # updatesmac: figure out what the parameters should be
+            safe_mf = pynisher.limit(
+                _calculate_metafeatures_encoded,
+                memory=memory_limit,
+                wall_time=int(time_limit),
+                # grace_period_in_s=30,
                 context=context,
-                logger=self.logger,
-            )(_calculate_metafeatures_encoded)
+                # logger=self.logger,
+            )
             res = safe_mf(
                 data_feat_type=self.datamanager.feat_type,
                 task=self.datamanager.info["task"],
