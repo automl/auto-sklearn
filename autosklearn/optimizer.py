@@ -289,7 +289,7 @@ class AutoMLOptimizer(ABC):
         if self._smac_facade is None:
             self._smac_facade = AutoMLOptimizer._default_smac_facade
 
-    def run_smbo(self) -> Tuple[RunHistory, list[TrajectoryItem], BUDGET_TYPE]:
+    def run(self) -> Tuple[RunHistory, list[TrajectoryItem], BUDGET_TYPE]:
         """Runs SMAC, the configured underlying optimizer, on the given task.
 
         This will return a history of configurations that were sampled by the
