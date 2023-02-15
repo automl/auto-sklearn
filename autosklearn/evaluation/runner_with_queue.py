@@ -484,7 +484,7 @@ class TargetFunctionWrapper:
 
             queue.put(
                 {
-                    "loss": self.worst_possible_result,
+                    "loss": self._worst_possible_result,
                     "additional_run_info": {
                         "traceback": exception_traceback,
                         "error": error_message,
