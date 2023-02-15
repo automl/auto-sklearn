@@ -148,6 +148,8 @@ class TargetFunctionRunnerWithQueue(TargetFunctionRunner):
         super().__init__(
             scenario=scenario,
             target_function=target_function_wrapper.target_function,
+            # avoid SMAC warning message: Argument kwargs not set by SMAC
+            required_arguments=["kwargs"],
         )
 
     def run_wrapper(
