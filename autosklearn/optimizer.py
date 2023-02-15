@@ -312,6 +312,7 @@ class AutoMLOptimizer(ABC):
             The budget type, based on which the corresponding target algorithm is chosen
         """
         self.stopwatch.start("SMBO")
+
         self._load_data_manager()
         self.config_space.seed(self.seed)
 
@@ -380,25 +381,20 @@ class AutoMLOptimizer(ABC):
             **self.resampling_strategy_args,
         )
 
-        # updatesmac: create the whole facade in a separate function instead of passing
-        #  kwargs to a function
         # Configure the optimizer, SMAC
         smac_facade_args = {
             "scenario": scenario,
             "target_function": target_function_runner,
             "metalearning_configurations": initial_configurations,
+            "multi_objective_algorithm": None,
+            "callbacks": [],
             "seed": self.seed,
         }
 
-        # updatesmac: look up what to use for multi_objective_algorithm
         if len(self.metrics) > 1:
+            # rho should be set to 0.05
             smac_facade_args["multi_objective_algorithm"] = ParEGO
-        #     smac_facade_args["multi_objective_kwargs"] = {"rho": 0.05}
-        else:
-            smac_facade_args["multi_objective_algorithm"] = None
-        #    smac_facade_args["multi_objective_kwargs"] = {}
 
-        smac_facade_args["callbacks"] = []
         if self.ensemble_callback is not None:
             smac_facade_args["callbacks"].append(self.ensemble_callback)
         if self.trials_callback is not None:
