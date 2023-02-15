@@ -10,7 +10,6 @@ import dask.distributed
 import numpy as np
 from sklearn.utils.validation import check_random_state
 from smac import Callback
-
 from smac.main.smbo import SMBO
 from smac.runhistory import TrialInfo, TrialValue
 from smac.runner import DaskParallelRunner
@@ -165,9 +164,10 @@ class EnsembleBuilderManager(Callback):
             A list with the performance history of this ensemble, of the form
             [(pandas_timestamp, train_performance, val_performance, test_performance)]
         """
-        if result.status in (StatusType.STOP, StatusType.ABORT) or smbo._stop:
-            return
-        self.build_ensemble(smbo.tae_runner.client)
+        runner = smbo._runner
+        assert isinstance(runner, DaskParallelRunner)
+        self.build_ensemble(runner._client)
+        return None
 
     def build_ensemble(
         self,
