@@ -11,6 +11,10 @@ import numpy as np
 from sklearn.utils.validation import check_random_state
 from smac import Callback
 
+from smac.main.smbo import SMBO
+from smac.runhistory import TrialInfo, TrialValue
+from smac.runner import DaskParallelRunner
+
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.ensemble_building.builder import EnsembleBuilder
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
@@ -148,13 +152,12 @@ class EnsembleBuilderManager(Callback):
         # Keep track of when we started to know when we need to finish!
         self.start_time = time.time()
 
-    def __call__(
+    def on_tell_end(
         self,
-        smbo: "SMBO",
-        run_info: RunInfo,
-        result: RunValue,
-        time_left: float,
-    ) -> None:
+        smbo: SMBO,
+        trial_info: TrialInfo,
+        result: TrialValue,
+    ) -> bool | None:
         """
         Returns
         -------
