@@ -781,7 +781,7 @@ class AutoML(BaseEstimator):
                         )
                 elif self._ensemble_class is None:
                     self._logger.info(
-                        "No ensemble buildin because no ensemble class was given."
+                        "No ensemble building because no ensemble class was given."
                     )
                 else:
                     self._logger.info(
