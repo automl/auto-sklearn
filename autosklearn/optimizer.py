@@ -15,9 +15,9 @@ import warnings
 from logging import Logger
 from pathlib import Path
 
-import ConfigSpace
 import numpy as np
 import pynisher
+from ConfigSpace import ConfigurationSpace
 from dask.distributed import Client
 from sklearn.model_selection import BaseCrossValidator, BaseShuffleSplit
 from sklearn.model_selection._split import _RepeatedSplits
@@ -225,7 +225,7 @@ class AutoMLOptimizer(ABC):
 
     def __init__(
         self,
-        config_space: ConfigSpace,
+        config_space: ConfigurationSpace,
         dataset_name: str = None,
         backend: Backend = None,
         total_walltime_limit: int = None,
