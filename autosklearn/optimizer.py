@@ -23,6 +23,7 @@ from sklearn.model_selection import BaseCrossValidator, BaseShuffleSplit
 from sklearn.model_selection._split import _RepeatedSplits
 from smac import AlgorithmConfigurationFacade, Callback, RunHistory, Scenario
 from smac.facade import AbstractFacade
+from smac.initial_design import RandomInitialDesign
 from smac.intensifier import Intensifier
 from smac.multi_objective import ParEGO
 from smac.runhistory.dataclasses import TrajectoryItem
@@ -768,18 +769,25 @@ class AutoMLOptimizer(ABC):
         #  they match for the defaults of the newer version (for both intensifier and
         #  encoder)
         intensifier = Intensifier(scenario)
+
+        encoder = RunHistoryLogEncoder(scenario=scenario, seed=seed)
+
+        initial_design = None
         if len(metalearning_configurations) > 0:
             default_config = scenario.configspace.get_default_configuration()
             initial_configurations = [default_config] + metalearning_configurations
-        else:
-            initial_configurations = None
-        encoder = RunHistoryLogEncoder(scenario=scenario, seed=seed)
+            initial_design = RandomInitialDesign(
+                scenario=scenario,
+                n_configs=0,
+                additional_configs=initial_configurations,
+            )
+
         return AlgorithmConfigurationFacade(
             scenario=scenario,
             target_function=target_function,
             intensifier=intensifier,
             multi_objective_algorithm=multi_objective_algorithm,
             runhistory_encoder=encoder,
-            initial_design=initial_configurations,
+            initial_design=initial_design,
             callbacks=callbacks,
         )
