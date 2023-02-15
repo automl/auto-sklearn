@@ -9,10 +9,7 @@ import traceback
 import dask.distributed
 import numpy as np
 from sklearn.utils.validation import check_random_state
-from smac.callbacks import IncorporateRunResultCallback
-from smac.optimizer.smbo import SMBO
-from smac.runhistory.runhistory import RunInfo, RunValue
-from smac.tae.base import StatusType
+from smac import Callback
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.ensemble_building.builder import EnsembleBuilder
@@ -22,7 +19,7 @@ from autosklearn.metrics import Scorer
 from autosklearn.util.logging_ import get_named_client_logger
 
 
-class EnsembleBuilderManager(IncorporateRunResultCallback):
+class EnsembleBuilderManager(Callback):
     def __init__(
         self,
         backend: Backend,
