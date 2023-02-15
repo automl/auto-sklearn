@@ -765,9 +765,7 @@ class AutoMLOptimizer(ABC):
         smac: AlgorithmConfigurationFacade
             The optimizer
         """
-        # updatesmac: look at the details of what the defaults were before and if
-        #  they match for the defaults of the newer version (for both intensifier and
-        #  encoder)
+        # updatesmac: look into how intensification changed
         intensifier = Intensifier(scenario)
 
         encoder = RunHistoryLogEncoder(scenario=scenario, seed=seed)
