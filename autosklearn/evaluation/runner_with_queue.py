@@ -240,7 +240,7 @@ class TargetFunctionRunnerWithQueue(TargetFunctionRunner):
         if context == "forkserver":
             preload_modules(context)
 
-        obj_kwargs = dict(
+        target_function_kwargs = dict(
             queue=queue,
             config=config,
             instance=instance,
@@ -262,8 +262,10 @@ class TargetFunctionRunnerWithQueue(TargetFunctionRunner):
 
         # This seems to be used scripts/run_auto-sklearn_for_metadata_generation.py
         if self.resampling_strategy != "test":
-            obj_kwargs["resampling_strategy"] = self.resampling_strategy
-            obj_kwargs["resampling_strategy_args"] = self.resampling_strategy_args
+            target_function_kwargs["resampling_strategy"] = self.resampling_strategy
+            target_function_kwargs[
+                "resampling_strategy_args"
+            ] = self.resampling_strategy_args
 
         # Wrap the target function into pynisher that limits the maximum resources
         # that a call to this function can take
@@ -277,7 +279,7 @@ class TargetFunctionRunnerWithQueue(TargetFunctionRunner):
         start = time.time()
         try:
             # Run the target function and put its result into a queue
-            target_function(**obj_kwargs)
+            target_function(**target_function_kwargs)
             error = None
             _traceback = None
         except Exception as e:
