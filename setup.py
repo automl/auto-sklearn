@@ -38,6 +38,7 @@ extras_reqs = {
         "mypy",
         "isort",
         "black",
+        "flake8",
         "pydocstyle",
         "openml",
         "pre-commit",
