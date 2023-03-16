@@ -10,7 +10,7 @@ from itertools import product
 import numpy as np
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
-from smac.utils.constants import MAXINT
+from smac.constants import MAXINT
 
 from autosklearn.constants import (
     BINARY_CLASSIFICATION,
@@ -751,6 +751,32 @@ def _compute_single_scorer(
     else:
         score = metric(solution, prediction)
     return score
+
+
+def get_cost_of_crash(metrics: Sequence[Scorer]) -> list[float] | float:
+    """Return the cost of a crashed run.
+
+    Return value can be either a list (multi-objective optimization) or a
+    raw float (single objective) because SMAC assumes different types in the
+    two different cases.
+    """
+    costs = []
+    for metric in metrics:
+        if not isinstance(metric, Scorer):
+            raise ValueError("The metric {metric} must be an instance of Scorer")
+
+        # Autosklearn optimizes the err. This function translates
+        # worst_possible_result to be a minimization problem.
+        # For metrics like accuracy that are bounded to [0,1]
+        # metric.optimum==1 is the worst cost.
+        # A simple guide is to use greater_is_better embedded as sign
+        if metric._sign < 0:
+            worst_possible_result = metric._worst_possible_result
+        else:
+            worst_possible_result = metric._optimum - metric._worst_possible_result
+        costs.append(worst_possible_result)
+
+    return costs if len(costs) > 1 else costs[0]
 
 
 # Must be at bottom so all metrics are defined
