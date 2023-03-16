@@ -38,7 +38,6 @@ class SingleThreadedClient(dask.distributed.Client):
     """
 
     def __init__(self) -> None:
-
         # Raise a not implemented error if using a method from Client
         implemented_methods = [
             "submit",
