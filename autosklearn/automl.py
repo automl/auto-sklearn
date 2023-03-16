@@ -857,20 +857,19 @@ class AutoML(BaseEstimator):
                     n_meta_configs = self._initial_configurations_via_metalearning
                     with self._dask as dask_client:
                         resamp_args = self._resampling_strategy_arguments
-                        _proc_smac = AutoMLSMBO(
+                        # Create the optimizer
+                        _proc_smac = AutoMLOptimizer(
                             config_space=self.configuration_space,
                             dataset_name=self._dataset_name,
                             backend=self._backend,
-                            total_walltime_limit=time_left,
+                            total_walltime_limit=int(time_left),
                             func_eval_time_limit=per_run_time_limit,
                             memory_limit=self._memory_limit,
-                            data_memory_limit=self._data_memory_limit,
                             stopwatch=self._stopwatch,
                             n_jobs=self._n_jobs,
                             dask_client=dask_client,
-                            start_num_run=self.num_run,
+                            initial_num_run=self.num_run,
                             num_metalearning_cfgs=n_meta_configs,
-                            config_file=configspace_path,
                             seed=self._seed,
                             metadata_directory=self._metadata_directory,
                             metrics=self._metrics,
@@ -879,13 +878,13 @@ class AutoML(BaseEstimator):
                             include=self._include,
                             exclude=self._exclude,
                             disable_file_output=self._disable_evaluator_output,
-                            get_smac_object_callback=self._get_smac_object_callback,
+                            smac_facade=self._get_smac_object_callback,
                             smac_scenario_args=self._smac_scenario_args,
                             scoring_functions=self._scoring_functions,
                             port=self._logger_port,
                             pynisher_context=self._multiprocessing_context,
                             ensemble_callback=proc_ensemble,
-                            callback=self._callback,
+                            trials_callback=self._callback,
                         )
 
                         # Run the underlying optimizer to find the optimal pipeline
