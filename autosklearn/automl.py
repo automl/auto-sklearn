@@ -897,15 +897,14 @@ class AutoML(BaseEstimator):
 
                         trajectory_filename = os.path.join(
                             self._backend.get_smac_output_directory_for_run(
-                                self._dataset_name, self._seed),
+                                self._dataset_name, self._seed
+                            ),
                             "trajectory.json",
                         )
 
                         with open(trajectory_filename, "w") as fh:
                             json.dump(
-                                self.trajectory_,
-                                fh,
-                                default=lambda traj: traj.__dict__
+                                self.trajectory_, fh, default=lambda traj: traj.__dict__
                             )
 
                         self._logger.info("Starting shutdown...")
@@ -995,7 +994,8 @@ class AutoML(BaseEstimator):
                 module_dist = pkg_resources.get_distribution(name)
                 self._logger.debug("  %s", module_dist)
             else:
-                raise ValueError("Unable to read requirement: %s" % requirement)
+                # raise ValueError("Unable to read requirement: %s" % requirement)
+                pass
 
         self._logger.debug("Done printing environment information")
         self._logger.debug("Starting to print arguments to auto-sklearn")
