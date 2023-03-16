@@ -455,7 +455,6 @@ def reduce_dataset_size_if_too_large(
         )
 
     for operation in operations:
-
         if operation == "precision":
             # If the dataset is too big for the allocated memory,
             # we then try to reduce the precision if it's a high precision dataset
@@ -470,7 +469,6 @@ def reduce_dataset_size_if_too_large(
             # If the dataset is still too big such that we couldn't fit
             # into the allocated memory, we subsample it so that it does
             if megabytes(X) > allocated_memory:
-
                 n_samples_before = X.shape[0]
                 sample_percentage = allocated_memory / megabytes(X)
 
