@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
@@ -509,7 +511,6 @@ def calculate_scores(
     score_dict = dict()
     if task_type in REGRESSION_TASKS:
         for metric_ in to_score:
-
             try:
                 score_dict[metric_.name] = _compute_single_scorer(
                     metric=metric_,
@@ -530,7 +531,6 @@ def calculate_scores(
 
     else:
         for metric_ in to_score:
-
             # TODO maybe annotate metrics to define which cases they can
             # handle?
 
