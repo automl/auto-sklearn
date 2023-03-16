@@ -379,6 +379,15 @@ class AutoMLOptimizer(ABC):
             **self.resampling_strategy_args,
         )
 
+        # Wrap target function iside a dask runner that uses the client.
+        # This used to be a functionality provided by SMAC when a dask client was
+        # passed in as a parameter for a SMAC facade. However, it's not offered by SMAC
+        # anymore, so we replicate the old funcitonality here, because we rely on it.
+        target_function_runner = DaskParallelRunner(
+            single_worker=target_function_runner,
+            dask_client=self.dask_client,
+        )
+
         # Configure the optimizer, SMAC
         smac_facade_args = {
             "scenario": scenario,
