@@ -431,30 +431,31 @@ class AutoML(BaseEstimator):
 
         scenario_mock = unittest.mock.Mock()
         scenario_mock.wallclock_limit = self._time_for_task
-        # This stats object is a hack - maybe the SMAC stats object should
-        # already be generated here!
-        stats = Stats(scenario_mock)
-        stats.start_timing()
-        ta = ExecuteTaFuncWithQueue(
+        scenario_mock.count_objectives = lambda: 1
+        scenario_mock.trial_memory_limit = memory_limit
+        scenario_mock.trial_walltime_limit = self._time_for_task
+
+        target_function_runner = TargetFunctionRunnerWithQueue(
+            scenario=scenario_mock,
             backend=self._backend,
             autosklearn_seed=self._seed,
             multi_objectives=[metric.name for metric in self._metrics],
             resampling_strategy=self._resampling_strategy,
             initial_num_run=dummy_run_num,
-            stats=stats,
             metrics=self._metrics,
             memory_limit=memory_limit,
             disable_file_output=self._disable_evaluator_output,
             abort_on_first_run_crash=False,
-            cost_for_crash=get_cost_of_crash(self._metrics),
+            worst_possible_result=get_cost_of_crash(self._metrics),
             port=self._logger_port,
+            # askeddie: Expected type 'Literal["spawn", "fork", "forkserver"]',
+            #  got 'str' instead
             pynisher_context=self._multiprocessing_context,
             **self._resampling_strategy_arguments,
         )
 
-        status, cost, runtime, additional_info = ta.run(
+        status, cost, runtime, additional_info = target_function_runner.run(
             config=dummy_run_num,
-            cutoff=self._time_for_task,
         )
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
@@ -765,7 +766,6 @@ class AutoML(BaseEstimator):
             # dummy predictions are actually included in the ensemble even if
             # calculating the meta-features takes very long
             with self._stopwatch.time("Run Ensemble Builder"):
-
                 elapsed_time = self._stopwatch.time_since(self._dataset_name, "start")
 
                 time_left_for_ensembles = max(0, self._time_for_task - elapsed_time)
