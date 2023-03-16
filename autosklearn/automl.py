@@ -1337,22 +1337,19 @@ class AutoML(BaseEstimator):
             kwargs["disable_file_output"] = self._disable_evaluator_output
         if "pynisher_context" not in kwargs:
             kwargs["pynisher_context"] = self._multiprocessing_context
-        if "stats" not in kwargs:
-            scenario_mock = unittest.mock.Mock()
-            scenario_mock.wallclock_limit = self._time_for_task
-            kwargs["stats"] = Stats(scenario_mock)
         kwargs["stats"].start_timing()
 
         _validate_metrics(kwargs["metrics"], kwargs["scoring_functions"])
 
         # Fit a pipeline, which will be stored on disk
         # which we can later load via the backend
-        ta = ExecuteTaFuncWithQueue(
+
+        target_function_runner = TargetFunctionRunnerWithQueue(
             backend=self._backend,
             autosklearn_seed=self._seed,
             abort_on_first_run_crash=False,
             multi_objectives=["cost"],
-            cost_for_crash=get_cost_of_crash(kwargs["metrics"]),
+            worst_possible_result=get_cost_of_crash(kwargs["metrics"]),
             port=self._logger_port,
             **kwargs,
             **self._resampling_strategy_arguments,
@@ -2262,7 +2259,6 @@ class AutoML(BaseEstimator):
 
 
 class AutoMLClassifier(AutoML):
-
     _task_mapping = {
         "multilabel-indicator": MULTILABEL_CLASSIFICATION,
         "multiclass": MULTICLASS_CLASSIFICATION,
@@ -2352,7 +2348,6 @@ class AutoMLClassifier(AutoML):
 
 
 class AutoMLRegressor(AutoML):
-
     _task_mapping = {
         "continuous-multioutput": MULTIOUTPUT_REGRESSION,
         "continuous": REGRESSION,
