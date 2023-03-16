@@ -687,7 +687,7 @@ class AutoMLOptimizer(ABC):
                 memory=memory_limit,
                 wall_time=int(time_limit),
                 # grace_period_in_s=30,
-                context=context,
+                context=self.pynisher_context,
                 # logger=self.logger,
             )
             res = safe_mf(
@@ -721,7 +721,7 @@ class AutoMLOptimizer(ABC):
                 memory=memory_limit,
                 wall_time=int(time_limit),
                 # grace_period_in_s=30,
-                context=context,
+                context=self.pynisher_context,
                 # logger=self.logger,
             )
             res = safe_mf(
