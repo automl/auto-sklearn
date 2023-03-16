@@ -19,7 +19,7 @@ def deprecate(
     ignored: str | bool = False,
     when: tuple[int, ...] | None = None,
 ) -> bool:
-    """Set a deprecation warning whichs triggers an Error once reached
+    """Set a deprecation warning which triggers an Error once reached
 
     Parameters
     ----------
