@@ -5,7 +5,7 @@ import multiprocessing
 
 import numpy as np
 from ConfigSpace import Configuration
-from smac.tae import StatusType
+from smac.runhistory import StatusType
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.evaluation.abstract_evaluator import (

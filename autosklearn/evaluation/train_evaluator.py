@@ -7,7 +7,6 @@ import multiprocessing
 import warnings
 
 import numpy as np
-import pandas
 import pandas as pd
 import scipy.sparse
 from ConfigSpace import Configuration
@@ -23,7 +22,8 @@ from sklearn.model_selection import (
     train_test_split,
 )
 from sklearn.model_selection._split import _RepeatedSplits
-from smac.tae import StatusType, TAEAbortException
+from smac.runhistory import StatusType
+from smac.runner import TargetAlgorithmAbortException
 
 from autosklearn.automl_common.common.utils.backend import Backend
 from autosklearn.constants import (
@@ -44,7 +44,7 @@ from autosklearn.evaluation.splitter import (
     CustomStratifiedShuffleSplit,
 )
 from autosklearn.metrics import Scorer
-from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE
+from autosklearn.pipeline.base import PIPELINE_DATA_DTYPE, BasePipeline
 from autosklearn.pipeline.components.base import (
     IterativeComponent,
     ThirdPartyComponents,
@@ -82,7 +82,6 @@ def subsample_indices(
     task_type: int,
     Y_train: SUPPORTED_TARGET_TYPES,
 ) -> List[int]:
-
     if not isinstance(subsample, float):
         raise ValueError(
             "Subsample must be of type float, but is of type %s" % type(subsample)
@@ -119,7 +118,7 @@ def _fit_with_budget(
     budget: float,
     budget_type: Optional[str],
     logger: Union[logging.Logger, PicklableClientLogger],
-    model: BaseEstimator,
+    model: BasePipeline,
     train_indices: List[int],
     task_type: int,
 ) -> None:
@@ -203,7 +202,6 @@ class TrainEvaluator(AbstractEvaluator):
         disable_file_output: bool = False,
         init_params: Optional[Dict[str, Any]] = None,
     ):
-
         super().__init__(
             backend=backend,
             queue=queue,
@@ -259,7 +257,6 @@ class TrainEvaluator(AbstractEvaluator):
 
         if iterative:
             if self.num_cv_folds == 1:
-
                 for train_split, test_split in self.splitter.split(
                     self.X_train,
                     self.Y_train,
@@ -275,7 +272,6 @@ class TrainEvaluator(AbstractEvaluator):
                         add_model_to_self=True,
                     )
             else:
-
                 # Test if the model allows for an iterative fit, if not,
                 # call this method again without the iterative argument
                 model = self._get_model(self.feat_type)
@@ -340,7 +336,6 @@ class TrainEvaluator(AbstractEvaluator):
                 opt_fold_weights = [np.NaN] * self.num_cv_folds
 
                 while not all(converged):
-
                     splitter = self.get_splitter(self.datamanager)
 
                     for i, (train_indices, test_indices) in enumerate(
@@ -499,7 +494,6 @@ class TrainEvaluator(AbstractEvaluator):
                     )
 
         else:
-
             self.partial = False
 
             Y_train_pred = [None] * self.num_cv_folds
@@ -522,7 +516,6 @@ class TrainEvaluator(AbstractEvaluator):
                     self.X_train, y, groups=self.resampling_strategy_args.get("groups")
                 )
             ):
-
                 # TODO add check that split is actually an integer array,
                 # not a boolean array (to allow indexed assignement of
                 # training data later).
@@ -557,7 +550,7 @@ class TrainEvaluator(AbstractEvaluator):
                     and len(additional_run_info) > 0
                     and i > 0
                 ):
-                    raise TAEAbortException(
+                    raise TargetAlgorithmAbortException(
                         'Found additional run info "%s" in fold %d, '
                         "but cannot handle additional run info if fold >= 1."
                         % (additional_run_info, i)
@@ -802,7 +795,11 @@ class TrainEvaluator(AbstractEvaluator):
                 total_n_iteration += n_iter
                 model.iterative_fit(Xt, y, n_iter=n_iter, **fit_params)
 
-                (Y_train_pred, Y_optimization_pred, Y_test_pred,) = self._predict(
+                (
+                    Y_train_pred,
+                    Y_optimization_pred,
+                    Y_test_pred,
+                ) = self._predict(
                     model,
                     train_indices=train_indices,
                     test_indices=test_indices,
@@ -841,7 +838,6 @@ class TrainEvaluator(AbstractEvaluator):
 
             return
         else:
-
             (
                 Y_train_pred,
                 Y_optimization_pred,
@@ -934,7 +930,6 @@ class TrainEvaluator(AbstractEvaluator):
         PIPELINE_DATA_DTYPE,  # test_pred
         TYPE_ADDITIONAL_INFO,
     ]:
-
         # This function is only called in the event budget is not None
         # Add this statement for mypy
         assert self.budget is not None
@@ -1000,7 +995,6 @@ class TrainEvaluator(AbstractEvaluator):
     def get_splitter(
         self, D: AbstractDataManager
     ) -> Union[BaseCrossValidator, _RepeatedSplits, BaseShuffleSplit]:
-
         if self.resampling_strategy_args is None:
             self.resampling_strategy_args = {}
 
@@ -1045,10 +1039,8 @@ class TrainEvaluator(AbstractEvaluator):
             D.info["task"] in CLASSIFICATION_TASKS
             and D.info["task"] != MULTILABEL_CLASSIFICATION
         ):
-
             y = y.ravel()
             if self.resampling_strategy in ["holdout", "holdout-iterative-fit"]:
-
                 if shuffle:
                     try:
                         cv = StratifiedShuffleSplit(
