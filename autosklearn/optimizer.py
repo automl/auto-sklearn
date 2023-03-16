@@ -23,7 +23,7 @@ from sklearn.model_selection import BaseCrossValidator, BaseShuffleSplit
 from sklearn.model_selection._split import _RepeatedSplits
 from smac import AlgorithmConfigurationFacade, Callback, RunHistory, Scenario
 from smac.facade import AbstractFacade
-from smac.initial_design import RandomInitialDesign
+from smac.initial_design import DefaultInitialDesign
 from smac.intensifier import Intensifier
 from smac.multi_objective import ParEGO
 from smac.runhistory.dataclasses import TrajectoryItem
@@ -116,7 +116,6 @@ def _calculate_metafeatures(
 
         # == Calculate metafeatures
         with stopwatch.time("Calculate meta-features") as task_timer:
-
             EXCLUDE_META_FEATURES = (
                 EXCLUDE_META_FEATURES_CLASSIFICATION
                 if data_info_task in CLASSIFICATION_TASKS
@@ -170,7 +169,6 @@ def _calculate_metafeatures_encoded(
         )
 
         with stopwatch.time("Calculate meta-features encoded") as task_timer:
-
             result = calculate_all_metafeatures_encoded_labels(
                 x_train,
                 y_train,
@@ -548,7 +546,6 @@ class AutoMLOptimizer(ABC):
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):
-
                 self.logger.info("Metadata directory: %s", self.metadata_directory)
                 meta_base = MetaBase(
                     self.config_space, self.metadata_directory, self.logger
@@ -640,7 +637,6 @@ class AutoMLOptimizer(ABC):
         return metalearning_configurations
 
     def collect_metalearning_suggestions(self, meta_base):
-
         with self.stopwatch.time("Initial Configurations") as task:
             metalearning_configurations = _get_metalearning_configurations(
                 meta_base=meta_base,
@@ -768,12 +764,12 @@ class AutoMLOptimizer(ABC):
 
         initial_design = None
         if len(metalearning_configurations) > 0:
-            default_config = scenario.configspace.get_default_configuration()
-            initial_configurations = [default_config] + metalearning_configurations
-            initial_design = RandomInitialDesign(
+            # TODO: The additional configs should be instead appended manually to
+            # SMAC's runhistory, because otherwise SMAC will reevaluate these configs.
+            initial_design = DefaultInitialDesign(
                 scenario=scenario,
                 n_configs=0,
-                additional_configs=initial_configurations,
+                additional_configs=metalearning_configurations,
             )
 
         return AlgorithmConfigurationFacade(
