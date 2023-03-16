@@ -304,7 +304,6 @@ class EnsembleBuilder:
 
         process_start_time = time.time()
         while True:
-
             if time_left is not None:
                 time_elapsed = time.time() - process_start_time
                 time_left -= time_elapsed
@@ -750,7 +749,6 @@ class EnsembleBuilder:
             return dummies, all_discarded
 
         if better_than_dummy:
-
             # In the single objective case, they must explicitly be better than dummy
             if len(metrics) == 1:
                 metric = metrics[0]

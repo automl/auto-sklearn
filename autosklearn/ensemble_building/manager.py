@@ -86,19 +86,19 @@ class EnsembleBuilderManager(Callback):
             If float: consider only this fraction of the best models
 
         max_models_on_disc: int | float | None = None
-           Defines the maximum number of models that are kept in the disc.
+            Defines the maximum number of models that are kept in the disc.
 
-           If int, it must be greater or equal than 1, and dictates the max
-           number of models to keep.
+            If int, it must be greater or equal than 1, and dictates the max
+            number of models to keep.
 
-           If float, it will be interpreted as the max megabytes allowed of
-           disc space. That is, if the number of ensemble candidates require more
-           disc space than this float value, the worst models will be deleted to
-           keep within this budget. Models and predictions of the worst-performing
-           models will be deleted then.
+            If float, it will be interpreted as the max megabytes allowed of
+            disc space. That is, if the number of ensemble candidates require more
+            disc space than this float value, the worst models will be deleted to
+            keep within this budget. Models and predictions of the worst-performing
+            models will be deleted then.
 
-           If None, the feature is disabled. It defines an upper bound on the
-           models that can be used in the ensemble.
+            If None, the feature is disabled. It defines an upper bound on the
+            models that can be used in the ensemble.
 
         seed: int = 1
             Seed used for the inidividual runs
@@ -216,7 +216,6 @@ class EnsembleBuilderManager(Callback):
 
         # Only submit new jobs if the previous ensemble job finished
         if len(self.futures) == 0:
-
             # Add the result of the run
             # On the next while iteration, no references to
             # ensemble builder object, so it should be garbage collected to
