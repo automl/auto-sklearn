@@ -75,7 +75,7 @@ from autosklearn.ensembles.abstract_ensemble import (
 )
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.singlebest_ensemble import SingleBestFromRunhistory
-from autosklearn.evaluation import ExecuteTaFuncWithQueue, get_cost_of_crash
+from autosklearn.evaluation import TargetFunctionRunnerWithQueue
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, _fit_with_budget
 from autosklearn.metrics import (
@@ -83,7 +83,9 @@ from autosklearn.metrics import (
     _validate_metrics,
     compute_single_metric,
     default_metric_for_task,
+    get_cost_of_crash,
 )
+from autosklearn.optimizer import AutoMLOptimizer
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding import (
@@ -97,7 +99,6 @@ from autosklearn.pipeline.components.feature_preprocessing import (
     FeaturePreprocessorChoice,
 )
 from autosklearn.pipeline.components.regression import RegressorChoice
-from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util import RE_PATTERN, pipeline
 from autosklearn.util.dask import Dask, LocalDask, UserDask
 from autosklearn.util.data import (
@@ -239,7 +240,6 @@ class AutoML(BaseEstimator):
         disable_progress_bar: bool = False,
     ):
         super().__init__()
-
         if isinstance(disable_evaluator_output, Iterable):
             disable_evaluator_output = list(disable_evaluator_output)  # Incase iterator
             allowed = set(["model", "cv_model", "y_optimization", "y_test"])
