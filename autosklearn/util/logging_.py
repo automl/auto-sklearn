@@ -364,7 +364,6 @@ def warnings_to(logger: Optional[PicklableClientLogger] = None) -> Iterator[None
     """
     # Send to a logger if one exists
     if logger:
-
         with warnings.catch_warnings():
 
             def to_log(
