@@ -24,7 +24,7 @@ from scipy.sparse import spmatrix
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.ensemble import VotingClassifier, VotingRegressor
 from sklearn.utils.multiclass import type_of_target
-from smac.runhistory.runhistory import RunInfo, RunValue
+from smac.runhistory import TrialInfo, TrialValue
 from typing_extensions import Literal
 
 from autosklearn.automl import AutoML, AutoMLClassifier, AutoMLRegressor
@@ -489,7 +489,6 @@ class AutoSklearnEstimator(BaseEstimator):
         return self.__dict__
 
     def build_automl(self):
-
         initial_configs = self.initial_configurations_via_metalearning
         automl = self._get_automl_class()(
             temporary_directory=self.tmp_folder,
@@ -525,7 +524,6 @@ class AutoSklearnEstimator(BaseEstimator):
         return automl
 
     def fit(self, **kwargs):
-
         # Automatically set the cutoff time per task
         if self.per_run_time_limit is None:
             self.per_run_time_limit = self._n_jobs * self.time_left_for_this_task // 10
@@ -547,7 +545,7 @@ class AutoSklearnEstimator(BaseEstimator):
         feat_type: Optional[List[str]] = None,
         *args,
         **kwargs: Dict,
-    ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue]:
+    ) -> Tuple[Optional[BasePipeline], TrialInfo, TrialValue]:
         """Fits and individual pipeline configuration and returns
         the result to the user.
 
@@ -589,9 +587,9 @@ class AutoSklearnEstimator(BaseEstimator):
         pipeline: Optional[BasePipeline]
             The fitted pipeline. In case of failure while fitting the pipeline,
             a None is returned.
-        run_info: RunInFo
+        trial_info: TrialInfo
             A named tuple that contains the configuration launched
-        run_value: RunValue
+        trial_value: TrialValue
             A named tuple that contains the result of the run
         """
         if self.automl_ is None:
@@ -1080,31 +1078,31 @@ class AutoSklearnEstimator(BaseEstimator):
             return rv.additional_info and key in rv.additional_info
 
         model_runs = {}
-        for run_key, run_val in self.automl_.runhistory_.data.items():
-            if not additional_info_has_key(run_val, "num_run"):
+        for trial_key, trial_value in self.automl_.runhistory_._data.items():
+            if not additional_info_has_key(trial_value, "num_run"):
                 continue
             else:
-                model_key = run_val.additional_info["num_run"]
+                model_key = trial_value.additional_info["num_run"]
                 model_run = {
-                    "model_id": run_val.additional_info["num_run"],
-                    "seed": run_key.seed,
-                    "budget": run_key.budget,
-                    "duration": run_val.time,
-                    "config_id": run_key.config_id,
-                    "start_time": run_val.starttime,
-                    "end_time": run_val.endtime,
-                    "status": str(run_val.status),
-                    "train_loss": run_val.additional_info["train_loss"]
-                    if additional_info_has_key(run_val, "train_loss")
+                    "model_id": trial_value.additional_info["num_run"],
+                    "seed": trial_key.seed,
+                    "budget": trial_key.budget,
+                    "duration": trial_value.time,
+                    "config_id": trial_key.config_id,
+                    "start_time": trial_value.starttime,
+                    "end_time": trial_value.endtime,
+                    "status": str(trial_value.status),
+                    "train_loss": trial_value.additional_info["train_loss"]
+                    if additional_info_has_key(trial_value, "train_loss")
                     else None,
-                    "config_origin": run_val.additional_info["configuration_origin"]
-                    if additional_info_has_key(run_val, "configuration_origin")
+                    "config_origin": trial_value.additional_info["configuration_origin"]
+                    if additional_info_has_key(trial_value, "configuration_origin")
                     else None,
                 }
                 if num_metrics == 1:
-                    model_run["cost"] = run_val.cost
+                    model_run["cost"] = trial_value.cost
                 else:
-                    for cost_idx, cost in enumerate(run_val.cost):
+                    for cost_idx, cost in enumerate(trial_value.cost):
                         model_run[f"cost_{cost_idx}"] = cost
                 model_runs[model_key] = model_run
 
@@ -1147,7 +1145,6 @@ class AutoSklearnEstimator(BaseEstimator):
             model_id,
             _,
         ), weight in self.automl_.ensemble_.get_identifiers_with_weights():
-
             # We had issues where the model's in the ensembles are not in the runhistory
             # collected. I have no clue why this is but to prevent failures, we fill
             # the values with NaN
