@@ -470,7 +470,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         self.ensemble_class = ensemble_class
 
-        self.automl_ = None  # type: Optional[AutoML]
+        self.automl_: AutoML | None = None
 
         # Handle the number of jobs and the time for them
         self._n_jobs = None
@@ -488,7 +488,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.dask_client = None
         return self.__dict__
 
-    def build_automl(self):
+    def build_automl(self) -> AutoML:
         initial_configs = self.initial_configurations_via_metalearning
         automl = self._get_automl_class()(
             temporary_directory=self.tmp_folder,
