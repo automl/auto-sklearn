@@ -12,7 +12,7 @@ from ConfigSpace import Configuration
 from sklearn.base import BaseEstimator
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.ensemble import VotingClassifier, VotingRegressor
-from smac.tae import StatusType
+from smac.runhistory import StatusType
 from threadpoolctl import threadpool_limits
 
 import autosklearn.pipeline.classification
@@ -210,7 +210,6 @@ class AbstractEvaluator(object):
         budget: Optional[float] = None,
         budget_type: Optional[str] = None,
     ):
-
         # Limit the number of threads that numpy uses
         threadpool_limits(limits=1)
 
@@ -508,7 +507,6 @@ class AbstractEvaluator(object):
         if hasattr(self, "models"):
             if len(self.models) > 0 and self.models[0] is not None:
                 if "models" not in self.disable_file_output:
-
                     if self.task_type in CLASSIFICATION_TASKS:
                         models = VotingClassifier(
                             estimators=None,
