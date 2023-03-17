@@ -40,7 +40,7 @@ from autosklearn.ensembles.multiobjective_dummy_ensemble import (
 )
 from autosklearn.metrics import Scorer
 from autosklearn.pipeline.base import BasePipeline
-from autosklearn.util.deprecations import deprecate, deprecated
+from autosklearn.util.deprecations import deprecate
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -393,7 +393,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 used for plotting directly. Please refer to the example
                 :ref:`Train and Test Inputs <sphx_glr_examples_40_advanced_example_pandas_train_test.py>`.
         """  # noqa (links are too long)
-        deprecated(
+        deprecate(
             get_trials_callback,
             "Please use `callback` parameter instead",
             when=(0, 16, 0),
@@ -403,7 +403,7 @@ class AutoSklearnEstimator(BaseEstimator):
             and ensemble_kwargs
             and "ensemble_size" in ensemble_kwargs,
             msg=f"`ensemble_size` is deprecated but is present in {ensemble_kwargs=}",
-            ignore="`ensemble_size`",
+            ignored="`ensemble_size`",
             when=(0, 17, 0),
         )
         deprecate(
@@ -413,7 +413,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 "`ensemble_size` has been deprecated and we do not know how to handle"
                 f"with {ensemble_class=}"
             ),
-            ignore="ensemble_size",
+            ignored="ensemble_size",
             when=(0, 17, 0),
         )
 
@@ -695,7 +695,7 @@ class AutoSklearnEstimator(BaseEstimator):
             and ensemble_kwargs
             and "ensemble_size" in ensemble_kwargs,
             msg=f"`ensemble_size` is deprecated but is present in {ensemble_kwargs=}",
-            ignore="`ensemble_size`",
+            ignored="`ensemble_size`",
             when=(0, 17, 0),
         )
         deprecate(
@@ -705,7 +705,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 "`ensemble_size` has been deprecated and we do not know how to handle"
                 f"with {ensemble_class=}"
             ),
-            ignore="ensemble_size",
+            ignored="ensemble_size",
             when=(0, 17, 0),
         )
 
