@@ -125,6 +125,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
             Returns the predicted values"""
         y = super().predict(X, batch_size=batch_size)
+
         if self.y_max_ > 0:
             y[y > (2 * self.y_max_)] = 2 * self.y_max_
         elif self.y_max_ < 0:
@@ -133,6 +134,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             y[y < (2 * self.y_min_)] = 2 * self.y_min_
         elif self.y_min_ > 0:
             y[y < (0.5 * self.y_min_)] = 0.5 * self.y_min_
+
         return y
 
     def _get_hyperparameter_search_space(
