@@ -107,7 +107,10 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     def predict(self, X, batch_size=None):
         y = super().predict(X, batch_size=batch_size)
-        y[y > (2 * self.y_max_)] = 2 * self.y_max_
+        if self.y_max_ > 0:
+            y[y > (2 * self.y_max_)] = 2 * self.y_max_
+        elif self.y_max_ < 0:
+            y[y > (0.5 * self.y_max_)] = 0.5 * self.y_max_
         if self.y_min_ < 0:
             y[y < (2 * self.y_min_)] = 2 * self.y_min_
         elif self.y_min_ > 0:
