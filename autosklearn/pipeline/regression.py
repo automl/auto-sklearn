@@ -106,6 +106,24 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         )
 
     def predict(self, X, batch_size=None):
+        """Predict the classes using the selected model.
+
+        Predicted values are capped to approximately the maximum and minimum labels
+        seen during training.
+
+        Parameters
+        ----------
+        X : array-like, shape = (n_samples, n_features)
+
+        batch_size: int or None, defaults to None
+            batch_size controls whether the pipeline will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
+
+        Returns
+        -------
+        array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
+            Returns the predicted values"""
         y = super().predict(X, batch_size=batch_size)
         if self.y_max_ > 0:
             y[y > (2 * self.y_max_)] = 2 * self.y_max_
