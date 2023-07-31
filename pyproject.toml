@@ -3,7 +3,7 @@
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
-minversion = "3.7"
+minversion = "3.8"
 addopts = "--forked"
 
 [tool.coverage.run]
@@ -21,10 +21,10 @@ exclude_lines = [
 ]
 
 [tool.black]
-target-version = ['py37']
+target-version = ['py38']
 
 [tool.isort]
-py_version = "37"
+py_version = "38"
 profile = "black" # Play nicely with black
 src_paths = ["autosklearn", "test"]
 known_types = ["typing", "abc"] # We put these in their own section TYPES
@@ -66,7 +66,7 @@ add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
 ]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 
 show_error_codes = true
 
