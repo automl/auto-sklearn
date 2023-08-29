@@ -43,7 +43,7 @@ class ThirdPartyComponents(object):
         self.components = OrderedDict()
 
     def add_component(self, obj):
-        if inspect.isclass(obj) and self.base_class in obj.__bases__:
+        if inspect.isclass(obj) and isinstance(obj, self.base_class):
             name = obj.__name__
             classifier = obj
         else:
