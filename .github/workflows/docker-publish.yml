@@ -41,7 +41,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker Hub
         id: meta_dockerhub
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.DOCKERHUB_IMAGE_NAME }}
 
@@ -62,7 +62,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker on Github Packages
         id: meta_githubpackages
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
