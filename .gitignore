@@ -1,7 +1,7 @@
 # Documentation
 doc/build/*
 doc/examples
-
+py39
 *.py[cod]
 
 # Exmaples
