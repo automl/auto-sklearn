@@ -1,0 +1,69 @@
+balancing:strategy categorical {none, weighting} [none]
+classifier:__choice__ categorical {mlp} [mlp]
+data_preprocessor:__choice__ categorical {feature_type} [feature_type]
+feature_preprocessor:__choice__ categorical {no_preprocessing} [no_preprocessing]
+classifier:mlp:activation categorical {tanh, relu} [relu]
+classifier:mlp:alpha real [1e-07, 0.1] [0.0001]log
+classifier:mlp:batch_size categorical {auto} [auto]
+classifier:mlp:beta_1 categorical {0.9} [0.9]
+classifier:mlp:beta_2 categorical {0.999} [0.999]
+classifier:mlp:early_stopping categorical {valid, train} [valid]
+classifier:mlp:epsilon categorical {1e-08} [1e-08]
+classifier:mlp:hidden_layer_depth integer [1, 3] [1]
+classifier:mlp:learning_rate_init real [0.0001, 0.5] [0.001]log
+classifier:mlp:n_iter_no_change categorical {32} [32]
+classifier:mlp:num_nodes_per_layer integer [16, 264] [32]log
+classifier:mlp:shuffle categorical {True} [True]
+classifier:mlp:solver categorical {adam} [adam]
+classifier:mlp:tol categorical {0.0001} [0.0001]
+data_preprocessor:feature_type:numerical_transformer:imputation:strategy categorical {mean, median, most_frequent} [mean]
+data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ categorical {minmax, none, normalize, power_transformer, quantile_transformer, robust_scaler, standardize} [standardize]
+data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ categorical {tfidf_encoding} [tfidf_encoding]
+data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components integer [1, 10000] [100]log
+classifier:mlp:validation_fraction categorical {0.1} [0.1]
+data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles integer [10, 2000] [1000]
+data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution categorical {normal, uniform} [normal]
+data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max real [0.7, 0.999] [0.75]
+data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min real [0.001, 0.3] [0.25]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:analyzer categorical {word, char} [char]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:binary categorical {False} [False]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:max_df real [0.7, 1.0] [1.0]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df real [0.0, 0.3] [0.0]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:norm categorical {l2, l1} [l2]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:per_column categorical {True, False} [False]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:sublinear_tf categorical {False} [False]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range_char integer [2, 4] [4]
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range_word integer [1, 3] [1]
+
+classifier:mlp:activation | classifier:__choice__ == mlp
+classifier:mlp:alpha | classifier:__choice__ == mlp
+classifier:mlp:batch_size | classifier:__choice__ == mlp
+classifier:mlp:beta_1 | classifier:__choice__ == mlp
+classifier:mlp:beta_2 | classifier:__choice__ == mlp
+classifier:mlp:early_stopping | classifier:__choice__ == mlp
+classifier:mlp:epsilon | classifier:__choice__ == mlp
+classifier:mlp:hidden_layer_depth | classifier:__choice__ == mlp
+classifier:mlp:learning_rate_init | classifier:__choice__ == mlp
+classifier:mlp:n_iter_no_change | classifier:__choice__ == mlp
+classifier:mlp:num_nodes_per_layer | classifier:__choice__ == mlp
+classifier:mlp:shuffle | classifier:__choice__ == mlp
+classifier:mlp:solver | classifier:__choice__ == mlp
+classifier:mlp:tol | classifier:__choice__ == mlp
+data_preprocessor:feature_type:numerical_transformer:imputation:strategy | data_preprocessor:__choice__ == feature_type
+data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ | data_preprocessor:__choice__ == feature_type
+data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ | data_preprocessor:__choice__ == feature_type
+data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components | data_preprocessor:__choice__ == feature_type
+classifier:mlp:validation_fraction | classifier:mlp:early_stopping in {valid}
+data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:n_quantiles | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == quantile_transformer
+data_preprocessor:feature_type:numerical_transformer:rescaling:quantile_transformer:output_distribution | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == quantile_transformer
+data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_max | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == robust_scaler
+data_preprocessor:feature_type:numerical_transformer:rescaling:robust_scaler:q_min | data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__ == robust_scaler
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:analyzer | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == tfidf_encoding
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:binary | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == tfidf_encoding
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:max_df | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == tfidf_encoding
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == tfidf_encoding
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:norm | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == tfidf_encoding
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:per_column | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == tfidf_encoding
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:sublinear_tf | data_preprocessor:feature_type:text_transformer:text_encoding:__choice__ == tfidf_encoding
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range_char | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:analyzer == char
+data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range_word | data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:analyzer == word

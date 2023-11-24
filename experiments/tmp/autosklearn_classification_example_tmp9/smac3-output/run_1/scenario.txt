@@ -1,0 +1,17 @@
+execdir = .
+deterministic = True
+run_obj = quality
+multi_objectives = cost
+overall_obj = par10
+save_results_instantly = True
+par_factor = 10
+cost_for_crash = 1.0
+cutoff = 30.0
+memory_limit = 3072.0
+algo_runs_timelimit = inf
+wallclock_limit = 106.29372501373291
+always_race_default = False
+ta_run_limit = inf
+train_inst_fn = tmp/autosklearn_classification_example_tmp9/smac3-output/run_1/train_insts.txt
+initial_incumbent = DEFAULT
+pcs_fn = tmp/autosklearn_classification_example_tmp9/smac3-output/run_1/configspace.json

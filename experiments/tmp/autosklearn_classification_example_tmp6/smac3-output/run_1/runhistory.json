@@ -1,0 +1,181 @@
+{
+  "data": [
+    [
+      [
+        1,
+        "{\"task_id\": \"airbnb\"}",
+        0,
+        0.0
+      ],
+      [
+        0.30737838720208943,
+        9.69698190689087,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        1700837278.5573187,
+        1700837288.3167174,
+        {
+          "duration": 9.515685796737671,
+          "num_run": 2,
+          "train_loss": 0.281222356252513,
+          "configuration_origin": "Initial design"
+        }
+      ]
+    ],
+    [
+      [
+        2,
+        "{\"task_id\": \"airbnb\"}",
+        0,
+        0.0
+      ],
+      [
+        1.0,
+        2.3502707481384277,
+        {
+          "__enum__": "StatusType.CRASHED"
+        },
+        1700837288.4073927,
+        1700837300.4964151,
+        {
+          "duration": 11.936345338821411,
+          "num_run": 3,
+          "train_loss": 0.32038600723763566,
+          "info": "Run treated as crashed because the pynisher exit status 5 is unknown.",
+          "exit_status": 5,
+          "subprocess_stdout": "",
+          "subprocess_stderr": "",
+          "configuration_origin": "Initial design"
+        }
+      ]
+    ],
+    [
+      [
+        3,
+        "{\"task_id\": \"airbnb\"}",
+        0,
+        0.0
+      ],
+      [
+        1.0,
+        0.9383399486541748,
+        {
+          "__enum__": "StatusType.CRASHED"
+        },
+        1700837302.1895518,
+        1700837303.1651585,
+        {
+          "traceback": "Traceback (most recent call last):\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/evaluation/__init__.py\", line 55, in fit_predict_try_except_decorator\n    return ta(queue=queue, **kwargs)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/evaluation/train_evaluator.py\", line 1211, in eval_holdout\n    evaluator.fit_predict_and_loss(iterative=iterative)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/evaluation/train_evaluator.py\", line 535, in fit_predict_and_loss\n    ) = self._partial_fit_and_predict_standard(\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/evaluation/train_evaluator.py\", line 900, in _partial_fit_and_predict_standard\n    _fit_and_suppress_warnings(self.logger, model, X, y)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/evaluation/abstract_evaluator.py\", line 188, in _fit_and_suppress_warnings\n    model.fit(X, y)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/pipeline/base.py\", line 124, in fit\n    X, fit_params = self.fit_transformer(X, y, **fit_params)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/pipeline/classification.py\", line 123, in fit_transformer\n    X, fit_params = super().fit_transformer(X, y, fit_params=fit_params)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/pipeline/base.py\", line 136, in fit_transformer\n    Xt = self._fit(X, y, **fit_params_steps)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/pipeline.py\", line 303, in _fit\n    X, fitted_transformer = fit_transform_one_cached(\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/joblib/memory.py\", line 353, in __call__\n    return self.func(*args, **kwargs)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/pipeline.py\", line 756, in _fit_transform_one\n    res = transformer.fit(X, y, **fit_params).transform(X)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/pipeline/components/base.py\", line 473, in fit\n    return self.choice.fit(X, y, **kwargs)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/pipeline/components/data_preprocessing/feature_type.py\", line 216, in fit\n    self.column_transformer.fit(X, y)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/compose/_column_transformer.py\", line 470, in fit\n    self.fit_transform(X, y=y)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/compose/_column_transformer.py\", line 507, in fit_transform\n    result = self._fit_transform(X, y, _fit_transform_one)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/compose/_column_transformer.py\", line 434, in _fit_transform\n    return Parallel(n_jobs=self.n_jobs)(\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/joblib/parallel.py\", line 1863, in __call__\n    return output if self.return_generator else list(output)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/joblib/parallel.py\", line 1792, in _get_sequential_output\n    res = func(*args, **kwargs)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/utils/fixes.py\", line 222, in __call__\n    return self.function(*args, **kwargs)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/pipeline.py\", line 754, in _fit_transform_one\n    res = transformer.fit_transform(X, y, **fit_params)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/pipeline.py\", line 378, in fit_transform\n    Xt = self._fit(X, y, **fit_params_steps)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/pipeline.py\", line 303, in _fit\n    X, fitted_transformer = fit_transform_one_cached(\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/joblib/memory.py\", line 353, in __call__\n    return self.func(*args, **kwargs)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/pipeline.py\", line 754, in _fit_transform_one\n    res = transformer.fit_transform(X, y, **fit_params)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/base.py\", line 702, in fit_transform\n    return self.fit(X, y, **fit_params).transform(X)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/autosklearn/pipeline/components/data_preprocessing/imputation/numerical_imputation.py\", line 30, in fit\n    self.preprocessor.fit(X)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/impute/_base.py\", line 322, in fit\n    self.statistics_ = self._dense_fit(X,\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/impute/_base.py\", line 412, in _dense_fit\n    most_frequent[i] = _most_frequent(row, np.nan, 0)\n  File \"/home/preethi/projects/hitlda-project/auto-sklearn/py39/lib/python3.9/site-packages/sklearn/impute/_base.py\", line 50, in _most_frequent\n    most_frequent_value = mode[0][0]\nIndexError: invalid index to scalar variable.\n",
+          "error": "IndexError('invalid index to scalar variable.')",
+          "configuration_origin": "Random Search (sorted)"
+        }
+      ]
+    ]
+  ],
+  "config_origins": {
+    "1": "Initial design",
+    "2": "Initial design",
+    "3": "Random Search (sorted)"
+  },
+  "configs": {
+    "1": {
+      "balancing:strategy": "none",
+      "classifier:__choice__": "mlp",
+      "data_preprocessor:__choice__": "feature_type",
+      "feature_preprocessor:__choice__": "no_preprocessing",
+      "classifier:mlp:activation": "relu",
+      "classifier:mlp:alpha": 0.0001,
+      "classifier:mlp:batch_size": "auto",
+      "classifier:mlp:beta_1": 0.9,
+      "classifier:mlp:beta_2": 0.999,
+      "classifier:mlp:early_stopping": "valid",
+      "classifier:mlp:epsilon": 1e-08,
+      "classifier:mlp:hidden_layer_depth": 1,
+      "classifier:mlp:learning_rate_init": 0.001,
+      "classifier:mlp:n_iter_no_change": 32,
+      "classifier:mlp:num_nodes_per_layer": 32,
+      "classifier:mlp:shuffle": "True",
+      "classifier:mlp:solver": "adam",
+      "classifier:mlp:tol": 0.0001,
+      "data_preprocessor:feature_type:numerical_transformer:imputation:strategy": "mean",
+      "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__": "standardize",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "tfidf_encoding",
+      "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100,
+      "classifier:mlp:validation_fraction": 0.1,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:analyzer": "char",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:binary": "False",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:max_df": 1.0,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df": 0.0,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:norm": "l2",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:per_column": false,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:sublinear_tf": "False",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range_char": 4
+    },
+    "2": {
+      "balancing:strategy": "weighting",
+      "classifier:__choice__": "mlp",
+      "data_preprocessor:__choice__": "feature_type",
+      "feature_preprocessor:__choice__": "no_preprocessing",
+      "classifier:mlp:activation": "relu",
+      "classifier:mlp:alpha": 1.1952772240345466e-06,
+      "classifier:mlp:batch_size": "auto",
+      "classifier:mlp:beta_1": 0.9,
+      "classifier:mlp:beta_2": 0.999,
+      "classifier:mlp:early_stopping": "valid",
+      "classifier:mlp:epsilon": 1e-08,
+      "classifier:mlp:hidden_layer_depth": 1,
+      "classifier:mlp:learning_rate_init": 0.04431671753867657,
+      "classifier:mlp:n_iter_no_change": 32,
+      "classifier:mlp:num_nodes_per_layer": 103,
+      "classifier:mlp:shuffle": "True",
+      "classifier:mlp:solver": "adam",
+      "classifier:mlp:tol": 0.0001,
+      "data_preprocessor:feature_type:numerical_transformer:imputation:strategy": "mean",
+      "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__": "minmax",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "tfidf_encoding",
+      "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 100,
+      "classifier:mlp:validation_fraction": 0.1,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:analyzer": "char",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:binary": "False",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:max_df": 1.0,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df": 0.0,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:norm": "l2",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:per_column": false,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:sublinear_tf": "False",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range_char": 4
+    },
+    "3": {
+      "balancing:strategy": "none",
+      "classifier:__choice__": "mlp",
+      "data_preprocessor:__choice__": "feature_type",
+      "feature_preprocessor:__choice__": "no_preprocessing",
+      "classifier:mlp:activation": "relu",
+      "classifier:mlp:alpha": 1.1327276814847491e-07,
+      "classifier:mlp:batch_size": "auto",
+      "classifier:mlp:beta_1": 0.9,
+      "classifier:mlp:beta_2": 0.999,
+      "classifier:mlp:early_stopping": "train",
+      "classifier:mlp:epsilon": 1e-08,
+      "classifier:mlp:hidden_layer_depth": 2,
+      "classifier:mlp:learning_rate_init": 0.31815852194378347,
+      "classifier:mlp:n_iter_no_change": 32,
+      "classifier:mlp:num_nodes_per_layer": 64,
+      "classifier:mlp:shuffle": "True",
+      "classifier:mlp:solver": "adam",
+      "classifier:mlp:tol": 0.0001,
+      "data_preprocessor:feature_type:numerical_transformer:imputation:strategy": "most_frequent",
+      "data_preprocessor:feature_type:numerical_transformer:rescaling:__choice__": "none",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:__choice__": "tfidf_encoding",
+      "data_preprocessor:feature_type:text_transformer:text_feature_reduction:n_components": 26,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:analyzer": "word",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:binary": "False",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:max_df": 0.9083075871373589,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:min_df": 0.261625321785097,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:norm": "l1",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:per_column": true,
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:sublinear_tf": "False",
+      "data_preprocessor:feature_type:text_transformer:text_encoding:tfidf_encoding:ngram_range_word": 3
+    }
+  }
+}

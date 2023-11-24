@@ -1254,8 +1254,11 @@ def calculate_all_metafeatures(
         metafeatures.set_value(name, value)
         mf_[name] = value
         visited.add(name)
-
     mf_ = DatasetMetafeatures(dataset_name, mf_)
+    clean_x = pd.DataFrame(X_transformed) 
+    clean_y = pd.DataFrame(y_transformed, columns=['Rating']) 
+    clean_data = pd.concat([clean_x, clean_y], axis=1)
+    clean_data.to_csv('../data/clean_data.csv', index=False)
     return mf_
 
 
