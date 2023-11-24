@@ -47,7 +47,7 @@ from autosklearn.util.smac_wrap import SMACCallback
 class AutoSklearnEstimator(BaseEstimator):
     def __init__(
         self,
-        time_left_for_this_task=3600,
+        time_left_for_this_task=36000,
         per_run_time_limit=None,
         initial_configurations_via_metalearning=25,
         ensemble_size: int | None = None,

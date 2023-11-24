@@ -43,8 +43,9 @@ class MLPClassifier(IterativeComponent, AutoSklearnClassificationAlgorithm):
         random_state=None,
         verbose=0,
     ):
-        self.hidden_layer_depth = hidden_layer_depth
-        self.num_nodes_per_layer = num_nodes_per_layer
+        print("MLPP INITTT")
+        self.hidden_layer_depth = 3
+        self.num_nodes_per_layer = 64
         self.max_iter = self.get_max_iter()
         self.activation = activation
         self.alpha = alpha
@@ -211,10 +212,10 @@ class MLPClassifier(IterativeComponent, AutoSklearnClassificationAlgorithm):
     ):
         cs = ConfigurationSpace()
         hidden_layer_depth = UniformIntegerHyperparameter(
-            name="hidden_layer_depth", lower=1, upper=3, default_value=1
+            name="hidden_layer_depth", lower=1, upper=5, default_value=5
         )
         num_nodes_per_layer = UniformIntegerHyperparameter(
-            name="num_nodes_per_layer", lower=16, upper=264, default_value=32, log=True
+            name="num_nodes_per_layer", lower=16, upper=264, default_value=256, log=True
         )
         activation = CategoricalHyperparameter(
             name="activation", choices=["tanh", "relu"], default_value="relu"
