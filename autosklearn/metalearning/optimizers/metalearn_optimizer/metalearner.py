@@ -46,7 +46,7 @@ class MetaLearningOptimizer(object):
                 )
                 self.logger.info("%s %s %s" % (neighbor[0], neighbor[1], configuration))
             except (KeyError):
-                self.logger.warning("Configuration %s not found" % neighbor[2])
+                # self.logger.warning("Configuration %s not found" % neighbor[2])
                 continue
 
             hp_list.append(configuration)

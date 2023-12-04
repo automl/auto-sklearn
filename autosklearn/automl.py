@@ -630,7 +630,7 @@ class AutoML(BaseEstimator):
         self._logger_port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
 
         progress_bar = ProgressBar(
-            total=36000,
+            total=self._time_for_task,
             disable=self.disable_progress_bar,
             desc="Fitting to the training data",
             colour="green",
