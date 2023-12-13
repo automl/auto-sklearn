@@ -88,7 +88,7 @@ jobs:
           ref: ${{ env.AUTOMLBENCHMARK_REF }}
 
       - name: Download baselines artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           workflow: generate-baselines.yml
           workflow_conclusion: "success"
@@ -239,7 +239,7 @@ jobs:
         #   pyutil: path to the python util file
 
       - name: Download baselines artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           workflow: generate-baselines.yml
           workflow_conclusion: "success"
