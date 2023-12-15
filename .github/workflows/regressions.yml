@@ -185,7 +185,7 @@ jobs:
           #   filename: name of the results file
 
       - name: Upload ${{matrix.task_type}} results as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.benchmark.outputs.filename }}
           path: |
@@ -307,7 +307,7 @@ jobs:
           #   compared_means: path to the results of regression test vs baseline
 
       - name: Upload all results together as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.repository_owner }}_${{ steps.extract.outputs.branch }}_${{ github.sha }}
           path: |
