@@ -327,7 +327,7 @@ jobs:
             && github.event.action == 'labeled'
             && github.event.label.name == 'regression-tests'
           )
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@v4
         id: comment_finder
         with:
           issue-number: ${{ github.event.pull_request.number }}
