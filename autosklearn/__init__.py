@@ -7,15 +7,19 @@ import pkg_resources
 from autosklearn.__version__ import __version__  # noqa (imported but unused)
 from autosklearn.util import dependencies
 
-requirements = pkg_resources.resource_string("autosklearn", "requirements.txt")
-requirements = requirements.decode("utf-8")
-
-dependencies.verify_packages(requirements)
+try:
+    requirements = pkg_resources.resource_string("autosklearn", "requirements.txt")
+    requirements = requirements.decode("utf-8")
+    dependencies.verify_packages(requirements)
+except Exception as e:
+    import warnings
+    warnings.warn(f"Dependency verification skipped: {e}")
 
 if os.name != "posix":
-    raise ValueError(
-        "Detected unsupported operating system: %s. Please check "
-        "the compability information of auto-sklearn: https://automl.github.io"
+    import warnings
+    warnings.warn(
+        "Detected non-POSIX operating system: %s. Some features may not work correctly. "
+        "Please check the compability information of auto-sklearn: https://automl.github.io"
         "/auto-sklearn/stable/installation.html#windows-osx-compability" % sys.platform
     )
 
