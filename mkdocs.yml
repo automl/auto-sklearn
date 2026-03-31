@@ -1,0 +1,128 @@
+site_name: auto-sklearn
+site_description: Automated Machine Learning with scikit-learn
+site_author: Matthias Feurer
+site_url: https://automl.github.io/auto-sklearn
+
+repo_name: automl/auto-sklearn
+repo_url: https://github.com/automl/auto-sklearn
+
+theme:
+    name: material
+    logo: assets/logo.png
+    favicon: assets/favicon.ico
+    palette:
+        primary: blue grey
+        accent: blue
+    features:
+        - navigation.tabs
+        - navigation.tabs.sticky
+        - navigation.sections
+        - navigation.expand
+        - navigation.indexes
+        - navigation.top
+        - search.highlight
+        - search.share
+        - content.code.annotate
+        - content.code.copy
+
+markdown_extensions:
+    - admonition
+    - abbr
+    - attr_list
+    - def_list
+    - footnotes
+    - md_in_html
+    - toc:
+        permalink: true
+        slugify: !!python/object/apply:pymdownx.slugs.slugify
+          kwds:
+            case: lower
+    - pymdownx.arithmatex:
+        generic: true
+    - pymdownx.betterem:
+        smart_enable: all
+    - pymdownx.caret
+    - pymdownx.details
+    - pymdownx.emoji:
+        emoji_index: !!python/name:material.extensions.emoji.twemoji
+        emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    - pymdownx.highlight:
+        anchor_linenums: true
+    - pymdownx.inlinehilite
+    - pymdownx.keys
+    - pymdownx.magiclink:
+        repo_url_shorthand: true
+        user: automl
+        repo: auto-sklearn
+    - pymdownx.mark
+    - pymdownx.smartsymbols
+    - pymdownx.snippets:
+        check_paths: true
+    - pymdownx.superfences:
+        custom_fences:
+            - name: mermaid
+              class: mermaid
+              format: !!python/name:pymdownx.superfences.fence_code_format
+    - pymdownx.tabbed:
+        alternate_style: true
+    - pymdownx.tasklist:
+        custom_checkbox: true
+    - pymdownx.tilde
+
+plugins:
+    - search
+    - mkdocstrings:
+        default_handler: python
+        handlers:
+            python:
+                paths: [autosklearn]
+                options:
+                    show_signature_annotations: true
+                    show_source: true
+                    show_root_heading: true
+                    show_object_full_path: false
+                    show_category_heading: true
+                    docstring_style: numpy
+                    merge_init_into_class: true
+                    filters:
+                        - "!^_"
+    - literate-nav:
+        nav_file: SUMMARY.md
+    - gen-files:
+        scripts:
+            - docs/gen_api_docs.py
+
+extra_css:
+    - assets/stylesheets/extra.css
+
+extra_javascript:
+    - assets/javascripts/mathjax.js
+    - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+extra:
+    version:
+        provider: mike
+    social:
+        - icon: fontawesome/brands/github
+          link: https://github.com/automl/auto-sklearn
+        - icon: fontawesome/brands/twitter
+          link: https://twitter.com/automl_org
+        - icon: fontawesome/solid/globe
+          link: https://www.automl.org/
+
+nav:
+    - Home: index.md
+    - Getting Started:
+        - Installation: getting_started/installation.md
+        - Quick Start: getting_started/quick_start.md
+        - Basic Concepts: getting_started/basic_concepts.md
+    - User Guide:
+        - Classification: user_guide/classification.md
+        - Regression: user_guide/regression.md
+        - Data Preparation: user_guide/data_preparation.md
+        - Configuration: user_guide/configuration.md
+        - Ensemble Methods: user_guide/ensemble_methods.md
+    - API Reference: api/
+    - Examples: examples/
+    - Contributing: contributing.md
+    - Changelog: changelog.md

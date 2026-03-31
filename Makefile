@@ -1,13 +1,14 @@
 # NOTE: Used on linux, limited support outside of Linux
 #
-# A simple makefile to help with small tasks related to development of autosklearn
+# A modern makefile for auto-sklearn development using Poetry
 # These have been configured to only really run short tasks. Longer form tasks
 # are usually completed in github actions.
 
-.PHONY: help install-dev check format pre-commit clean clean-doc clean-build build doc links examples publish test
+.PHONY: help install install-dev check format pre-commit clean clean-doc clean-build build doc links examples publish test test-cov benchmark
 
 help:
-	@echo "Makefile autosklearn"
+	@echo "Makefile auto-sklearn"
+	@echo "* install          to install the package"
 	@echo "* install-dev      to install all dev requirements and install pre-commit"
 	@echo "* check            to check the source code for issues"
 	@echo "* format           to format the code with black and isort"
@@ -19,28 +20,33 @@ help:
 	@echo "* examples         to run and generate the examples"
 	@echo "* publish          to help publish the current branch to pypi"
 	@echo "* test             to run the tests"
+	@echo "* test-cov         to run the tests with coverage"
+	@echo "* benchmark        to run performance benchmarks"
 
 PYTHON ?= python
 CYTHON ?= cython
-PYTEST ?= python -m pytest
+PYTEST ?= poetry run pytest
 CTAGS ?= ctags
-PIP ?= python -m pip
+POETRY ?= poetry
 MAKE ?= make
-BLACK ?= black
-ISORT ?= isort
-PYDOCSTYLE ?= pydocstyle
-MYPY ?= mypy
-PRECOMMIT ?= pre-commit
-FLAKE8 ?= flake8
+BLACK ?= poetry run black
+ISORT ?= poetry run isort
+PYDOCSTYLE ?= poetry run pydocstyle
+MYPY ?= poetry run mypy
+PRECOMMIT ?= poetry run pre-commit
+FLAKE8 ?= poetry run flake8
 
 DIR := "${CURDIR}"
-DIST := "${CURDIR}/dist""
+DIST := "${CURDIR}/dist"
 DOCDIR := "${DIR}/doc"
 INDEX_HTML := "file://${DOCDIR}/build/html/index.html"
 
+install:
+	$(POETRY) install --no-dev
+
 install-dev:
-	$(PIP) install -e ".[test,examples,docs]"
-	pre-commit install
+	$(POETRY) install
+	$(POETRY) run pre-commit install
 
 check-black:
 	$(BLACK) autosklearn examples test --check || :
@@ -88,7 +94,7 @@ clean: clean-doc clean-build
 
 # Build a distribution in ./dist
 build:
-	$(PYTHON) setup.py sdist
+	$(POETRY) build
 
 doc:
 	$(MAKE) -C ${DOCDIR} html-noexamples
@@ -105,26 +111,17 @@ examples:
 	@echo "View docs at:"
 	@echo ${INDEX_HTML}
 
-# Publish to testpypi
-# Will echo the commands to actually publish to be run to publish to actual PyPi
-# This is done to prevent accidental publishing but provide the same conveniences
+# Publish to PyPI
 publish: clean build
-	$(PIP) install twine
-	$(PYTHON) -m twine upload --repository testpypi ${DIST}/*
+	$(POETRY) publish
 	@echo
-	@echo "Test with the following:"
-	@echo "* Create a new virtual environment to install the uplaoded distribution into"
-	@echo "* Run the following:"
-	@echo
-	@echo "        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ autosklearn"
-	@echo
-	@echo "* Run this to make sure it can import correctly, plus whatever else you'd like to test:"
-	@echo
-	@echo "        python -c 'import autosklearn'"
-	@echo
-	@echo "Once you have decided it works, publish to actual pypi with"
-	@echo
-	@echo "    python -m twine upload dist/*"
+	@echo "Package published to PyPI!"
 
 test:
 	$(PYTEST) test
+
+test-cov:
+	$(PYTEST) test --cov=autosklearn --cov-report=html --cov-report=term
+
+benchmark:
+	$(PYTEST) test --benchmark-autosave --benchmark-save=current
