@@ -1,0 +1,100 @@
+{
+  "name": "Auto-sklearn Dev Environment",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "charliermarsh.ruff",
+        "matangover.mypy",
+        "ms-azuretools.vscode-docker",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-mermaid",
+        "streetsidesoftware.code-spell-checker",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "github.copilot",
+        "github.copilot-chat",
+        "mechatroner.rainbow-csv",
+        "oderwat.indent-rainbow",
+        "aaron-bond.better-comments",
+        "njpwerner.autodocstring",
+        "littlefoxteam.vscode-python-test-adapter"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.autoImportCompletions": true,
+        "python.formatting.provider": "none",
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "editor.rulers": [88],
+        "editor.minimap.enabled": false,
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/.pytest_cache": true,
+          "**/*.pyc": true,
+          "**/.mypy_cache": true,
+          "**/.ruff_cache": true
+        },
+        "files.watcherExclude": {
+          "**/.git/**": true,
+          "**/.venv/**": true,
+          "**/node_modules/**": true
+        },
+        "ruff.lint.run": "onType",
+        "ruff.format.args": ["--line-length=88"],
+        "mypy.enabled": true,
+        "mypy.runUsingActiveInterpreter": true,
+        "isort.args": ["--profile", "black"],
+        "jupyter.askForKernelRestart": false,
+        "jupyter.interactiveWindow.textEditor.executeSelection": true,
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+  "forwardPorts": [8888, 8000],
+  "postCreateCommand": "poetry install --with dev,docs,examples,benchmark && pre-commit install",
+  "postStartCommand": "poetry env info",
+  "remoteUser": "vscode",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.vscode,target=/workspace/.vscode,type=bind,consistency=cached"
+  ],
+  "runArgs": [
+    "--shm-size=4g",
+    "--cpus=4",
+    "--memory=8g"
+  ]
+}
