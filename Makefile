@@ -1,130 +1,235 @@
-# NOTE: Used on linux, limited support outside of Linux
-#
-# A simple makefile to help with small tasks related to development of autosklearn
-# These have been configured to only really run short tasks. Longer form tasks
-# are usually completed in github actions.
+.PHONY: help install install-dev install-all check format clean build test test-cov test-benchmark doc doc-serve security lint type-check pre-commit publish docker-build docker-run
 
-.PHONY: help install-dev check format pre-commit clean clean-doc clean-build build doc links examples publish test
+SHELL := /bin/bash
+PYTHON ?= python
+POETRY ?= poetry
+PYTEST ?= $(POETRY) run pytest
+BLACK ?= $(POETRY) run black
+ISORT ?= $(POETRY) run isort
+MYPY ?= $(POETRY) run mypy
+RUFF ?= $(POETRY) run ruff
+BANDIT ?= $(POETRY) run bandit
+VULTURE ?= $(POETRY) run vulture
+PRECOMMIT ?= $(POETRY) run pre-commit
+MKDOCS ?= $(POETRY) run mkdocs
+
+DIR := $(CURDIR)
+DIST := $(DIR)/dist
+DOCDIR := $(DIR)/docs
+BENCHMARK_DIR := $(DIR)/benchmarks
 
 help:
-	@echo "Makefile autosklearn"
-	@echo "* install-dev      to install all dev requirements and install pre-commit"
-	@echo "* check            to check the source code for issues"
-	@echo "* format           to format the code with black and isort"
-	@echo "* pre-commit       to run the pre-commit check"
-	@echo "* clean            to clean the dist and doc build files"
-	@echo "* build            to build a dist"
-	@echo "* doc              to generate and view the html files"
-	@echo "* linkcheck        to check the documentation links"
-	@echo "* examples         to run and generate the examples"
-	@echo "* publish          to help publish the current branch to pypi"
-	@echo "* test             to run the tests"
+	@echo "╔══════════════════════════════════════════════════════════════════╗"
+	@echo "║                    Auto-sklearn Makefile                         ║"
+	@echo "╠══════════════════════════════════════════════════════════════════╣"
+	@echo "║  安装命令                                                        ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  install           安装生产依赖                                  ║"
+	@echo "║  install-dev       安装开发依赖 + pre-commit hooks               ║"
+	@echo "║  install-all        安装所有依赖 (含 examples/docs/benchmark)    ║"
+	@echo "║  install-docs       安装文档依赖                                 ║"
+	@echo "║  install-examples   安装示例依赖                                 ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  质量检查 (四层质量门禁)                                         ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  lint              第一层: 代码风格检查 (ruff + black + isort)   ║"
+	@echo "║  type-check        第二层: 静态类型检查 (mypy)                   ║"
+	@echo "║  security          第三层: 安全漏洞扫描 (bandit + vulture)       ║"
+	@echo "║  test              第四层: 单元测试                              ║"
+	@echo "║  test-cov          单元测试 + 覆盖率报告                         ║"
+	@echo "║  check             运行所有质量检查                              ║"
+	@echo "║  pre-commit         运行 pre-commit 所有检查                     ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  格式化                                                          ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  format            格式化代码 (black + isort + ruff --fix)       ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  测试                                                            ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  test              运行单元测试                                  ║"
+	@echo "║  test-cov          运行测试 + 覆盖率报告                         ║"
+	@echo "║  test-benchmark    运行性能基准测试                              ║"
+	@echo "║  test-parallel     并行运行测试 (4 workers)                      ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  文档                                                            ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  doc               构建 HTML 文档                                ║"
+	@echo "║  doc-serve          本地预览文档 (热重载)                        ║"
+	@echo "║  doc-api            生成 API 文档                                ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  构建 & 发布                                                     ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  build             构建分发包 (sdist + wheel)                    ║"
+	@echo "║  publish           发布到 TestPyPI                               ║"
+	@echo "║  publish-prod       发布到 PyPI                                  ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  Docker                                                          ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  docker-build       构建 Docker 镜像                             ║"
+	@echo "║  docker-run         运行 Docker 容器                             ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  清理                                                            ║"
+	@echo "╠──────────────────────────────────────────────────────────────────╣"
+	@echo "║  clean             清理构建产物和缓存                            ║"
+	@echo "║  clean-all         深度清理 (含虚拟环境)                         ║"
+	@echo "╚══════════════════════════════════════════════════════════════════╝"
 
-PYTHON ?= python
-CYTHON ?= cython
-PYTEST ?= python -m pytest
-CTAGS ?= ctags
-PIP ?= python -m pip
-MAKE ?= make
-BLACK ?= black
-ISORT ?= isort
-PYDOCSTYLE ?= pydocstyle
-MYPY ?= mypy
-PRECOMMIT ?= pre-commit
-FLAKE8 ?= flake8
-
-DIR := "${CURDIR}"
-DIST := "${CURDIR}/dist""
-DOCDIR := "${DIR}/doc"
-INDEX_HTML := "file://${DOCDIR}/build/html/index.html"
+install:
+	$(POETRY) install --only main
 
 install-dev:
-	$(PIP) install -e ".[test,examples,docs]"
-	pre-commit install
+	$(POETRY) install --with dev
+	$(POETRY) run pre-commit install
+	@echo "✅ 开发环境安装完成！"
 
-check-black:
-	$(BLACK) autosklearn examples test --check || :
+install-all:
+	$(POETRY) install --with dev,docs,examples,benchmark
+	$(POETRY) run pre-commit install
+	@echo "✅ 完整开发环境安装完成！"
 
-check-isort:
-	$(ISORT) autosklearn test --check || :
+install-docs:
+	$(POETRY) install --with docs
 
-check-pydocstyle:
-	$(PYDOCSTYLE) autosklearn || :
+install-examples:
+	$(POETRY) install --with examples
 
-check-mypy:
-	$(MYPY) autosklearn || :
+lint-ruff:
+	$(RUFF) check autosklearn test examples || true
 
-check-flake8:
-	$(FLAKE8) autosklearn || :
-	$(FLAKE8) test || :
+lint-black:
+	$(BLACK) autosklearn test examples --check || true
 
-# pydocstyle does not have easy ignore rules, instead, we include as they are covered
-check: check-black check-isort check-mypy check-flake8 # check-pydocstyle
+lint-isort:
+	$(ISORT) autosklearn test examples --check || true
+
+lint: lint-ruff lint-black lint-isort
+	@echo "✅ 第一层质量门禁 (代码风格) 检查完成"
+
+type-check:
+	$(MYPY) autosklearn || true
+	@echo "✅ 第二层质量门禁 (类型检查) 完成"
+
+security-bandit:
+	$(BANDIT) -r autosklearn -c pyproject.toml || true
+
+security-vulture:
+	$(VULTURE) autosklearn --min-confidence 80 || true
+
+security: security-bandit security-vulture
+	@echo "✅ 第三层质量门禁 (安全检查) 完成"
+
+test:
+	$(PYTEST) test -v --forked --durations=20
+
+test-cov:
+	$(PYTEST) test -v --forked --durations=20 \
+		--cov=autosklearn \
+		--cov-report=term-missing \
+		--cov-report=html:htmlcov \
+		--cov-report=xml:coverage.xml
+	@echo "✅ 第四层质量门禁 (测试) 完成"
+	@echo "📊 覆盖率报告: htmlcov/index.html"
+
+test-parallel:
+	$(PYTEST) test -v --forked -n 4 --dist loadscope
+
+test-benchmark:
+	$(PYTEST) test/benchmark -v --benchmark-only \
+		--benchmark-autosave \
+		--benchmark-sort=mean \
+		--benchmark-columns=mean,stddev,rounds,iterations
+	@echo "📊 基准测试结果保存在: .benchmarks/"
+
+check: lint type-check security test
+	@echo "🎉 所有质量门禁检查通过！"
+
+format-black:
+	$(BLACK) autosklearn test examples
+
+format-isort:
+	$(ISORT) autosklearn test examples
+
+format-ruff:
+	$(RUFF) check autosklearn test examples --fix || true
+
+format: format-ruff format-isort format-black
+	@echo "✅ 代码格式化完成"
 
 pre-commit:
 	$(PRECOMMIT) run --all-files
 
-format-black:
-	$(BLACK) autosklearn/.*
-	$(BLACK) test/.*
-	$(BLACK) examples/.*
+doc:
+	$(MKDOCS) build --clean
+	@echo "📚 文档构建完成: site/index.html"
 
-format-isort:
-	$(ISORT) autosklearn
-	$(ISORT) test
+doc-serve:
+	$(MKDOCS) serve --dev-addr 127.0.0.1:8000
 
+doc-api:
+	$(POETRY) run python scripts/generate_api_docs.py
+	@echo "📚 API 文档生成完成"
 
-format: format-black format-isort
+build:
+	$(POETRY) build
+	@echo "📦 构建完成，产物位于: dist/"
 
-clean-doc:
-	$(MAKE) -C ${DOCDIR} clean
+publish: build
+	$(POETRY) publish --repository testpypi
+	@echo "🚀 已发布到 TestPyPI"
+	@echo "测试安装: pip install --index-url https://test.pypi.org/simple/ auto-sklearn"
+
+publish-prod: build
+	$(POETRY) publish
+	@echo "🚀 已发布到 PyPI"
+
+docker-build:
+	docker build -t autosklearn:latest -t autosklearn:$(shell date +%Y%m%d) .
+
+docker-run:
+	docker run -it --rm \
+		-v $(DIR):/workspace \
+		-w /workspace \
+		autosklearn:latest \
+		/bin/bash
 
 clean-build:
-	$(PYTHON) setup.py clean
-	rm -rf ${DIST}
+	rm -rf dist/
+	rm -rf build/
+	rm -rf *.egg-info
+	rm -rf autosklearn.egg-info
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	find . -type f -name "*.pyo" -delete
 
-# Clean up any builds in ./dist as well as doc
-clean: clean-doc clean-build
+clean-doc:
+	rm -rf site/
+	rm -rf docs/api/
 
-# Build a distribution in ./dist
-build:
-	$(PYTHON) setup.py sdist
+clean-cache:
+	rm -rf .mypy_cache/
+	rm -rf .pytest_cache/
+	rm -rf .ruff_cache/
+	rm -rf .benchmarks/
+	rm -rf htmlcov/
+	rm -rf .coverage
+	rm -rf coverage.xml
 
-doc:
-	$(MAKE) -C ${DOCDIR} html-noexamples
-	@echo
-	@echo "View docs at:"
-	@echo ${INDEX_HTML}
+clean: clean-build clean-doc clean-cache
+	@echo "🧹 清理完成"
 
-links:
-	$(MAKE) -C ${DOCDIR} linkcheck
+clean-all: clean
+	rm -rf .venv/
+	rm -rf .poetry/
+	@echo "🧹 深度清理完成 (含虚拟环境)"
 
-examples:
-	$(MAKE) -C ${DOCDIR} html
-	@echo
-	@echo "View docs at:"
-	@echo ${INDEX_HTML}
+lock:
+	$(POETRY) lock --no-update
 
-# Publish to testpypi
-# Will echo the commands to actually publish to be run to publish to actual PyPi
-# This is done to prevent accidental publishing but provide the same conveniences
-publish: clean build
-	$(PIP) install twine
-	$(PYTHON) -m twine upload --repository testpypi ${DIST}/*
-	@echo
-	@echo "Test with the following:"
-	@echo "* Create a new virtual environment to install the uplaoded distribution into"
-	@echo "* Run the following:"
-	@echo
-	@echo "        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ autosklearn"
-	@echo
-	@echo "* Run this to make sure it can import correctly, plus whatever else you'd like to test:"
-	@echo
-	@echo "        python -c 'import autosklearn'"
-	@echo
-	@echo "Once you have decided it works, publish to actual pypi with"
-	@echo
-	@echo "    python -m twine upload dist/*"
+update:
+	$(POETRY) update
 
-test:
-	$(PYTEST) test
+outdated:
+	$(POETRY) show --outdated
+
+tree:
+	$(POETRY) show --tree

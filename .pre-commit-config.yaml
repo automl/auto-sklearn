@@ -1,57 +1,111 @@
-# If you see me, please update my `rev` field using the provided links
-# Click the repo and update to latest tags.
-# If things break on update, raise an issue
 repos:
-
-  - repo: https://github.com/pycqa/isort
-    rev: 5.11.5
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
     hooks:
-      - id: isort
-        name: isort imports autosklearn
-        files: autosklearn/.*
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: debug-statements
 
-      - id: isort
-        name: isort imports test
-        files: test/.*
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.270'
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
 
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
       - id: black
-        name: black formatter autosklearn
-        files: autosklearn/.*
+        name: black formatter
 
-      - id: black
-        name: black formatter test
-        files: test/.*
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort imports
+        args: ["--profile", "black"]
 
-      - id: black
-        name: black formatter examples
-        files: examples/.*
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.3.0
+    hooks:
+      - id: mypy
+        name: mypy type check
+        additional_dependencies:
+          - types-PyYAML
+          - types-setuptools
+        args: [--config-file=pyproject.toml]
 
-  # This is disabled as most modules fail this
+  - repo: https://github.com/PyCQA/bandit
+    rev: '1.7.5'
+    hooks:
+      - id: bandit
+        name: bandit security check
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: 'v2.7'
+    hooks:
+      - id: vulture
+        name: vulture dead code check
+
   - repo: https://github.com/pycqa/pydocstyle
     rev: 6.3.0
     hooks:
       - id: pydocstyle
-        files: DISABLED # autosklearn/.*
-        always_run: false
-        additional_dependencies: ["toml"] # Needed to parse pyproject.toml
+        name: pydocstyle docstring check
+        additional_dependencies: ["toml"]
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.2.0
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.4.0
     hooks:
-      - id: mypy
-        name: mypy auto-sklearn
-        files: autosklearn/.*
+      - id: pyupgrade
+        args: [--py38-plus]
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.16
     hooks:
-      - id: flake8
-        name: flake8 autosklearn
-        files: autosklearn/.*
+      - id: mdformat
+        name: mdformat markdown
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-tables
+        files: \.md$
+        exclude: ^(doc/|docs/|CHANGELOG\.md)
 
-      - id: flake8
-        name: flake8 test
-        files: test/.*
+  - repo: local
+    hooks:
+      - id: poetry-check
+        name: poetry check
+        entry: poetry check
+        language: system
+        pass_filenames: false
+        files: ^pyproject\.toml$
+
+      - id: poetry-lock-check
+        name: poetry lock check
+        entry: poetry lock --check
+        language: system
+        pass_filenames: false
+        files: ^(pyproject\.toml|poetry\.lock)$
+
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

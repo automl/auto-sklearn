@@ -1,6 +1,133 @@
 # For TOML reference
 # https://learnxinyminutes.com/docs/toml/
 
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "auto-sklearn"
+version = "0.16.0dev"
+description = "Automated machine learning."
+authors = ["Matthias Feurer <feurerm@informatik.uni-freiburg.de>"]
+maintainers = ["AutoML Team <automl@informatik.uni-freiburg.de>"]
+license = "BSD-3-Clause"
+readme = "README.md"
+homepage = "https://automl.github.io/auto-sklearn"
+repository = "https://github.com/automl/auto-sklearn"
+documentation = "https://automl.github.io/auto-sklearn"
+keywords = ["automl", "machine learning", "hyperparameter optimization", "scikit-learn"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+packages = [{include = "autosklearn", from = "."}]
+include = ["autosklearn/**/*.py", "autosklearn/**/*.yaml", "autosklearn/**/*.json", "autosklearn/**/*.arff"]
+exclude = ["test/**", "scripts/**", "examples/**"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.12"
+setuptools = ">=45"
+typing-extensions = ">=4.0"
+distro = ">=1.6"
+numpy = [
+    {version = ">=1.9.0,<1.24", python = ">=3.8,<3.9"},
+    {version = ">=1.20.0,<1.26", python = ">=3.9,<3.12"},
+]
+scipy = [
+    {version = ">=1.5.0,<1.10", python = ">=3.8,<3.9"},
+    {version = ">=1.7.0,<1.12", python = ">=3.9,<3.12"},
+]
+joblib = ">=1.0"
+scikit-learn = ">=0.24.0,<0.25.0"
+dask = ">=2021.12"
+distributed = ">=2021.12"
+pyyaml = ">=6.0"
+pandas = ">=1.0,<2.0"
+liac-arff = ">=2.5"
+threadpoolctl = ">=3.0"
+tqdm = ">=4.60"
+ConfigSpace = ">=0.4.21,<0.5"
+pynisher = ">=0.6.3,<0.7"
+pyrfr = ">=0.8.1,<0.9"
+smac = ">=1.2,<1.3"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.0"
+pytest-cov = ">=4.0"
+pytest-forked = ">=1.4"
+pytest-timeout = ">=2.1"
+pytest-xdist = ">=3.0"
+pytest-cases = ">=3.6.11"
+pytest-benchmark = ">=4.0"
+mypy = ">=1.0"
+isort = ">=5.11"
+black = ">=23.0"
+pydocstyle = ">=6.3"
+flake8 = ">=5.0"
+pre-commit = ">=3.0"
+ruff = ">=0.0.260"
+bandit = ">=1.7"
+vulture = ">=2.0"
+
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
+matplotlib = ">=3.5"
+jupyter = ">=1.0"
+notebook = ">=6.4"
+seaborn = ">=0.12"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = ">=1.5"
+mkdocs-material = ">=9.0"
+mkdocstrings = {extras = ["python"], version = ">=0.22"}
+mkdocs-gen-files = ">=0.5"
+mkdocs-literate-nav = ">=0.6"
+mkdocs-section-index = ">=0.3"
+mkdocs-jupyter = ">=0.24"
+pymdown-extensions = ">=10.0"
+pygments = ">=2.15"
+
+[tool.poetry.group.benchmark]
+optional = true
+
+[tool.poetry.group.benchmark.dependencies]
+pytest-benchmark = ">=4.0"
+memory-profiler = ">=0.60"
+
+[tool.poetry.plugins."autosklearn.classifiers"]
+random_forest = "autosklearn.pipeline.components.classification.random_forest:RandomForest"
+extra_trees = "autosklearn.pipeline.components.classification.extra_trees:ExtraTreesClassifier"
+
+[tool.poetry.plugins."autosklearn.regressors"]
+random_forest = "autosklearn.pipeline.components.regression.random_forest:RandomForest"
+extra_trees = "autosklearn.pipeline.components.regression.extra_trees:ExtraTreesRegressor"
+
+[tool.poetry.plugins."autosklearn.preprocessors"]
+pca = "autosklearn.pipeline.components.feature_preprocessing.pca:PCA"
+truncated_svd = "autosklearn.pipeline.components.feature_preprocessing.truncatedSVD:TruncatedSVD"
+
 [tool.pytest.ini_options]
 testpaths = ["test"]
 minversion = "3.7"
@@ -162,4 +289,72 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["test.*"]
-disallow_untyped_decorators = false # Test decorators are not properly typed
+disallow_untyped_decorators = false
+
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "ARG001", # unused function argument
+    "ARG002", # unused method argument
+]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "autosklearn/automl_common",
+]
+
+[tool.ruff.per-file-ignores]
+"test/**/*" = ["ARG", "S101"]
+"examples/**/*" = ["ARG", "B018"]
+
+[tool.ruff.isort]
+known-first-party = ["autosklearn"]
+known-third-party = ["sklearn", "numpy", "scipy", "pandas"]
+
+[tool.bandit]
+exclude_dirs = ["test", "examples", "scripts"]
+skips = ["B101", "B601"]
+
+[tool.vulture]
+exclude = ["test/", "examples/", "autosklearn/automl_common/"]
+ignore_names = ["test_*", "Test*", "setUp", "tearDown"]
+min_confidence = 80
+
+[tool.pytest-benchmark]
+min_rounds = 10
+timer = "time.perf_counter"
+disable_gc = true
+warmup = true
