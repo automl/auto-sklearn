@@ -15,35 +15,34 @@ import pytest
 import unittest
 
 
-class TestScorer(unittest.TestCase):
-    def test_needs_X(self):
-        y_true = np.array([0, 0, 1, 1])
-        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
+def test_needs_X():
+    y_true = np.array([0, 0, 1, 1])
+    y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
 
-        def dummy_metric(y_true, y_pred, X_data=None, **kwargs):
-            if not np.array_equal(np.array([45]), X_data):
-                raise ValueError(f"is {X_data}")
-            return 1
+    def dummy_metric(y_true, y_pred, X_data=None, **kwargs):
+        if not np.array_equal(np.array([45]), X_data):
+            raise ValueError(f"is {X_data}")
+        return 1
 
-        scorer = autosklearn.metrics._PredictScorer(
-            "accuracy", dummy_metric, 1, 0, 1, {}, needs_X=True
-        )
-        scorer(y_true, y_pred, X_data=np.array([45]))
+    scorer = autosklearn.metrics._PredictScorer(
+        "accuracy", dummy_metric, 1, 0, 1, {}, needs_X=True
+    )
+    scorer(y_true, y_pred, X_data=np.array([45]))
 
-        scorer_nox = autosklearn.metrics._PredictScorer(
-            "accuracy", dummy_metric, 1, 0, 1, {}, needs_X=False
-        )
-        with self.assertRaises(ValueError) as cm:
-            scorer_nox(y_true, y_pred, X_data=np.array([32]))
-        the_exception = cm.exception
-        # X_data is not forwarded
-        self.assertEqual(the_exception.args[0], "is None")
+    scorer_nox = autosklearn.metrics._PredictScorer(
+        "accuracy", dummy_metric, 1, 0, 1, {}, needs_X=False
+    )
 
-        scorer_nox = autosklearn.metrics._PredictScorer(
-            "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}, needs_X=False
-        )
+    with pytest.raises(ValueError) as cm:
         scorer_nox(y_true, y_pred, X_data=np.array([32]))
 
+    # X_data is not forwarded
+    assert str(cm.value) == "is None"
+
+    scorer_nox = autosklearn.metrics._PredictScorer(
+        "accuracy", sklearn.metrics.accuracy_score, 1, 0, 1, {}, needs_X=False
+    )
+    scorer_nox(y_true, y_pred, X_data=np.array([32]))
 
 @pytest.mark.parametrize(
     "y_pred, y_true, scorer, expected_score",
@@ -270,7 +269,7 @@ def test_classification_metrics():
             if (
                 e.args[0] == "Samplewise metrics are not available outside"
                 " of multilabel classification."
-            ):
+            )
                 pass
             else:
                 raise e
