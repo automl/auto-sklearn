@@ -1151,11 +1151,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 {
                     "balancing_strategy": run_config.get("balancing:strategy", None),
                     "type": run_config[f"{model_type}:__choice__"],
-                    "data_preprocessors": [
-                        value
-                        for key, value in run_config.items()
-                        if "data_preprocessing" in key and "__choice__" in key
-                    ],
+                    "data_preprocessors": [run_config.get("data_preprocessor:__choice__")],
                     "feature_preprocessors": [
                         value
                         for key, value in run_config.items()
