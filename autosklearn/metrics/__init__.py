@@ -324,9 +324,22 @@ mean_absolute_error = make_scorer(
     worst_possible_result=MAXINT,
     greater_is_better=False,
 )
+def _mse_with_squared(y_true, y_pred, *, squared=True, sample_weight=None,
+                      multioutput="uniform_average"):
+    """Wrapper that drops ``squared`` for sklearn >= 1.4 compatibility."""
+    if squared:
+        return sklearn.metrics.mean_squared_error(
+            y_true, y_pred, sample_weight=sample_weight,
+            multioutput=multioutput)
+    else:
+        return np.sqrt(sklearn.metrics.mean_squared_error(
+            y_true, y_pred, sample_weight=sample_weight,
+            multioutput=multioutput))
+
+
 mean_squared_error = make_scorer(
     "mean_squared_error",
-    sklearn.metrics.mean_squared_error,
+    _mse_with_squared,
     optimum=0,
     worst_possible_result=MAXINT,
     greater_is_better=False,
@@ -334,7 +347,7 @@ mean_squared_error = make_scorer(
 )
 root_mean_squared_error = make_scorer(
     "root_mean_squared_error",
-    sklearn.metrics.mean_squared_error,
+    _mse_with_squared,
     optimum=0,
     worst_possible_result=MAXINT,
     greater_is_better=False,

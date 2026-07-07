@@ -3,7 +3,25 @@ import warnings
 import numpy as np
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 from sklearn.model_selection._split import _validate_shuffle_split
-from sklearn.utils import _approximate_mode, check_random_state, indexable
+import numpy as np
+from sklearn.utils import check_random_state, indexable
+
+
+def _approximate_mode(class_counts, n_draws, rng):
+    """Approximately draw n_draws samples proportional to class_counts.
+
+    Reimplementation of the private sklearn function removed in v1.2.
+    """
+    n_classes = len(class_counts)
+    total = sum(class_counts)
+    if total == 0:
+        return np.zeros(n_classes, dtype=np.intp)
+    floored = np.floor(class_counts * n_draws / total).astype(np.intp)
+    remainder = n_draws - int(floored.sum())
+    diffs = class_counts * n_draws / total - floored
+    order = np.argsort(diffs)[::-1]
+    floored[order[:remainder]] += 1
+    return floored
 from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import _num_samples, check_array, column_or_1d
 
