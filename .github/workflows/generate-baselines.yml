@@ -59,12 +59,12 @@ jobs:
           #   value: The python version used by the installed system
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ steps.python-version.outputs.value }}
 
       - name: Checkout Automlbenchmark
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.AUTOMLBENCHMARK_REPO }}
           ref: ${{ env.AUTOMLBENCHMARK_REF }}
