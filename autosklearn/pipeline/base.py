@@ -5,6 +5,7 @@ import numpy as np
 import scipy.sparse
 from ConfigSpace import Configuration
 from sklearn.pipeline import Pipeline
+from sklearn.pipeline import _print_elapsed_time
 
 import autosklearn.pipeline.create_searchspace_util
 from autosklearn.askl_typing import FEAT_TYPE_TYPE
@@ -62,6 +63,9 @@ class BasePipeline(Pipeline):
             self.steps = steps
 
         self._validate_include_exclude_params()
+
+        # Initialize sklearn Pipeline parent for sklearn >= 1.2 compat
+        super().__init__(steps=self.steps)
 
         self.config_space = self.get_hyperparameter_search_space(feat_type=feat_type)
 
@@ -125,6 +129,11 @@ class BasePipeline(Pipeline):
         self.fit_estimator(X, y, **fit_params)
         return self
 
+
+    def _check_fit_params(self, **fit_params):
+        """Replacement for sklearn's removed ``_check_fit_params`` (>=1.2)."""
+        return fit_params
+
     def fit_transformer(self, X, y, fit_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
         if fit_params is None:
@@ -133,14 +142,17 @@ class BasePipeline(Pipeline):
             key.replace(":", "__"): value for key, value in fit_params.items()
         }
         fit_params_steps = self._check_fit_params(**fit_params)
-        Xt = self._fit(X, y, **fit_params_steps)
-        return Xt, fit_params_steps[self.steps[-1][0]]
+        from sklearn.utils.metadata_routing import process_routing
+        routed = process_routing(self, "fit", **fit_params_steps)
+        Xt = self._fit(X, y, routed_params=routed)
+        last_step = self.steps[-1][0]
+        return Xt, routed.get(last_step, {})
 
     def fit_estimator(self, X, y, **fit_params):
         fit_params = {
             key.replace(":", "__"): value for key, value in fit_params.items()
         }
-        self._final_estimator.fit(X, y, **fit_params)
+        self._final_estimator.fit(X, y, **fit_params.get(self.steps[-1][0], {}))
         return self
 
     def iterative_fit(self, X, y, n_iter=1, **fit_params):

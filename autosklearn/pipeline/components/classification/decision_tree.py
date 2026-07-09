@@ -22,14 +22,14 @@ from autosklearn.util.common import check_none
 class DecisionTree(AutoSklearnClassificationAlgorithm):
     def __init__(
         self,
-        criterion,
-        max_features,
-        max_depth_factor,
-        min_samples_split,
-        min_samples_leaf,
-        min_weight_fraction_leaf,
-        max_leaf_nodes,
-        min_impurity_decrease,
+        criterion=None,
+        max_features=None,
+        max_depth_factor=None,
+        min_samples_split=None,
+        min_samples_leaf=None,
+        min_weight_fraction_leaf=None,
+        max_leaf_nodes=None,
+        min_impurity_decrease=None,
         class_weight=None,
         random_state=None,
     ):

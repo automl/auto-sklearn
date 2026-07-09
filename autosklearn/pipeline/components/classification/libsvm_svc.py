@@ -22,12 +22,12 @@ from autosklearn.util.common import check_for_bool, check_none
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     def __init__(
         self,
-        C,
-        kernel,
-        gamma,
-        shrinking,
-        tol,
-        max_iter,
+        C=None,
+        kernel=None,
+        gamma=None,
+        shrinking=None,
+        tol=None,
+        max_iter=None,
         class_weight=None,
         degree=3,
         coef0=0,

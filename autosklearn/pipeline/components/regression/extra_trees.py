@@ -23,15 +23,15 @@ class ExtraTreesRegressor(
 ):
     def __init__(
         self,
-        criterion,
-        min_samples_leaf,
-        min_samples_split,
-        max_features,
-        bootstrap,
-        max_leaf_nodes,
-        max_depth,
-        min_weight_fraction_leaf,
-        min_impurity_decrease,
+        criterion=None,
+        min_samples_leaf=None,
+        min_samples_split=None,
+        max_features=None,
+        bootstrap=None,
+        max_leaf_nodes=None,
+        max_depth=None,
+        min_weight_fraction_leaf=None,
+        min_impurity_decrease=None,
         oob_score=False,
         n_jobs=1,
         random_state=None,
@@ -69,9 +69,9 @@ class ExtraTreesRegressor(
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.criterion not in ("mse", "friedman_mse", "mae"):
+            if self.criterion not in ("squared_error", "friedman_mse", "absolute_error"):
                 raise ValueError(
-                    "'criterion' is not in ('mse', 'friedman_mse', "
+                    "'criterion' is not in ('squared_error', 'friedman_mse', "
                     "'mae): %s" % self.criterion
                 )
 
@@ -157,7 +157,7 @@ class ExtraTreesRegressor(
         cs = ConfigurationSpace()
 
         criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "friedman_mse", "mae"]
+            "criterion", ["squared_error", "friedman_mse", "absolute_error"]
         )
         max_features = UniformFloatHyperparameter(
             "max_features", 0.1, 1.0, default_value=1

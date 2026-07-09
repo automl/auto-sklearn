@@ -15,14 +15,14 @@ from autosklearn.util.common import check_for_bool
 class ARDRegression(AutoSklearnRegressionAlgorithm):
     def __init__(
         self,
-        n_iter,
-        tol,
-        alpha_1,
-        alpha_2,
-        lambda_1,
-        lambda_2,
-        threshold_lambda,
-        fit_intercept,
+        n_iter=None,
+        tol=None,
+        alpha_1=None,
+        alpha_2=None,
+        lambda_1=None,
+        lambda_2=None,
+        threshold_lambda=None,
+        fit_intercept=None,
         random_state=None,
     ):
         self.random_state = random_state

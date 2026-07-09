@@ -19,14 +19,14 @@ from autosklearn.util.common import check_none
 class DecisionTree(AutoSklearnRegressionAlgorithm):
     def __init__(
         self,
-        criterion,
-        max_features,
-        max_depth_factor,
-        min_samples_split,
-        min_samples_leaf,
-        min_weight_fraction_leaf,
-        max_leaf_nodes,
-        min_impurity_decrease,
+        criterion=None,
+        max_features=None,
+        max_depth_factor=None,
+        min_samples_split=None,
+        min_samples_leaf=None,
+        min_weight_fraction_leaf=None,
+        max_leaf_nodes=None,
+        min_impurity_decrease=None,
         random_state=None,
     ):
         self.criterion = criterion
@@ -105,7 +105,7 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
         cs = ConfigurationSpace()
 
         criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "friedman_mse", "mae"]
+            "criterion", ["squared_error", "friedman_mse", "absolute_error"]
         )
         max_features = Constant("max_features", 1.0)
         max_depth_factor = UniformFloatHyperparameter(

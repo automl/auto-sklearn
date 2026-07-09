@@ -21,11 +21,11 @@ from autosklearn.util.common import check_for_bool, check_none
 class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
     def __init__(
         self,
-        kernel,
-        C,
-        epsilon,
-        tol,
-        shrinking,
+        kernel=None,
+        C=None,
+        epsilon=None,
+        tol=None,
+        shrinking=None,
         gamma=0.1,
         degree=3,
         coef0=0.0,

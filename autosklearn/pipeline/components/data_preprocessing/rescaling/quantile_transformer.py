@@ -25,8 +25,8 @@ from autosklearn.pipeline.constants import (
 class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        n_quantiles: int,
-        output_distribution: str,
+        n_quantiles: int=None,
+        output_distribution: str=None,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
     ) -> None:
         from sklearn.preprocessing import QuantileTransformer

@@ -19,11 +19,11 @@ from autosklearn.util.common import check_for_bool, check_none
 class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        n_estimators,
-        criterion,
-        min_samples_leaf,
-        min_samples_split,
-        max_features,
+        n_estimators=None,
+        criterion=None,
+        min_samples_leaf=None,
+        min_samples_split=None,
+        max_features=None,
         bootstrap=False,
         max_leaf_nodes=None,
         max_depth="None",

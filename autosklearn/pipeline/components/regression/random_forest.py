@@ -23,15 +23,15 @@ class RandomForest(
 ):
     def __init__(
         self,
-        criterion,
-        max_features,
-        max_depth,
-        min_samples_split,
-        min_samples_leaf,
-        min_weight_fraction_leaf,
-        bootstrap,
-        max_leaf_nodes,
-        min_impurity_decrease,
+        criterion=None,
+        max_features=None,
+        max_depth=None,
+        min_samples_split=None,
+        min_samples_leaf=None,
+        min_weight_fraction_leaf=None,
+        bootstrap=None,
+        max_leaf_nodes=None,
+        min_impurity_decrease=None,
         random_state=None,
         n_jobs=1,
     ):
@@ -143,7 +143,7 @@ class RandomForest(
     ):
         cs = ConfigurationSpace()
         criterion = CategoricalHyperparameter(
-            "criterion", ["mse", "friedman_mse", "mae"]
+            "criterion", ["squared_error", "friedman_mse", "absolute_error"]
         )
 
         # In contrast to the random forest classifier we want to use more max_features

@@ -38,7 +38,7 @@ def find_components(package, directory, base_class):
 
 
 class ThirdPartyComponents(object):
-    def __init__(self, base_class):
+    def __init__(self, base_class=None):
         self.base_class = base_class
         self.components = OrderedDict()
 

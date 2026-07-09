@@ -15,8 +15,8 @@ from autosklearn.pipeline.constants import DENSE, INPUT, SPARSE, UNSIGNED_DATA
 class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
     def __init__(
         self,
-        gamma: float,
-        n_components: int,
+        gamma: float=None,
+        n_components: int=None,
         random_state: Optional[Union[int, RandomState]] = None,
     ) -> None:
         """

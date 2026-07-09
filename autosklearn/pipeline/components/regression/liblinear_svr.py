@@ -18,13 +18,13 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
     def __init__(
         self,
-        loss,
-        epsilon,
-        dual,
-        tol,
-        C,
-        fit_intercept,
-        intercept_scaling,
+        loss=None,
+        epsilon=None,
+        dual=None,
+        tol=None,
+        C=None,
+        fit_intercept=None,
+        intercept_scaling=None,
         random_state=None,
     ):
         self.epsilon = epsilon

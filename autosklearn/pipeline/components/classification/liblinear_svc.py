@@ -19,14 +19,14 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
     def __init__(
         self,
-        penalty,
-        loss,
-        dual,
-        tol,
-        C,
-        multi_class,
-        fit_intercept,
-        intercept_scaling,
+        penalty=None,
+        loss=None,
+        dual=None,
+        tol=None,
+        C=None,
+        multi_class=None,
+        fit_intercept=None,
+        intercept_scaling=None,
         class_weight=None,
         random_state=None,
     ):

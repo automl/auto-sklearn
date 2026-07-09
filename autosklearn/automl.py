@@ -311,6 +311,7 @@ class AutoML(BaseEstimator):
         # in examples. Nevertheless, multi-process runs have spawn as requirement to
         # reduce the possibility of a deadlock
         self._dask: Dask
+        self.dask_client = dask_client
         if dask_client is not None:
             self._dask = UserDask(client=dask_client)
         else:

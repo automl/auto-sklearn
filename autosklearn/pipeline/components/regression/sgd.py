@@ -23,12 +23,12 @@ class SGD(
 ):
     def __init__(
         self,
-        loss,
-        penalty,
-        alpha,
-        fit_intercept,
-        tol,
-        learning_rate,
+        loss=None,
+        penalty=None,
+        alpha=None,
+        fit_intercept=None,
+        tol=None,
+        learning_rate=None,
         l1_ratio=0.15,
         epsilon=0.1,
         eta0=0.01,
